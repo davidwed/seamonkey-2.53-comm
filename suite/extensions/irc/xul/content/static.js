@@ -34,7 +34,7 @@
  *  Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
  */
 
-const __cz_version   = "0.9.57";
+const __cz_version   = "0.9.58";
 const __cz_condition = "green";
 
 var warn;
@@ -958,7 +958,7 @@ function playSounds (list)
         setTimeout (playSound, 250 * i, ary[i]);
 }
 
-function playSound (file)
+function playSound(file)
 {
     if (!client.sound || !file)
         return;
@@ -969,13 +969,15 @@ function playSound (file)
     }
     else
     {
-        var uri = Components.classes["@mozilla.org/network/standard-url;1"];
-        uri = uri.createInstance(Components.interfaces.nsIURI);
-        uri.spec = file;
         try
         {
-            client.sound.play (uri);
-        } catch (ex) {
+            var io = Components.classes['@mozilla.org/network/io-service;1'];
+            io = io.createInstance(Components.interfaces.nsIIOService);
+            var uri = io.newURI(file, null, null);
+            client.sound.play(uri);
+        }
+        catch (ex)
+        {
             // ignore exceptions from this pile of code.
         }
     }
@@ -1773,7 +1775,10 @@ function setCurrentObject (obj)
     
     /* Unselect currently selected users. */
     userList = document.getElementById("user-list");
-    if (isVisible("user-list-box"))
+    /* If the splitter's collapsed, the userlist *isn't* visible, but we'll not
+     * get told when it becomes visible, so update it even if it's only the 
+     * splitter visible. */
+    if (isVisible("user-list-box") || isVisible("main-splitter"))
     {
         /* Remove currently selected items before this tree gets rerooted,
          * because it seems to remember the selections for eternity if not. */
@@ -2540,9 +2545,8 @@ function net_display (message, msgtype, sourceObj, destObj)
 {
     var o = getObjectDetails(client.currentObject);
 
-    if (client.SLOPPY_NETWORKS && client.currentObject != client &&
-        client.currentObject != this && o.network == this &&
-        o.server.isConnected)
+    if (client.SLOPPY_NETWORKS && client.currentObject != this &&
+        o.network == this && o.server && o.server.isConnected)
     {
         client.currentObject.display (message, msgtype, sourceObj, destObj);
     }
@@ -2562,7 +2566,7 @@ function usr_display(message, msgtype, sourceObj, destObj)
     else
     {
         var o = getObjectDetails(client.currentObject);
-        if (o.server.isConnected &&
+        if (o.server && o.server.isConnected &&
             o.network == this.parent.parent &&
             client.currentObject.TYPE != "IRCUser")
             client.currentObject.display (message, msgtype, sourceObj, destObj);
@@ -2804,7 +2808,7 @@ function __display(message, msgtype, sourceObj, destObj)
             }
             else /* msg from user to channel */
             {
-                if (typeof (message == "string") && me)
+                if ((typeof message == "string") && me)
                 {
                     isImportant = msgIsImportant (message, nick, o.network);
                     if (isImportant)
