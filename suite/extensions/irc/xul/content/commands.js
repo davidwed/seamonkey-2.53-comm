@@ -52,7 +52,7 @@ function initCommands()
          ["about",             cmdAbout,                           CMD_CONSOLE],
          ["alias",             cmdAlias,                           CMD_CONSOLE],
          ["attach",            cmdAttach,                          CMD_CONSOLE],
-         ["away",              cmdAway,             CMD_NEED_SRV | CMD_CONSOLE],
+         ["away",              cmdAway,                            CMD_CONSOLE],
          ["cancel",            cmdCancel,           CMD_NEED_NET | CMD_CONSOLE],
          ["charset",           cmdCharset,                         CMD_CONSOLE],
          ["channel-motif",     cmdMotif,           CMD_NEED_CHAN | CMD_CONSOLE],
@@ -103,6 +103,7 @@ function initCommands()
          ["goto-url",          cmdGotoURL,                                   0],
          ["goto-url-newwin",   cmdGotoURL,                                   0],
          ["goto-url-newtab",   cmdGotoURL,                                   0],
+         ["goto-url-external", cmdGotoURL,                                   0],
          ["help",              cmdHelp,                            CMD_CONSOLE],
          ["hide-view",         cmdHideView,                        CMD_CONSOLE],
          ["ignore",            cmdIgnore,           CMD_NEED_NET | CMD_CONSOLE],
@@ -131,7 +132,9 @@ function initCommands()
          ["notify",            cmdNotify,           CMD_NEED_SRV | CMD_CONSOLE],
          ["open-at-startup",   cmdOpenAtStartup,                   CMD_CONSOLE],
          ["ping",              cmdPing,             CMD_NEED_SRV | CMD_CONSOLE],
+         ["plugin-pref",       cmdPref,                            CMD_CONSOLE],
          ["pref",              cmdPref,                            CMD_CONSOLE],
+         ["print",             cmdPrint,                           CMD_CONSOLE],
          ["query",             cmdQuery,            CMD_NEED_SRV | CMD_CONSOLE],
          ["quit",              cmdQuit,                            CMD_CONSOLE],
          ["quit-mozilla",      cmdQuitMozilla,                     CMD_CONSOLE],
@@ -161,13 +164,15 @@ function initCommands()
          ["topic",             cmdTopic,           CMD_NEED_CHAN | CMD_CONSOLE],
          ["unignore",          cmdIgnore,           CMD_NEED_NET | CMD_CONSOLE],
          ["unstalk",           cmdUnstalk,                         CMD_CONSOLE],
+         ["urls",              cmdURLs,                            CMD_CONSOLE],
          ["usermode",          cmdUsermode,                        CMD_CONSOLE],
          ["user-motif",        cmdMotif,           CMD_NEED_USER | CMD_CONSOLE],
          ["user-pref",         cmdPref,            CMD_NEED_USER | CMD_CONSOLE],
          ["version",           cmdVersion,                         CMD_CONSOLE],
          ["who",               cmdWho,              CMD_NEED_SRV | CMD_CONSOLE],
          ["whois",             cmdWhoIs,            CMD_NEED_SRV | CMD_CONSOLE],
-         ["whowas",            cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
+         ["whowas",            cmdWhoWas,           CMD_NEED_SRV | CMD_CONSOLE],
+         ["wii",               cmdWhoIsIdle,        CMD_NEED_SRV | CMD_CONSOLE],
 
          /* aliases */
          ["css",              "motif",                             CMD_CONSOLE],
@@ -178,6 +183,8 @@ function initCommands()
          ["name",             "pref username",                     CMD_CONSOLE],
          ["part",             "leave",                             CMD_CONSOLE],
          ["raw",              "quote",              CMD_NEED_SRV | CMD_CONSOLE],
+         // Used to display a nickname in the menu only.
+         ["label-user",       "echo",                                        0],
          // These are all the font family/size menu commands...
          ["font-family-default",    "font-family default",                   0],
          ["font-family-serif",      "font-family serif",                     0],
@@ -223,8 +230,8 @@ function initCommands()
     client.commandManager.isCommandSatisfied = isCommandSatisfied;
     client.commandManager.defineCommands(cmdary);
 
-    var restList = ["reason", "action", "text", "message", "params", "font", 
-                    "expression", "ircCommand", "prefValue", "newTopic", 
+    var restList = ["reason", "action", "text", "message", "params", "font",
+                    "expression", "ircCommand", "prefValue", "newTopic",
                     "commandList", "file", "commands"];
     client.commandManager.argTypes.__aliasTypes__(restList, "rest");
     client.commandManager.argTypes["plugin"] = parsePlugin;
@@ -542,7 +549,7 @@ function parsePlugin(e, name)
 
     }
 
-    e.unparsedData = arrayHasElementAt(ary, 4) ? ary[4] : "";
+    e.unparsedData = arrayHasElementAt(ary, 3) ? ary[3] : "";
     e[name] = plugin;
     return true;
 }
@@ -694,7 +701,7 @@ function cmdChanUserMode(e)
     }
     else if (e.nickname)
     {
-        var user = e.channel.getUser(e.nickname);
+        user = e.channel.getUser(e.nickname);
         if (!user)
         {
             display(getMsg(MSG_ERR_UNKNOWN_USER, e.nicknameList[i]), MT_ERROR);
@@ -1494,11 +1501,9 @@ function cmdMotif(e)
 
 function cmdList(e)
 {
-    e.network.list = new Array();
-    e.network.list.regexp = null;
-    if (!e.channelName || !e.inputData)
+    if (!e.channelName)
         e.channelName = "";
-    e.server.sendData("LIST " + fromUnicode(e.channelName, e.network) + "\n");
+    e.network.list(e.channelName);
 }
 
 function cmdListPlugins(e)
@@ -1536,9 +1541,7 @@ function cmdListPlugins(e)
 
 function cmdRlist(e)
 {
-    e.network.list = new Array();
-    e.network.list.regexp = new RegExp(e.regexp, "i");
-    e.server.sendData ("list\n");
+    e.network.list(new RegExp(e.regexp, "i"));
 }
 
 function cmdReloadUI(e)
@@ -1638,6 +1641,9 @@ function cmdFocusInput(e)
 
 function cmdGotoURL(e)
 {
+    const IO_SVC = "@mozilla.org/network/io-service;1";
+    const EXT_PROTO_SVC = "@mozilla.org/uriloader/external-protocol-service;1";
+
     if (e.url.search(/^ircs?:/i) == 0)
     {
         gotoIRCURL(e.url);
@@ -1649,6 +1655,16 @@ function cmdGotoURL(e)
         var ary = e.url.match(/^x-cz-command:(.*)$/i);
         e.sourceObject.frame.contentWindow.location = "javascript:void(view.dispatch('" +
                                                       decodeURI(ary[1]) + "'))";
+        return;
+    }
+
+    if (e.command.name == "goto-url-external")
+    {
+        const ioSvc = getService(IO_SVC, "nsIIOService");
+        const extProtoSvc = getService(EXT_PROTO_SVC,
+                                       "nsIExternalProtocolService");
+        var uri = ioSvc.newURI(e.url, "UTF-8", null);
+        extProtoSvc.loadUrl(uri);
         return;
     }
 
@@ -1666,9 +1682,14 @@ function cmdGotoURL(e)
         return;
     }
 
+    window.focus();
     if (e.command.name == "goto-url-newtab")
     {
-        window.openNewTabWith(e.url, false, false);
+        if (client.host == "Mozilla") {
+            window.openNewTabWith(e.url, false, false);
+        } else {
+            window.openNewTabWith(e.url);
+        }
         return;
     }
 
@@ -1677,6 +1698,7 @@ function cmdGotoURL(e)
     {
         // don't replace chatzilla running in a tab
         openTopWin(e.url);
+        return;
     }
 
     location.href = e.url;
@@ -1690,6 +1712,32 @@ function cmdCTCP(e)
 
 function cmdJoin(e)
 {
+    /* Why are we messing with __proto__?
+     *
+     * Well, the short answer is so we can check the parameters passed to the
+     * command properly.
+     *
+     * The long answer is that when a command is being dispatch, e.__proto__ is
+     * set to the result of getObjectDetails() on the source view. This is for
+     * a reason - it means that a parameter <channel-name> is automatically
+     * filled in when run from a channel view, for example. However, here we
+     * don't want just "a parameter" to satisfy some need, we actually want to
+     * check the user's supplied parameters - clearing __proto__ allows this.
+     * Naturally we put it back afterwards. (The upshot, and intended effect,
+     * is that doing "/join" from a channel view will still open the dialog.)
+     */
+    var oldProto = e.__proto__;
+    e.__proto__ = Object;
+
+    if (!e.channelName)
+    {
+        window.openDialog("chrome://chatzilla/content/channels.xul", "",
+                          "modal,resizable=yes", { client: client })
+        return null;
+    }
+
+    e.__proto__ = oldProto;
+
     if (!("charset" in e))
     {
         e.charset = null;
@@ -1969,9 +2017,33 @@ function cmdWho(e)
     e.server.who(e.pattern);
 }
 
-function cmdWhoIs (e)
+function cmdWhoIs(e)
 {
-    e.server.whois(e.nickname);
+    for (var i = 0; i < e.nicknameList.length; i++)
+    {
+        if ((i < e.nicknameList.length - 1) && 
+            (e.server.toLowerCase(e.nicknameList[i]) ==
+             e.server.toLowerCase(e.nicknameList[i + 1])))
+        {
+            e.server.whois(e.nicknameList[i] + " " + e.nicknameList[i]);
+            i++;
+        }
+        else
+        {
+            e.server.whois(e.nicknameList[i]);
+        }
+    }
+}
+
+function cmdWhoIsIdle(e)
+{
+    for (var i = 0; i < e.nicknameList.length; i++)
+        e.server.whois(e.nicknameList[i] + " " + e.nicknameList[i]);
+}
+
+function cmdWhoWas(e)
+{
+    e.server.whowas(e.nickname, e.limit);
 }
 
 function cmdTopic(e)
@@ -2058,21 +2130,59 @@ function cmdAlias(e)
 
 function cmdAway(e)
 {
+    function sendToAllNetworks(reason)
+    {
+        for (var n in client.networks)
+        {
+            if (client.networks[n].primServ &&
+                (client.networks[n].state == NET_ONLINE))
+            {
+                client.networks[n].dispatch("away", { reason: reason });
+            }
+        }
+    };
+
     if (e.reason)
     {
         /* going away */
-        if (client.prefs["awayNick"])
-            e.server.sendData("NICK " + e.network.prefs["awayNick"] + "\n");
+        if (e.server)
+        {
+            if (e.network.state == NET_ONLINE)
+            {
+                if (e.network.prefs["awayNick"])
+                    e.server.sendData("NICK " + e.network.prefs["awayNick"] + "\n");
 
-        e.server.sendData ("AWAY :" + fromUnicode(e.reason, e.network) + "\n");
+                e.server.sendData("AWAY :" + fromUnicode(e.reason, e.network) + "\n");
+            }
+            e.network.prefs["away"] = e.reason;
+        }
+        else
+        {
+            // Client view, do command for all networks.
+            sendToAllNetworks(e.reason);
+            display(getMsg(MSG_AWAY_ON, e.reason));
+        }
     }
     else
     {
         /* returning */
-        if (client.prefs["awayNick"])
-            e.server.sendData("NICK " + e.network.prefs["nickname"] + "\n");
+        if (e.server)
+        {
+            if (e.network.state == NET_ONLINE)
+            {
+                if (e.network.prefs["awayNick"])
+                    e.server.sendData("NICK " + e.network.prefs["nickname"] + "\n");
 
-        e.server.sendData ("AWAY\n");
+                e.server.sendData("AWAY\n");
+            }
+            e.network.prefs["away"] = "";
+        }
+        else
+        {
+            // Client view, do command for all networks.
+            sendToAllNetworks(null);
+            display(MSG_AWAY_OFF);
+        }
     }
 }
 
@@ -2143,6 +2253,11 @@ function cmdPref (e)
         pm = e.channel.prefManager;
         msg = MSG_FMT_CHANPREF;
     }
+    else if (e.command.name == "plugin-pref")
+    {
+        pm = e.plugin.prefManager;
+        msg = MSG_FMT_PLUGINPREF;
+    }
     else if (e.command.name == "user-pref")
     {
         pm = e.user.prefManager;
@@ -2167,6 +2282,12 @@ function cmdPref (e)
 
     if (e.deletePref)
     {
+        if (!(e.prefName in pm.prefRecords))
+        {
+            display(getMsg(MSG_ERR_UNKNOWN_PREF, [e.prefName]), MT_ERROR);
+            return false;
+        }
+
         try
         {
             pm.clearPref(e.prefName);
@@ -2188,13 +2309,21 @@ function cmdPref (e)
 
     if (e.prefValue)
     {
+        if (!(e.prefName in pm.prefRecords))
+        {
+            display(getMsg(MSG_ERR_UNKNOWN_PREF, [e.prefName]), MT_ERROR);
+            return false;
+        }
+
         var r = pm.prefRecords[e.prefName];
-        var type;
+        var def, type;
 
         if (typeof r.defaultValue == "function")
-            type = typeof r.defaultValue(e.prefName);
+            def = r.defaultValue(e.prefName);
         else
-            type = typeof r.defaultValue;
+            def = r.defaultValue;
+
+        type = typeof def;
 
         switch (type)
         {
@@ -2207,14 +2336,16 @@ function cmdPref (e)
             case "string":
                 break;
             default:
-                if (r.defaultValue instanceof Array)
-                    e.prefValue = pm.stringToArray(e.prefValue);
-                else
+                if (isinstance(e.prefValue, Array))
                     e.prefValue = e.prefValue.join("; ");
+                if (isinstance(def, Array))
+                    e.prefValue = pm.stringToArray(e.prefValue);
                 break;
         }
 
         pm.prefs[e.prefName] = e.prefValue;
+        if (isinstance(e.prefValue, Array))
+            e.prefValue = e.prefValue.join("; ");
         feedback (e, getMsg(msg, [e.prefName, e.prefValue]));
     }
     else
@@ -2222,7 +2353,7 @@ function cmdPref (e)
         for (var i = 0; i < ary.length; ++i)
         {
             var value;
-            if (pm.prefs[ary[i]] instanceof Array)
+            if (isinstance(pm.prefs[ary[i]], Array))
                 value = pm.prefs[ary[i]].join("; ");
             else
                 value = pm.prefs[ary[i]];
@@ -2232,6 +2363,20 @@ function cmdPref (e)
     }
 
     return true;
+}
+
+function cmdPrint(e)
+{
+    if (("frame" in e.sourceObject) && e.sourceObject.frame &&
+        ("contentWindow" in e.sourceObject.frame) &&
+        e.sourceObject.frame.contentWindow)
+    {
+        e.sourceObject.frame.contentWindow.print();
+    }
+    else
+    {
+        display(MSG_ERR_UNABLE_TO_PRINT);
+    }
 }
 
 function cmdVersion(e)
@@ -2330,7 +2475,9 @@ function cmdNotify(e)
         for (var i in e.nicknameList)
         {
             var nickname = e.server.toLowerCase(e.nicknameList[i]);
-            var idx = arrayIndexOf (net.prefs["notifyList"], nickname);
+            var list = net.prefs["notifyList"];
+            list = e.server.toLowerCase(list.join(";")).split(";");
+            var idx = arrayIndexOf (list, nickname);
             if (idx == -1)
             {
                 net.prefs["notifyList"].push (nickname);
@@ -2375,14 +2522,39 @@ function cmdStalk(e)
         if (list.length == 0)
             display(MSG_NO_STALK_LIST);
         else
+        {
+            function alphabetize(a, b)
+            {
+                var A = a.toLowerCase();
+                var B = b.toLowerCase();
+                if (A < B) return -1;
+                if (B < A) return 1;
+                return 0;
+            }
+
+            list.sort(alphabetize);
             display(getMsg(MSG_STALK_LIST, list.join(MSG_COMMASP)));
+        }
         return;
     }
 
-    list.push(e.text);
-    list.update();
+    var notStalkingWord = true;
+    var loweredText = e.text.toLowerCase();
 
-    display(getMsg(MSG_STALK_ADD, e.text));
+    for (var i = 0; i < list.length; ++i)
+        if (list[i].toLowerCase() == loweredText)
+            notStalkingWord = false;
+
+    if (notStalkingWord)
+    {
+        list.push(e.text);
+        list.update();
+        display(getMsg(MSG_STALK_ADD, e.text));
+    }
+    else
+    {
+        display(getMsg(MSG_STALKING_ALREADY, e.text));
+    }
 }
 
 function cmdUnstalk(e)
@@ -2447,7 +2619,7 @@ function cmdLog(e)
     else
     {
         if (view.prefs["log"])
-            display(getMsg(MSG_LOGGING_ON, view.logFile.path));
+            display(getMsg(MSG_LOGGING_ON, getLogPath(view)));
         else
             display(MSG_LOGGING_OFF);
     }
@@ -3080,4 +3252,32 @@ function cmdInputTextDirection(e)
     }
 
     return true;
+}
+
+function cmdURLs(e)
+{
+    if (client.prefs["urls.list"].length == 0)
+    {
+        display(MSG_URLS_NONE);
+    }
+    else
+    {
+        /* Store the current URL list, so we can put it back afterwards. This
+         * is needed because the process of displaying the list changes the
+         * list! (think about it for a second)
+         */
+        var oldList = client.prefs["urls.list"];
+        client.prefs["urls.list"] = new Array();
+
+        var num = e.number || client.prefs["urls.display"];
+        if (num > oldList.length)
+            num = oldList.length;
+        display(getMsg(MSG_URLS_HEADER, num));
+
+        for (var i = 0; i < num; i++)
+            display(getMsg(MSG_URLS_ITEM, [i + 1, oldList[i]]));
+
+        // Restore old URL list so displaying it has no effect.
+        client.prefs["urls.list"] = oldList;
+    }
 }

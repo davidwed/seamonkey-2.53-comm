@@ -127,7 +127,7 @@ function PrefNetwork(parent, name, force, show)
     this.users = this.primServ.users;
     this.prefManager = getNetworkPrefManager(this);
     this.prefs = this.prefManager.prefs;
-    delete this.prefManager.onPrefChanged;
+    this.prefManager.onPrefChanged = function(){};
     
     if (force)
         this.prefs["hasPrefs"] = true;
@@ -185,7 +185,7 @@ function PrefChannel(parent, name, force, show)
                              [this.parent.parent.unicodeName, this.unicodeName]);
     this.prefManager = getChannelPrefManager(this);
     this.prefs = this.prefManager.prefs;
-    delete this.prefManager.onPrefChanged;
+    this.prefManager.onPrefChanged = function(){};
     
     if (force)
         this.prefs["hasPrefs"] = true;
@@ -223,7 +223,7 @@ function PrefUser(parent, name, force, show)
                              [this.parent.parent.unicodeName, this.unicodeName]);
     this.prefManager = getUserPrefManager(this);
     this.prefs = this.prefManager.prefs;
-    delete this.prefManager.onPrefChanged;
+    this.prefManager.onPrefChanged = function(){};
     
     if (force)
         this.prefs["hasPrefs"] = true;
@@ -614,19 +614,19 @@ function pdata_loadXUL()
             break;
             
         case "array":
-            this.box.orient = "vertical";
             this.box.removeAttribute("align");
+            
+            var oBox = document.createElement("box");
+            oBox.orient = "vertical";
+            oBox.flex = 1;
+            this.box.appendChild(oBox);
             
             if (this.help)
             {
                 label = document.createElement("label");
                 label.appendChild(document.createTextNode(this.help));
-                this.box.appendChild(label);
+                oBox.appendChild(label);
             }
-            
-            var oBox = document.createElement("box");
-            oBox.orient = "horizontal";
-            this.box.appendChild(oBox);
             
             this.edit = document.createElement("listbox");
             this.edit.flex = 1;
@@ -640,7 +640,7 @@ function pdata_loadXUL()
             
             var box = document.createElement("box");
             box.orient = "vertical";
-            oBox.appendChild(box);
+            this.box.appendChild(box);
             
             // NOTE: This order is important - getRelatedItem needs to be 
             // kept in sync with this order. Perhaps a better way is needed...
@@ -978,7 +978,7 @@ function pwin_onLoad()
     
     // Turn off all notifications, or it'll get confused when any pref 
     // does change.
-    delete client.prefManager.onPrefChanged;
+    client.prefManager.onPrefChanged = function(){};
     
     // The list of objects we're tacking the prefs of.
     this.prefObjects = new PrefObjectList();
@@ -1634,19 +1634,19 @@ function getRelatedItem(object, thing)
                 case "list":
                     return object;
                 case "button-up":
-                    return object.nextSibling.childNodes[0];
+                    return object.parentNode.nextSibling.childNodes[0];
                 case "button-down":
-                    return object.nextSibling.childNodes[1];
+                    return object.parentNode.nextSibling.childNodes[1];
                 case "button-add":
-                    return object.nextSibling.childNodes[3];
+                    return object.parentNode.nextSibling.childNodes[3];
                 case "button-edit":
-                    return object.nextSibling.childNodes[4];
+                    return object.parentNode.nextSibling.childNodes[4];
                 case "button-delete":
-                    return object.nextSibling.childNodes[5];
+                    return object.parentNode.nextSibling.childNodes[5];
             }
             break;
         case "button":
-            var n = object.parentNode.previousSibling;
+            var n = object.parentNode.previousSibling.lastChild;
             if (n)
                 return getRelatedItem(n, thing);
             break;

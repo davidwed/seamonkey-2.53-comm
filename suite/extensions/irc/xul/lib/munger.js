@@ -41,7 +41,7 @@
 function initMunger()
 {
     client.linkRE =
-        /((\w[\w-]+):[^<>\[\]()\'\"\s\u201d]+|www(\.[^.<>\[\]()\'\"\s\u201d]+){2,})/;    
+        /(?:\s|\W|^)((?:(\w[\w-]+):[^\s]+|www(\.[^.\s]+){2,})[^>)\].,!?\'\"\u201d])(?:\s|\W|$)/;
 
     var munger = client.munger = new CMunger();
     // Special internal munger!
@@ -74,7 +74,7 @@ function initMunger()
                     insertChannelLink);
     
     munger.addRule ("face",
-         /((^|\s)(?:[>]?[B8=:;(xX]\~?[-^v"]?[)|(PpDSs0oO\?\[\]\/\\]|[oO9][._][oO9])(\s|$))/,
+         /((^|\s)(?:[>]?[B8=:;(xX][~']?[-^v"]?(?:[)|(PpSs0oO\?\[\]\/\\]|D+)|>[-^v]?\)|[oO9][._][oO9])(\s|$))/,
          insertSmiley);
     munger.addRule ("rheet", /(?:\s|\W|^)(rhee+t\!*)(?:\s|$)/i, insertRheet);
     munger.addRule ("word-hyphenator",
