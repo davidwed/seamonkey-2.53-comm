@@ -520,12 +520,12 @@ function onHideCurrentView()
     }
 }
 
-function onDeleteCurrentView()
+function onDeleteView(view)
 {
-    var tb = getTabForObject(client.currentObject);
+    var tb = getTabForObject(view);
     if (client.viewsArray.length < 2)
     {
-        client.currentObject.display (getMsg("onDeleteCurrentViewMsg"), "ERROR");
+        view.display (getMsg("onDeleteViewMsg"), "ERROR");
         return;
     }
     
@@ -534,8 +534,8 @@ function onDeleteCurrentView()
         var i = deleteTab (tb);
         if (i != -1)
         {
-            delete client.currentObject.messageCount;
-            delete client.currentObject.messages;
+            delete view.messageCount;
+            delete view.messages;
 
             if (i >= client.viewsArray.length)
                 i = client.viewsArray.length - 1;            
@@ -671,6 +671,11 @@ function onToggleMsgCollapse()
     client.COLLAPSE_MSGS = !client.COLLAPSE_MSGS;
 }
 
+function onToggleCopyMessages()
+{
+    client.COPY_MESSAGES = !client.COPY_MESSAGES;
+}
+
 function onToggleStartupURL()
 {
     var tb = getTabForObject (client.currentObject);
@@ -707,6 +712,9 @@ function onViewMenuShowing ()
 
     val = client.COLLAPSE_MSGS;
     document.getElementById ("menu-view-collapse").setAttribute ("checked", val);
+
+    val = client.COPY_MESSAGES;
+    document.getElementById ("menu-view-copymsgs").setAttribute ("checked", val);
     
     val = isStartupURL(client.currentObject.getURL());
     document.getElementById ("menu-view-startup").setAttribute ("checked", val);
@@ -949,7 +957,7 @@ function onInputCompleteLine(e, simulated)
     if (e.line[0] == client.COMMAND_CHAR)
     {
         var ary = e.line.substr(1, e.line.length).match (/(\S+)? ?(.*)/);
-        var command = ary[1];
+        var command = ary[1].toLowerCase();
         
         var ev = new CEvent ("client", "input-command", client,
                              "onInputCommand");
@@ -1496,7 +1504,7 @@ function cli_idelete (e)
 {
     if ("inputData" in e && e.inputData)
         return false;
-    onDeleteCurrentView();
+    onDeleteView(client.currentObject);
     return true;
 
 }
@@ -2321,7 +2329,7 @@ function cli_iclient (e)
 client.onInputNotify =
 function cli_inotify (e)
 {
-    if (!e.network)
+    if (!("network" in e) || !e.network)
     {
         client.currentObject.display (getMsg("cli_inotifyMsg"), "ERROR");
         return false;
@@ -2331,7 +2339,7 @@ function cli_inotify (e)
     
     if (!e.inputData)
     {
-        if (net.notifyList && net.notifyList.length > 0)
+        if ("notifyList" in net && net.notifyList.length > 0)
         {
             /* delete the lists and force a ISON check, this will
              * print the current online/offline status when the server
@@ -2348,7 +2356,7 @@ function cli_inotify (e)
         var adds = new Array();
         var subs = new Array();
         
-        if (!net.notifyList)
+        if (!("notifyList" in net))
             net.notifyList = new Array();
         var ary = e.inputData.toLowerCase().split(/\s+/);
 
@@ -2503,7 +2511,8 @@ function my_showtonet (e)
     switch (e.code)
     {
         case "004":
-            str = e.params.slice(1).join (" ");
+        case "005":
+            str = e.params.slice(3).join (" ");
             break;
 
         case "001":
@@ -2564,14 +2573,19 @@ function my_303 (e)
     var offList = new Array();
     var newArrivals = new Array();
     var newDepartures = new Array();
+    var o = getObjectDetails(client.currentObject);
+    var displayTab;
     var i;
+
+    if ("network" in o && o.network == this && client.currentObject != this)
+        displayTab = client.currentObject;
 
     for (i in this.notifyList)
         if (!arrayContains(onList, this.notifyList[i]))
             /* user is not on */
             offList.push (this.notifyList[i]);
         
-    if (this.onList)
+    if ("onList" in this)
     {
         for (i in onList)
             if (!arrayContains(this.onList, onList[i]))
@@ -2581,7 +2595,7 @@ function my_303 (e)
     else
         this.onList = newArrivals = onList;
 
-    if (this.offList)
+    if ("offList" in this)
     {
         for (i in offList)
             if (!arrayContains(this.offList, offList[i]))
@@ -2592,12 +2606,22 @@ function my_303 (e)
         this.offList = newDepartures = offList;
     
     if (newArrivals.length > 0)
-        this.display (arraySpeak (newArrivals, "is", "are") +
-                      " online.", "NOTIFY-ON");
+    {
+        this.displayHere (arraySpeak (newArrivals, "is", "are") +
+                          " online.", "NOTIFY-ON");
+        if (displayTab)
+            displayTab.displayHere (arraySpeak (newArrivals, "is", "are") +
+                                    " online.", "NOTIFY-ON");
+    }
     
     if (newDepartures.length > 0)
-        this.display (arraySpeak (newDepartures, "is", "are") +
-                      " offline.", "NOTIFY-OFF");
+    {
+        this.displayHere (arraySpeak (newDepartures, "is", "are") +
+                          " offline.", "NOTIFY-OFF");
+        if (displayTab)
+            displayTab.displayHere (arraySpeak (newDepartures, "is", "are") +
+                                    " offline.", "NOTIFY-OFF");
+    }
 
     this.onList = onList;
     this.offList = offList;
@@ -3071,7 +3095,7 @@ function my_cpart (e)
             client.rdf.setTreeRoot("user-list", this.getGraphResource());
 
         if (client.DELETE_ON_PART)
-            client.onInputDelete(e);
+            onDeleteView(this);
     }
     else
         this.display (getMsg("my_cpartMsg2",

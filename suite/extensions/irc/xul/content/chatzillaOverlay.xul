@@ -19,18 +19,19 @@
 
 <menupopup id="taskPopup">
   <menuitem
-        position="3"
         label="&ircCmd.label;"
         accesskey="&ircCmd.accesskey;"
         key="key_irc"
-        command="Tasks:IRC"/>
+        command="Tasks:IRC"
+        id="tasksMenuIRC"
+        insertbefore="tasksMenuEditor"/>
 </menupopup>
 
-<hbox id="component-bar">
+<statusbarpanel id="component-bar">
   <toolbarbutton class="taskbutton" id="mini-irc" oncommand="toIRC()"
     image="chrome://chatzilla/skin/images/taskbar-irc.gif"
     position="5" tooltiptext="&ircCmd.label;"/>
-</hbox>
+</statusbarpanel>
 
 
 

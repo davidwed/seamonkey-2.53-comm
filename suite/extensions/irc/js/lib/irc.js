@@ -442,7 +442,7 @@ function serv_messto (code, target, msg, ctcpCode)
 
     if (ctcpCode)
     {
-        pfx = "\01" + ctcpCode + " ";
+        pfx = "\01" + ctcpCode;
         sfx = "\01";
     }
 
@@ -464,8 +464,16 @@ function serv_messto (code, target, msg, ctcpCode)
             
         if ((lines[i] != "") || ctcpCode)
         {
+            var line = code + " " + target + " :" + pfx;
             this.sendsThisRound++;
-            var line = code + " " + target + " :" + pfx + lines[i] + sfx;
+            if (lines[i] != "")
+            {
+                if (ctcpCode)
+                    line += " ";
+                line += lines[i] + sfx;
+            }
+            else
+                line += sfx;
             //dd ("-*- irc sending '" +  line + "'");
             this.sendData (line + "\n");
         }
@@ -1106,7 +1114,7 @@ function serv_chanmode (e)
                     (typeof e.channel.bans[ban] == "undefined"))
                 {
                     e.channel.bans[ban] = {host: ban};
-                    ban_evt = new CEvent ("channel", "ban", e.channel,
+                    var ban_evt = new CEvent ("channel", "ban", e.channel,
                                           "onBan");
                     ban_evt.channel = e.channel;
                     ban_evt.ban = ban;
@@ -1794,6 +1802,7 @@ function CIRCChanMode (parent)
     this.publicMessages = true;
     this.publicTopic = true;
     this.invite = false;
+    this.secret = false;
     this.pvt = false;
     
 }
@@ -1813,6 +1822,8 @@ function chan_modestr (f)
         str += "n";
     if (!this.publicTopic)
         str += "t";
+    if (this.secret)
+        str += "s";
     if (this.pvt)
         str += "p";
     if (this.key)

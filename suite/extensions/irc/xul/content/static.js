@@ -36,7 +36,7 @@ const MSG_UNKNOWN   = getMsg ("unknown");
 
 client.defaultNick = getMsg( "defaultNick" );
 
-client.version = "0.8.5";
+client.version = "0.8.6";
 
 client.TYPE = "IRCClient";
 client.COMMAND_CHAR = "/";
@@ -410,14 +410,14 @@ function initHost(obj)
 
     obj.munger = new CMunger();
     obj.munger.enabled = true;
+    obj.munger.addRule ("link", obj.linkRE, insertLink);
     obj.munger.addRule ("mailto",
        /(?:\s|\W|^)((mailto:)?[^<>\[\]()\'\"\s]+@[^.<>\[\]()\'\"\s]+\.[^<>\[\]()\'\"\s]+)/i,
                         insertMailToLink);
-    obj.munger.addRule ("link", obj.linkRE, insertLink);
     obj.munger.addRule ("bugzilla-link", /(?:\s|\W|^)(bug\s+#?\d{3,6})/i,
                         insertBugzillaLink);
     obj.munger.addRule ("channel-link",
-                    /(?:\s|\W|^)[@+]?(#[^<>\[\]()\'\"\s]+[^:,.<>\[\]()\'\"\s])/i,
+                /(?:\s|\W|^)[@+]?(#[^<>\[\](){}\"\s]*[^:,.<>\[\](){}\'\"\s])/i,
                         insertChannelLink);
     
     obj.munger.addRule ("face",
@@ -458,10 +458,10 @@ function insertLink (matchText, containerTag)
 
     var href;
     
-    if (matchText.indexOf ("://") == -1)
-        href = "http://" + matchText;
-    else
+    if (matchText.match (/^[a-zA-Z-]+:/))
         href = matchText;
+    else
+        href = "http://" + matchText;
     
     var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
                                            "html:a");
@@ -630,7 +630,7 @@ function mircChangeColor (colorInfo, containerTag, data)
         delete data.currFgColor;
     if (ary.length >= 4)
     {
-        bgColor = ary[3];
+        var bgColor = ary[3];
         if (bgColor > 16)
             bgColor &= 16;
         if (bgColor.length == 1)
@@ -1653,7 +1653,7 @@ function setCurrentObject (obj)
     }
     if (tb)
     {
-        tb.setAttribute ("selected", "false");
+        tb.selected = false;
         tb.setAttribute ("state", "normal");
     }
     
@@ -1665,7 +1665,7 @@ function setCurrentObject (obj)
     userList = document.getElementById("user-list");
     /* Remove curently selection items before this tree gets rerooted,
      * because it seems to remember the selections for eternity if not. */
-    userList.clearItemSelection ();    
+    userList.clearSelection ();
 
     if (obj.TYPE == "IRCChannel")
         client.rdf.setTreeRoot ("user-list", obj.getGraphResource());
@@ -1676,7 +1676,7 @@ function setCurrentObject (obj)
     tb = getTabForObject(obj);
     if (tb)
     {
-        tb.setAttribute ("selected", "true");
+        tb.selected = true;
         tb.setAttribute ("state", "current");
     }
     
@@ -1723,7 +1723,11 @@ function scrollDown ()
     window.frames[0].scrollTo(0, window.frames[0].document.height);
 }
 
-function notifyActivity (source)
+/* valid values for |what| are "superfluous", "activity", and "attention".
+ * final value for state is dependant on priority of the current state, and the
+ * new state. the priority is: normal < superfluous < activity < attention.
+ */
+function setTabState (source, what)
 {
     if (typeof source != "object")
         source = client.viewsArray[source].source;
@@ -1733,24 +1737,44 @@ function notifyActivity (source)
     
     if ("currentObject" in client && client.currentObject != source)
     {
-        if (tb.getAttribute ("state") == "normal")
-        {       
-            tb.setAttribute ("state", "activity");
-            if (!(vk in client.activityList))
+        var state = tb.getAttribute ("state");
+        if (state == what)
+        {
+            /* if the tab state has an equal priority to what we are setting
+             * then blink it */
+            tb.setAttribute ("state", "normal");
+            setTimeout (setTabState, 200, vk, what);
+        }
+        else
+        {
+            if (state == "normal" || state == "superfluous" ||
+               (state == "activity" && what == "attention"))
             {
-                client.activityList[vk] = "+";
+                /* if the tab state has a lower priority than what we are
+                 * setting, change it to the new state */
+                tb.setAttribute ("state", what);
+                /* we only change the activity list if priority has increased */
+                if (what == "attention")
+                   client.activityList[vk] = "!";
+                else if (what == "activity")
+                    client.activityList[vk] = "+";
+                else
+                {
+                   /* this is functionally equivalent to "+" for now */
+                   client.activityList[vk] = "-";
+                }
                 updateTitle();
             }
+            else
+            {
+                /* the current state of the tab has a higher priority than the
+                 * new state.
+                 * blink the new lower state quickly, then back to the old */
+                tb.setAttribute ("state", what);
+                setTimeout (setTabState, 200, vk, state);
+            }
         }
-        else if (tb.getAttribute("state") == "activity")
-            /* if act light is already lit, blink it real quick */
-        {
-            tb.setAttribute ("state", "normal");
-            setTimeout ("notifyActivity(" + vk + ");", 200);
-        }
-        
     }
-    
 }
 
 function notifyAttention (source)
@@ -1769,7 +1793,7 @@ function notifyAttention (source)
     }
 
     if (client.FLASH_WINDOW)
-        window.GetAttention();
+        window.getAttention();
     
 }
 
@@ -1829,20 +1853,14 @@ function getTabForObject (source, create)
                          "nsDragAndDrop.startDrag(event, tabDNDObserver);");
         tb.setAttribute ("href", source.getURL());
         tb.setAttribute ("name", source.name);
-        tb.setAttribute ("onclick", "onTabClick('" + id + "');");
+        tb.setAttribute ("onclick", "onTabClick(" + id.quote() + ");");
         tb.setAttribute ("crop", "right");
         
         tb.setAttribute ("class", "tab-bottom view-button");
         tb.setAttribute ("id", id);
         tb.setAttribute ("state", "normal");
 
-        var spacer = document.createElement ("box");
-        spacer.setAttribute ("id", id + "-spacer");
-        spacer.setAttribute ("class", "tabs-bottom view-button-spacer");
-        spacer.setAttribute ("index", client.viewsArray.length);
-        views.appendChild (spacer);
-
-        client.viewsArray.push ({source: source, tb: tb, spacer: spacer});
+        client.viewsArray.push ({source: source, tb: tb});
         tb.setAttribute ("viewKey", client.viewsArray.length - 1);
         if (matches > 1)
             tb.setAttribute("label", name + "<" + matches + ">");
@@ -1958,13 +1976,10 @@ function deleteTab (tb)
             for (i = key + 1; i < client.viewsArray.length; i++)
             {
                 client.viewsArray[i].tb.setAttribute ("viewKey", i - 1);
-                client.viewsArray[i].spacer.setAttribute ("index", i - 1);
             }
-            var spacer = client.viewsArray[key].spacer;
             arrayRemoveAt(client.viewsArray, key);
             var tbinner = document.getElementById("views-tbar-inner");
             tbinner.removeChild(tb);
-            tbinner.removeChild(spacer);
         }
     }
     else
@@ -2129,8 +2144,11 @@ function __display(message, msgtype, sourceObj, destObj)
 
     function setAttribs (obj, c, attrs)
     {
-        for (var a in attrs)
-            obj.setAttribute (a, attrs[a]);
+        if (attrs)
+        {
+            for (var a in attrs)
+                obj.setAttribute (a, attrs[a]);
+        }
         obj.setAttribute ("class", c);
         obj.setAttribute ("msg-type", msgtype);
         obj.setAttribute ("msg-dest", toAttr);
@@ -2174,7 +2192,7 @@ function __display(message, msgtype, sourceObj, destObj)
 
     /* isImportant means to style the messages as important, and flash the
      * window, getAttention means just flash the window. */
-    var isImportant = false, getAttention = false;
+    var isImportant = false, getAttention = false, isSuperfluous = false;
     var viewType = this.TYPE;
     var code;
     var msgRow = document.createElementNS("http://www.w3.org/1999/xhtml",
@@ -2282,6 +2300,7 @@ function __display(message, msgtype, sourceObj, destObj)
     }
     else
     {
+        isSuperfluous = true;
         if (!client.debugMode && msgtype in client.responseCodeMap)
         {
             code = client.responseCodeMap[msgtype];
@@ -2359,9 +2378,25 @@ function __display(message, msgtype, sourceObj, destObj)
 
     addHistory (this, msgRow, canMergeData, canCollapseRow);
     if (isImportant || getAttention)
-        notifyAttention(this);
+    {
+        setTabState(this, "attention");
+        if (client.FLASH_WINDOW)
+            window.getAttention();
+    }
     else
-        notifyActivity (this);
+    {
+        if (isSuperfluous)
+            setTabState(this, "superfluous");
+        else
+            setTabState(this, "activity");
+    }
+
+    if (isImportant && client.COPY_MESSAGES)
+    {
+        if ("network" in o && o.network != this)
+            o.network.displayHere("{" + this.name + "} " + message, msgtype,
+                                  sourceObj, destObj);
+    }
 }
 
 function addHistory (source, obj, mergeData, collapseRow)
