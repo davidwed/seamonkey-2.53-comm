@@ -136,6 +136,7 @@ function initCommands()
          ["quit",              cmdQuit,                            CMD_CONSOLE],
          ["quit-mozilla",      cmdQuitMozilla,                     CMD_CONSOLE],
          ["quote",             cmdQuote,            CMD_NEED_SRV | CMD_CONSOLE],
+         ["reload-plugin",     cmdReload,                          CMD_CONSOLE],
          ["rlist",             cmdRlist,            CMD_NEED_SRV | CMD_CONSOLE],
          ["reload-ui",         cmdReloadUI,                                  0],
          ["say",               cmdSay,              CMD_NEED_SRV | CMD_CONSOLE],
@@ -222,12 +223,10 @@ function initCommands()
     client.commandManager.isCommandSatisfied = isCommandSatisfied;
     client.commandManager.defineCommands(cmdary);
 
-    client.commandManager.argTypes.__aliasTypes__(["reason", "action", "text",
-                                                   "message", "params", "font",
-                                                   "reason", "expression",
-                                                   "ircCommand", "prefValue",
-                                                   "newTopic", "commandList",
-                                                   "file"], "rest");
+    var restList = ["reason", "action", "text", "message", "params", "font", 
+                    "expression", "ircCommand", "prefValue", "newTopic", 
+                    "commandList", "file", "commands"];
+    client.commandManager.argTypes.__aliasTypes__(restList, "rest");
     client.commandManager.argTypes["plugin"] = parsePlugin;
 }
 
@@ -264,7 +263,7 @@ function isCommandSatisfied(e, command)
             return false;
         }
 
-        if (!e.server.isConnected)
+        if (e.network.state != NET_ONLINE)
         {
             e.parseError = MSG_ERR_NOT_CONNECTED;
             return false;
@@ -564,25 +563,62 @@ function cmdAblePlugin(e)
 {
     if (e.command.name == "disable-plugin")
     {
-        if (!("disablePlugin" in e.plugin.scope))
+        if (!e.plugin.enabled)
+        {
+            display(getMsg(MSG_IS_DISABLED, e.plugin.id));
+            return;
+        }
+
+        if (e.plugin.API > 0)
+        {
+            if (!e.plugin.disable())
+            {
+                display(getMsg(MSG_CANT_DISABLE, e.plugin.id));
+                return;
+            }
+            e.plugin.prefs["enabled"] = false;
+        }
+        else if (!("disablePlugin" in e.plugin.scope))
         {
             display(getMsg(MSG_CANT_DISABLE, e.plugin.id));
             return;
         }
+        else
+        {
+            e.plugin.scope.disablePlugin();
+        }
 
         e.plugin.enabled = false;
-        e.plugin.scope.disablePlugin();
     }
     else
     {
-        if (!("enablePlugin" in e.plugin.scope))
+        if (e.plugin.enabled)
+        {
+            display(getMsg(MSG_IS_ENABLED, e.plugin.id));
+            return;
+        }
+
+        if (e.plugin.API > 0)
+        {
+            if (!e.plugin.enable())
+            {
+                display(getMsg(MSG_CANT_ENABLE, e.plugin.id));
+                e.plugin.prefs["enabled"] = false;
+                return;
+            }
+            e.plugin.prefs["enabled"] = true;
+        }
+        else if (!("enablePlugin" in e.plugin.scope))
         {
             display(getMsg(MSG_CANT_ENABLE, e.plugin.id));
             return;
         }
+        else
+        {
+            e.plugin.scope.enablePlugin();
+        }
 
         e.plugin.enabled = true;
-        e.plugin.scope.enablePlugin();
     }
 }
 
@@ -590,25 +626,14 @@ function cmdCancel(e)
 {
     var network = e.network;
 
-    if (!network.connecting)
+    if ((network.state != NET_CONNECTING) && (network.state != NET_WAITING))
     {
         display(MSG_NOTHING_TO_CANCEL, MT_ERROR);
         return;
     }
 
-    network.cancelConnect = true;
     display(getMsg(MSG_CANCELLING, network.unicodeName));
-    if (network.isConnected())
-    {
-        // Pull the plug on the current connection, or...
-        network.dispatch("disconnect");
-    }
-    else
-    {
-        // ...try a reconnect (which will fail us).
-        var ev = new CEvent("network", "do-connect", network, "onDoConnect");
-        network.eventPump.addEvent(ev);
-    }
+    network.cancel();
 }
 
 function cmdChanUserMode(e)
@@ -1481,7 +1506,7 @@ function cmdListPlugins(e)
     function listPlugin(plugin, i)
     {
         var enabled;
-        if ("disablePlugin" in plugin.scope)
+        if ((plugin.API > 0) || ("disablePlugin" in plugin.scope))
             enabled = plugin.enabled;
         else
             enabled = MSG_ALWAYS;
@@ -1740,7 +1765,6 @@ function cmdLeave(e)
         return;
     }
 
-    // FIXME: Smart param handling... //
     if (e.channelName)
     {
         if (arrayIndexOf(e.server.channelTypes, e.channelName[0]) == -1)
@@ -1766,11 +1790,15 @@ function cmdLeave(e)
             {
                 if (e.channel)
                 {
+                    /* Their channel name was invalid, but we have a channel
+                     * view, so we'll assume they did "/leave part msg".
+                     */
                     e.reason = e.channelName + " " + e.reason;
                 }
                 else
                 {
-                    display("Huh?", MT_ERROR);
+                    display(getMsg(MSG_ERR_UNKNOWN_CHANNEL, e.channelName),
+                            MT_ERROR);
                     return;
                 }
             }
@@ -1779,13 +1807,19 @@ function cmdLeave(e)
         {
             // Valid prefix, so get real channel (if it exists...).
             e.channel = e.server.getChannel(e.channelName);
+            if (!e.channel)
+            {
+                display(getMsg(MSG_ERR_UNKNOWN_CHANNEL, e.channelName),
+                        MT_ERROR);
+                return;
+            }
         }
     }
 
     /* If it's not active, we're not actually in it, even though the view is
      * still here.
      */
-    if (e.channel && e.channel.active)
+    if (e.channel.active)
     {
         if (e.noDelete)
             e.channel.noDelete = true;
@@ -1803,9 +1837,52 @@ function cmdLeave(e)
     }
 }
 
-function cmdLoad (e)
+function cmdReload(e)
+{
+    dispatch("load " + e.plugin.url);
+}
+
+function cmdLoad(e)
 {
     var ex;
+    var plugin;
+
+    function removeOldPlugin(url)
+    {
+        var oldPlugin;
+
+        var i = getPluginIndexByURL(url);
+        if (i == -1)
+            return -1;
+
+        oldPlugin = client.plugins[i];
+        if (oldPlugin.enabled)
+        {
+            if (oldPlugin.API > 0)
+            {
+                if (!oldPlugin.disable())
+                {
+                    display(getMsg(MSG_CANT_DISABLE, oldPlugin.id));
+                    display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
+                    return null;
+                }
+                client.prefManager.removeObserver(oldPlugin.prefManager);
+                oldPlugin.prefManager.destroy();
+            }
+            else if ("disablePlugin" in oldPlugin.scope)
+            {
+                oldPlugin.scope.disablePlugin();
+            }
+            else
+            {
+                display(getMsg(MSG_CANT_DISABLE, oldPlugin.id));
+                display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
+                return null;
+            }
+        }
+
+        return i;
+    }
 
     if (!e.scope)
         e.scope = new Object();
@@ -1813,46 +1890,67 @@ function cmdLoad (e)
     if (!("plugin" in e.scope))
     {
         e.scope.plugin = { url: e.url, id: MSG_UNKNOWN, version: -1,
-                           description: "", status: MSG_LOADING, enabled: true};
+                           description: "", status: MSG_LOADING, enabled: false,
+                           PluginAPI: 1, cwd: e.url.match(/^(.*?)[^\/]+$/)[1]};
+
     }
 
-    e.scope.plugin.scope = e.scope;
+    plugin = e.scope.plugin;
+    plugin.scope = e.scope;
 
     try
     {
         var rvStr;
         var rv = rvStr = client.load(e.url, e.scope);
-        if ("initPlugin" in e.scope)
-            rv = rvStr = e.scope.initPlugin(e.scope);
+        var index = removeOldPlugin(e.url);
 
-        /* do this again, in case the plugin trashed it */
-        if (!("plugin" in e.scope))
+        if (index == null)
+            return null;
+
+        if ("init" in plugin)
         {
-            e.scope.plugin = { url: e.url, id: MSG_UNKNOWN, version: -1,
-                               description: "", status: MSG_ERROR,
-                               enabled: true };
+            if (!("enable" in plugin) || !("disable" in plugin) ||
+                !("id" in plugin) || !(plugin.id.match(/^[A-Za-z-_]+$/)))
+            {
+                display (getMsg(MSG_ERR_PLUGINAPI, e.url));
+                display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
+                return null;
+            }
+
+            plugin.API = 1;
+            plugin.prefary = [["enabled", true, ""]];
+            rv = rvStr = plugin.init(e.scope);
+
+            var branch = "extensions.irc.plugins." + plugin.id + ".";
+            var prefManager = new PrefManager(branch, client.defaultBundle);
+            prefManager.addPrefs(plugin.prefary);
+            plugin.prefManager = prefManager;
+            plugin.prefs = prefManager.prefs;
+            if ("onPrefChanged" in plugin)
+                prefManager.addObserver(plugin);
+            client.prefManager.addObserver(prefManager);
         }
         else
         {
-            e.scope.plugin.status = "loaded";
+            plugin.API = 0;
+            if ("initPlugin" in e.scope)
+                rv = rvStr = e.scope.initPlugin(e.scope);
+            plugin.enabled = true;
         }
-
-        e.scope.plugin.scope = e.scope;
+        plugin.status = "loaded";
 
         if (typeof rv == "function")
             rvStr = "function";
-        if (!("__id" in e.scope))
-            e.scope.__id = null;
-        if (!("__description" in e.scope))
-            e.scope.__description = null;
 
-        var i = getPluginIndexByURL(e.url);
-        if (i != -1)
-            client.plugins[i] = e.scope.plugin;
+        if (index != -1)
+            client.plugins[index] = plugin;
         else
-            client.plugins.push(e.scope.plugin);
+            index = client.plugins.push(plugin) - 1;
 
         feedback(e, getMsg(MSG_SUBSCRIPT_LOADED, [e.url, rvStr]), MT_INFO);
+
+        if ((plugin.API > 0) && plugin.prefs["enabled"])
+            dispatch("enable-plugin " + index);
         return rv;
     }
     catch (ex)
@@ -2270,6 +2368,8 @@ function cmdNotify(e)
 
 function cmdStalk(e)
 {
+    var list = client.prefs["stalkWords"];
+
     if (!e.text)
     {
         if (list.length == 0)
@@ -2279,8 +2379,8 @@ function cmdStalk(e)
         return;
     }
 
-    client.prefs["stalkWords"].push(e.text);
-    client.prefs["stalkWords"].update();
+    list.push(e.text);
+    list.update();
 
     display(getMsg(MSG_STALK_ADD, e.text));
 }
@@ -2290,7 +2390,7 @@ function cmdUnstalk(e)
     e.text = e.text.toLowerCase();
     var list = client.prefs["stalkWords"];
 
-    for (i in list)
+    for (var i = 0; i < list.length; ++i)
     {
         if (list[i].toLowerCase() == e.text)
         {

@@ -39,9 +39,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.65";
+const __cz_version   = "0.9.66";
 const __cz_condition = "green";
 const __cz_suffix    = "";
+const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
 
 var warn;
 var ASSERT;
@@ -1816,9 +1817,14 @@ function gotoIRCURL (url)
                 // with the Unicode forms.
                 var serv = network.primServ;
                 var target = url.target;
-                if (arrayIndexOf(serv.channelTypes, target[0]) == -1) {
-                    target = serv.channelTypes[0] + target;
-                }
+
+                /* If we don't have a valid prefix, stick a "#" on it.
+                 * NOTE: This is always a "#" so that URLs may be compared
+                 * properly without involving the server (e.g. off-line).
+                 */
+                if (arrayIndexOf(serv.channelTypes, target[0]) == -1)
+                    target = "#" + target;
+
                 var chan = new CIRCChannel(serv, null, target);
 
                 d = { channelName: chan.unicodeName, key: key,
@@ -2816,7 +2822,7 @@ function cli_connect(networkOrName, requireSecurity)
         return network;
     }
 
-    if (network.connecting)
+    if (network.state != NET_OFFLINE)
         return network;
 
     if (network.prefs["nickname"] == DEFAULT_NICK)
@@ -2825,7 +2831,6 @@ function cli_connect(networkOrName, requireSecurity)
     if (!("connecting" in network))
         network.display(getMsg(MSG_NETWORK_CONNECTING, name));
 
-    network.connecting = true;
     network.connect(requireSecurity);
 
     network.updateHeader();
@@ -3506,18 +3511,11 @@ function __display(message, msgtype, sourceObj, destObj)
         }
         catch (ex)
         {
-            this.displayHere(getMsg(MSG_LOGFILE_WRITE_ERROR, this.logFile.path),
-                             "ERROR");
-            try
-            {
-                // Close log file, and stop logging.
-                this.logFile.close();
-                this.prefs["log"] = false;
-            }
-            catch(ex)
-            {
-                // can't do much here.
-            }
+            // Stop logging before showing any messages!
+            this.prefs["log"] = false;
+            dd("Log file write error: " + formatException(ex));
+            this.displayHere(getMsg(MSG_LOGFILE_WRITE_ERROR,
+                             this.prefs["logFileName"]), "ERROR");
         }
     }
 }
@@ -3741,26 +3739,34 @@ function gettabmatch_usr (line, wordStart, wordEnd, word, cursorPos)
 client.openLogFile =
 function cli_startlog (view)
 {
+    const NORMAL_FILE_TYPE = Components.interfaces.nsIFile.NORMAL_FILE_TYPE;
+
     try
     {
-        view.logFile = fopen(view.prefs["logFileName"], ">>");
+        var file = new LocalFile(view.prefs["logFileName"]);
+        if (!file.localFile.exists())
+        {
+            // futils.umask may be 0022. Result is 0644.
+            file.localFile.create(NORMAL_FILE_TYPE, 0666 & ~futils.umask);
+        }
+        view.logFile = fopen(file.localFile, ">>");
     }
     catch (ex)
     {
-        view.displayHere(getMsg(MSG_LOGFILE_ERROR, view.logFile), MT_ERROR);
-        view.logFile = null;
         view.prefs["log"] = false;
+        dd("Log file open error: " + formatException(ex));
+        view.displayHere(getMsg(MSG_LOGFILE_ERROR,
+                                view.prefs["logFileName"]), MT_ERROR);
         return;
     }
 
-    view.displayHere(getMsg(MSG_LOGFILE_OPENED,
-                            getURLSpecFromFile(view.logFile.path)));
+    view.displayHere(getMsg(MSG_LOGFILE_OPENED, view.prefs["logFileName"]));
 }
 
 client.closeLogFile =
 function cli_stoplog (view)
 {
-    view.displayHere(MSG_LOGFILE_CLOSING);
+    view.displayHere(getMsg(MSG_LOGFILE_CLOSING, view.prefs["logFileName"]));
 
     if (view.logFile)
     {
