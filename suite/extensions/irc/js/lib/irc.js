@@ -600,11 +600,8 @@ function serv_actto (target, msg)
 CIRCServer.prototype.ctcpTo = 
 function serv_ctcpto (target, code, msg, method)
 {
-    if (typeof msg == "undefined")
-        msg = "";
-
-    if (typeof method == "undefined")
-        method = "PRIVMSG";
+    msg = msg || "";
+    method = method || "PRIVMSG";
     
     code = code.toUpperCase();
     if (code == "PING" && !msg)
@@ -1968,7 +1965,7 @@ CIRCChannel.prototype.getURL =
 function chan_geturl ()
 {
     var target;
-    if (this.normalizedName[0] == "#")
+    if (this.normalizedName.match(/^#[^!+&]/))
         target = ecmaEscape(this.normalizedName.substr(1));
     else
         target = ecmaEscape(this.normalizedName);
@@ -2077,13 +2074,9 @@ function chan_notice (msg)
 CIRCChannel.prototype.ctcp = 
 function chan_ctcpto (code, msg, type)
 {
-    if (typeof msg == "undefined")
-        msg = "";
-
-    if (typeof type == "undefined")
-        type = "PRIVMSG";
+    msg = msg || "";
+    type = type || "PRIVMSG";
     
-     
     this.parent.messageTo(type, this.encodedName, fromUnicode(msg, this), code);
 }
 
@@ -2345,13 +2338,9 @@ function usr_act (msg)
 CIRCUser.prototype.ctcp = 
 function usr_ctcp (code, msg, type)
 {
-    if (typeof msg == "undefined")
-        msg = "";
-
-    if (typeof type == "undefined")
-        type = "PRIVMSG";
+    msg = msg || "";
+    type = type || "PRIVMSG";
     
-     
     this.parent.messageTo(type, this.name, fromUnicode(msg, this), code);
 }
 
