@@ -34,7 +34,7 @@
  *  Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
  */
 
-const __cz_version   = "0.9.59";
+const __cz_version   = "0.9.60";
 const __cz_condition = "green";
 
 var warn;
@@ -830,13 +830,10 @@ function getDefaultFontSize()
     }
     catch(ex) { }
     
-    // DPI pref    : browser.display.screen_resolution
-    var dpi = 96;
-    try
-    {
-        dpi = prefBranch.getIntPref("browser.display.screen_resolution");
-    }
-    catch(ex) { }
+    // Get the DPI the fun way (make Mozilla do the work).
+    var b = document.createElement("box");
+    b.style.width = "1in";
+    var dpi = window.getComputedStyle(b, null).width.match(/^\d+/);
     
     return Math.round((pxSize / dpi) * 72);
 }
@@ -966,8 +963,23 @@ function getFontContext(cx)
 
 function msgIsImportant (msg, sourceNick, network)
 {
+    /* This is a huge hack, but it works. What we want is to match against the
+     * plain text of a message, ignoring color codes, bold, etc. so we put it
+     * through the munger. This produces a tree of HTML elements, which we use
+     * |.innerHTML| to convert to a textual representation.
+     * 
+     * Then we remove all the HTML tags, using a RegExp.
+     * 
+     * It certainly isn't ideal, and there has to be a better way, but it:
+     *   a) works, and
+     *   b) is fast enough to not cause problems,
+     * so it will do for now.
+     */
+    var plainMsg = client.munger.munge(msg, null, {});
+    plainMsg = plainMsg.innerHTML.replace(/<[^>]+>/g, "");
+    
     var re = network.stalkExpression;
-    if (msg.search(re) != -1 || sourceNick && sourceNick.search(re) == 0)
+    if (plainMsg.search(re) != -1 || sourceNick && sourceNick.search(re) == 0)
         return true;
 
     return false;    
@@ -1832,7 +1844,7 @@ function setCurrentObject (obj)
         /* Remove currently selected items before this tree gets rerooted,
          * because it seems to remember the selections for eternity if not. */
         if (userList.treeBoxObject.selection)
-            userList.treeBoxObject.selection.clearSelection ();
+            userList.treeBoxObject.selection.select(-1);
 
         if (obj.TYPE == "IRCChannel")
         {
