@@ -29,12 +29,13 @@
  *   +- desc     (String)  initial description (used in whois info)
  *   +- defaultNet (String) default network to use for irc:// urls
  *   +- reconnect (Boolean) reconnect when disconnected due to ERROR
+ *   +- multiline (Boolean) multiline input mode
  *   +- bugURL   (String) url to use for "bug 12345" links.  Use %s to place
  *                        the bug number.
  *   +- initialURLs (String) irc:// urls to connect to on startup, semicolon
- *   |                       seperated
+ *   |                       separated
  *   +- initialScripts (String) urls for scripts to run at startup,
- *   |                          semicolon seperated
+ *   |                          semicolon separated
  *   +- newTabLimit (Number) max number of tabs to have open before disabling
  *   |                       automatic tab creation for private messages.
  *   |                       use 0 for unlimited new tabs, or 1 to disable
@@ -50,7 +51,7 @@
  *   +- nickCompleteStr (String) String to use when tab-completing nicknames
  *   |                           at the beginning of sentences
  *   +- stalkWords (String) List of words to add to the stalk victims list
- *   |                      semicolon seperated (see the /stalk command)
+ *   |                      semicolon separated (see the /stalk command)
  *   +- deleteOnPart (Boolean) Delete channel window automatically after a /part
  *   |
  *   |  The following beep prefs can be set to the text "beep" to use the
@@ -90,6 +91,7 @@ function initPrefs()
         "username": ["CIRCNetwork.prototype.INITIAL_NAME",          "chatzilla"],
         "desc":     ["CIRCNetwork.prototype.INITIAL_DESC",   "New Now Know How"],
         "reconnect": ["CIRCNetwork.prototype.stayingPower",                true],
+        "multiline":         ["client.MULTILINE",                         false],
         "defaultNet":        ["client.DEFAULT_NETWORK",                "moznet"],
         "charset":           ["client.CHARSET",                              ""],
         "initialURLs":       ["client.INITIAL_URLS",                   "irc://"],
