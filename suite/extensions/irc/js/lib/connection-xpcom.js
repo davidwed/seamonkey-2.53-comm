@@ -79,7 +79,21 @@ function bc_connect(host, port, bind, tcp_flag, observer)
     this.bind = bind;
     this.tcp_flag = tcp_flag;
 
-    this._transport = this._sockService.createTransport (host, port, null, -1,
+    // Lets get a transportInfo for this
+    var pps = Components.classes["@mozilla.org/network/protocol-proxy-service;1"].
+        getService().
+        QueryInterface(Components.interfaces.nsIProtocolProxyService);
+
+    if (!pps)
+        throw ("Couldn't get protocol proxy service");
+
+    var uri = Components.classes["@mozilla.org/network/simple-uri;1"].
+        createInstance(Components.interfaces.nsIURI);
+    uri.spec = "irc:" + host + ':' + port;
+
+    var info = pps.examineForProxy(uri);
+
+    this._transport = this._sockService.createTransport (host, port, info,
                                                          0, 0);
     if (!this._transport)
         throw ("Error creating transport.");
@@ -112,8 +126,9 @@ function bc_connect(host, port, bind, tcp_flag, observer)
 
 CBSConnection.prototype.disconnect =
 function bc_disconnect()
-{    
-    this._inputStream.close();
+{
+    if ("_inputStream" in this && this._inputStream)
+        this._inputStream.close();
     /*
     this._streamProvider.close();
     if (this._streamProvider.isBlocked)
@@ -235,7 +250,7 @@ function sp_datawrite (request, ctxt, ostream, offset, count)
     //dd ("StreamProvider.prototype.onDataWritable");
  
     if (this.isClosed)
-        return Components.results.NS_BASE_STREAM_CLOSED;
+        throw Components.results.NS_BASE_STREAM_CLOSED;
     
     if (!this.pendingData)
     {

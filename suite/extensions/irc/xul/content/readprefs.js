@@ -35,7 +35,15 @@
  *   |                       seperated
  *   +- initialScripts (String) urls for scripts to run at startup,
  *   |                          semicolon seperated
+ *   +- newTabThreshold (Number) max number of tabs to have open before disabling
+ *   |                           automatic tab creation for private messages.
+ *   |                           use 0 for unlimited new tabs, or 1 to disable
+ *   |                           automatic tab creation.
+ *   +- focusNewTab (Boolean) bring new tabs created in response to a private
+ *   |                        message to the front.
  *   +- munger   (Boolean) send output through text->html munger
+ *   |  +- colorCodes (Boolean) enable color code handling
+ *   |  +- <various>  (Boolean) enable specific munger entry
  *   |  +- smileyText (Boolean) true => display text (and graphic) when
  *   |                                  matching smileys
  *   |                          false => show only the smiley graphic
@@ -45,6 +53,12 @@
  *   |                      semicolon seperated (see the /stalk command)
  *   +- deleteOnPart (Boolean) Delete channel window automatically after a /part
  *   |
+ *   |  The following beep prefs can be set to the text "beep" to use the
+ *   |  system beep, or "" to disable the beep.
+ *   +- msgBeep   (String) url to sound to play when a /msg is recieved
+ *   +- stalkBeep (String) url to sound to play when a /stalk matches
+ *   +- queryBeep (String) url to sound to play for new msgs in a /query
+ *   |
  *   +- notify
  *   |  +- aggressive (Boolean) flash trayicon/ bring window to top when
  *   |                          your nickname is mentioned.
@@ -53,20 +67,25 @@
  *   +- style   
  *   |  +- default (String) url to default style sheet
  *   +- views
+ *   |  +- collapseMsgs (Boolean) Collapse consecutive messages from same
+ *   |  |                         user
  *   |  +- client
- *   |  |  +- maxlines (Number) max lines to keep in *client* view
+ *   |  |  +- maxlines  (Number) max lines to keep in *client* view
+ *   |  +- network
+ *   |  |  +- maxlines  (Number) max lines to keep in network views
  *   |  +- channel
- *   |  |  +- maxlines (Number) max lines to keep in channel views
+ *   |  |  +- maxlines  (Number) max lines to keep in channel views
  *   |  +- chanuser
- *   |     +- maxlines (Number) max lines to keep in /msg views
+ *   |     +- maxlines  (Number) max lines to keep in /msg views
  *   +- debug
  *      +- tracer (Boolean) enable/disable debug message tracing
  */
 
 function readIRCPrefs (rootNode)
 {
-    var pref =
-        Components.classes["@mozilla.org/preferences;1"].createInstance();
+    const PREF_CTRID = "@mozilla.org/preferences-service;1";
+    const nsIPrefBranch = Components.interfaces.nsIPrefBranch
+    var pref = Components.classes[PREF_CTRID].getService(nsIPrefBranch);
     if(!pref)
         throw ("Can't find pref component.");
 
@@ -76,8 +95,6 @@ function readIRCPrefs (rootNode)
     if (!rootNode.match(/\.$/))
         rootNode += ".";
     
-    pref = pref.QueryInterface(Components.interfaces.nsIPref);
-
     CIRCNetwork.prototype.INITIAL_NICK =
         getCharPref (pref, rootNode + "nickname",
                      CIRCNetwork.prototype.INITIAL_NICK);
@@ -88,25 +105,52 @@ function readIRCPrefs (rootNode)
         getCharPref (pref, rootNode + "desc",
                      CIRCNetwork.prototype.INITIAL_DESC);
     client.DEFAULT_NETWORK =
-        getCharPref (pref, rootNode + "defaultNet", "moznet");    
+        getCharPref (pref, rootNode + "defaultNet", "moznet");
+    client.CHARSET = getCharPref (pref, rootNode + "charset", "");
     client.INITIAL_URLS =
-        getCharPref (pref, rootNode + "initialURLs", "");
+        getCharPref (pref, rootNode + "initialURLs", "irc://");
+    if (!client.INITIAL_URLS)
+        client.INITIAL_URLS = "irc://";
     client.INITIAL_SCRIPTS =
         getCharPref (pref, rootNode + "initialScripts", "");
+    client.NEW_TAB_THRESHOLD =
+        getIntPref (pref, rootNode + "newTabThreshold", 15);
+    client.FOCUS_NEW_TAB =
+        getIntPref (pref, rootNode + "focusNewTab", false);
     client.ADDRESSED_NICK_SEP =
         getCharPref (pref, rootNode + "nickCompleteStr",
-                     client.ADDRESSED_NICK_SEP);
+                     client.ADDRESSED_NICK_SEP).replace(/\s*$/, "");
     client.INITIAL_VICTIMS =
         getCharPref (pref, rootNode + "stalkWords", "");
     
     client.DELETE_ON_PART =
         getCharPref (pref, rootNode + "deleteOnPart", true);
+
+    client.STALK_BEEP =
+        getCharPref (pref, rootNode + "stalkBeep", "beep");
+    client.MSG_BEEP =
+        getCharPref (pref, rootNode + "msgBeep", "beep beep");
+    client.QUERY_BEEP =
+        getCharPref (pref, rootNode + "queryBeep", "beep");
     
     client.munger.enabled =
         getBoolPref (pref, rootNode + "munger", client.munger.enabled);
 
+    client.enableColors =
+        getBoolPref (pref, rootNode + "munger.colorCodes", true);
+
     client.smileyText =
         getBoolPref (pref, rootNode + "munger.smileyText", false);
+
+    for (var entry in client.munger.entries)
+    {
+        if (entry[0] != ".")
+        {
+            client.munger.entries[entry].enabled =
+                getBoolPref (pref, rootNode + "munger." + entry,
+                             client.munger.entries[entry].enabled);
+        }
+    }
 
     client.FLASH_WINDOW =
         getBoolPref (pref, rootNode + "notify.aggressive", true);
@@ -118,15 +162,22 @@ function readIRCPrefs (rootNode)
         getCharPref (pref, rootNode + "style.default",
                      "chrome://chatzilla/skin/output-default.css");
     
+    client.COLLAPSE_MSGS = 
+        getBoolPref (pref, rootNode + "views.collapseMsgs", false);
+
     client.MAX_MESSAGES = 
         getIntPref (pref, rootNode + "views.client.maxlines",
                     client.MAX_MESSAGES);
+
+    CIRCNetwork.prototype.MAX_MESSAGES =
+        getIntPref (pref, rootNode + "views.network.maxlines",
+                    CIRCChanUser.prototype.MAX_MESSAGES);
 
     CIRCChannel.prototype.MAX_MESSAGES =
         getIntPref (pref, rootNode + "views.channel.maxlines",
                     CIRCChannel.prototype.MAX_MESSAGES);
 
-    CIRCChanUser.prototype.MAX_MESSAGES =
+    CIRCUser.prototype.MAX_MESSAGES =
         getIntPref (pref, rootNode + "views.chanuser.maxlines",
                     CIRCChanUser.prototype.MAX_MESSAGES);
     
@@ -138,8 +189,9 @@ function readIRCPrefs (rootNode)
 
 function writeIRCPrefs (rootNode)
 {
-    var pref =
-        Components.classes["@mozilla.org/preferences;1"].createInstance();
+    const PREF_CTRID = "@mozilla.org/preferences-service;1";
+    const nsIPrefBranch = Components.interfaces.nsIPrefBranch;
+    var pref = Components.classes[PREF_CTRID].getService(nsIPrefBranch);
     if(!pref)
         throw ("Can't find pref component.");
 
@@ -149,23 +201,47 @@ function writeIRCPrefs (rootNode)
     if (!rootNode.match(/\.$/))
         rootNode += ".";
     
-    pref = pref.QueryInterface(Components.interfaces.nsIPref);
-
-    pref.SetCharPref (rootNode + "nickname",
+    pref.setCharPref (rootNode + "nickname",
                       CIRCNetwork.prototype.INITIAL_NICK);
-    pref.SetCharPref (rootNode + "username",
+    pref.setCharPref (rootNode + "username",
                       CIRCNetwork.prototype.INITIAL_NAME);
-    pref.SetCharPref (rootNode + "desc", CIRCNetwork.prototype.INITIAL_DESC);
-    pref.SetCharPref (rootNode + "nickCompleteStr", client.ADDRESSED_NICK_SEP);
-    pref.SetCharPref (rootNode + "style.default", client.DEFAULT_STYLE);
-    pref.SetCharPref (rootNode + "stalkWords",
+    pref.setCharPref (rootNode + "desc", CIRCNetwork.prototype.INITIAL_DESC);
+    pref.setCharPref (rootNode + "charset", client.CHARSET);
+    pref.setCharPref (rootNode + "nickCompleteStr", client.ADDRESSED_NICK_SEP);
+    pref.setCharPref (rootNode + "initialURLs", client.INITIAL_URLS);
+    pref.setCharPref (rootNode + "initialScripts", client.INITIAL_SCRIPTS);
+    pref.setCharPref (rootNode + "newTabThreshold", client.NEW_TAB_THRESHOLD);
+    pref.setCharPref (rootNode + "focusNewTab", client.FOCUS_NEW_TAB);
+    pref.setCharPref (rootNode + "style.default", client.DEFAULT_STYLE);
+    pref.setCharPref (rootNode + "stalkWords",
                       client.stalkingVictims.join ("; "));
-    pref.SetBoolPref (rootNode + "munger", client.munger.enabled);
-    pref.SetBoolPref (rootNode + "munger.smileyText", client.smileyText);
-    pref.SetBoolPref (rootNode + "notify.aggressive", client.FLASH_WINDOW);
+    pref.setCharPref (rootNode + "stalkBeep", client.STALK_BEEP);
+    pref.setCharPref (rootNode + "msgBeep", client.MSG_BEEP);
+    pref.setCharPref (rootNode + "queryBeep", client.QUERY_BEEP);    
+    pref.setBoolPref (rootNode + "munger", client.munger.enabled);
+    pref.setBoolPref (rootNode + "munger.colorCodes", client.enableColors);
+    pref.setBoolPref (rootNode + "munger.smileyText", client.smileyText);
+
+    for (var entry in client.munger.entries)
+    {
+        if (entry[0] != ".")
+        {
+            pref.setBoolPref (rootNode + "munger." + entry,
+                              client.munger.entries[entry].enabled);
+        }
+    }
+    pref.setBoolPref (rootNode + "notify.aggressive", client.FLASH_WINDOW);
+    pref.setBoolPref (rootNode + "views.collapseMsgs", client.COLLAPSE_MSGS);
+    pref.setIntPref (rootNode + "views.client.maxlines", client.MAX_MESSAGES);
+    pref.setIntPref (rootNode + "views.network.maxlines",
+                     CIRCChanUser.prototype.MAX_MESSAGES);
+    pref.setIntPref (rootNode + "views.channel.maxlines",
+                     CIRCChannel.prototype.MAX_MESSAGES);
+    pref.setIntPref (rootNode + "views.chanuser.maxlines",
+                     CIRCChanUser.prototype.MAX_MESSAGES);
     
     var h = client.eventPump.getHook ("event-tracer");
-    pref.SetBoolPref (rootNode + "debug.tracer", h.enabled);
+    pref.setBoolPref (rootNode + "debug.tracer", h.enabled);
     
 }
 
@@ -175,7 +251,7 @@ function getCharPref (prefObj, prefName, defaultValue)
     
     try
     {
-        rv = prefObj.CopyCharPref (prefName);
+        rv = prefObj.getCharPref (prefName);
     }
     catch (e)
     {
@@ -193,7 +269,7 @@ function getIntPref (prefObj, prefName, defaultValue)
 
     try
     {
-        return prefObj.GetIntPref (prefName);
+        return prefObj.getIntPref (prefName);
     }
     catch (e)
     {
@@ -208,7 +284,7 @@ function getBoolPref (prefObj, prefName, defaultValue)
 
     try
     {
-        return prefObj.GetBoolPref (prefName);
+        return prefObj.getBoolPref (prefName);
     }
     catch (e)
     {

@@ -19,12 +19,16 @@
  *
  * Contributor(s):
  *  Robert Ginda, rginda@ndcico.com, original author
+ *  Samuel Sieb, samuel@sieb.net, MIRC color codes
  */
 
-function CMungerEntry (name, regex, className, tagName)
+function CMungerEntry (name, regex, className, enable, tagName)
 {
     
     this.name = name;
+    if (name[0] != ".")
+        this.description = getMsg("rule_" + name);
+    this.enabled = (typeof enable == "undefined" ? true : enable);
     this.tagName = (tagName) ? tagName : "html:span";
 
     if (regex instanceof RegExp)
@@ -49,10 +53,10 @@ function CMunger ()
 CMunger.prototype.enabled = true;
 
 CMunger.prototype.addRule =
-function mng_addrule (name, regex, className)
+function mng_addrule (name, regex, className, enable)
 {
     
-    this.entries[name] = new CMungerEntry (name, regex, className);
+    this.entries[name] = new CMungerEntry (name, regex, className, enable);
     
 }
 
@@ -69,6 +73,7 @@ function mng_munge (text, containerTag, data)
 {
     var entry;
     var ary;
+    var wbr, newClass;
     
     if (!containerTag)
         containerTag =
@@ -79,70 +84,122 @@ function mng_munge (text, containerTag, data)
     {
         for (entry in this.entries)
         {
-            if (typeof this.entries[entry].lambdaMatch == "function")
+            if (this.entries[entry].enabled)
             {
-                var rval;
-                
-                rval = this.entries[entry].lambdaMatch(text, containerTag,
-                                                       data,
-                                                       this.entries[entry]);
-                if (rval)
-                    ary = [(void 0), rval];
-                else
-                    ary = null;
-            }
-            else
-                ary = text.match(this.entries[entry].regex);
-            
-            if ((ary != null) && (ary[1]))
-            {
-                var startPos = text.indexOf(ary[1]);
-                
-                if (typeof this.entries[entry].lambdaReplace == "function")
+                if (typeof this.entries[entry].lambdaMatch == "function")
                 {
-                    this.munge (text.substr(0,startPos), containerTag,
-                                data);
-                    this.entries[entry].lambdaReplace (ary[1], containerTag,
-                                                       data,
-                                                       this.entries[entry]);
-                    this.munge (text.substr (startPos + ary[1].length,
-                                             text.length), containerTag,
-                                data);
-                
-                    return containerTag;
+                    var rval;
+ 
+                    rval = this.entries[entry].lambdaMatch(text, containerTag,
+                                                           data,
+                                                           this.entries[entry]);
+                    if (rval)
+                        ary = [(void 0), rval];
+                    else
+                        ary = null;
                 }
                 else
+                    ary = text.match(this.entries[entry].regex);
+ 
+                if ((ary != null) && (ary[1]))
                 {
-                    this.munge (text.substr(0,startPos), containerTag,
-                                data);
-                    
-                    var subTag = document.createElementNS
-                        ("http://www.w3.org/1999/xhtml",
-                         this.entries[entry].tagName);
-
-                    subTag.setAttribute ("class",
-                                         this.entries[entry].className);
-                    var wordParts = splitLongWord (ary[1],
-                                                   client.MAX_WORD_DISPLAY);
-                    for (var i in wordParts)
+                    var startPos = text.indexOf(ary[1]);
+ 
+                    if (typeof this.entries[entry].lambdaReplace == "function")
                     {
-                        subTag.appendChild (document.createTextNode (wordParts[i]));
-                        var img = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                                            "html:img");
-                        subTag.appendChild (img);
+                        this.munge (text.substr(0,startPos), containerTag,
+                                    data);
+                        this.entries[entry].lambdaReplace (ary[1], containerTag,
+                                                           data,
+                                                           this.entries[entry]);
+                        this.munge (text.substr (startPos + ary[1].length,
+                                                 text.length), containerTag,
+                                    data);
+ 
+                        return containerTag;
                     }
-                    
-                    containerTag.appendChild (subTag);
-                    this.munge (text.substr (startPos + ary[1].length,
-                                             text.length), containerTag, data);
+                    else
+                    {
+                        this.munge (text.substr(0,startPos), containerTag,
+                                    data);
+ 
+                        var subTag = document.createElementNS
+                            ("http://www.w3.org/1999/xhtml",
+                             this.entries[entry].tagName);
 
-                    return containerTag;
+                        newClass = this.entries[entry].className;
+
+                        if ("hasColorInfo" in data)
+                        {
+                            if ("currFgColor" in data)
+                                newClass += " chatzilla-fg" + data.currFgColor;
+                            if ("currBgColor" in data)
+                                newClass += " chatzilla-bg" + data.currBgColor;
+                            if ("isBold" in data)
+                                newClass += " chatzilla-bold";
+                            if ("isUnderline" in data)
+                                newClass += " chatzilla-underline";
+                        }
+
+                        subTag.setAttribute ("class", newClass);
+
+                        var wordParts = splitLongWord (ary[1],
+                                                       client.MAX_WORD_DISPLAY);
+                        for (var i in wordParts)
+                        {
+                            subTag.appendChild (document.createTextNode (wordParts[i]));
+                            wbr = document.createElementNS ("http://www.w3.org/1999/xhtml",
+                                                            "html:wbr");
+                            subTag.appendChild (wbr);
+                        }
+ 
+                        containerTag.appendChild (subTag);
+                        this.munge (text.substr (startPos + ary[1].length,
+                                                 text.length), containerTag,
+                                                 data);
+
+                        return containerTag;
+                    }
                 }
             }
         }
     }
 
-    containerTag.appendChild (document.createTextNode (text));
+    var textNode = document.createTextNode (text);
+
+    if ("hasColorInfo" in data)
+    {
+
+        newClass = "";
+        if ("currFgColor" in data)
+            newClass = "chatzilla-fg" + data.currFgColor;
+        if ("currBgColor" in data)
+            newClass += " chatzilla-bg" + data.currBgColor;
+        if ("isBold" in data)
+            newClass += " chatzilla-bold";
+        if ("isUnderline" in data)
+            newClass += " chatzilla-underline";
+        if (newClass != "")
+        {
+            var newTag = document.createElementNS
+                ("http://www.w3.org/1999/xhtml",
+                 "html:span");
+            newTag.setAttribute ("class", newClass);
+            newTag.appendChild (textNode);
+            containerTag.appendChild (newTag);
+        }
+        else
+        {
+            delete data.hasColorInfo;
+            containerTag.appendChild (textNode);
+        }
+        wbr = document.createElementNS ("http://www.w3.org/1999/xhtml",
+                                        "html:wbr");
+        containerTag.appendChild (wbr);
+    }
+    else
+        containerTag.appendChild (textNode);
+
     return containerTag;
     
 }

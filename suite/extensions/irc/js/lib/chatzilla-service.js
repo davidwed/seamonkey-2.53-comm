@@ -131,7 +131,7 @@ function (aContentType, aCommand, aWindowTarget, aRequest)
     {
         var ass =
             Components.classes[ASS_CONTRACTID].getService(nsIAppShellService);
-        w = ass.getHiddenDOMWindow();
+        w = ass.hiddenDOMWindow;
 
         var args = new Object ();
         args.url = channel.URI.spec;
@@ -163,8 +163,9 @@ function IRCProtocolHandler()
 
 IRCProtocolHandler.prototype.scheme = "irc";
 IRCProtocolHandler.prototype.defaultPort = 6667;
-IRCProtocolHandler.prototype.URIType = 
-                   Components.interfaces.nsIProtocolHandler.URI_NORELATIVE;
+IRCProtocolHandler.prototype.protocolFlags = 
+                   nsIProtocolHandler.URI_NORELATIVE |
+                   nsIProtocolHandler.ALLOWS_PROXY;
 
 IRCProtocolHandler.prototype.allowPort =
 function (aPort, aScheme)
