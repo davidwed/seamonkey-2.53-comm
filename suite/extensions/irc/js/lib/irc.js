@@ -181,7 +181,7 @@ function net_doconnect(e)
     var connected = false;
     
     if (c.connect (this.serverList[host].name, this.serverList[host].port,
-                   (void 0), true))
+                   (void 0), true, null))
     {
         var ex;
         ev = new CEvent ("network", "connect", this, "onConnect");
@@ -213,6 +213,7 @@ function net_doconnect(e)
     return true;
 
 }
+
 
 /*
  * What to do when the client connects to it's primary server
@@ -257,7 +258,7 @@ function CIRCServer (parent, connection)
     s.lag = -1;    
     s.usersStable = true;
 
-    if (typeof connection.startAsyncRead == "function")
+    if (jsenv.HAS_NSPR_EVENTQ)
         connection.startAsyncRead(s);
     else
         s.parent.eventPump.addEvent(new CEvent ("server", "poll", s,
@@ -270,7 +271,7 @@ function CIRCServer (parent, connection)
 
 CIRCServer.prototype.MAX_LINES_PER_SEND = 5;
 CIRCServer.prototype.MS_BETWEEN_SENDS = 1500;
-CIRCServer.prototype.READ_TIMEOUT = 2000;
+CIRCServer.prototype.READ_TIMEOUT = 100;
 CIRCServer.prototype.TOO_MANY_LINES_MSG = "\01ACTION has said too much\01";
 CIRCServer.prototype.VERSION_RPLY = "JS-IRC Library v0.01, " +
     "Copyright (C) 1999 Robert Ginda; rginda@ndcico.com";
@@ -278,6 +279,62 @@ CIRCServer.prototype.DEFAULT_REASON = "no reason";
 
 CIRCServer.prototype.TYPE = "IRCServer";
 
+CIRCServer.prototype.onStreamDataAvailable = 
+function serv_sda (request, inStream, sourceOffset, count)
+{
+    var ev = new CEvent ("server", "data-available", this,
+                         "onDataAvailable");
+
+    ev.line = this.connection.readData(0, count);
+    /* route data-available as we get it.  the data-available handler does
+     * not do much, so we can probably get away with this without starving
+     * the UI even under heavy input traffic.
+     */
+    this.parent.eventPump.routeEvent (ev);
+}
+
+CIRCServer.prototype.onStreamClose = 
+function serv_sockdiscon(status)
+{
+    
+    this.connection.isConnected = false;
+
+    var ev = new CEvent ("server", "disconnect", this, "onDisconnect");
+    ev.disconnectStatus = status;
+    this.parent.eventPump.addEvent (ev);
+    
+    var msg;
+
+    switch (status)
+    {
+        case NS_ERROR_CONNECTION_REFUSED:
+            msg = "Connection to " + this.connection.host + ":" +
+                this.connection.port + " refused.";
+            break;
+
+        case NS_ERROR_NET_TIMEOUT:
+            msg = "Connection to " + this.connection.host + ":" +
+                this.connection.port + " timed out.";
+            break;
+
+        case NS_ERROR_UNKNOWN_HOST:
+            msg = "Unknown host: " + this.connection.host;
+            break;
+            
+        default:
+            msg = "Connection to " + this.connection.host + ":" +
+                this.connection.port + " closed with status " + status + ".";
+            break;
+            
+    }
+    
+    var ev = new CEvent ("network", "info", this.parent, "onInfo");
+    ev.msg = msg;
+    this.parent.eventPump.addEvent (ev);
+    
+}
+
+    
 CIRCServer.prototype.flushSendQueue =
 function serv_flush()
 {
@@ -496,15 +553,6 @@ function serv_onsenddata (e)
 {
     var d = new Date();
 
-    if (!this.connection.isConnected)
-    {
-        var ev = new CEvent ("server", "disconnect", this,
-                             "onDisconnect");
-        ev.reason = "unknown";
-        this.parent.eventPump.addEvent (ev);
-        return false;
-    }
-
     this.sendsThisRound = 0;
 
     if (((d - this.lastSend) >= this.MS_BETWEEN_SENDS) &&
@@ -550,7 +598,7 @@ function serv_poll(e)
             dd("### catching a ThreadDeath");
             throw(ex);
         }
-        else if (typeof ex != "undefined")
+        else
         {
             ev = new CEvent ("server", "disconnect", this, "onDisconnect");
             ev.reason = "error";
@@ -558,8 +606,6 @@ function serv_poll(e)
             this.parent.eventPump.addEvent (ev);
             return false;
         }
-        else
-            line = ""
     }
         
     this.parent.eventPump.addEvent (new CEvent ("server", "poll", this,
@@ -655,10 +701,10 @@ function serv_onRawData(e)
 
     e.server = this;
 
-    var sep = l.indexOf(":");
+    var sep = l.indexOf(" :");
 
     if (sep != -1) /* <trailing> param, if there is one */
-        e.meat = l.substr (sep + 1, l.length);
+        e.meat = l.substr (sep + 2, l.length);
     else
         e.meat = "";
 
@@ -667,8 +713,6 @@ function serv_onRawData(e)
     else
         e.params = l.split(" ");
     e.code = e.params[0].toUpperCase();
-    if (e.params[e.params.length - 1] == "")
-        e.params.length--;
 
     e.type = "parseddata";
     e.destObject = this;
@@ -766,6 +810,37 @@ function serv_332 (e)
 
     return true;
     
+}
+
+/* whois name */
+CIRCServer.prototype.on311 =
+function serv_311 (e)
+{
+    e.user = new CIRCUser (this, e.params[2], e.params[3], e.params[4]);
+    e.destObject = this.parent;
+    e.set = "network";
+}
+    
+/* whois server */
+CIRCServer.prototype.on312 =
+function serv_312 (e)
+{
+    e.user = new CIRCUser (this, e.params[2]);
+    e.user.connectionHost = e.params[3];
+
+    e.destObject = this.parent;
+    e.set = "network";
+}
+
+/* whois idle time */
+CIRCServer.prototype.on317 =
+function serv_317 (e)
+{
+    e.user = new CIRCUser (this, e.params[2]);
+    e.user.idleSeconds = e.params[3];
+
+    e.destObject = this.parent;
+    e.set = "network";
 }
 
 /* topic information */
@@ -1334,6 +1409,15 @@ function serv_ctcp (e)
     
 }
 
+CIRCServer.prototype.onCTCPAction =
+function serv_cact (e)
+{
+    e.destObject = e.replyTo;
+    e.set = (e.replyTo == e.user) ? "user" : "channel";        
+
+}
+
+
 CIRCServer.prototype.onCTCPVersion = 
 function serv_cver (e)
 {
@@ -1499,7 +1583,7 @@ CIRCChannel.prototype.setTopic =
 function chan_topic (str)
 {
     if ((!this.mode.publicTopic) && 
-        (!this.parent.me.isOp))
+        (!this.users[this.parent.me.nick].isOp))
         return false;
     
     str = String(str).split("\n");

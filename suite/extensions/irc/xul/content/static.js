@@ -30,6 +30,8 @@ var client = new Object();
 
 client.defaultNick = "IRCMonkey";
 
+client.version = "0.8.2";
+
 client.TYPE = "IRCClient";
 client.COMMAND_CHAR = "/";
 client.STEP_TIMEOUT = 500;
@@ -120,6 +122,14 @@ function initStatic()
     client.sound =
         Components.classes["@mozilla.org/sound;1"].createInstance(nsISound);
     
+    var ary = navigator.userAgent.match (/;\s*([^;\s]+\s*)\).*\/(\d+)/);
+    if (ary)
+        client.userAgent = "ChatZilla " + client.version + " [Mozilla " + 
+            ary[1] + "/" + ary[2] + "]";
+    else
+        client.userAgent = "ChatZilla " + client.version + "[" + 
+            navigator.userAgent + "]";
+
     obj = document.getElementById("input");
     obj.addEventListener("keyup", onInputKeyUp, false);
     obj = document.getElementById("multiline-input");
@@ -1235,9 +1245,7 @@ function getTBForObject (source, create)
         var views = document.getElementById ("views-tbar-inner");
         tb = document.createElement ("tab");
         tb.setAttribute ("onclick", "onTBIClick('" + id + "');");
-        tb.setAttribute ("autostretch", "never");
         tb.setAttribute ("crop", "right");
-        tb.setAttribute ("flex", "1");
         
         //tb.addEventListener("command", onTBIClickTempHandler, false);
         
@@ -1248,9 +1256,9 @@ function getTBForObject (source, create)
         client.viewsArray.push ({source: source, tb: tb});
         tb.setAttribute ("viewKey", client.viewsArray.length - 1);
         if (matches > 1)
-            tb.setAttribute ("value", name + "<" + matches + ">");
+            tb.setAttribute ("label", name + "<" + matches + ">");
         else
-            tb.setAttribute ("value", name);
+            tb.setAttribute ("label", name);
 
         views.appendChild (tb);
     }
@@ -1369,8 +1377,10 @@ function cli_say(msg)
             break;
 
         default:
-            client.display ("No default action for objects of type ``" +
-                            client.currentObject.TYPE + "''", "ERROR");
+            if (msg != "")
+                client.currentObject.display 
+                    ("No default action for objects of type ``" +
+                     client.currentObject.TYPE + "''", "ERROR");
             break;
     }
 
@@ -1581,6 +1591,18 @@ function display(message, msgtype, sourceObj, destObj)
     else
         notifyActivity (this);
 }
+
+client.getConnectionCount =
+function cli_gccount ()
+{
+    var count = 0;
+    
+    for (var n in client.networks)
+        if (client.networks[n].isConnected())
+            ++count;
+
+    return count;
+}   
 
 client.quit =
 function cli_quit (reason)
