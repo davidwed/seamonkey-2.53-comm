@@ -36,7 +36,7 @@ const MSG_UNKNOWN   = getMsg ("unknown");
 
 client.defaultNick = getMsg( "defaultNick" );
 
-client.version = "0.8.6";
+client.version = "0.8.7";
 
 client.TYPE = "IRCClient";
 client.COMMAND_CHAR = "/";
@@ -406,7 +406,7 @@ function initHost(obj)
                                "event-tracer", true /* negate */,
                                false /* disable */);
 
-    obj.linkRE = /((\w+):\/\/[^<>\[\]()\'\"\s]+|www(\.[^.<>\[\]()\'\"\s]+){2,})/;
+    obj.linkRE = /((\w+):[^<>\[\]()\'\"\s]+|www(\.[^.<>\[\]()\'\"\s]+){2,})/;
 
     obj.munger = new CMunger();
     obj.munger.enabled = true;
@@ -1449,6 +1449,17 @@ function updateChannel (obj)
     
     client.statusBar["channel-mode"].setAttribute("value", mode);
     client.statusBar["channel-users"].setAttribute("value", users);
+    var regex = new RegExp ("(\\S{" + client.MAX_WORD_DISPLAY + ",})", "g");
+    var ary = topic.match(regex);
+    if (ary && ary.length)
+    {
+        for (var i = 0; i < ary.length; ++i)
+        {
+            var hyphenated = hyphenateWord(ary[i], client.MAX_WORD_DISPLAY);
+            topic = topic.replace(ary[i], hyphenated);
+        }
+    }        
+
     client.statusBar["channel-topic"].firstChild.data = topic;
 
 }
@@ -1663,15 +1674,19 @@ function setCurrentObject (obj)
 
     /* Unselect currently selected users. */
     userList = document.getElementById("user-list");
-    /* Remove curently selection items before this tree gets rerooted,
-     * because it seems to remember the selections for eternity if not. */
-    userList.clearSelection ();
+    if (isVisible("user-list-box"))
+    {
+        /* Remove currently selected items before this tree gets rerooted,
+         * because it seems to remember the selections for eternity if not. */
+        if (userList.treeBoxObject.selection)
+            userList.treeBoxObject.selection.clearSelection ();
 
-    if (obj.TYPE == "IRCChannel")
-        client.rdf.setTreeRoot ("user-list", obj.getGraphResource());
-    else
-        client.rdf.setTreeRoot ("user-list", client.rdf.resNullChan);
-
+        if (obj.TYPE == "IRCChannel")
+            client.rdf.setTreeRoot ("user-list", obj.getGraphResource());
+        else
+            client.rdf.setTreeRoot ("user-list", client.rdf.resNullChan);
+    }
+    
     client.currentObject = obj;
     tb = getTabForObject(obj);
     if (tb)
@@ -2665,15 +2680,23 @@ function my_getselectedusers ()
     var cell; /* reference to each selected cell of the tree object */
     var rv_ary = new Array; /* return value arrray for CIRCChanUser objects */
 
-    for (var i = 0; i < tree.selectedItems.length; i++)
+    var rangeCount = tree.view.selection.getRangeCount();
+    for (var i = 0; i < rangeCount; ++i)
     {
-        /* First, set the reference to the XUL element. */
-        cell = tree.selectedItems[i].firstChild.childNodes[2].firstChild;
+        var start = {}, end = {};
+        tree.view.selection.getRangeAt(i, start, end);
+        for (var k = start.value; k <= end.value; ++k)
+        {
+            var item = tree.contentView.getItemAtIndex(k);
 
-        /* Now, create an instance of CIRCChaneUser by passing the text
-       *  of the cell to the getUser function of this CIRCChannel instance.
-       */
-        rv_ary[i] = this.getUser( cell.getAttribute("value") );
+            /* First, set the reference to the XUL element. */
+            cell = item.firstChild.childNodes[2];
+            
+            /* Now, create an instance of CIRCChaneUser by passing the text
+          *  of the cell to the getUser function of this CIRCChannel instance.
+          */
+            rv_ary[i] = this.getUser( cell.getAttribute("label") );
+        }
     }
 
     /* 

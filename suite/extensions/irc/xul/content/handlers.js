@@ -467,6 +467,15 @@ function onToggleVisibility(thing)
     
     if (d == "true")
     {
+        if (thing == "info")
+        {
+            if (client.currentObject.TYPE == "IRCChannel")
+                client.rdf.setTreeRoot ("user-list", 
+                                        client.currentObject.getGraphResource());
+            else
+                client.rdf.setTreeRoot ("user-list", client.rdf.resNullChan);
+        }
+        
         newState = "false";
         menu.setAttribute ("checked", "true");
         client.uiState[thing] = true;
@@ -1045,7 +1054,7 @@ function cli_icommand (e)
     if (ary.length == 0)
     {        
         var o = getObjectDetails(client.currentObject);
-        if (o.server)
+        if ("server" in o)
         {
             client.currentObject.display (getMsg("cli_icommandMsg",
                                                  e.command), "WARNING");
@@ -1413,7 +1422,7 @@ function cli_iserver (e)
         return false;
 
     var ary = 
-        e.inputData.match(/^([^\s\:]+)[\s\:]?(?:(\d+)(?:\s+(\S+)|$)|(\S+)|$)/);
+        e.inputData.match(/^([^\s\:]+)[\s\:]?(?:(\d+)(?:\s+(\S+)|\s*$)|(\S+)|$)/);
     var pass;
     if (3 in ary && ary[3])
         pass = ary[3];

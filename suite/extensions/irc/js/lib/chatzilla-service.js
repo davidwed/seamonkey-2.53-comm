@@ -49,7 +49,7 @@ const IRCPROT_HANDLER_CID =
 
 /* components used in this file */
 const MEDIATOR_CONTRACTID =
-    "@mozilla.org/rdf/datasource;1?name=window-mediator";
+    "@mozilla.org/appshell/window-mediator;1";
 const STANDARDURL_CONTRACTID = 
     "@mozilla.org/network/standard-url;1";
 const ASS_CONTRACTID =
@@ -114,7 +114,7 @@ function (aContentType, aCommand, aWindowTarget, aRequest)
     var channel = aRequest.QueryInterface(nsIChannel);
     
     /*
-    dump ("ircLoader.handleContent (" + aContentType + ", " +
+    debug ("ircLoader.handleContent (" + aContentType + ", " +
           aCommand + ", " + aWindowTarget + ", " + channel.URI.spec + ")\n");
     */
 
@@ -175,17 +175,17 @@ function (aPort, aScheme)
 }
 
 IRCProtocolHandler.prototype.newURI =
-function (aSpec, aBaseURI)
+function (aSpec, aCharset, aBaseURI)
 {
     if (aBaseURI)
     {
-        dump ("-*- ircHandler: aBaseURI passed to newURI, bailing.\n");
+        debug ("-*- ircHandler: aBaseURI passed to newURI, bailing.\n");
         return null;
     }
     
     var url = Components.classes[STANDARDURL_CONTRACTID].
       createInstance(nsIStandardURL);
-    url.init(nsIStandardURL.URLTYPE_STANDARD, 6667, aSpec, aBaseURI);
+    url.init(nsIStandardURL.URLTYPE_STANDARD, 6667, aSpec, aCharset, aBaseURI);
     
     return url.QueryInterface(nsIURI);
 }
@@ -282,7 +282,7 @@ var ChatzillaModule = new Object();
 ChatzillaModule.registerSelf =
 function (compMgr, fileSpec, location, type)
 {
-    dump("*** Registering -chat handler.\n");
+    debug("*** Registering -chat handler.\n");
     
     compMgr = compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
 
@@ -299,7 +299,7 @@ function (compMgr, fileSpec, location, type)
                             "chatzilla command line handler",
                             CLINE_SERVICE_CONTRACTID, true, true);
 
-    dump("*** Registering x-application-irc handler.\n");
+    debug("*** Registering x-application-irc handler.\n");
     compMgr.registerFactoryLocation(IRCCNT_HANDLER_CID,
                                     "IRC Content Handler",
                                     IRCCNT_HANDLER_CONTRACTID, 
@@ -307,7 +307,7 @@ function (compMgr, fileSpec, location, type)
                                     location, 
                                     type);
 
-    dump("*** Registering irc protocol handler.\n");
+    debug("*** Registering irc protocol handler.\n");
     compMgr.registerFactoryLocation(IRCPROT_HANDLER_CID,
                                     "IRC protocol handler",
                                     IRCPROT_HANDLER_CONTRACTID, 
