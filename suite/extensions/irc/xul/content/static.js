@@ -36,7 +36,7 @@ const MSG_UNKNOWN   = getMsg ("unknown");
 
 client.defaultNick = getMsg("defaultNick");
 
-client.version = "0.8.25";
+client.version = "0.8.26";
 
 client.TYPE = "IRCClient";
 client.COMMAND_CHAR = "/";
@@ -279,8 +279,6 @@ function initStatic()
     client.statusElement = document.getElementById ("status-text");
     client.defaultStatus = getMsg ("defaultStatus");
     
-    onSortCol ("usercol-nick");
-
     client.display (getMsg("welcome"), "HELLO");
     setCurrentObject (client);
 
@@ -821,6 +819,8 @@ function cycleView (amount)
     
     var vk = Number(tb.getAttribute("viewKey"));
     var destKey = (vk + amount) % len; /* wrap around */
+    if (destKey < 0)
+        destKey += len;
     
     setCurrentObject (client.viewsArray[destKey].source);
 }

@@ -764,6 +764,11 @@ function onInputKeyPress (e)
     
     switch (e.keyCode)
     {        
+        case 9:  /* tab */
+            onTabCompleteRequest(e);
+            e.preventDefault();
+            break;
+
         case 13: /* CR */
             e.line = e.target.value;
             e.target.value = "";
@@ -792,6 +797,7 @@ function onInputKeyPress (e)
                         client.inputHistory[++client.lastHistoryReferenced];
                 }
             }
+            e.preventDefault();
             break;
 
         case 40: /* down */
@@ -808,6 +814,7 @@ function onInputKeyPress (e)
                 client.lastHistoryReferenced = -1;
                 e.target.value = client.incompleteLine;
             }
+            e.preventDefault();
             break;
 
         default:
@@ -830,8 +837,6 @@ function onTabCompleteRequest (e)
     if (document.getBindingParent(elem) != singleInput)
         return;
 
-    e.preventDefault();
-    
     var selStart = singleInput.selectionStart;
     var selEnd = singleInput.selectionEnd;            
     var line = singleInput.value;
@@ -967,10 +972,6 @@ function onWindowKeyPress (e)
             e.preventDefault();
             break;
 
-        case 9: /* tab */
-            e.preventDefault();
-            break;
-            
         default:
             
     }
@@ -1009,6 +1010,15 @@ function onInputCompleteLine(e, simulated)
     }
     else /* plain text */
     {
+        /* color codes */
+        if (client.COLORCODES)
+        {
+            e.line = e.line.replace(/%U/g, "\x1f");
+            e.line = e.line.replace(/%B/g, "\x02");
+            e.line = e.line.replace(/%O/g, "\x0f");
+            e.line = e.line.replace(/%C/g, "\x03");
+            e.line = e.line.replace(/%R/g, "\x16");
+        }
         client.sayToCurrentTarget (e.line);
     }
 }
@@ -1994,12 +2004,6 @@ function cli_ijoin (e)
 
         e.channel = e.server.addChannel (name);
         e.channel.join(key);
-        if (!("messages" in e.channel))
-        {
-            e.channel.display (getMsg("cli_ijoinMsg3", e.channel.unicodeName),
-                               "INFO");
-        }
-        setCurrentObject(e.channel);
     }
 
     return true;
@@ -3276,6 +3280,11 @@ function my_cjoin (e)
 
     if (userIsMe (e.user))
     {
+        if (!("messages" in this))
+        {
+            this.display (getMsg("cli_ijoinMsg3", this.unicodeName),
+                          "INFO");
+        }
         this.display (getMsg("my_cjoinMsg", e.channel.unicodeName), "JOIN",
                       e.server.me, this);
         setCurrentObject(this);
@@ -3445,7 +3454,7 @@ function my_unick (e)
     if (userIsMe(e.user))
     {
         updateNetwork();
-        updateTitle (e.channel);
+        updateTitle();
     }
     
 }
