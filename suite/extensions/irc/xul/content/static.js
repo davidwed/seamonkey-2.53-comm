@@ -34,7 +34,7 @@
  *  Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
  */
 
-const __cz_version   = "0.9.45";
+const __cz_version   = "0.9.47";
 const __cz_condition = "green";
 
 var warn;
@@ -1732,6 +1732,8 @@ function setCurrentObject (obj)
 
     if (client.PRINT_DIRECTION == 1)
         scrollDown(obj.frame, false);    
+
+    client.input.focus();
 }
 
 function checkScroll(frame)
