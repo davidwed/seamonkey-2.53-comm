@@ -35,7 +35,7 @@
 
 function toScriptableInputStream (i)
 {
-    var si = Components.classes["component://netscape/scriptableinputstream"];
+    var si = Components.classes["@mozilla.org/scriptableinputstream;1"];
     
     si = si.createInstance();
     si = si.QueryInterface(Components.interfaces.nsIScriptableInputStream);
@@ -59,6 +59,8 @@ function CBSConnection ()
 
     this._sockService = sockService.QueryInterface
         (Components.interfaces.nsISocketTransportService);
+
+    this.wrappedJSObject = this;
 
 }
 
@@ -92,8 +94,8 @@ CBSConnection.prototype.disconnect = function()
     
     if (this.isConnected) {
         this.isConnected = false;
-        this._inputStream.Close();
-        this._outputStream.Close();
+        this._inputStream.close();
+        this._outputStream.close();
     }
 
 }
@@ -107,7 +109,7 @@ CBSConnection.prototype.sendData = function(str)
     
     try
     {
-        this._outputStream.Write(str, str.length);
+        this._outputStream.write(str, str.length);
         rv = true;
     }
     catch (ex)
@@ -161,11 +163,14 @@ CBSConnection.prototype.readData = function(timeout)
     return rv;
 }
 
-CBSConnection.prototype.startAsyncRead =
-function (server)
+if (jsenv.HAS_DOCUMENT)
 {
-    this._channel.asyncRead (new StreamListener (server), this);
-
+    CBSConnection.prototype.startAsyncRead =
+    function (server)
+    {
+        this._channel.asyncRead (new StreamListener (server), this);
+        
+    }
 }
 
 function StreamListener(server)
@@ -189,7 +194,15 @@ function (channel, ctxt, status, errorMsg)
 StreamListener.prototype.onDataAvailable =
 function (channel, ctxt, inStr, sourceOffset, count)
 {
-    if (!this.lastInStr)
+    ctxt = ctxt.wrappedJSObject;
+    if (!ctxt)
+    {
+        dd ("*** Can't get wrappedJSObject from ctxt in " +
+            "StreamListener.onDataAvailable ***");
+        return;
+    }
+    
+    if (!ctxt._inputStream)
         ctxt._inputStream = toScriptableInputStream (inStr);
 
     var ev = new CEvent ("server", "data-available", this.server,
@@ -197,4 +210,3 @@ function (channel, ctxt, inStr, sourceOffset, count)
     ev.line = ctxt.readData(0);
     this.server.parent.eventPump.addEvent (ev);
 }
-

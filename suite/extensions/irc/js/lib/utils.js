@@ -31,6 +31,9 @@
 
 var DEBUG = true;
 
+var dumpln;
+var dd;
+
 if (typeof document == "undefined") /* in xpcshell */
     dumpln = print;
 else
@@ -117,9 +120,9 @@ function dumpObjectTree (o, recurse, compress, level)
         switch (t)
         {
             case "function":
-                var sfunc = o[i].toString().split("\n");
+                var sfunc = String(o[i]).split("\n");
                 if (sfunc[2] == "    [native code]")
-                    var sfunc = "[native code]";
+                    sfunc = "[native code]";
                 else
                     sfunc = sfunc.length + " lines";
                 s += pfx + tee + i + " (function) " + sfunc + "\n";
@@ -279,12 +282,12 @@ function renameProperty (obj, oldname, newname)
     
 }
 
-function newObject(progID, iface)
+function newObject(contractID, iface)
 {
     if (!jsenv.HAS_XPCOM)
         return null;
 
-    var obj = Components.classes[progID].createInstance();
+    var obj = Components.classes[contractID].createInstance();
     var rv;
 
     switch (typeof iface)

@@ -26,7 +26,7 @@
 
 function onLoad()
 {
-    
+
     initHost(client);
     readIRCPrefs();
     setOutputStyle (client.DEFAULT_STYLE); 
@@ -34,12 +34,15 @@ function onLoad()
        Called in a callback once the document loads due to a current bug
     */
     mainStep();
-    
+
 }
 
 function onUnload()
 {
 
+    if (client.SAVE_SETTINGS)
+        writeIRCPrefs();
+    
     client.quit ("ChatZilla! [" + navigator.userAgent + "]");
     
 }
@@ -94,7 +97,20 @@ function onToggleTraceHook()
     document.getElementById("menu-dmessages").setAttribute ("checked",
                                                             h.enabled);
     
-}   
+}
+
+function onToggleSaveOnExit()
+{
+    client.SAVE_SETTINGS = !client.SAVE_SETTINGS;
+    var m = document.getElementById ("menu-settings-autosave");
+    m.setAttribute ("checked", String(client.SAVE_SETTINGS));
+
+    var pref =
+        Components.classes["@mozilla.org/preferences;1"].createInstance(Components.interfaces.nsIPref);
+
+    pref.SetBoolPref ("extensions.irc.settings.autoSave",
+                      client.SAVE_SETTINGS);
+}
 
 function onToggleToolbarIcons()
 {
@@ -116,7 +132,7 @@ function onToggleVisibility(thing)
     switch (thing)
     {
         case "toolbar":
-            ids = ["views-tbox"];
+            ids = ["views-tbar"];
             break;
             
         case "info":
@@ -124,7 +140,7 @@ function onToggleVisibility(thing)
             break;
             
         case "status":
-            ids = ["status-bar-tbox"];
+            ids = ["status-bar-tbar"];
             break;
 
         default:
@@ -233,7 +249,7 @@ function onClearCurrentView()
 function onSortCol(sortColName)
 {
     const nsIXULSortService = Components.interfaces.nsIXULSortService;
-    const isupports_uri = "component://netscape/rdf/xul-sort-service";
+    const isupports_uri = "@mozilla.org/rdf/xul-sort-service;1";
     
     var node = document.getElementById(sortColName);
     // determine column resource to sort on
@@ -305,7 +321,7 @@ function onToggleMunger()
 function onInputKeyUp (e)
 {
     
-    switch (e.which)
+    switch (e.keyCode)
     {        
         case 13: /* CR */
             e.line = e.target.value;
@@ -331,6 +347,7 @@ function onInputKeyUp (e)
             break;
 
         case 9: /* tab */
+            e.preventDefault();
             onTabCompleteRequest(e);
             break;       
             
@@ -358,6 +375,9 @@ function onTabCompleteRequest (e)
     var firstSpace = v.indexOf(" ");
     if (firstSpace == -1)
         firstSpace = v.length;
+
+    var pfx;
+    var d;
     
     if ((v[0] == client.COMMAND_CHAR) && (selStart <= firstSpace))
     {
@@ -368,7 +388,7 @@ function onTabCompleteRequest (e)
         if (cmds.length == 1)
         {
             /* partial matched exactly one command */
-            var pfx = client.COMMAND_CHAR + cmds[0];
+            pfx = client.COMMAND_CHAR + cmds[0];
             if (firstSpace == v.length)
                 v =  pfx + " ";
             else
@@ -381,7 +401,7 @@ function onTabCompleteRequest (e)
         else if (cmds.length > 1)
         {
             /* partial matched more than one command */
-            var d = new Date();
+            d = new Date();
             if ((d - client.lastTabUp) <= client.DOUBLETAB_TIME)
                 client.currentObject.display
                     ("Commands matching ``" + partialCommand + 
@@ -389,7 +409,7 @@ function onTabCompleteRequest (e)
             else
                 client.lastTabUp = d;
             
-            var pfx = client.COMMAND_CHAR + getCommonPfx(cmds);
+            pfx = client.COMMAND_CHAR + getCommonPfx(cmds);
             if (firstSpace == v.length)
                 v =  pfx;
             else
@@ -437,7 +457,7 @@ function onTabCompleteRequest (e)
             }
             else
             {   /* partial matched more than one command */
-                var d = new Date();
+                d = new Date();
                 if ((d - client.lastTabUp) <= client.DOUBLETAB_TIME)
                     client.currentObject.display
                         ("Users matching ``" + partialNick +
@@ -460,7 +480,10 @@ function onTabCompleteRequest (e)
 
 function onWindowKeyPress (e)
 {
-    var code = Number (e.keyCode)
+    var code = Number (e.keyCode);
+    var w;
+    var newOfs;
+    
     switch (code)
     {
         case 112: /* F1 */
@@ -476,13 +499,11 @@ function onWindowKeyPress (e)
             var idx = code - 112;
             if ((client.viewsArray[idx]) && (client.viewsArray[idx].source))
                 setCurrentObject(client.viewsArray[idx].source);
-            
-            return false;
             break;
 
         case 33: /* pgup */
-            var w = window.frames[0];
-            var newOfs = w.pageYOffset - (w.innerHeight / 2);
+            w = window.frames[0];
+            newOfs = w.pageYOffset - (w.innerHeight / 2);
             if (newOfs > 0)
                 w.scrollTo (w.pageXOffset, newOfs);
             else
@@ -490,12 +511,16 @@ function onWindowKeyPress (e)
             break;
             
         case 34: /* pgdn */
-            var w = window.frames[0];
-            var newOfs = w.pageYOffset + (w.innerHeight / 2);
+            w = window.frames[0];
+            newOfs = w.pageYOffset + (w.innerHeight / 2);
             if (newOfs < (w.innerHeight + w.pageYOffset))
                 w.scrollTo (w.pageXOffset, newOfs);
             else
                 w.scrollTo (w.pageXOffset, (w.innerHeight + w.pageYOffset));
+            break;
+
+        case 9: /* tab */
+            e.preventDefault();
             break;
             
         default:
@@ -1710,7 +1735,8 @@ function my_cprivmsg (e)
     
     e.user.display (e.meat, "PRIVMSG");
     
-    if (e.meat.indexOf (client.prefix) == 0)
+    if ((typeof client.prefix == "string") &&
+        e.meat.indexOf (client.prefix) == 0)
     {
         try
         {
@@ -1848,6 +1874,9 @@ function my_cpart (e)
         if (client.currentObject == this)
             /* redisplay the tree */
             client.rdf.setTreeRoot("user-list", this.getGraphResource());
+
+        if (client.DELETE_ON_PART)
+            client.onInputDelete(e);
     }
     else
         this.display (e.user.properNick + " has left " + e.channel.name,
