@@ -1,40 +1,45 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/ 
- * 
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
  * Software distributed under the License is distributed on an "AS IS" basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
- * License. 
+ * License.
  *
- * The Original Code is ChatZilla
- * 
+ * The Original Code is ChatZilla.
+ *
  * The Initial Developer of the Original Code is
- * Netscape Communications Corporation
- * Portions created by Netscape are
- * Copyright (C) 1998 Netscape Communications Corporation.
- *
- * Alternatively, the contents of this file may be used under the
- * terms of the GNU Public License (the "GPL"), in which case the
- * provisions of the GPL are applicable instead of those above.
- * If you wish to allow use of your version of this file only
- * under the terms of the GPL and not to allow others to use your
- * version of this file under the MPL, indicate your decision by
- * deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL.  If you do not delete
- * the provisions above, a recipient may use your version of this
- * file under either the MPL or the GPL.
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *  Robert Ginda, <rginda@netscape.com>, original author
- *  Chiaki Koufugata chiaki@mozilla.gr.jp UI i18n 
- *  Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
- */
+ *   Robert Ginda, <rginda@netscape.com>, original author
+ *   Chiaki Koufugata chiaki@mozilla.gr.jp UI i18n
+ *   Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.61";
+const __cz_version   = "0.9.64";
 const __cz_condition = "green";
 
 var warn;
@@ -62,7 +67,7 @@ var client = new Object();
 
 client.TYPE = "IRCClient";
 client.COMMAND_CHAR = "/";
-client.STEP_TIMEOUT = 500;
+client.STEP_TIMEOUT = 100;
 client.MAX_MESSAGES = 200;
 client.MAX_HISTORY = 50;
 /* longest nick to show in display before forcing the message to a block level
@@ -115,6 +120,9 @@ CIRCChanUser.prototype.MAX_MESSAGES = 200;
 
 function init()
 {
+    if (("initialized" in client) && client.initialized)
+        return;
+    
     client.initialized = false;
 
     client.networks = new Object();
@@ -140,6 +148,9 @@ function init()
     initMenus();
     initStatic();
     initHandlers();
+    
+    // Create DCC handler.
+    client.dcc = new CIRCDCC(client);
 
     // start logging.  nothing should call display() before this point.
     if (client.prefs["log"])
@@ -169,18 +180,68 @@ function initStatic()
 {
     CIRCServer.prototype.VERSION_RPLY =
         getMsg(MSG_VERSION_REPLY, [__cz_version, navigator.userAgent]);
-
+    
     client.mainWindow = window;
-
-    const nsISound = Components.interfaces.nsISound;
-    client.sound =
-        Components.classes["@mozilla.org/sound;1"].createInstance(nsISound);
-
-    const nsIGlobalHistory = Components.interfaces.nsIGlobalHistory;
-    const GHIST_CONTRACTID = "@mozilla.org/browser/global-history;1";
-    client.globalHistory =
-        Components.classes[GHIST_CONTRACTID].getService(nsIGlobalHistory);
-
+    
+    try
+    {
+        var io = Components.classes['@mozilla.org/network/io-service;1'];
+        client.iosvc = io.getService(Components.interfaces.nsIIOService);
+    }
+    catch (ex)
+    {
+        throw { summary: "IO service failed to initalize", exception: ex };
+    }
+    
+    try
+    {
+        const nsISound = Components.interfaces.nsISound;
+        client.sound =
+            Components.classes["@mozilla.org/sound;1"].createInstance(nsISound);
+        
+        client.soundList = new Object();
+    }
+    catch (ex)
+    {
+        throw { summary: "Sound failed to initalize", exception: ex };
+    }
+    
+    try
+    {
+        const nsIGlobalHistory = Components.interfaces.nsIGlobalHistory;
+        const GHIST_CONTRACTID = "@mozilla.org/browser/global-history;1";
+        client.globalHistory =
+            Components.classes[GHIST_CONTRACTID].getService(nsIGlobalHistory);
+    }
+    catch (ex)
+    {
+        throw { summary: "Global History failed to initalize", exception: ex };
+    }
+    
+    try
+    {
+        const nsISDateFormat = Components.interfaces.nsIScriptableDateFormat;
+        const DTFMT_CID = "@mozilla.org/intl/scriptabledateformat;1";
+        client.dtFormatter = 
+            Components.classes[DTFMT_CID].createInstance(nsISDateFormat);
+        
+        // Mmmm, fun. This ONLY affects the ChatZilla window, don't worry!
+        Date.prototype.toStringInt = Date.prototype.toString;
+        Date.prototype.toString = function() {
+            var dtf = client.dtFormatter;
+            return dtf.FormatDateTime("", dtf.dateFormatLong, 
+                                      dtf.timeFormatSeconds, 
+                                      this.getFullYear(), this.getMonth() + 1, 
+                                      this.getDate(), this.getHours(), 
+                                      this.getMinutes(), this.getSeconds()
+                                     );
+        }
+    }
+    catch (ex)
+    {
+        throw { summary: "Locale-correct date formatting failed to initalize", exception: ex };
+    }
+    
     multilineInputMode(client.prefs["multiline"]);
     if (client.prefs["showModeSymbols"])
         setListMode("symbol");
@@ -207,6 +268,10 @@ function initStatic()
     client.statusElement = document.getElementById ("status-text");
     client.defaultStatus = MSG_DEFAULT_STATUS;
 
+    client.lineEnd = "\n";
+    if (navigator.platform.search(/win/i) >= 0)
+        client.lineEnd = "\r\n";
+    
     client.logFile = null;
     setInterval("onNotifyTimeout()", client.NOTIFY_TIMEOUT);
     
@@ -238,6 +303,7 @@ function importFromFrame(method)
     CIRCNetwork.prototype.__defineGetter__(method, import_wrapper);
     CIRCChannel.prototype.__defineGetter__(method, import_wrapper);
     CIRCUser.prototype.__defineGetter__(method, import_wrapper);
+    CIRCDCCChat.prototype.__defineGetter__(method, import_wrapper);
 
     function import_wrapper()
     {
@@ -520,7 +586,7 @@ function insertChannelLink (matchText, containerTag, eventData)
     var bogusChannels =
         /^#(include|error|define|if|ifdef|else|elsif|endif|\d+)$/i;
 
-    if (!eventData.network || matchText.search(bogusChannels) != -1)
+    if (!("network" in eventData) || matchText.search(bogusChannels) != -1)
     {
         containerTag.appendChild(document.createTextNode(matchText));
         return;
@@ -556,7 +622,7 @@ function insertRheet (matchText, containerTag)
     var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
                                            "html:a");
     anchor.setAttribute ("href",
-                         "ftp://ftp.mozilla.org/pub/mozilla/libraries/bonus-tracks/rheet.wav");
+                         "http://ftp.mozilla.org/pub/mozilla.org/mozilla/libraries/bonus-tracks/rheet.wav");
     anchor.setAttribute ("class", "chatzilla-rheet chatzilla-link");
     //anchor.setAttribute ("target", "_content");
     insertHyphenatedWord (matchText, anchor);
@@ -817,10 +883,10 @@ function getDefaultFontSize()
     const PREF_CTRID = "@mozilla.org/preferences-service;1";
     const nsIPrefService = Components.interfaces.nsIPrefService;
     const nsIPrefBranch = Components.interfaces.nsIPrefBranch;
+    const XHTML_NS = "http://www.w3.org/1999/xhtml";
     
-    var prefService =
-        Components.classes[PREF_CTRID].getService(nsIPrefService);
-    var prefBranch = prefService.getBranch(null);
+    var prefSvc = Components.classes[PREF_CTRID].getService(nsIPrefService);
+    var prefBranch = prefSvc.getBranch(null);
     
     // PX size pref: font.size.variable.x-western
     var pxSize = 16;
@@ -830,10 +896,25 @@ function getDefaultFontSize()
     }
     catch(ex) { }
     
-    // Get the DPI the fun way (make Mozilla do the work).
-    var b = document.createElement("box");
-    b.style.width = "1in";
-    var dpi = window.getComputedStyle(b, null).width.match(/^\d+/);
+    var dpi = 96;
+    try
+    {
+        // Get the DPI the fun way (make Mozilla do the work).
+        var b = document.createElement("box");
+        b.style.width = "1in";
+        dpi = window.getComputedStyle(b, null).width.match(/^\d+/);
+    }
+    catch(ex)
+    {
+        try
+        {
+            // Get the DPI the fun way (make Mozilla do the work).
+            b = document.createElementNS("box", XHTML_NS);
+            b.style.width = "1in";
+            dpi = window.getComputedStyle(b, null).width.match(/^\d+/);
+        }
+        catch(ex) { }
+    }
     
     return Math.round((pxSize / dpi) * 72);
 }
@@ -848,7 +929,7 @@ function getMessagesContext(cx, element)
     cx = getObjectDetails(client.currentObject, cx);
     if (!element)
         element = document.popupNode;
-
+    
     while (element)
     {
         switch (element.localName)
@@ -858,7 +939,7 @@ function getMessagesContext(cx, element)
                 cx.url = href;
                 break;
                 
-            case "td":
+            case "tr":
                 var nickname = element.getAttribute("msg-user");
                 if (!nickname)
                     break;
@@ -874,7 +955,7 @@ function getMessagesContext(cx, element)
                     cx.user = cx.channel.getUser(nickname);
                 else
                     cx.user = cx.network.getUser(nickname);
-
+                
                 if (cx.user)
                 {
                     cx.nickname = cx.user.properNick;
@@ -882,10 +963,10 @@ function getMessagesContext(cx, element)
                 }
                 break;
         }
-
+        
         element = element.parentNode;
     }
-
+    
     return cx;
 }
 
@@ -914,12 +995,17 @@ function getUserlistContext(cx)
     cx.nicknameList = new Array();
     
     var tree = document.getElementById("user-list");
-
     var rangeCount = tree.view.selection.getRangeCount();
+    
     for (var i = 0; i < rangeCount; ++i)
     {
         var start = {}, end = {};
         tree.view.selection.getRangeAt(i, start, end);
+        
+        // If they == -1, we've got no selection, so bail.
+        if ((start.value == -1) && (end.value == -1))
+            return cx;
+        
         for (var k = start.value; k <= end.value; ++k)
         {
             var item = tree.contentView.getItemAtIndex(k);
@@ -937,7 +1023,7 @@ function getUserlistContext(cx)
             }
         }
     }
-
+    
     return cx;
 }
 
@@ -1008,15 +1094,77 @@ function cycleView (amount)
     setCurrentObject (client.viewsArray[destKey].source);
 }
 
-function playSounds (list)
+// Plays the sound for a particular event on a type of object.
+function playEventSounds(type, event)
+{
+    if (!client.sound)
+        return;
+    
+    // Converts .TYPE values into the event object names.
+    // IRCChannel => channel, IRCUser => user, etc.
+    if (type.match(/^IRC/))
+        type = type.substr(3, type.length).toLowerCase();
+    
+    var ev = type + "." + event;
+    
+    if (ev in client.soundList)
+        return;
+    
+    if (!(("sound." + ev) in client.prefs))
+        return;
+    
+    var s = client.prefs["sound." + ev];
+    
+    if (!s)
+        return;
+    
+    if (client.prefs["sound.overlapDelay"] > 0)
+    {
+        client.soundList[ev] = true;
+        setTimeout("delete client.soundList['" + ev + "']", 
+                   client.prefs["sound.overlapDelay"]);
+    }
+    
+    if (event == "start")
+    {
+        blockEventSounds(type, "event");
+        blockEventSounds(type, "chat");
+        blockEventSounds(type, "stalk");
+    }
+    
+    playSounds(s);
+}
+
+// Blocks a particular type of event sound occuring.
+function blockEventSounds(type, event)
+{
+    if (!client.sound)
+        return;
+    
+    // Converts .TYPE values into the event object names.
+    // IRCChannel => channel, IRCUser => user, etc.
+    if (type.match(/^IRC/))
+        type = type.substr(3, type.length).toLowerCase();
+    
+    var ev = type + "." + event;
+    
+    if (client.prefs["sound.overlapDelay"] > 0)
+    {
+        client.soundList[ev] = true;
+        setTimeout("delete client.soundList['" + ev + "']", 
+                   client.prefs["sound.overlapDelay"]);
+    }
+}
+
+function playSounds(list)
 {
     var ary = list.split (" ");
     if (ary.length == 0)
         return;
     
-    playSound (ary[0]);
+    playSound(ary[0]);
     for (var i = 1; i < ary.length; ++i)
-        setTimeout (playSound, 250 * i, ary[i]);
+        setTimeout(playSound, 250 * i, ary[i]);
 }
 
 function playSound(file)
@@ -1032,9 +1180,7 @@ function playSound(file)
     {
         try
         {
-            var io = Components.classes['@mozilla.org/network/io-service;1'];
-            io = io.createInstance(Components.interfaces.nsIIOService);
-            var uri = io.newURI(file, null, null);
+            var uri = client.iosvc.newURI(file, null, null);
             client.sound.play(uri);
         }
         catch (ex)
@@ -1051,7 +1197,7 @@ function mainStep()
     setTimeout ("mainStep()", client.STEP_TIMEOUT);
 }
 
-function openQueryTab (server, nick)
+function openQueryTab(server, nick)
 {
     var user = server.addUser(nick);
     client.globalHistory.addPage(user.getURL());
@@ -1085,7 +1231,7 @@ function openQueryTab (server, nick)
         
         user.displayHere (getMsg(MSG_QUERY_OPENED, user.properNick));
     }
-    server.sendData ("WHOIS " + nick + "\n");
+    user.whois();
     return user;
 }
 
@@ -1843,8 +1989,8 @@ function setCurrentObject (obj)
     {
         /* Remove currently selected items before this tree gets rerooted,
          * because it seems to remember the selections for eternity if not. */
-        if (userList.treeBoxObject.selection)
-            userList.treeBoxObject.selection.select(-1);
+        if (userList.view && userList.view.selection)
+            userList.view.selection.select(-1);
 
         if (obj.TYPE == "IRCChannel")
         {
@@ -1884,7 +2030,7 @@ function setCurrentObject (obj)
 function checkScroll(frame)
 {
     var window = getContentWindow(frame);
-    if (!window)
+    if (!window || !("document" in window))
         return false;
 
     return (window.document.height - window.innerHeight -
@@ -1902,7 +2048,7 @@ function scrollDown(frame, force)
  * final value for state is dependant on priority of the current state, and the
  * new state. the priority is: normal < superfluous < activity < attention.
  */
-function setTabState (source, what)
+function setTabState(source, what, callback)
 {
     if (typeof source != "object")
     {
@@ -1912,21 +2058,40 @@ function setTabState (source, what)
         source = client.viewsArray[source].source;
     }
     
+    callback = callback || false;
+    
     var tb = getTabForObject (source, true);
     var vk = Number(tb.getAttribute("viewKey"));
     
-    if ("currentObject" in client && client.currentObject != source)
+    var current = ("currentObject" in client && client.currentObject == source);
+    
+    /* We want to play sounds if they're from a non-current view, or we don't
+     * have focus at all. Also make sure stalk matches always play sounds.
+     * Also make sure we don't play on the 2nd half of the flash (Callback).
+     */
+    if (!callback && (!window.isFocused || !current || (what == "attention")))
     {
-        var state = tb.getAttribute ("state");
+        if (what == "attention")
+            playEventSounds(source.TYPE, "stalk");
+        else if (what == "activity")
+            playEventSounds(source.TYPE, "chat");
+        else if (what == "superfluous")
+            playEventSounds(source.TYPE, "event");
+    }
+    
+    // Only change the tab's colour if it's not the active view.
+    if (!current)
+    {
+        var state = tb.getAttribute("state");
         if (state == what)
         {
             /* if the tab state has an equal priority to what we are setting
              * then blink it */
             if (client.prefs["activityFlashDelay"] > 0)
             {
-                tb.setAttribute ("state", "normal");
-                setTimeout (setTabState, client.prefs["activityFlashDelay"], 
-                            vk, what);
+                tb.setAttribute("state", "normal");
+                setTimeout(setTabState, client.prefs["activityFlashDelay"], 
+                           vk, what, true);
             }
         }
         else
@@ -1936,7 +2101,7 @@ function setTabState (source, what)
             {
                 /* if the tab state has a lower priority than what we are
                  * setting, change it to the new state */
-                tb.setAttribute ("state", what);
+                tb.setAttribute("state", what);
                 /* we only change the activity list if priority has increased */
                 if (what == "attention")
                    client.activityList[vk] = "!";
@@ -1956,10 +2121,10 @@ function setTabState (source, what)
                  * blink the new lower state quickly, then back to the old */
                 if (client.prefs["activityFlashDelay"] > 0)
                 {
-                    tb.setAttribute ("state", what);
-                    setTimeout (setTabState, 
-                                client.prefs["activityFlashDelay"], vk, 
-                                state);
+                    tb.setAttribute("state", what);
+                    setTimeout(setTabState, 
+                               client.prefs["activityFlashDelay"], vk, 
+                               state, true);
                 }
             }
         }
@@ -2198,6 +2363,8 @@ function syncOutputFrame(obj)
 
 function createMessages(source)
 {
+    playEventSounds(source.TYPE, "start");
+    
     source.messages =
     document.createElementNS ("http://www.w3.org/1999/xhtml",
                               "html:table");
@@ -2220,26 +2387,16 @@ function getTabForObject (source, create)
     if (!ASSERT(source, "UNDEFINED passed to getTabForObject"))
         return null;
     
-    switch (source.TYPE)
+    if ("displayName" in source)
     {
-        case "IRCChanUser":
-        case "IRCUser":
-            name = source.properNick;
-            break;
-            
-        case "IRCNetwork":
-        case "IRCClient":
-            name = source.name;
-            break;
-        case "IRCChannel":
-            name = source.unicodeName;
-            break;
-
-        default:
-            ASSERT(0, "INVALID OBJECT passed to getTabForObject");
-            return null;
+        name = source.displayName;
     }
-
+    else
+    {
+        ASSERT(0, "INVALID OBJECT passed to getTabForObject");
+        return null;
+    }
+    
     var tb, id = "tb[" + name + "]";
     var matches = 1;
 
@@ -2495,16 +2652,17 @@ function cli_load(url, scope)
 client.sayToCurrentTarget =
 function cli_say(msg)
 {
+    if ("say" in client.currentObject)
+    {
+        msg = filterOutput (msg, "PRIVMSG");
+        display(msg, "PRIVMSG", "ME!", client.currentObject);
+        client.currentObject.say(msg);
+        
+        return;
+    }
+    
     switch (client.currentObject.TYPE)
     {
-        case "IRCChannel":
-        case "IRCUser":
-        case "IRCChanUser":
-            msg = filterOutput (msg, "PRIVMSG");
-            display(msg, "PRIVMSG", "ME!", client.currentObject);
-            client.currentObject.say(msg);
-            break;
-
         case "IRCClient":
             dispatch("eval", {expression: msg});
             break;
@@ -2639,6 +2797,18 @@ function usr_display(message, msgtype, sourceObj, destObj)
     }
 }
 
+CIRCDCCChat.prototype.display =
+CIRCDCCFileTransfer.prototype.display =
+function dcc_display(message, msgtype, sourceObj, destObj)
+{
+    var o = getObjectDetails(client.currentObject);
+    
+    if ("messages" in this)
+        this.displayHere(message, msgtype, sourceObj, destObj);
+    else
+        client.currentObject.display(message, msgtype, sourceObj, destObj);
+}
+
 function feedback(e, message, msgtype, sourceObj, destObj)
 {
     if ("isInteractive" in e && e.isInteractive)
@@ -2648,6 +2818,7 @@ function feedback(e, message, msgtype, sourceObj, destObj)
 CIRCChannel.prototype.feedback =
 CIRCNetwork.prototype.feedback =
 CIRCUser.prototype.feedback =
+CIRCDCCChat.prototype.feedback =
 client.feedback =
 function this_feedback(e, message, msgtype, sourceObj, destObj)
 {
@@ -2664,6 +2835,7 @@ client.getTimestampCSS =
 CIRCNetwork.prototype.getTimestampCSS =
 CIRCChannel.prototype.getTimestampCSS =
 CIRCUser.prototype.getTimestampCSS =
+CIRCDCCChat.prototype.getTimestampCSS =
 function this_getTimestampCSS(format)
 {
     /* Wow, this is cool. We just put together a CSS-rule string based on the
@@ -2703,6 +2875,7 @@ client.getFontCSS =
 CIRCNetwork.prototype.getFontCSS =
 CIRCChannel.prototype.getFontCSS =
 CIRCUser.prototype.getFontCSS =
+CIRCDCCChat.prototype.getFontCSS =
 function this_getFontCSS(format)
 {
     /* See this_getTimestampCSS. */
@@ -2732,32 +2905,11 @@ CIRCNetwork.prototype.displayHere =
 CIRCChannel.prototype.display =
 CIRCChannel.prototype.displayHere =
 CIRCUser.prototype.displayHere =
+CIRCDCCChat.prototype.displayHere =
+CIRCDCCFileTransfer.prototype.displayHere =
 function __display(message, msgtype, sourceObj, destObj)
 {
-    var canMergeData = false;
-    var logText = "";
-
-    function setAttribs (obj, c, attrs)
-    {
-        if (attrs)
-        {
-            for (var a in attrs)
-                obj.setAttribute (a, attrs[a]);
-        }
-        obj.setAttribute ("class", c);
-        obj.setAttribute ("msg-type", msgtype);
-        obj.setAttribute ("msg-dest", toAttr);
-        obj.setAttribute ("dest-type", toType);
-        obj.setAttribute ("view-type", viewType); 
-        if (fromAttr)
-        {
-            if (fromUser)
-                obj.setAttribute ("msg-user", fromAttr);
-            else
-                obj.setAttribute ("msg-source", fromAttr);
-        }
-    };
-    
+    // We like some control on the number of digits.
     function formatTimeNumber (num, digits)
     {
         var rv = num.toString();
@@ -2765,211 +2917,236 @@ function __display(message, msgtype, sourceObj, destObj)
             rv = "0" + rv;
         return rv;
     };
-
+    
+    // We need a message type, assume "INFO".
     if (!msgtype)
         msgtype = MT_INFO;
-
+    
     var blockLevel = false; /* true if this row should be rendered at block
                              * level, (like, if it has a really long nickname
                              * that might disturb the rest of the layout)     */
-    var o = getObjectDetails (this);          /* get the skinny on |this|     */
-    var me;
-    if (o.server && "me" in o.server)
-        me = o.server.me;    /* get the object representing the user          */
-
-    if (sourceObj == "ME!")
-        sourceObj = me;      /* if the caller passes "ME!"   */
-    if (destObj == "ME!")
-        destObj = me;        /* substitute the actual object */
-
-    var fromType = (sourceObj && sourceObj.TYPE) ? sourceObj.TYPE : "unk";
-    var fromUser = (fromType.search(/IRC.*User/) != -1);    
-
-    var fromAttr;
-    if (fromUser && sourceObj == me)
-        fromAttr = me.nick + " ME!";
-    else if (fromUser)
-        fromAttr = sourceObj.nick;
-    else if (typeof sourceObj == "object")
-        fromAttr = sourceObj.name;
-
-    var toType = (destObj) ? destObj.TYPE : "unk";
-    var toAttr;
+    var o = getObjectDetails(this);           /* get the skinny on |this|     */
     
+    // Get the 'me' object, so we can be sure to get the attributes right.
+    var me;
+    if ("me" in this)
+        me = this.me;
+    else if (o.server && "me" in o.server)
+        me = o.server.me;
+    
+    // Let callers get away with "ME!" and we have to substitute here.
+    if (sourceObj == "ME!")
+        sourceObj = me;
+    if (destObj == "ME!")
+        destObj = me;
+    
+    // Get the TYPE of the source object.
+    var fromType = (sourceObj && sourceObj.TYPE) ? sourceObj.TYPE : "unk";
+    // Is the source a user?
+    var fromUser = (fromType.search(/IRC.*User/) != -1);    
+    // Get some sort of "name" for the source.
+    var fromAttr = (sourceObj) ? sourceObj.displayName : "";
+    // Attach "ME!" if appropriate, so motifs can style differently.
+    if (sourceObj == me)
+        fromAttr = fromAttr + " ME!";
+    
+    // Get the dest TYPE too...
+    var toType = (destObj) ? destObj.TYPE : "unk";
+    // Is the dest a user?
+    var toUser = (toType.search(/IRC.*User/) != -1);    
+    // Get a dest name too...
+    var toAttr = (destObj) ? destObj.displayName : "";
+    // Also do "ME!" work for the dest.
     if (destObj && destObj == me)
         toAttr = me.nick + " ME!";
-    else if (toType == "IRCUser")
-        toAttr = destObj.nick;
-    else if (typeof destObj == "object")
-        toAttr = destObj.name;
-
+    
     /* isImportant means to style the messages as important, and flash the
      * window, getAttention means just flash the window. */
     var isImportant = false, getAttention = false, isSuperfluous = false;
     var viewType = this.TYPE;
     var code;
-    var msgRow = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                          "html:tr");
-    setAttribs(msgRow, "msg");
-
-    //dd ("fromType is " + fromType + ", fromAttr is " + fromAttr);
-    var d = new Date();
-    var mins = d.getMinutes();
-    if (mins < 10)
-        mins = "0" + mins;
-    var statusString;
     
-    var timeStamp = getMsg(MSG_FMT_DATE, [d.getMonth() + 1, d.getDate(),
-                                          d.getHours(), mins]);
-    logText = "[" + timeStamp + "] ";
-
+    var d = new Date();
+    var dateInfo = { y: formatTimeNumber(d.getFullYear(), 4),
+                     m: formatTimeNumber(d.getMonth() + 1, 2),
+                     d: formatTimeNumber(d.getDate(), 2),
+                     h: formatTimeNumber(d.getHours(), 2),
+                     n: formatTimeNumber(d.getMinutes(), 2),
+                     s: formatTimeNumber(d.getSeconds(), 2)
+                   };
+    
+    // Statusbar text, and the line that gets saved to the log.
+    var statusString;
+    var logString;
+    
+    var dtf = client.dtFormatter;
+    var timeStamp = dtf.FormatDateTime("", dtf.dateFormatShort, 
+                                       dtf.timeFormatNoSeconds, d.getFullYear(), 
+                                       d.getMonth() + 1, d.getDate(), 
+                                       d.getHours(), d.getMinutes(), 
+                                       d.getSeconds()
+                                      );
+    logString = "[" + timeStamp + "] ";
+    
     if (fromUser)
     {
-        statusString =
-            getMsg(MSG_FMT_STATUS, [d.getMonth() + 1, d.getDate(),
-                                    d.getHours(), mins,
-                                    sourceObj.nick + "!" + 
-                                    sourceObj.name + "@" + sourceObj.host]);
+        statusString = getMsg(MSG_FMT_STATUS, 
+                              [timeStamp,
+                               sourceObj.nick + "!" + 
+                               sourceObj.name + "@" + sourceObj.host]);
     }
     else
     {
         var name;
         if (sourceObj)
-        {
-            name = (sourceObj.TYPE == "IRCChannel") ?
-                sourceObj.unicodeName : sourceObj.name;
-        }
+            name = sourceObj.displayName;
         else
-        {
-            name = (this.TYPE == "IRCChannel") ?
-                this.unicodeName : this.name;
-        }
-
-        statusString = getMsg(MSG_FMT_STATUS, [d.getMonth() + 1, d.getDate(),
-                                               d.getHours(), mins, name]);
+            name = this.displayName;
+        
+        statusString = getMsg(MSG_FMT_STATUS, 
+                              [timeStamp, name]);
     }
     
-    var msgTimestamp = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                                "html:td");
-    var atts = { statusText: statusString,
-                 "time-y": formatTimeNumber(d.getFullYear(), 4), 
-                 "time-m": formatTimeNumber(d.getMonth() + 1, 2), 
-                 "time-d": formatTimeNumber(d.getDate(), 2), 
-                 "time-h": formatTimeNumber(d.getHours(), 2), 
-                 "time-n": formatTimeNumber(d.getMinutes(), 2), 
-                 "time-s": formatTimeNumber(d.getSeconds(), 2)
-               };
-    setAttribs (msgTimestamp, "msg-timestamp", atts);
+    // The table row, and it's attributes.
+    var msgRow = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                          "html:tr");
+    msgRow.setAttribute("class", "msg");
+    msgRow.setAttribute("msg-type", msgtype);
+    msgRow.setAttribute("msg-dest", toAttr);
+    msgRow.setAttribute("dest-type", toType);
+    msgRow.setAttribute("view-type", viewType); 
+    msgRow.setAttribute("statusText", statusString);
+    if (fromAttr)
+    {
+        if (fromUser)
+            msgRow.setAttribute("msg-user", sourceObj.nick);
+        else
+            msgRow.setAttribute("msg-source", fromAttr);
+    }
     if (isImportant)
         msgTimestamp.setAttribute ("important", "true");
     
-    var msgSource, msgType, msgData;
+    // Timestamp cell.
+    var msgRowTimestamp = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                                   "html:td");
+    msgRowTimestamp.setAttribute("class", "msg-timestamp");
+    for (var key in dateInfo)
+        msgRowTimestamp.setAttribute("time-" + key, dateInfo[key]);
     
-    if (fromType.search(/IRC.*User/) != -1 &&
-        msgtype.search(/PRIVMSG|ACTION|NOTICE/) != -1)
+    var canMergeData;
+    var msgRowSource, msgRowType, msgRowData;
+    if (fromUser && msgtype.match(/^(PRIVMSG|ACTION|NOTICE)$/))
     {
-        /* do nick things here */
-        var nick;
+        var nick = sourceObj.displayName;
+        
         var nickURL;
+        if ((sourceObj != me) && ("getURL" in sourceObj))
+            nickURL = sourceObj.getURL();
         
         if (sourceObj != me)
         {
-            nick = sourceObj.properNick;
-            if (!nick)
-                nick = sourceObj.name + "@" + sourceObj.host;
-            else if ("getURL" in sourceObj)
-                nickURL = sourceObj.getURL();
-            
-            if (toType == "IRCUser") /* msg from user to me */
+            // Not from us...
+            if (destObj == me)
             {
+                // ...but to us. Messages from someone else to us.
+                
                 getAttention = true;
                 this.defaultCompletion = "/msg " + nick + " ";
+                
                 if (msgtype == "ACTION")
                 {
-                    logText += "*" + nick + " ";
+                    logString += "* " + nick + " ";
                 }
                 else
                 {
+                    // If this private message is not in a query view, use 
+                    // *nick* instead of <nick>.
                     if (this.TYPE == "IRCUser")
-                        logText += "<" + nick + "> ";
+                        logString += "<" + nick + "> ";
                     else
-                        logText += "*" + nick + "* ";
+                        logString += "*" + nick + "* ";
                 }
             }
-            else /* msg from user to channel */
+            else
             {
+                // ...or to us. Messages from someone else to channel or similar.
+                
                 if ((typeof message == "string") && me)
                 {
-                    isImportant = msgIsImportant (message, nick, o.network);
+                    isImportant = msgIsImportant(message, nick, o.network);
                     if (isImportant)
                     {
                         this.defaultCompletion = nick +
                             client.prefs["nickCompleteStr"] + " ";
-                        if (this.TYPE != "IRCNetwork")
-                            playSounds(client.prefs["stalkBeep"]);
-                    }                        
+                    }
                 }
                 if (msgtype == "ACTION")
-                    logText += "*" + nick + " ";
+                    logString += "* " + nick + " ";
                 else
-                    logText += "<" + nick + "> ";
+                    logString += "<" + nick + "> ";
             }
-        }
-        else if (toType == "IRCUser") /* msg from me to user */
-        {
-            if (this.TYPE == "IRCUser")
-            {
-                nick    = sourceObj.properNick;
-                if (msgtype == "ACTION")
-                    logText += "*" + nick + " ";
-                else
-                    logText += "<" + nick + "> ";
-            }
-            else
-            {
-                nick    = destObj.properNick;
-                logText += ">" + nick + "< ";
-            }
-        }
-        else /* msg from me to channel */
-        {
-            nick = sourceObj.properNick;
-            if (msgtype == "ACTION")
-                logText += "*" + nick + " ";
-            else
-                logText += "<" + nick + "> ";
-        }
-        
-        if (!("mark" in this))
-            this.mark = "odd";
-        
-        if (!("lastNickDisplayed" in this) ||
-            this.lastNickDisplayed != nick)
-        {
-            this.lastNickDisplayed = nick;
-            this.mark = (this.mark == "even") ? "odd" : "even";
-        }
-
-        msgSource = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                             "html:td");
-        setAttribs (msgSource, "msg-user", {statusText: statusString});
-        if (isImportant)
-            msgSource.setAttribute ("important", "true");
-        if (nick.length > client.MAX_NICK_DISPLAY)
-            blockLevel = true;
-        if (nickURL)
-        {
-            var nick_anchor =
-                document.createElementNS("http://www.w3.org/1999/xhtml",
-                                         "html:a");
-            nick_anchor.setAttribute ("class", "chatzilla-link");
-            nick_anchor.setAttribute ("href", nickURL);
-            nick_anchor.appendChild (newInlineText (nick));
-            msgSource.appendChild (nick_anchor);
         }
         else
         {
-            msgSource.appendChild (newInlineText (nick));
+            // Messages from us to somewhere...
+            
+            if (toUser)
+            {
+                // From us to a user.
+                
+                if (this.TYPE == "IRCUser")
+                {
+                    if (msgtype == "ACTION")
+                        logString += "* " + nick + " ";
+                    else
+                        logString += "<" + nick + "> ";
+                }
+                else
+                {
+                    nick = destObj.displayName;
+                    logString += ">" + nick + "< ";
+                }
+            }
+            else
+            {
+                if (msgtype == "ACTION")
+                    logString += "*" + nick + " ";
+                else
+                    logString += "<" + nick + "> ";
+            }
+        }
+        
+        // Mark makes alternate "talkers" show up in different shades.
+        //if (!("mark" in this))
+        //    this.mark = "odd";
+        
+        if (!("lastNickDisplayed" in this) || this.lastNickDisplayed != nick)
+        {
+            this.lastNickDisplayed = nick;
+            this.mark = (("mark" in this) && this.mark == "even") ? "odd" : "even";
+        }
+        
+        msgRowSource = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                             "html:td");
+        msgRowSource.setAttribute("class", "msg-user");
+        
+        // Make excessive nicks get shunted.
+        if (nick && (nick.length > client.MAX_NICK_DISPLAY))
+            blockLevel = true;
+        
+        if (nickURL)
+        {
+            var nick_anchor = 
+                document.createElementNS("http://www.w3.org/1999/xhtml",
+                                         "html:a");
+            nick_anchor.setAttribute("class", "chatzilla-link");
+            nick_anchor.setAttribute("href", nickURL);
+            nick_anchor.appendChild(newInlineText(nick));
+            msgRowSource.appendChild(nick_anchor);
+        }
+        else
+        {
+            msgRowSource.appendChild(newInlineText(nick));
         }
         canMergeData = this.prefs["collapseMsgs"];
     }
@@ -2989,48 +3166,47 @@ function __display(message, msgtype, sourceObj, destObj)
         }
         
         /* Display the message code */
-        msgType = document.createElementNS("http://www.w3.org/1999/xhtml",
+        msgRowType = document.createElementNS("http://www.w3.org/1999/xhtml",
                                            "html:td");
-        setAttribs (msgType, "msg-type", {statusText: statusString});
-
-        msgType.appendChild (newInlineText (code));
-        logText += code + " ";
+        msgRowType.setAttribute("class", "msg-type");
+        
+        msgRowType.appendChild(newInlineText(code));
+        logString += code + " ";
     }
-             
+    
     if (message)
     {
-        msgData = document.createElementNS("http://www.w3.org/1999/xhtml",
+        msgRowData = document.createElementNS("http://www.w3.org/1999/xhtml",
                                            "html:td");
-        setAttribs(msgData, "msg-data", {statusText: statusString, 
-                                         colspan: client.INITIAL_COLSPAN,
-                                         timeStamp: timeStamp});
-        if (isImportant)
-            msgData.setAttribute("important", "true");
-
-        if ("mark" in this)
-            msgData.setAttribute("mark", this.mark);
+        msgRowData.setAttribute("class", "msg-data");
         
         if (typeof message == "string")
         {
-            msgData.appendChild (stringToMsg (message, this));
-            logText += message;
+            msgRowData.appendChild(stringToMsg(message, this));
+            logString += message;
         }
         else
         {
-            msgData.appendChild (message);
-            logText += message.innerHTML.replace(/<[^<]*>/g, "");
+            msgRowData.appendChild(message);
+            logString += message.innerHTML.replace(/<[^<]*>/g, "");
         }
     }
-
+    
+    if ("mark" in this)
+        msgRow.setAttribute("mark", this.mark);
+    
     if (isImportant)
         msgRow.setAttribute ("important", "true");
-
-    if (msgSource)
-        msgRow.appendChild (msgSource);
+    
+    // Timestamps first...
+    msgRow.appendChild(msgRowTimestamp);
+    // Now do the rest of the row, after block-level stuff.
+    if (msgRowSource)
+        msgRow.appendChild(msgRowSource);
     else
-        msgRow.appendChild (msgType);
-    if (msgData)
-        msgRow.appendChild (msgData);
+        msgRow.appendChild(msgRowType);
+    if (msgRowData)
+        msgRow.appendChild(msgRowData);
     
     if (blockLevel)
     {
@@ -3042,27 +3218,26 @@ function __display(message, msgtype, sourceObj, destObj)
         var td = document.createElementNS ("http://www.w3.org/1999/xhtml",
                                            "html:td");        
         td.setAttribute ("class", "msg-nested-td");
-        td.setAttribute ("colspan", "2");
+        td.setAttribute ("colspan", "3");
         
         tr.appendChild(td);
         var table = document.createElementNS ("http://www.w3.org/1999/xhtml",
                                               "html:table");
         table.setAttribute ("class", "msg-nested-table");
-        table.setAttribute ("cellpadding", "0");
         
         td.appendChild (table);
         var tbody =  document.createElementNS ("http://www.w3.org/1999/xhtml",
                                                "html:tbody");
         
-        tbody.appendChild (msgRow);
-        table.appendChild (tbody);
+        tbody.appendChild(msgRow);
+        table.appendChild(tbody);
         msgRow = tr;
-        canMergeData = false;
     }
     
-    msgRow.insertBefore (msgTimestamp, msgRow.firstChild);
-
+    // Actually add the item.
     addHistory (this, msgRow, canMergeData);
+    
+    // Update attention states...
     if (isImportant || getAttention)
     {
         setTabState(this, "attention");
@@ -3072,18 +3247,23 @@ function __display(message, msgtype, sourceObj, destObj)
     else
     {
         if (isSuperfluous)
+        {
             setTabState(this, "superfluous");
+        }
         else
+        {
             setTabState(this, "activity");
+        }
     }
-
-    if (isImportant && client.prefs["copyMessages"])
+    
+    // Copy Important Messages [to network view].
+    if (isImportant && client.prefs["copyMessages"] && (o.network != this))
     {
-        if (o.network != this)
-            o.network.displayHere("{" + this.name + "} " + message, msgtype,
-                                  sourceObj, destObj);
+        o.network.displayHere("{" + this.name + "} " + message, msgtype,
+                              sourceObj, destObj);
     }
-
+    
+    // Log file time!
     if (this.prefs["log"])
     {
         if (!this.logFile)
@@ -3091,7 +3271,7 @@ function __display(message, msgtype, sourceObj, destObj)
         
         try
         {
-            this.logFile.write(fromUnicode(logText + "\n", "utf-8"));
+            this.logFile.write(fromUnicode(logString + client.lineEnd, "utf-8"));
         }
         catch (ex)
         {
@@ -3099,7 +3279,9 @@ function __display(message, msgtype, sourceObj, destObj)
                              "ERROR");
             try
             {
+                // Close log file, and stop logging.
                 this.logFile.close();
+                this.prefs["log"] = false;
             }
             catch(ex)
             {
@@ -3113,67 +3295,75 @@ function addHistory (source, obj, mergeData)
 {
     if (!("messages" in source) || (source.messages == null))
         createMessages(source);
-
+    
     var tbody = source.messages.firstChild;
-
+    var appendTo = tbody;
+    
     var needScroll = false;
-
+    
     if (mergeData)
     {
-        var thisUserCol = obj.firstChild;
-        var thisMessageCol = thisUserCol.nextSibling;
+        var inobj = obj;
+        // This gives us the non-nested row when there is nesting.
+        if (inobj.className == "msg-nested-tr")
+            inobj = inobj.firstChild.firstChild.firstChild.firstChild;
+        
+        var thisUserCol = inobj.firstChild;
+        while (thisUserCol && !thisUserCol.className.match(/^(msg-user|msg-type)$/))
+            thisUserCol = thisUserCol.nextSibling;
+        
+        var thisMessageCol = inobj.firstChild;
+        while (thisMessageCol && !(thisMessageCol.className == "msg-data"))
+            thisMessageCol = thisMessageCol.nextSibling;
+        
         var ci = findPreviousColumnInfo(source.messages);
         var nickColumns = ci.nickColumns;
         var rowExtents = ci.extents;
         var nickColumnCount = nickColumns.length;
+        
+        // Are we the same user as last time?
         var sameNick = (nickColumnCount > 0 &&
-                        nickColumns[nickColumnCount - 1].
+                        nickColumns[nickColumnCount - 1].parentNode.
                         getAttribute("msg-user") ==
-                        thisUserCol.getAttribute("msg-user"));
+                        thisUserCol.parentNode.getAttribute("msg-user"));
+        
+        // What was the span last time?
         var lastRowSpan = (nickColumnCount > 0) ?
             Number(nickColumns[0].getAttribute("rowspan")) : 0;
-        if (sameNick && mergeData)
+        
+        if (sameNick)
         {
+            obj = inobj;
+            if (ci.nested)
+                appendTo = source.messages.firstChild.lastChild.firstChild.firstChild.firstChild;
+            
             if (obj.getAttribute("important"))
             {
-                nickColumns[nickColumnCount - 1].setAttribute ("important",
-                                                               true);
+                nickColumns[nickColumnCount - 1].setAttribute("important",
+                                                              true);
             }
-            /* message is from the same person as last time,
-             * strip the nick first... */
-            obj.removeChild(obj.childNodes[1]);
-            /* Adjust height of previous cells, maybe. */
-            for (i = 0; i < rowExtents.length - 1; ++i)
-            {
-                var myLastData = 
-                    rowExtents[i].childNodes[nickColumnCount - 1];
-                var myLastRowSpan = (myLastData) ?
-                    myLastData.getAttribute("rowspan") : 0;
-                if (myLastData && myLastRowSpan > 1)
-                {
-                    myLastData.removeAttribute("rowspan");
-                }
-            }
-            /* then add one to the colspan for the previous user columns */
-            if (!lastRowSpan)
-                lastRowSpan = 1;
+            
+            // Remove nickname column from new row.
+            obj.removeChild(thisUserCol);
+            
+            // Expand previous grouping's nickname cell(s) to fill-in the gap.
             for (var i = 0; i < nickColumns.length; ++i)
-                nickColumns[i].setAttribute ("rowspan", lastRowSpan + 1);
+                nickColumns[i].setAttribute("rowspan", rowExtents.length + 1);
         }
     }
     
     if ("frame" in source)
         needScroll = checkScroll(source.frame);
     if (obj)
-        tbody.appendChild (obj);
-
+        appendTo.appendChild(obj);
+    
     if (source.MAX_MESSAGES)
     {
         if (typeof source.messageCount != "number")
             source.messageCount = 1;
         else
             source.messageCount++;
-
+        
         if (source.messageCount > source.MAX_MESSAGES)
         {
             if (client.PRINT_DIRECTION == 1)
@@ -3184,8 +3374,8 @@ function addHistory (source, obj, mergeData)
                 var y = window.pageYOffset;
                 tbody.removeChild (tbody.firstChild);
                 --source.messageCount;
-                while (tbody.firstChild &&
-                       tbody.firstChild.firstChild.getAttribute("class") ==
+                while (tbody.firstChild && tbody.firstChild.childNodes[1] &&
+                       tbody.firstChild.childNodes[1].getAttribute("class") ==
                        "msg-data")
                 {
                     --source.messageCount;
@@ -3198,8 +3388,8 @@ function addHistory (source, obj, mergeData)
             {
                 tbody.removeChild (tbody.lastChild);
                 --source.messageCount;
-                while (tbody.lastChild &&
-                       tbody.lastChild.firstChild.getAttribute("class") ==
+                while (tbody.lastChild && tbody.lastChild.childNodes[1] &&
+                       tbody.lastChild.childNodes[1].getAttribute("class") ==
                        "msg-data")
                 {
                     --source.messageCount;
@@ -3208,43 +3398,61 @@ function addHistory (source, obj, mergeData)
             }
         }
     }
-
+    
     if (needScroll)
     {
         scrollDown(source.frame, true);
-        setTimeout (scrollDown, 500, source.frame, false);
-        setTimeout (scrollDown, 1000, source.frame, false);
-        setTimeout (scrollDown, 2000, source.frame, false);
+        setTimeout(scrollDown, 500, source.frame, false);
+        setTimeout(scrollDown, 1000, source.frame, false);
+        setTimeout(scrollDown, 2000, source.frame, false);
     }
 }
 
-function findPreviousColumnInfo (table)
+function findPreviousColumnInfo(table)
 {
+    // All the rows in the grouping (for merged rows).
     var extents = new Array();
+    // Get the last row in the table.
     var tr = table.firstChild.lastChild;
-    var className = tr ? tr.childNodes[1].getAttribute("class") : "";
-    while (tr && className.search(/msg-user|msg-type|msg-nested-td/) == -1)
+    // Get message type.
+    if (tr.className == "msg-nested-tr")
+    {
+        var rv = findPreviousColumnInfo(tr.firstChild.firstChild);
+        rv.nested = true;
+        return rv;
+    }
+    // Now get the read one...
+    var className = (tr && tr.childNodes[1]) ? tr.childNodes[1].getAttribute("class") : "";
+    // Keep going up rows until you find the first in a group.
+    // This will go up until it hits the top of a multiline/merged block.
+    while (tr && tr.childNodes[1] && className.search(/msg-user|msg-type/) == -1)
     {
         extents.push(tr);
         tr = tr.previousSibling;
-        if (tr)
+        if (tr && tr.childNodes[1])
             className = tr.childNodes[1].getAttribute("class");
     }
     
+    // If we ran out of rows, or it's not a talking line, we're outta here.
     if (!tr || className != "msg-user")
-        return {extents: [], nickColumns: []};
+        return {extents: [], nickColumns: [], nested: false};
     
     extents.push(tr);
+    
+    // Time to collect the nick data...
     var nickCol = tr.firstChild;
+    // All the cells that contain nickname info.
     var nickCols = new Array();
     while (nickCol)
     {
+        // Just collect nickname column cells.
         if (nickCol.getAttribute("class") == "msg-user")
-            nickCols.push (nickCol);
+            nickCols.push(nickCol);
         nickCol = nickCol.nextSibling;
     }
-
-    return {extents: extents, nickColumns: nickCols};
+    
+    // And we're done.
+    return {extents: extents, nickColumns: nickCols, nested: false};
 }    
 
 client.getConnectionCount =
@@ -3330,6 +3538,7 @@ function cli_stoplog (view)
 CIRCChannel.prototype.performTabMatch =
 CIRCNetwork.prototype.performTabMatch =
 CIRCUser.prototype.performTabMatch    =
+CIRCDCCChat.prototype.performTabMatch =
 function gettabmatch_other (line, wordStart, wordEnd, word, cursorpos)
 {
     if (wordStart == 0 && line[0] == client.COMMAND_CHAR)

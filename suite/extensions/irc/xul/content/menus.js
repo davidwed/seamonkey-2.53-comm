@@ -1,37 +1,41 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/ 
- * 
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
  * Software distributed under the License is distributed on an "AS IS" basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
- * License. 
+ * License.
  *
- * The Original Code is ChatZilla
- * 
+ * The Original Code is ChatZilla.
+ *
  * The Initial Developer of the Original Code is
- * Netscape Communications Corporation
- * Portions created by Netscape are
- * Copyright (C) 1998 Netscape Communications Corporation.
- *
- * Alternatively, the contents of this file may be used under the
- * terms of the GNU Public License (the "GPL"), in which case the
- * provisions of the GPL are applicable instead of those above.
- * If you wish to allow use of your version of this file only
- * under the terms of the GPL and not to allow others to use your
- * version of this file under the MPL, indicate your decision by
- * deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL.  If you do not delete
- * the provisions above, a recipient may use your version of this
- * file under either the MPL or the GPL.
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *  Robert Ginda, <rginda@netscape.com>, original author
+ *   Robert Ginda, <rginda@netscape.com>, original author
  *
- */
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 
 function initMenus()
 {
@@ -107,9 +111,10 @@ function initMenus()
         getContext: getDefaultContext,
         items:
         [
-         ["delete-view", {enabledif: "client.viewsArray.length > 1"}],
-         ["quit"],
+         ["leave", {visibleif: "cx.TYPE == 'IRCChannel'"}],
+         ["delete-view", {visibleif: "cx.TYPE != 'IRCChannel'"}],
          ["disconnect"],
+         ["quit"],
          ["-"],
          [navigator.platform.search(/win/i) == -1 ? 
           "quit-mozilla" : "exit-mozilla"]
@@ -139,17 +144,15 @@ function initMenus()
         [
          [">popup:showhide"],
          ["-"],
+         ["clear-view"],
+         ["hide-view", {enabledif: "client.viewsArray.length > 1"}],
          ["toggle-oas",
                  {type: "checkbox",
                   checkedif: "isStartupURL(cx.sourceObject.getURL())"}],
-         ["clear-view"],
-         ["delete-view",
-                 {visibleif: "!cx.channel || !cx.channel.active",
-                  enabledif: "client.viewsArray.length > 1"}],
-         ["leave",       {visibleif: "cx.channel && cx.channel.active"}],
          ["-"],
          [">popup:motifs"],
          [">popup:fonts"],
+         ["-"],
          ["toggle-ccm",
                  {type: "checkbox",
                   checkedif: "client.prefs['collapseMsgs']"}],
@@ -225,19 +228,26 @@ function initMenus()
         ]
     };
 
-    var isopish = "(cx.channel.iAmOp() || cx.channel.iAmHalfOp())";
+    // Me is op.
+    var isop    = "(cx.channel.iAmOp()) && ";
+    // Me is op or half-op.
+    var isopish = "(cx.channel.iAmOp() || cx.channel.iAmHalfOp()) && ";
+    // Server has half-ops.
+    var shop    = "(cx.server.supports.prefix.indexOf('h') > 0) && ";
 
     client.menuSpecs["popup:opcommands"] = {
         label: MSG_MNU_OPCOMMANDS,
         items:
         [
-         ["op",         {enabledif: isopish + " && !cx.user.isOp"}],
-         ["deop",       {enabledif: isopish + " && cx.user.isOp"}],
-         ["voice",      {enabledif: isopish + " && !cx.user.isVoice"}],
-         ["devoice",    {enabledif: isopish + " && cx.user.isVoice"}],
+         ["op",         {visibleif: isop           + "!cx.user.isOp"}],
+         ["deop",       {visibleif: isop           + "cx.user.isOp"}],
+         ["hop",        {visibleif: isopish + shop + "!cx.user.isHalfOp"}],
+         ["dehop",      {visibleif: isopish + shop + "cx.user.isHalfOp"}],
+         ["voice",      {visibleif: isopish        + "!cx.user.isVoice"}],
+         ["devoice",    {visibleif: isopish        + "cx.user.isVoice"}],
          ["-"],
-         ["kick",       {enabledif: isopish}],
-         ["kick-ban",       {enabledif: isopish}]
+         ["kick",       {enabledif: "(" + isop + "1) || (" + isopish + "!cx.user.isOp)"}],
+         ["kick-ban",   {enabledif: "(" + isop + "1) || (" + isopish + "!cx.user.isOp)"}]
         ]
     };
 
@@ -251,7 +261,7 @@ function initMenus()
          ["toggle-umode", {type: "checkbox",
                            checkedif: "client.prefs['showModeSymbols']"}],
          ["-"],
-         [">popup:opcommands", {enabledif: "cx.channel && " + isopish}],
+         [">popup:opcommands", {enabledif: "cx.channel && " + isopish + "cx.user"}],
          ["whois"],
          ["query"],
          ["version"],
@@ -273,20 +283,20 @@ function initMenus()
          ["cmd-copy", {visibleif: "!" + urlenabled, enabledif: textselected }],
          ["cmd-selectall", {visibleif: "!" + urlenabled }],
          ["-"],
-         ["leave", 
-                 {enabledif: "cx.TYPE == 'IRCChannel'"}],
-         ["delete-view", {enabledif: "client.viewsArray.length > 1"}],
-         ["disconnect"],
+         ["clear-view"],
+         ["hide-view", {enabledif: "client.viewsArray.length > 1"}],
+         ["toggle-oas",
+                 {type: "checkbox",
+                  checkedif: "isStartupURL(cx.sourceObject.getURL())"}],
          ["-"],
-         [">popup:opcommands", {enabledif: "cx.channel && " + isopish}],
+         [">popup:opcommands", {enabledif: "cx.channel && " + isopish + "cx.user"}],
          ["whois"],
          ["query"],
          ["version"],
          ["-"],
-         [">popup:motifs"],
-         ["toggle-oas",
-                 {type: "checkbox",
-                  checkedif: "isStartupURL(cx.sourceObject.getURL())"}],
+         ["leave", {visibleif: "cx.TYPE == 'IRCChannel'"}],
+         ["delete-view", {visibleif: "cx.TYPE != 'IRCChannel'"}],
+         ["disconnect"]
         ]
     };
 
@@ -294,14 +304,15 @@ function initMenus()
         getContext: getTabContext,
         items:
         [
-         ["leave", 
-                 {enabledif: "cx.TYPE == 'IRCChannel'"}],
-         ["delete-view", {enabledif: "client.viewsArray.length > 1"}],
-         ["disconnect"],
-         ["-"],
+         ["clear-view"],
+         ["hide-view", {enabledif: "client.viewsArray.length > 1"}],
          ["toggle-oas",
                  {type: "checkbox",
                   checkedif: "isStartupURL(cx.sourceObject.getURL())"}],
+         ["-"],
+         ["leave", {visibleif: "cx.TYPE == 'IRCChannel'"}],
+         ["delete-view", {visibleif: "cx.TYPE != 'IRCChannel'"}],
+         ["disconnect"]
         ]
     };
 

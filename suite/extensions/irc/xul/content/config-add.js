@@ -13,13 +13,12 @@
  *
  * The Original Code is ChatZilla.
  *
- * The Initial Developer of the Original Code is
- * ____________________________________________.
- * Portions created by the Initial Developer are Copyright (C) 2002
+ * The Initial Developer of the Original Code is James Ross.
+ * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   James Ross, <twpol@aol.com>, original author
+ *   James Ross <silver@warwickcompsoc.co.uk>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -29,45 +28,60 @@
  * under the terms of either the GPL or the LGPL, and not to allow others to
  * use your version of this file under the terms of the MPL, indicate your
  * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the LGPL or the GPL. If you do not delete
+ * and other provisions required by the GPL or the LGPL. If you do not delete
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
 
-var strBundle;
+var rv, rad, box1, box2;
 
-function getMsg (msgName)
+function changeType()
 {
-    var restCount = arguments.length - 1;
+    box2.disabled = (rad.value == "net");
+}
 
-    if (!strBundle)
-    {       
-        strBundle = 
-            srGetStrBundle("chrome://chatzilla/locale/chatzilla.properties");
-    }
+function onOK()
+{
+    rv.ok = true;
     
-    try 
-    {
-        if (restCount == 1 && arguments[1] instanceof Array)
-        {
-            return strBundle.formatStringFromName (msgName, arguments[1], 
-                                                       arguments[1].length);
-        }
-        else if (restCount > 0)
-        {
-            var subPhrases = new Array();
-            for (var i = 1; i < arguments.length; ++i)
-                subPhrases.push(arguments[i]);
-            return strBundle.formatStringFromName (msgName, subPhrases,
-                                                         subPhrases.length);
-        }
+    rv.type = rad.value;
+    rv.net = box1.value;
+    rv.chan = box2.value;
+    
+    return true;
+}
 
-        return strBundle.GetStringFromName (msgName);
-    }
-    catch (ex)
-    {
-        dump ("caught exception getting value for ``" + msgName + "''\n" + ex);
-        return msgName;
-    }
+function onCancel()
+{
+    rv.ok = false;
+    
+    return true;
+}
+
+function onLoad()
+{
+    rad = document.getElementById("prefType");
+    box1 = document.getElementById("prefName1");
+    box2 = document.getElementById("prefName2");
+    
+    rv = window.arguments[0];
+    
+    if (!("type" in rv))
+        rv.type = "";
+    if (!("net" in rv))
+        rv.net = "";
+    if (!("chan" in rv))
+        rv.chan = "";
+    rv.ok = false;
+    
+    if (rv.type == "net")
+        rad.selectedIndex = 0;
+    if (rv.type == "chan")
+        rad.selectedIndex = 1;
+    if (rv.type == "user")
+        rad.selectedIndex = 2;
+    
+    box1.value = rv.net || "";
+    box2.value = rv.chan || "";
 }
