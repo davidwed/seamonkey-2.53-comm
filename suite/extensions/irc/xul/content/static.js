@@ -39,7 +39,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.67";
+const __cz_version   = "0.9.67+";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
@@ -420,6 +420,15 @@ function initIcons()
     }
 }
 
+function getFindData(e)
+{
+    var findData = new nsFindInstData();
+    findData.browser = e.sourceObject.frame;
+    findData.rootSearchWindow = e.sourceObject.frame.contentWindow;
+    findData.currentSearchWindow = e.sourceObject.frame.contentWindow;
+    return findData;
+}
+
 function importFromFrame(method)
 {
     client.__defineGetter__(method, import_wrapper);
@@ -633,6 +642,18 @@ function isVisible (id)
     return (e.getAttribute ("collapsed") != "true");
 }
 
+client.getConnectedNetworks =
+function getConnectedNetworks() 
+{
+    var rv = [];
+    for (var n in client.networks)
+    {
+        if (client.networks[n].isConnected())
+            rv.push(client.networks[n]);
+    }
+    return rv;
+}
+
 function insertLink (matchText, containerTag)
 {
     var href;
@@ -738,13 +759,22 @@ function insertChannelLink (matchText, containerTag, eventData)
     containerTag.appendChild (anchor);
 }
 
-function insertBugzillaLink (matchText, containerTag)
+function insertBugzillaLink (matchText, containerTag, eventData)
 {
     var number = matchText.match (/(\d+)/)[1];
 
     var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
                                            "html:a");
-    anchor.setAttribute ("href", client.prefs["bugURL"].replace("%s", number));
+
+    var bugURL;
+    if (eventData.channel)
+        bugURL = eventData.channel.prefs["bugURL"];
+    else if (eventData.network)
+        bugURL = eventData.network.prefs["bugURL"];
+    else
+        bugURL = client.prefs["bugURL"];
+
+    anchor.setAttribute ("href", bugURL.replace("%s", number));
     anchor.setAttribute ("class", "chatzilla-link");
     anchor.setAttribute ("target", "_content");
     insertHyphenatedWord (matchText, anchor);
@@ -1407,7 +1437,8 @@ function mainStep()
 function openQueryTab(server, nick)
 {
     var user = server.addUser(nick);
-    client.globalHistory.addPage(user.getURL());
+    if (client.globalHistory)
+        client.globalHistory.addPage(user.getURL());
     if (!("messages" in user))
     {
         var value = "";
@@ -2455,6 +2486,8 @@ function updateUserList()
     var sortDirection;
 
     node = document.getElementById("user-list");
+    if (!node.view)
+        return;
 
     const nsIXULSortService = Components.interfaces.nsIXULSortService;
     const isupports_uri = "@mozilla.org/xul/xul-sort-service;1";

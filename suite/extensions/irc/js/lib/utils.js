@@ -274,7 +274,7 @@ function ecmaUnescape(str)
 {
     function replaceEscapes(seq)
     {
-        var ary = seq.match(/([\da-f]{1,2})(.*)|u([\da-f]{1,4})/);
+        var ary = seq.match(/([\da-f]{1,2})(.*)|u([\da-f]{1,4})/i);
         if (!ary)
             return "<ERROR>";
 
@@ -908,7 +908,22 @@ function getFileFromURLSpec(url)
 
     var service = getService("@mozilla.org/network/io-service;1", 
                              "nsIIOService");
-    
+
+    /* In sept 2002, bug 166792 moved this method to the nsIFileProtocolHandler
+     * interface, but we need to support older versions too. */
+    if ("getFileFromURLSpec" in service)
+        return service.getFileFromURLSpec(url);
+
+    /* In builds before 2002-08-15, there is no getFileFromURLSpec at all.
+     * Instead, we have nsIIOservice.initFileFromURLSpec(nsIFile, string).
+     */
+    if ("initFileFromURLSpec" in service)
+    {
+        var file = newObject("@mozilla.org/file/local;1", "nsILocalFile");
+        service.initFileFromURLSpec(file, url);
+        return file;
+    }
+
     var handler = service.getProtocolHandler("file");
     handler = handler.QueryInterface(nsIFileProtocolHandler);
     return handler.getFileFromURLSpec(url);
@@ -967,6 +982,66 @@ function confirm(msg, parent, title)
     if (!title)
         title = MSG_CONFIRM;
     return ps.confirm (parent, title, msg);
+}
+
+function confirmEx(msg, buttons, defaultButton, checkText, 
+                   checkVal, parent, title)
+{
+    /* Note that on versions before Mozilla 0.9, using 3 buttons,
+     * the revert or dontsave button, or custom button titles will NOT work.
+     *
+     * The buttons should be listed in the 'accept', 'cancel' and 'extra' order,
+     * and the exact button order is host app- and platform-dependant.
+     * For example, on Windows this is usually [button 1] [button 3] [button 2],
+     * and on Linux [button 3] [button 2] [button 1]. 
+     */
+    var PROMPT_CTRID = "@mozilla.org/embedcomp/prompt-service;1";
+    var nsIPromptService = Components.interfaces.nsIPromptService;
+    var ps = Components.classes[PROMPT_CTRID].getService(nsIPromptService);
+
+    var buttonConstants = {
+        ok: ps.BUTTON_TITLE_OK,
+        cancel: ps.BUTTON_TITLE_CANCEL,
+        yes: ps.BUTTON_TITLE_YES,
+        no: ps.BUTTON_TITLE_NO,
+        save: ps.BUTTON_TITLE_SAVE,
+        revert: ps.BUTTON_TITLE_REVERT,
+        dontsave: ps.BUTTON_TITLE_DONT_SAVE
+    };
+    var buttonFlags = 0;
+    var buttonText = [null, null, null];
+
+    if (!isinstance(buttons, Array)) 
+        throw "buttons parameter must be an Array";
+    if ((buttons.length < 1) || (buttons.length > 3))
+        throw "the buttons array must have 1, 2 or 3 elements";
+
+    for (var i = 0; i < buttons.length; i++)
+    {
+        var buttonFlag = ps.BUTTON_TITLE_IS_STRING;
+        if ((buttons[i][0] == "!") && (buttons[i].substr(1) in buttonConstants))
+            buttonFlag = buttonConstants[buttons[i].substr(1)];
+        else
+            buttonText[i] = buttons[i];
+
+        buttonFlags += ps["BUTTON_POS_" + i] * buttonFlag;
+    }
+
+    // ignore anything but a proper number
+    var defaultIsNumber = (typeof defaultButton == "number");
+    if (defaultIsNumber && arrayHasElementAt(buttons, defaultButton))
+        buttonFlags += ps["BUTTON_POS_" + defaultButton + "_DEFAULT"];
+
+    if (!parent)
+        parent = window;
+    if (!title)
+        title = MSG_CONFIRM;
+    if (!checkVal)
+        checkVal = new Object();
+
+    rv = ps.confirmEx(parent, title, msg, buttonFlags, buttonText[0], 
+                      buttonText[1], buttonText[2], checkText, checkVal);
+    return rv;
 }
 
 function prompt(msg, initial, parent, title)

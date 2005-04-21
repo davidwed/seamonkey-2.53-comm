@@ -901,7 +901,8 @@ function my_showtonet (e)
 
             // Update everything.
             // Welcome to history.
-            client.globalHistory.addPage(this.getURL());
+            if (client.globalHistory)
+                client.globalHistory.addPage(this.getURL());
             updateTitle(this);
             this.updateHeader();
             client.updateHeader();
@@ -1096,14 +1097,13 @@ function my_263 (e)
      *   - LIST, with or without a parameter.
      */
 
-    if (("_list" in this) && !this._list.done &&
-        (!("count" in this._list) || (this._list.count == 0)))
+    if (("_list" in this) && !this._list.done && (this._list.count == 0))
     {
         // We attempted a LIST, and we think it failed. :)
         this._list.done = true;
         this._list.error = e.decodeParam(2);
         // Return early for this one if we're saving it.
-        if (("saveTo" in this._list) && this._list.saveTo)
+        if ("saveTo" in this._list)
             return true;
     }
 
@@ -1123,7 +1123,8 @@ function my_list(word, file)
     this._list.regexp = null;
     this._list.done = false;
     this._list.count = 0;
-    this._list.saveTo = file;
+    if (file)
+        this._list.saveTo = file;
 
     if (word instanceof RegExp)
     {
@@ -1193,12 +1194,13 @@ function my_list_init ()
     if (!("_list" in this))
     {
         this._list = new Array();
+        this._list.string = MSG_UNKNOWN;
         this._list.regexp = null;
         this._list.done = false;
         this._list.count = 0;
     }
 
-    if (("saveTo" in this._list) && this._list.saveTo)
+    if ("saveTo" in this._list)
     {
         var file = new LocalFile(this._list.saveTo);
         if (!file.localFile.exists())
@@ -1247,7 +1249,7 @@ function my_323 (e)
 CIRCNetwork.prototype.on322 = /* LIST reply */
 function my_listrply (e)
 {
-    if (!("_list" in this) || !("done" in this._list))
+    if (!("_list" in this) || !("lastLength" in this._list))
         this.listInit();
 
     ++this._list.count;
@@ -1286,6 +1288,24 @@ function my_401 (e)
     else
     {
         display(toUnicode(e.params[3], this));
+    }
+}
+
+/* 464; "invalid or missing password", occurs as a reply to both OPER and
+ * sometimes initially during user registration. */
+CIRCNetwork.prototype.on464 =
+function my_464(e)
+{
+    if (this.state == NET_CONNECTING)
+    {
+        // If we are in the process of connecting we are needing a login
+        // password, subtly different from after user registration.
+        this.display(MSG_ERR_IRC_464_LOGIN);
+    }
+    else
+    {
+        e.destMethod = "onUnknown";
+        e.destObject = this;
     }
 }
 
@@ -1570,6 +1590,7 @@ CIRCNetwork.prototype.onDisconnect =
 function my_netdisconnect (e)
 {
     var msg;
+    var msgType = "ERROR";
 
     if (typeof e.disconnectStatus != "undefined")
     {
@@ -1614,6 +1635,13 @@ function my_netdisconnect (e)
                      [this.getURL(), e.server.getURL()]);
     }
 
+    // e.quitting signals the disconnect was intended: use "INFO", not "ERROR".
+    if (e.quitting)
+    {
+        msgType = "INFO";
+        msg = getMsg(MSG_CONNECTION_QUIT, [this.getURL(), e.server.getURL()]);
+    }
+
     /* If we were only /trying/ to connect, and failed, just put an error on
      * the network tab. If we were actually connected ok, put it on all tabs.
      */
@@ -1622,7 +1650,7 @@ function my_netdisconnect (e)
         this.busy = false;
         updateProgress();
 
-        this.displayHere(msg, "ERROR");
+        this.displayHere(msg, msgType);
     }
     else
     {
@@ -1633,7 +1661,7 @@ function my_netdisconnect (e)
             {
                 var details = getObjectDetails(obj);
                 if ("server" in details && details.server == e.server)
-                    obj.displayHere(msg, "ERROR");
+                    obj.displayHere(msg, msgType);
             }
         }
     }
@@ -1651,6 +1679,12 @@ function my_netdisconnect (e)
     if ("userClose" in client && client.userClose &&
         client.getConnectionCount() == 0)
         window.close();
+
+    if (("reconnect" in this) && this.reconnect)
+    {
+        this.connect(this.requireSecurity);
+        delete this.reconnect;
+    }
 }
 
 CIRCNetwork.prototype.onCTCPReplyPing =
@@ -1669,11 +1703,13 @@ function my_umode (e)
     if ("user" in e && e.user)
     {
         e.user.updateHeader();
-        display(getMsg(MSG_USER_MODE, [e.user.unicodeName, e.params[2]]), MT_MODE);
+        this.display(getMsg(MSG_USER_MODE, [e.user.unicodeName, e.params[2]]),
+                     MT_MODE);
     }
     else
     {
-        display(getMsg(MSG_USER_MODE, [e.params[1], e.params[2]]), MT_MODE);
+        this.display(getMsg(MSG_USER_MODE, [e.params[1], e.params[2]]),
+                     MT_MODE);
     }
 }
 
@@ -1912,9 +1948,11 @@ function my_cjoin (e)
 
     if (userIsMe(e.user))
     {
-        this.display (getMsg(MSG_YOU_JOINED, e.channel.unicodeName), "JOIN",
+        var params = [e.user.unicodeName, e.channel.unicodeName];
+        this.display (getMsg(MSG_YOU_JOINED, params), "JOIN", 
                       e.server.me, this);
-        client.globalHistory.addPage(this.getURL());
+        if (client.globalHistory)
+            client.globalHistory.addPage(this.getURL());
 
         if ("joinTimer" in this)
         {
@@ -1958,8 +1996,8 @@ function my_cpart (e)
 
     if (userIsMe (e.user))
     {
-        this.display (getMsg(MSG_YOU_LEFT, e.channel.unicodeName), "PART",
-                      e.user, this);
+        var params = [e.user.unicodeName, e.channel.unicodeName];
+        this.display (getMsg(MSG_YOU_LEFT, params), "PART", e.user, this);
 
         if (client.currentObject == this)
             /* hide the tree while we remove (possibly tons) of nodes */
@@ -2011,15 +2049,15 @@ function my_ckick (e)
         if (e.user)
         {
             this.display (getMsg(MSG_YOURE_GONE,
-                                 [e.channel.unicodeName, e.user.unicodeName,
-                                  e.reason]),
+                                 [e.lamer.unicodeName, e.channel.unicodeName,
+                                  e.user.unicodeName, e.reason]),
                           "KICK", e.user, this);
         }
         else
         {
             this.display (getMsg(MSG_YOURE_GONE,
-                                 [e.channel.unicodeName, MSG_SERVER,
-                                  e.reason]),
+                                 [e.lamer.unicodeName, e.channel.unicodeName, 
+                                  MSG_SERVER, e.reason]),
                           "KICK", (void 0), this);
         }
 
@@ -2119,8 +2157,8 @@ function my_cquit (e)
     if (userIsMe(e.user))
     {
         /* I dont think this can happen */
-        this.display (getMsg(MSG_YOU_QUIT, [e.server.parent.unicodeName, e.reason]),
-                      "QUIT", e.user, this);
+        var pms = [e.user.unicodeName, e.server.parent.unicodeName, e.reason];
+        this.display (getMsg(MSG_YOU_QUIT, pms),"QUIT", e.user, this);
     }
     else
     {

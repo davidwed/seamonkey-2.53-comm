@@ -73,11 +73,11 @@ function initCommands()
          ["create-tab-for-view", cmdCreateTabForView,                        0],
          ["op",                cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
          ["dcc-accept",        cmdDCCAccept,                       CMD_CONSOLE],
-         ["dcc-chat",          cmdDCCChat,          CMD_NEED_NET | CMD_CONSOLE],
+         ["dcc-chat",          cmdDCCChat,          CMD_NEED_SRV | CMD_CONSOLE],
          ["dcc-close",         cmdDCCClose,                        CMD_CONSOLE],
          ["dcc-decline",       cmdDCCDecline,                      CMD_CONSOLE],
          ["dcc-list",          cmdDCCList,                         CMD_CONSOLE],
-         ["dcc-send",          cmdDCCSend,          CMD_NEED_NET | CMD_CONSOLE],
+         ["dcc-send",          cmdDCCSend,          CMD_NEED_SRV | CMD_CONSOLE],
          ["deop",              cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
          ["describe",          cmdDescribe,         CMD_NEED_SRV | CMD_CONSOLE],
          ["hop",               cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
@@ -92,9 +92,12 @@ function initCommands()
          ["delete-view",       cmdDeleteView,                      CMD_CONSOLE],
          ["disable-plugin",    cmdAblePlugin,                      CMD_CONSOLE],
          ["disconnect",        cmdDisconnect,       CMD_NEED_SRV | CMD_CONSOLE],
+         ["disconnect-all",    cmdDisconnectAll,                   CMD_CONSOLE],
          ["echo",              cmdEcho,                            CMD_CONSOLE],
          ["enable-plugin",     cmdAblePlugin,                      CMD_CONSOLE],
          ["eval",              cmdEval,                            CMD_CONSOLE],
+         ["find",              cmdFind,                                      0],
+         ["find-again",        cmdFindAgain,                                 0],
          ["focus-input",       cmdFocusInput,                      CMD_CONSOLE],
          ["font-family",       cmdFont,                            CMD_CONSOLE],
          ["font-family-other", cmdFont,                                      0],
@@ -129,8 +132,10 @@ function initCommands()
          ["network-pref",      cmdPref,             CMD_NEED_NET | CMD_CONSOLE],
          ["networks",          cmdNetworks,                        CMD_CONSOLE],
          ["nick",              cmdNick,                            CMD_CONSOLE],
+         ["notice",            cmdNotice,           CMD_NEED_SRV | CMD_CONSOLE],
          ["notify",            cmdNotify,           CMD_NEED_SRV | CMD_CONSOLE],
          ["open-at-startup",   cmdOpenAtStartup,                   CMD_CONSOLE],
+         ["pass",              cmdPass,             CMD_NEED_NET | CMD_CONSOLE],
          ["ping",              cmdPing,             CMD_NEED_SRV | CMD_CONSOLE],
          ["plugin-pref",       cmdPref,                            CMD_CONSOLE],
          ["pref",              cmdPref,                            CMD_CONSOLE],
@@ -141,7 +146,12 @@ function initCommands()
          ["quote",             cmdQuote,            CMD_NEED_SRV | CMD_CONSOLE],
          ["reload-plugin",     cmdReload,                          CMD_CONSOLE],
          ["rlist",             cmdRlist,            CMD_NEED_SRV | CMD_CONSOLE],
+         ["reconnect",         cmdReconnect,        CMD_NEED_NET | CMD_CONSOLE],
+         ["reconnect-all",     cmdReconnectAll,                    CMD_CONSOLE],
+         ["rejoin",            cmdRejoin,
+                                   CMD_NEED_SRV |  CMD_NEED_CHAN | CMD_CONSOLE],
          ["reload-ui",         cmdReloadUI,                                  0],
+         ["save",              cmdSave,                            CMD_CONSOLE],
          ["say",               cmdSay,              CMD_NEED_SRV | CMD_CONSOLE],
          ["server",            cmdServer,                          CMD_CONSOLE],
          ["set-current-view",  cmdSetCurrentView,                            0],
@@ -453,6 +463,152 @@ function dispatchCommand (command, e, flags)
         return null;
     }
 
+    function parseAlias(aliasLine, e) {
+        /* Only 1 of these will be presented to the user. Math.max is used to
+           supply the 'worst' error */
+        const ALIAS_ERR_REQ_PRMS = 1;
+        const ALIAS_ERR_REQ_SRV = 2;
+        const ALIAS_ERR_REQ_RECIP = 3;
+
+        /* double slashes because of the string to regexp conversion, which
+           turns these into single slashes */
+        const SIMPLE_REPLACE = "\\$\\((\\d+)\\)";
+        const CUMUL_REPLACE = "\\$\\((\\d+)\\+\\)";
+        const RANGE_REPLACE = "\\$\\((\\d+)\\-(\\d+)\\)";
+        const NICK_REPLACE = "\\$\\((nick)\\)";
+        const RECIP_REPLACE = "\\$\\((recip)\\)";
+        const ALL_REPLACE = "\\$\\((all)\\)";
+        if (!aliasLine.match(/\$/))
+        {
+            if (e.inputData)
+                display(getMsg(MSG_EXTRA_PARAMS, e.inputData), MT_WARN);
+            return aliasLine;
+        }
+
+        function replaceAll(match, single, cumulative, start, end, nick, recip, all)
+        {
+            if (single)
+            {
+                // Simple 1-parameter replace
+                if (arrayHasElementAt(parameters, single - 1))
+                {
+                    paramsUsed = Math.max(paramsUsed, single);
+                    return parameters[single-1];
+                }
+                maxParamsAsked = Math.max(maxParamsAsked, single);
+                errorMsg = Math.max(ALIAS_ERR_REQ_PRMS, errorMsg);
+                return match;
+            }
+            if (cumulative)
+            {
+                // Cumulative Replace: parameters cumulative and up
+                if (arrayHasElementAt(parameters, cumulative - 1))
+                {
+                    paramsUsed = parameters.length;
+                    // there are never leftover parameters for $(somenumber+)
+                    return parameters.slice(cumulative - 1).join(" ");
+                }
+                maxParamsAsked = Math.max(maxParamsAsked, cumulative);
+                errorMsg = Math.max(ALIAS_ERR_REQ_PRMS, errorMsg);
+                return match;
+            }
+            if (start && end)
+            {
+                // Ranged replace: parameters start through end
+                //'decrement to correct 0-based index.
+                if (start > end)
+                {
+                    var iTemp = end;
+                    end = start;
+                    start = iTemp;
+                    // We obviously have a very stupid user, but we're nice
+                }
+                start--;
+                if (arrayHasElementAt(parameters, start) &&
+                    arrayHasElementAt(parameters, end - 1))
+                {
+                    paramsUsed = Math.max(paramsUsed,end);
+                    return parameters.slice(start, end).join(" ");
+                }
+                maxParamsAsked = Math.max(maxParamsAsked, end);
+                errorMsg = Math.max(ALIAS_ERR_REQ_PRMS, errorMsg);
+                return match;
+            }
+            if (nick)
+            {
+                // Replace with own nickname
+                if (e.network && e.server && e.network.state == NET_ONLINE)
+                    return e.server.me.unicodeName;
+
+                errorMsg = Math.max(ALIAS_ERR_REQ_SRV, errorMsg);
+                return null;
+            }
+            if (recip)
+            {
+                // Replace with current recipient
+                if (e.channel)
+                    return e.channel.unicodeName;
+
+                if (e.user)
+                    return e.user.unicodeName;
+
+                errorMsg = ALIAS_ERR_REQ_RECIP;
+                return null;
+             }
+             // Replace with all parameters
+             paramsUsed = parameters.length;
+             return parameters.join(" ");
+        };
+
+        // If the replace function has a problem, this is an error constant:
+        var errorMsg = 0;
+
+        var paramsUsed = 0;
+        var maxParamsAsked = 0;
+
+        /* set parameters array and escaping \ and ; in parameters so the
+         * parameters don't get split up by the command list split later on */
+        e.inputData = e.inputData.replace(/([\\;])/g, "\\$1");
+        var parameters = e.inputData.match(/\S+/g);
+        if (!parameters)
+            parameters = [];
+
+        // replace in the command line.
+        var expr = [SIMPLE_REPLACE, CUMUL_REPLACE, RANGE_REPLACE, NICK_REPLACE,
+                    RECIP_REPLACE, ALL_REPLACE].join("|");
+        aliasLine = aliasLine.replace(new RegExp(expr, "gi"), replaceAll);
+
+        if (errorMsg)
+        {
+            switch (errorMsg)
+            {
+                case ALIAS_ERR_REQ_PRMS:
+                    display(getMsg(MSG_ERR_REQUIRED_NR_PARAM,
+                                   [maxParamsAsked - parameters.length,
+                                    maxParamsAsked]), MT_ERROR);
+                    break;
+                case ALIAS_ERR_REQ_SRV:
+                    display(getMsg(MSG_ERR_NEED_SERVER, e.command.name),
+                            MT_ERROR);
+                    break;
+                case ALIAS_ERR_REQ_RECIP:
+                    display(getMsg(MSG_ERR_NEED_RECIP, e.command.name),
+                            MT_ERROR);
+                    break;
+            }
+            return null;
+        }
+
+        // return the revised command line.
+        if (paramsUsed < parameters.length)
+        {
+            var pmstring = parameters.slice(paramsUsed,
+                                            parameters.length).join(" ");
+            display(getMsg(MSG_EXTRA_PARAMS, pmstring), MT_WARN);
+        }
+        return aliasLine;
+    };
+
     var h, i;
 
     if (typeof e.command.func == "function")
@@ -499,16 +655,38 @@ function dispatchCommand (command, e, flags)
         if ("beforeHooks" in e.command)
             callHooks (e.command, true);
 
-        var commandList = e.command.func.split(";");
+        var commandList;
+        //Don't make use of e.inputData if we have multiple commands in 1 alias
+        if (e.command.func.match(/\$\(.*\)|(?:^|[^\\])(?:\\\\)*;/))
+            commandList = parseAlias(e.command.func, e);
+        else
+            commandList = e.command.func + " " + e.inputData;
+
+        if (commandList == null)
+            return null;
+        commandList = commandList.split(";");
+
+        i = 0;
+        while (i < commandList.length) {
+            if (commandList[i].match(/(?:^|[^\\])(?:\\\\)*$/) ||
+                (i == commandList.length - 1))
+            {
+                commandList[i] = commandList[i].replace(/\\(.)/g, "$1");
+                i++;
+            }
+            else
+            {
+                commandList[i] = commandList[i] + ";" + commandList[i + 1];
+                commandList.splice(i + 1, 1);
+            }
+        }
+
         for (i = 0; i < commandList.length; ++i)
         {
             var newEvent = Clone(e);
             delete newEvent.command;
             commandList[i] = stringTrim(commandList[i]);
-            if (i == commandList.length - 1)
-                dispatch(commandList[i] + " " + e.inputData, newEvent, flags);
-            else
-                dispatch(commandList[i], newEvent, flags);
+            dispatch(commandList[i], newEvent, flags);
         }
     }
     else
@@ -678,6 +856,7 @@ function cmdChanUserMode(e)
     }
 
     var nicks;
+    var user;
     // Prefer pre-canonicalised list, then a normal list, then finally a
     // sigular item (canon. or otherwise).
     if (e.canonNickList)
@@ -689,7 +868,7 @@ function cmdChanUserMode(e)
         var nickList = new Array();
         for (i = 0; i < e.nicknameList.length; i++)
         {
-            var user = e.channel.getUser(e.nicknameList[i]);
+            user = e.channel.getUser(e.nicknameList[i]);
             if (!user)
             {
                 display(getMsg(MSG_ERR_UNKNOWN_USER, e.nicknameList[i]), MT_ERROR);
@@ -704,7 +883,7 @@ function cmdChanUserMode(e)
         user = e.channel.getUser(e.nickname);
         if (!user)
         {
-            display(getMsg(MSG_ERR_UNKNOWN_USER, e.nicknameList[i]), MT_ERROR);
+            display(getMsg(MSG_ERR_UNKNOWN_USER, e.nickname), MT_ERROR);
             return;
         }
         var str = new String(user.encodedName);
@@ -1210,6 +1389,25 @@ function cmdDisconnect(e)
     e.network.quit(e.reason);
 }
 
+function cmdDisconnectAll(e)
+{
+    if (confirmEx(MSG_CONFIRM_DISCONNECT_ALL, ["!yes", "!no"]) != 0)
+        return;
+
+    var conNetworks = client.getConnectedNetworks();
+    if (conNetworks.length <= 0)
+    {
+        display(MSG_NO_CONNECTED_NETS, MT_ERROR);
+        return;
+    }
+
+    if (typeof e.reason != "string")
+        e.reason = client.userAgent;
+
+    for (var i = 0; i < conNetworks.length; i++)
+        conNetworks[i].quit(e.reason);
+}
+
 function cmdDeleteView(e)
 {
     if (!e.view)
@@ -1259,6 +1457,12 @@ function cmdHideView(e)
 {
     if (!e.view)
         e.view = e.sourceObject;
+
+    if (client.viewsArray.length < 2)
+    {
+        display(MSG_ERR_LAST_VIEW_HIDE, MT_ERROR);
+        return;
+    }
 
     var tb = getTabForObject(e.view);
 
@@ -1313,6 +1517,51 @@ function cmdNames(e)
 
     e.channel.pendingNamesReply = true;
     e.server.sendData("NAMES " + e.channel.encodedName + "\n");
+}
+
+function cmdReconnect(e)
+{
+    if (e.network.isConnected())
+    {
+        // Set reconnect flag
+        e.network.reconnect = true;
+        if (typeof e.reason != "string")
+            e.reason = MSG_RECONNECTING;
+        // Now we disconnect.
+        e.network.quit(e.reason);
+    }
+    else
+    {
+        e.network.connect(e.network.requireSecurity);
+    }
+}
+
+function cmdReconnectAll(e)
+{
+    var reconnected = false;
+    for (var net in client.networks)
+    {
+        if (client.networks[net].isConnected() || 
+            ("messages" in client.networks[net]))
+        {
+            client.networks[net].dispatch("reconnect", { reason: e.reason });
+            reconnected = true;
+        }
+    }
+    if (!reconnected)
+        display(MSG_NO_RECONNECTABLE_NETS, MT_ERROR);
+}
+
+function cmdRejoin(e)
+{
+    if (e.channel.joined)
+    {
+        if (!e.reason)
+            e.reason = "";
+        e.channel.dispatch("part", { reason: e.reason, noDelete: true });
+    }
+
+    e.channel.join(e.channel.mode.key);
 }
 
 function cmdTogglePref (e)
@@ -1564,7 +1813,7 @@ function cmdQuery(e)
     {
         e.message = filterOutput(e.message, "PRIVMSG", "ME!");
         user.display(e.message, "PRIVMSG", "ME!", user);
-        user.say(e.message, e.sourceObject);
+        user.say(e.message);
     }
 
     return user;
@@ -1580,7 +1829,7 @@ function cmdSay(e)
 
     var msg = filterOutput(e.message, "PRIVMSG", "ME!");
     e.sourceObject.display(msg, "PRIVMSG", "ME!", e.sourceObject);
-    e.sourceObject.say(msg, e.sourceObject);
+    e.sourceObject.say(msg);
 }
 
 function cmdMsg(e)
@@ -1589,7 +1838,7 @@ function cmdMsg(e)
 
     var msg = filterOutput(e.message, "PRIVMSG", "ME!");
     e.sourceObject.display(msg, "PRIVMSG", "ME!", target);
-    target.say(msg, target);
+    target.say(msg);
 }
 
 function cmdNick(e)
@@ -1601,6 +1850,15 @@ function cmdNick(e)
         e.network.prefs["nickname"] = e.nickname;
     else
         client.prefs["nickname"] = e.nickname;
+}
+
+function cmdNotice(e)
+{
+    var target = e.server.addTarget(e.nickname);
+
+    var msg = filterOutput(e.message, "NOTICE", "ME!");
+    e.sourceObject.display(msg, "NOTICE", "ME!", target);
+    target.notice(msg);
 }
 
 function cmdQuote(e)
@@ -1671,6 +1929,7 @@ function cmdGotoURL(e)
     if (e.command.name == "goto-url-newwin")
     {
         openTopWin(e.url);
+        dispatch("focus-input");
         return;
     }
 
@@ -1679,17 +1938,20 @@ function cmdGotoURL(e)
     if (!window)
     {
         openTopWin(e.url);
+        dispatch("focus-input");
         return;
     }
 
-    window.focus();
+    if (client.prefs["link.focus"])
+        window.focus();
     if (e.command.name == "goto-url-newtab")
     {
         if (client.host == "Mozilla") {
             window.openNewTabWith(e.url, false, false);
         } else {
-            window.openNewTabWith(e.url);
+            window.openNewTabWith(e.url, null, null, null, null, false);
         }
+        dispatch("focus-input");
         return;
     }
 
@@ -1698,10 +1960,12 @@ function cmdGotoURL(e)
     {
         // don't replace chatzilla running in a tab
         openTopWin(e.url);
+        dispatch("focus-input");
         return;
     }
 
     location.href = e.url;
+    dispatch("focus-input");
 }
 
 function cmdCTCP(e)
@@ -1841,7 +2105,7 @@ function cmdLeave(e)
                     /* Their channel name was invalid, but we have a channel
                      * view, so we'll assume they did "/leave part msg".
                      */
-                    e.reason = e.channelName + " " + e.reason;
+                    e.reason = e.channelName + (e.reason ? " " + e.reason : "");
                 }
                 else
                 {
@@ -2021,7 +2285,7 @@ function cmdWhoIs(e)
 {
     for (var i = 0; i < e.nicknameList.length; i++)
     {
-        if ((i < e.nicknameList.length - 1) && 
+        if ((i < e.nicknameList.length - 1) &&
             (e.server.toLowerCase(e.nicknameList[i]) ==
              e.server.toLowerCase(e.nicknameList[i + 1])))
         {
@@ -2231,6 +2495,20 @@ function cmdOpenAtStartup(e)
             display(getMsg(MSG_STARTUP_NOTFOUND, url));
         }
     }
+}
+
+function cmdPass(e)
+{
+    /* Check we are connected, or at least pretending to be connected, so this
+     * can actually send something.
+     */
+   if ((e.network.state != NET_ONLINE) && !e.server.isConnected)
+   {
+       feedback(e, MSG_ERR_NOT_CONNECTED);
+       return;
+   }
+
+   e.server.sendData("PASS " + fromUnicode(e.password, e.server) + "\n");
 }
 
 function cmdPing (e)
@@ -2623,6 +2901,240 @@ function cmdLog(e)
         else
             display(MSG_LOGGING_OFF);
     }
+}
+
+function cmdSave(e)
+{
+    var OutputProgressListener =
+    {
+        onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus)
+        {
+            // Use this to access onStateChange flags
+            var requestSpec;
+            try 
+            {
+              var channel = aRequest.QueryInterface(nsIChannel);
+              requestSpec = channel.URI.spec;
+            } 
+            catch (ex) { }
+
+            // Detect end of file saving of any file:
+            if (aStateFlags & nsIWebProgressListener.STATE_STOP)
+            {
+                if (aStatus == kErrorBindingAborted)
+                    aStatus = 0;
+
+                // We abort saving for all errors except if image src file is 
+                // not found
+                var abortSaving = (aStatus != 0 && aStatus != kFileNotFound);
+                if (abortSaving)
+                {
+                    // Cancel saving
+                    wbp.cancelSave();
+                    display(getMsg(MSG_SAVE_ERR_FAILED, aMessage), MT_ERROR);
+                    return;
+                }
+
+                if (aStateFlags & nsIWebProgressListener.STATE_IS_NETWORK
+                    && wbp.currentState == nsIWBP.PERSIST_STATE_FINISHED)
+                {
+                    // Let the user know:
+                    pm = [e.sourceObject.viewName, e.filename];
+                    display(getMsg(MSG_SAVE_SUCCESSFUL, pm), MT_INFO);
+                }
+                /* Check if we've finished. WebBrowserPersist screws up when we
+                 * don't save additional files. Cope when saving html only or 
+                 * text. 
+                 */
+                else if (!requestSpec && saveType > 0)
+                {
+                    pm = [e.sourceObject.viewName, e.filename];
+                    display(getMsg(MSG_SAVE_SUCCESSFUL, pm), MT_INFO);
+                }
+            }
+        },
+
+        onProgressChange: function(aWebProgress, aRequest, aCurSelfProgress,
+                                  aMaxSelfProgress, aCurTotalProgress, 
+                                  aMaxTotalProgress) {},
+        onLocationChange: function(aWebProgress, aRequest, aLocation) {},
+        onStatusChange: function(aWebProgress, aRequest, aStatus, aMessage) {},
+        onSecurityChange: function(aWebProgress, aRequest, state) {},
+
+        QueryInterface: function(aIID)
+        {
+            if (aIID.equals(Components.interfaces.nsIWebProgressListener)
+                || aIID.equals(Components.interfaces.nsISupports)
+                || aIID.equals(Components.interfaces.nsISupportsWeakReference))
+            {
+                return this;
+            }
+
+            throw Components.results.NS_NOINTERFACE;
+        }
+    };
+
+    const kFileNotFound = 2152857618;
+    const kErrorBindingAborted = 2152398850;
+
+    const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+    const nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
+    const nsIChannel = Components.interfaces.nsIChannel;
+
+    var wbp = newObject("@mozilla.org/embedding/browser/nsWebBrowserPersist;1",
+                        nsIWBP);
+    wbp.progressListener = OutputProgressListener;
+
+    var file, saveType, saveFolder, docToBeSaved, title;
+    var flags, fileType, charLimit;
+    var dialogTitle, rv, pm;
+
+    // We want proper descriptions and no "All Files" option.
+    const TYPELIST = [[MSG_SAVE_COMPLETEVIEW,"*.htm;*.html"],
+                      [MSG_SAVE_HTMLONLYVIEW,"*.htm;*.html"],
+                      [MSG_SAVE_PLAINTEXTVIEW,"*.txt"], "$noAll"];
+    // constants and variables for the wbp.saveDocument call
+    var saveTypes = 
+    {
+        complete: 0,
+        htmlonly: 1,
+        text: 2
+    };
+
+    if (!e.filename)
+    {
+        dialogTitle = getMsg(MSG_SAVE_DIALOGTITLE, e.sourceObject.viewName);
+        rv = pickSaveAs(dialogTitle, TYPELIST, e.sourceObject.viewName + 
+                        ".html");
+        if (rv.file == null)
+            return;
+        saveType = rv.picker.filterIndex;
+        file = rv.file;
+        e.filename = rv.file.path;
+    }
+    else
+    {
+        try 
+        {
+            // Try to use this as a path
+            file = nsLocalFile(e.filename);
+        }
+        catch (ex) 
+        {
+            // try to use it as an url
+            try
+            {
+                file = getFileFromURLSpec(e.filename);
+            }
+            catch(ex)
+            {
+                // What is the user thinking? It's not rocket science...
+                display(getMsg(MSG_SAVE_ERR_INVALID_PATH, e.filename), 
+                        MT_ERROR);
+                return;
+            }
+        }
+
+        // Get extension and determine savetype
+        if (!e.savetype)
+        {
+            var extension = file.path.substr(file.path.lastIndexOf("."));
+            if (extension == ".txt")
+            {
+                saveType = saveTypes["text"];
+            }
+            else if (extension.match(/\.x?html?$/))
+            {
+                saveType = saveTypes["complete"];
+            }
+            else
+            {
+                // No saveType and no decent extension --> out!
+                var errMsg;
+                if (extension.indexOf(".") < 0)
+                    errMsg = MSG_SAVE_ERR_NO_EXT;
+                else
+                    errMsg = getMsg(MSG_SAVE_ERR_INVALID_EXT, extension);
+                display(errMsg, MT_ERROR);
+                return;
+            }
+        }
+        else
+        {
+            if (!(e.savetype in saveTypes))
+            {
+                // no valid saveType
+                display(getMsg(MSG_SAVE_ERR_INVALID_SAVETYPE, e.savetype),
+                            MT_ERROR);
+                return;
+            }
+            saveType = saveTypes[e.savetype];
+        }
+
+        var askforreplace = (e.isInteractive && file.exists());
+        if (askforreplace && !confirm(getMsg(MSG_SAVE_FILEEXISTS, e.filename)))
+            return;        
+    }
+
+    // We don't want to convert anything, leave everything as is and replace
+    // old files, as the user has been prompted about that already.
+    wbp.persistFlags |= nsIWBP.PERSIST_FLAGS_NO_CONVERSION
+                        | nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES
+                        | nsIWBP.PERSIST_FLAGS_NO_BASE_TAG_MODIFICATIONS
+                        | nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES
+                        | nsIWBP.PERSIST_FLAGS_DONT_FIXUP_LINKS
+                        | nsIWBP.PERSIST_FLAGS_DONT_CHANGE_FILENAMES;
+
+    // Set the document from the current view, and set a usable title
+    docToBeSaved = e.sourceObject.frame.contentDocument;
+    var headElement = docToBeSaved.getElementsByTagName("HEAD")[0];
+    var titleElements = docToBeSaved.getElementsByTagName("title");
+    // Remove an existing title, there shouldn't be more than one.
+    if (titleElements.length > 0)
+        titleElements[0].parentNode.removeChild(titleElements[0]);
+    title = docToBeSaved.createElement("title");
+    title.appendChild(docToBeSaved.createTextNode(document.title +
+                                                  " (" + new Date() + ")"));
+    headElement.appendChild(title);
+    // Set standard flags, file type, saveFolder and character limit
+    flags = nsIWBP.ENCODE_FLAGS_ENCODE_BASIC_ENTITIES;
+    fileType = "text/html";
+    saveFolder = null;
+    charLimit = 0;
+
+    // Do saveType specific stuff
+    switch (saveType)
+    {
+        case saveTypes["complete"]:
+            // Get the directory into which to save associated files.
+            saveFolder = file.clone();
+            var baseName = saveFolder.leafName;
+            baseName = baseName.substring(0, baseName.lastIndexOf("."));
+            saveFolder.leafName = getMsg(MSG_SAVE_FILES_FOLDER, baseName);
+            break;
+            // html only does not need any additional configuration
+        case saveTypes["text"]:
+            // set flags for Plain Text
+            flags = nsIWBP.ENCODE_FLAGS_FORMATTED;
+            flags |= nsIWBP.ENCODE_FLAGS_ABSOLUTE_LINKS;
+            flags |= nsIWBP.ENCODE_FLAGS_NOFRAMES_CONTENT;
+            // set the file type and set character limit to 80
+            fileType = "text/plain";
+            charLimit = 80;
+            break;
+    }
+
+    try
+    {
+        wbp.saveDocument(docToBeSaved, file, saveFolder, fileType, flags, 
+                         charLimit);
+    }
+    catch (ex)
+    {
+        pm = [e.sourceObject.viewName, e.filename, ex.message];
+        display(getMsg(MSG_SAVE_ERR_FAILED, pm), MT_ERROR);
+    }
+    // Error handling and finishing message is done by the listener
 }
 
 function cmdSupports(e)
@@ -3252,6 +3764,17 @@ function cmdInputTextDirection(e)
     }
 
     return true;
+}
+
+function cmdFind(e)
+{
+    findInPage(getFindData(e));
+}
+
+function cmdFindAgain(e)
+{
+    if (canFindAgainInPage())
+        findAgainInPage(getFindData(e));
 }
 
 function cmdURLs(e)

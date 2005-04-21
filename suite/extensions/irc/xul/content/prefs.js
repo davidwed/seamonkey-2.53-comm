@@ -96,7 +96,7 @@ function initPrefs()
          ["autoRejoin",         false,    ".connect"],
          ["awayNick",           "",       ".ident"],
          ["bugURL",           "https://bugzilla.mozilla.org/show_bug.cgi?id=%s",
-                                          "global"],
+                                          "appearance.misc"],
          ["channelHeader",      true,     "global.header"],
          ["channelLog",         false,    "global.log"],
          ["channelMaxLines",    500,      "global.maxLines"],
@@ -119,6 +119,7 @@ function initPrefs()
          ["initialURLs",        [],       "startup.initialURLs"],
          ["initialScripts",     [getURLSpecFromFile(scriptPath.path)],
                                           "startup.initialScripts"],
+         ["link.focus",         true,     "global.links"],
          ["log",                false,                                  ".log"],
          ["logFileName",        makeLogNameClient,                      ".log"],
          ["logFile.client",     "client.$y-$m-$d.log",                  ".log"],
@@ -257,17 +258,21 @@ function makeLogName(obj, type)
             // Remember to encode these, don't want some dodgy # breaking stuff.
             if (longName in longCodes)
                 return encode(longCodes[longName]);
+
             dd("Unknown long code: " + longName);
-            return match;
         }
         else if (typeof shortName != "undefined" && shortName)
         {
             if (shortName in shortCodes)
                 return encode(shortCodes[shortName]);
+
             dd("Unknown short code: " + shortName);
-            return match;
         }
-        dd("Unknown match: " + match);
+        else
+        {
+            dd("Unknown match: " + match);
+        }
+
         return match;
     };
 
@@ -351,6 +356,7 @@ function getNetworkPrefManager(network)
          ["autoRejoin",       defer, ".connect"],
          ["away",             "",    "hidden"],
          ["awayNick",         defer, ".ident"],
+         ["bugURL",           defer, "appearance.misc"],
          ["charset",          defer, ".connect"],
          ["collapseMsgs",     defer, "appearance.misc"],
          ["connectTries",     defer, ".connect"],
@@ -435,6 +441,7 @@ function getChannelPrefManager(channel)
     var prefs =
         [
          ["autoRejoin",       defer, ".connect"],
+         ["bugURL",           defer, "appearance.misc"],
          ["charset",          defer, ".connect"],
          ["collapseMsgs",     defer, "appearance.misc"],
          ["displayHeader",    client.prefs["channelHeader"],
