@@ -1053,7 +1053,7 @@ function prompt(msg, initial, parent, title)
         parent = window;
     if (!title)
         title = MSG_PROMPT;
-    rv = { value: initial };
+    var rv = { value: initial };
 
     if (!ps.prompt (parent, title, msg, rv, null, {value: null}))
         return null;
@@ -1076,6 +1076,15 @@ function promptPassword(msg, initial, parent, title)
         return null;
 
     return rv.value;
+}
+
+function viewCert(cert, parent)
+{
+    var cd = getService("@mozilla.org/nsCertificateDialogs;1",
+                        "nsICertificateDialogs");
+    if (!parent)
+        parent = window;
+    cd.viewCert(parent, cert);
 }
 
 function getHostmaskParts(hostmask)
@@ -1116,3 +1125,66 @@ function isinstance(inst, base)
     return (inst && inst.constructor && base &&
             (inst.constructor.name == base.name));
 }
+
+function scaleNumberBy1024(number)
+{
+    var scale = 0;
+    while ((number >= 1000) && (scale < 6))
+    {
+        scale++;
+        number /= 1024;
+    }
+
+    return [scale, number];
+}
+
+function getSISize(size)
+{
+    var data = scaleNumberBy1024(size);
+
+    if (data[1] < 10)
+        data[1] = data[1].toFixed(2);
+    else if (data[1] < 100)
+        data[1] = data[1].toFixed(1);
+    else
+        data[1] = data[1].toFixed(0);
+
+    return getMsg(MSG_SI_SIZE, [data[1], getMsg("msg.si.size." + data[0])]);
+}
+
+function getSISpeed(speed)
+{
+    var data = scaleNumberBy1024(speed);
+
+    if (data[1] < 10)
+        data[1] = data[1].toFixed(2);
+    else if (data[1] < 100)
+        data[1] = data[1].toFixed(1);
+    else
+        data[1] = data[1].toFixed(0);
+
+    return getMsg(MSG_SI_SPEED, [data[1], getMsg("msg.si.speed." + data[0])]);
+}
+
+// Returns -1 if version 1 is newer, +1 if version 2 is newer, and 0 for same.
+function compareVersions(ver1, ver2)
+{
+    var ver1parts = ver1.split(".");
+    var ver2parts = ver2.split(".");
+
+    while ((ver1parts.length > 0) && (ver2parts.length > 0))
+    {
+        if (ver1parts[0] < ver2parts[0])
+            return 1;
+        if (ver1parts[0] > ver2parts[0])
+            return -1;
+        ver1parts.shift();
+        ver2parts.shift();
+    }
+    if (ver1parts.length > 0)
+        return -1;
+    if (ver2parts.length > 0)
+        return 1;
+    return 0;
+}
+

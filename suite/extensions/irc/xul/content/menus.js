@@ -302,6 +302,8 @@ function initMenus()
          ["voice",      {visibleif: isopish        + "!cx.user.isVoice"}],
          ["devoice",    {visibleif: isopish        + "cx.user.isVoice"}],
          ["-"],
+         ["ban",        {enabledif: "(" + isop + "1) || (" + isopish + "!cx.user.isOp)"}],
+         ["unban",      {enabledif: "(" + isop + "1) || (" + isopish + "!cx.user.isOp)"}],
          ["kick",       {enabledif: "(" + isop + "1) || (" + isopish + "!cx.user.isOp)"}],
          ["kick-ban",   {enabledif: "(" + isop + "1) || (" + isopish + "!cx.user.isOp)"}]
         ]
@@ -380,6 +382,26 @@ function initMenus()
          ["reconnect",   {visibleif: netDisconnected}],
          ["-"],
          ["toggle-text-dir"]
+        ]
+    };
+
+    var net          = "cx.network";
+    var netAway      = "cx.network.prefs['away']";
+    var netAwayIsDef = "(cx.network.prefs['away'] == '" + MSG_AWAY_DEFAULT +
+                       "') and " + netAway;
+
+    client.menuSpecs["mainmenu:nickname"] = {
+        label: client.prefs["nickname"],
+        domID: "server-nick",
+        getContext: getDefaultContext,
+        items:
+        [
+         ["nick"],
+         ["-"],
+         ["back", {type: "checkbox", checkedif: net + " and !" + netAway}],
+         ["away", {type: "checkbox", checkedif: net + " and " + netAwayIsDef}],
+         ["custom-away",
+                  {type: "checkbox", checkedif: net + " and !" + netAwayIsDef}]
         ]
     };
 

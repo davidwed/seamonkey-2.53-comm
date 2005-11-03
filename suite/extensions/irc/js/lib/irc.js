@@ -40,6 +40,7 @@
 const JSIRC_ERR_NO_SOCKET = "JSIRCE:NS";
 const JSIRC_ERR_EXHAUSTED = "JSIRCE:E";
 const JSIRC_ERR_CANCELLED = "JSIRCE:C";
+const JSIRC_ERR_NO_SECURE = "JSIRCE:NO_SECURE";
 const JSIRC_ERR_OFFLINE   = "JSIRCE:OFFLINE";
 
 function userIsMe (user)
@@ -90,7 +91,7 @@ delete i;
 /*
  * irc network
  */
-function CIRCNetwork (name, serverList, eventPump)
+function CIRCNetwork (name, serverList, eventPump, temporary)
 {
     this.unicodeName = name;
     this.viewName = name;
@@ -101,6 +102,7 @@ function CIRCNetwork (name, serverList, eventPump)
     this.ignoreList = new Object();
     this.ignoreMaskCache = new Object();
     this.state = NET_OFFLINE;
+    this.temporary = Boolean(temporary);
 
     for (var i = 0; i < serverList.length; ++i)
     {
@@ -125,6 +127,7 @@ CIRCNetwork.prototype.INITIAL_CHANNEL = "#jsbot";
 CIRCNetwork.prototype.INITIAL_UMODE = "+iw";
 
 CIRCNetwork.prototype.MAX_CONNECT_ATTEMPTS = 5;
+CIRCNetwork.prototype.getReconnectDelayMs = function() { return 15000; }
 CIRCNetwork.prototype.stayingPower = false;
 
 CIRCNetwork.prototype.TYPE = "IRCNetwork";
@@ -132,12 +135,8 @@ CIRCNetwork.prototype.TYPE = "IRCNetwork";
 CIRCNetwork.prototype.getURL =
 function net_geturl(target)
 {
-    if (this.serverList.length == 1 &&
-        this.serverList[0].unicodeName == this.unicodeName &&
-        this.serverList[0].port != 6667)
-    {
+    if (this.temporary)
         return this.serverList[0].getURL(target);
-    }
 
     if (!target)
         target = "";
@@ -181,19 +180,78 @@ function net_addsrv(host, port, isSecure, password)
     this.serverList.push(new CIRCServer(this, host, port, isSecure, password));
 }
 
+// Checks if a network has a secure server in its list.
+CIRCNetwork.prototype.hasSecureServer =
+function net_hasSecure()
+{
+    for (var i = 0; i < this.serverList.length; i++)
+    {
+        if (this.serverList[i].isSecure)
+            return true;
+    }
+
+    return false;
+}
+
+/** Trigger an onDoConnect event after a delay. */
+CIRCNetwork.prototype.delayedConnect =
+function net_delayedConnect(eventProperties)
+{
+    function reconnectFn(network, eventProperties)
+    {
+        network.immediateConnect(eventProperties);
+    };
+
+    this.state = NET_WAITING;
+    this.reconnectTimer = setTimeout(reconnectFn,
+                                     this.getReconnectDelayMs(),
+                                     this,
+                                     eventProperties);
+}
+
+/**
+ * Immediately trigger an onDoConnect event. Use delayedConnect for automatic
+ * repeat attempts, instead, to throttle the attempts to a reasonable pace.
+ */
+CIRCNetwork.prototype.immediateConnect =
+function net_immediateConnect(eventProperties)
+{
+    var ev = new CEvent("network", "do-connect", this, "onDoConnect");
+
+    if (typeof eventProperties != "undefined")
+        for (var key in eventProperties)
+            ev[key] = eventProperties[key];
+
+    this.eventPump.addEvent(ev);
+}
+
 CIRCNetwork.prototype.connect =
 function net_connect(requireSecurity)
 {
     if ("primServ" in this && this.primServ.isConnected)
         return;
 
+    // We need to test for secure servers in the network object here,
+    // because without them all connection attempts will fail anyway.
+    if (requireSecurity && !this.hasSecureServer())
+    {
+        // No secure server, cope.
+        ev = new CEvent ("network", "error", this, "onError");
+        ev.server = this;
+        ev.debug = "No connection attempted: no secure servers in list";
+        ev.errorCode = JSIRC_ERR_NO_SECURE;
+        this.eventPump.addEvent(ev);
+
+        return false;
+    }
+
     this.state = NET_CONNECTING;
-    this.connectAttempt = 0;
+    this.connectAttempt = 0;            // actual connection attempts
+    this.connectCandidate = 0;          // incl. requireSecurity non-attempts
     this.nextHost = 0;
     this.requireSecurity = requireSecurity || false;
-    var ev = new CEvent("network", "do-connect", this, "onDoConnect");
-    ev.password = null;
-    this.eventPump.addEvent(ev);
+    this.immediateConnect({"password": null});
+    return true;
 }
 
 CIRCNetwork.prototype.quit =
@@ -216,8 +274,7 @@ function net_cancel()
         this.state = NET_CANCELLING;
 
         // ...try a reconnect (which will fail us).
-        var ev = new CEvent("network", "do-connect", this, "onDoConnect");
-        this.eventPump.addEvent(ev);
+        this.immediateConnect();
     }
     else
     {
@@ -262,7 +319,11 @@ function net_doconnect(e)
     if ("primServ" in this && this.primServ.isConnected)
         return true;
 
-    if (this.connectAttempt++ >= this.MAX_CONNECT_ATTEMPTS)
+    this.connectAttempt++;
+    this.connectCandidate++;
+
+    if ((-1 != this.MAX_CONNECT_ATTEMPTS) &&
+        (this.connectAttempt > this.MAX_CONNECT_ATTEMPTS))
     {
         this.state = NET_OFFLINE;
 
@@ -295,6 +356,7 @@ function net_doconnect(e)
         ev.port = this.serverList[host].port;
         ev.server = this.serverList[host];
         ev.connectAttempt = this.connectAttempt;
+        ev.reconnectDelayMs = this.getReconnectDelayMs();
         this.eventPump.addEvent (ev);
 
         try
@@ -302,14 +364,13 @@ function net_doconnect(e)
             if (!this.serverList[host].connect(null))
             {
                 /* connect failed, try again  */
-                ev = new CEvent ("network", "do-connect", this, "onDoConnect");
-                this.eventPump.addEvent (ev);
+                this.delayedConnect();
             }
         }
         catch(ex)
         {
             this.state = NET_OFFLINE;
-    
+
             ev = new CEvent ("network", "error", this, "onError");
             ev.server = this;
             ev.debug = "Exception opening socket: " + ex;
@@ -321,9 +382,10 @@ function net_doconnect(e)
     }
     else
     {
-        /* server doesn't use SSL as requested, try next one.  */
-        ev = new CEvent ("network", "do-connect", this, "onDoConnect");
-        this.eventPump.addEvent (ev);
+        /* Server doesn't use SSL as requested, try next one.
+         * In the meantime, correct the connection attempt counter  */
+        this.connectAttempt--;
+        this.immediateConnect();
     }
 
     return true;
@@ -832,6 +894,18 @@ function serv_uptimer()
     this.lastPing = this.lastPingSent = new Date();
 }
 
+CIRCServer.prototype.userhost = 
+function serv_userhost(target)
+{
+    this.sendData("USERHOST " + fromUnicode(target, this) + "\n");
+}
+
+CIRCServer.prototype.userip = 
+function serv_userip(target)
+{
+    this.sendData("USERIP " + fromUnicode(target, this) + "\n");
+}
+
 CIRCServer.prototype.who =
 function serv_who(target)
 {
@@ -867,19 +941,16 @@ function serv_disconnect(e)
         network.state = state;
     };
 
+    function delayedConnectFn(network) {
+        network.delayedConnect();
+    };
+
     if ((this.parent.state == NET_CONNECTING) ||
         /* fell off while connecting, try again */
         (this.parent.primServ == this) && (this.parent.state == NET_ONLINE) &&
         (!("quitting" in this) && this.parent.stayingPower))
     { /* fell off primary server, reconnect to any host in the serverList */
-        var reconnectFn = function(server) {
-            delete server.parent.reconnectTimer;
-            var ev = new CEvent("network", "do-connect", server.parent,
-                                "onDoConnect");
-            server.parent.eventPump.addEvent(ev);
-        };
-        setTimeout(stateChangeFn, 0, this.parent, NET_WAITING);
-        this.parent.reconnectTimer = setTimeout(reconnectFn, 15000, this);
+        setTimeout(delayedConnectFn, 0, this.parent);
     }
     else
     {
@@ -1107,7 +1178,8 @@ function serv_onRawData(e)
             else
                 mask.hostRE = makeMaskRegExp(mask.host);
         }
-        if ((!mask.nickRE || user.unicodeName.match(mask.nickRE)) &&
+        var lowerNick = this.parent.toLowerCase(user.unicodeName);
+        if ((!mask.nickRE || lowerNick.match(mask.nickRE)) &&
             (!mask.userRE || user.name.match(mask.userRE)) &&
             (!mask.hostRE || user.host.match(mask.hostRE)))
             return true;
@@ -1260,6 +1332,7 @@ CIRCServer.prototype.on001 =
 function serv_001 (e)
 {
     this.parent.connectAttempt = 0;
+    this.parent.connectCandidate = 0;
     this.parent.state = NET_ONLINE;
 
     /* servers won't send a nick change notification if user was forced
@@ -1302,10 +1375,13 @@ function serv_001 (e)
                           c: ['l'],
                           d: ['i', 'm', 'n', 'p', 's', 't']
                         };
+    // Default to support of v/+ and o/@ only.
     this.userModes = [
                        { mode: 'o', symbol: '@' },
                        { mode: 'v', symbol: '+' }
                      ];
+    // Assume the server supports no extra interesting commands.
+    this.servCmds = {};
 
     if (this.parent.INITIAL_UMODE)
     {
@@ -1329,6 +1405,7 @@ function serv_001 (e)
 CIRCServer.prototype.on005 =
 function serv_005 (e)
 {
+    var oldCaseMapping = this.supports["casemapping"];
     /* Drop params 0 and 1. */
     for (var i = 2; i < e.params.length; i++) {
         var itemStr = e.params[i];
@@ -1357,6 +1434,30 @@ function serv_005 (e)
         {
             // Boolean-type items stored as 'true'.
             this.supports[name] = !(("1" in item) && item[1] == "-");
+        }
+    }
+    // Update all users and channels if the casemapping changed.
+    if (this.supports["casemapping"] != oldCaseMapping)
+    {
+        var newName, encodedName;
+        for (var user in this.users)
+        {
+            newName = this.toLowerCase(this.users[user].encodedName);
+            renameProperty(this.users, user, newName);
+            this.users[newName].canonicalName = newName;
+        }
+        for (var channel in this.channels)
+        {
+            newName = this.toLowerCase(this.channels[channel].encodedName);
+            renameProperty(this.channels, this.channels[channel].canonicalName,
+                           newName);
+            this.channels[channel].canonicalName = newName;
+            for (user in this.channels[channel].users)
+            {
+                encodedName = this.channels[channel].users[user].encodedName;
+                newName = this.toLowerCase(encodedName);
+                renameProperty(this.channels[channel].users, user, newName);
+            }
         }
     }
 
@@ -1406,6 +1507,14 @@ function serv_005 (e)
                                            d: cmlist[3].split('')
                                          };
         }
+    }
+
+    if ("cmds" in this.supports)
+    {
+        // Map this.supports.cmds [comma-list] into this.servCmds [props].
+        var cmdlist = this.supports.cmds.split(/,/);
+        for (var i = 0; i < cmdlist.length; i++)
+            this.servCmds[cmdlist[i].toLowerCase()] = true;
     }
 
     this.supports.rpl_isupport = true;
@@ -2141,6 +2250,15 @@ function serv_pong (e)
     return true;
 }
 
+CIRCServer.prototype.onInvite =
+function serv_invite(e)
+{
+    e.channel = new CIRCChannel(this, null, e.params[2]);
+
+    e.destObject = this.parent;
+    e.set = "network";
+}
+
 CIRCServer.prototype.onNotice =
 function serv_notice (e)
 {
@@ -2172,6 +2290,7 @@ function serv_notice (e)
         e.replyTo = e.user; /* send replys to the user who sent the message */
     }
 
+    e.msg = e.decodeParam(2, e.replyTo);
     e.destObject = e.replyTo;
 
     return true;
@@ -2203,7 +2322,10 @@ function serv_privmsg (e)
         e.destObject = this;
     }
     else
+    {
         e.destObject = e.replyTo;
+        e.msg = e.decodeParam(2, e.replyTo);
+    }
 
     return true;
 }
@@ -2349,10 +2471,17 @@ function serv_cact (e)
     e.set = (e.replyTo == e.user) ? "user" : "channel";
 }
 
+CIRCServer.prototype.onCTCPFinger =
+function serv_cfinger (e)
+{
+    e.user.ctcp("FINGER", this.parent.prefs["desc"], "NOTICE");
+    return true;
+}
+
 CIRCServer.prototype.onCTCPTime =
 function serv_cping (e)
 {
-    e.user.ctcp("TIME", fromUnicode(new Date(), this), "NOTICE");
+    e.user.ctcp("TIME", new Date(), "NOTICE");
 
     return true;
 }
@@ -2367,6 +2496,14 @@ function serv_cver (e)
 
     e.destObject = e.replyTo;
     e.set = (e.replyTo == e.user) ? "user" : "channel";
+
+    return true;
+}
+
+CIRCServer.prototype.onCTCPSource =
+function serv_csrc (e)
+{
+    e.user.ctcp("SOURCE", this.SOURCE_RPLY, "NOTICE");
 
     return true;
 }
@@ -2938,6 +3075,15 @@ function usr_hostmask (pfx)
     return (pfx + this.host.substr(idx + 1, this.host.length));
 }
 
+CIRCUser.prototype.getBanMask =
+function usr_banmask()
+{
+    var hostmask = this.host;
+    if (!/^\d+\.\d+\.\d+\.\d+$/.test(hostmask))
+        hostmask = hostmask.replace(/^[^.]+/, "*");
+    return "*!" + this.name + "@" + hostmask;
+}
+
 CIRCUser.prototype.say =
 function usr_say (msg)
 {
@@ -2969,7 +3115,7 @@ function usr_ctcp (code, msg, type)
 CIRCUser.prototype.whois =
 function usr_whois ()
 {
-    this.parent.whois(this.encodedName);
+    this.parent.whois(this.unicodeName);
 }
 
 /*
@@ -3126,7 +3272,7 @@ function cusr_setban (f)
         return false;
 
     var modifier = (f) ? " +b " : " -b ";
-    modifier += this.getHostMask() + " ";
+    modifier += this.getBanMask() + " ";
 
     server.sendData("MODE " + this.parent.encodedName + modifier + "\n");
 
@@ -3142,7 +3288,7 @@ function cusr_kban (reason)
         return false;
 
     reason = (typeof reason != "undefined") ? reason : this.encodedName;
-    var modifier = " -o+b " + this.encodedName + " " + this.getHostMask() + " ";
+    var modifier = " -o+b " + this.encodedName + " " + this.getBanMask() + " ";
 
     server.sendData("MODE " + this.parent.encodedName + modifier + "\n" +
                     "KICK " + this.parent.encodedName + " " +

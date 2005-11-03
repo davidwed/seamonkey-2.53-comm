@@ -63,7 +63,6 @@
     <stringbundle id="findBundle" src="chrome://global/locale/finddialog.properties"/>
   </stringbundleset>
 
-  <vbox id="outer-box" flex="1">
     <vbox id="upper-box" flex="1">
       <hbox id="tabpanels-contents-box" flex="1">
         <vbox id="user-list-box" width="125" persist="collapsed width">
@@ -124,13 +123,12 @@
     
       <hbox id="tabstrip-box" flex="0" crop="right">
         <hbox id="view-tabs" persist="collapsed" flex="1">
-          <scrollbox flex="1">
-            <tabs class="tabs-bottom" id="views-tbar-inner" flex="1" crop="right">
-              <tab collapsed="true"/> <!-- dummy tab to keep the freaking xbl from
-                                           causing an exception -->
-            </tabs>
-            <spacer id="views-tbar-spacer"/>
-          </scrollbox>
+          <tabs class="tabs-bottom" id="views-tbar-inner" flex="1"
+              onselect="onTabSelect(event)" setfocus="false">
+            <tab collapsed="true"/> <!-- dummy tab to keep the freaking xbl from
+                                         causing an exception -->
+          </tabs>
+          <spacer id="views-tbar-spacer"/>
         </hbox>
       </hbox>
   
@@ -139,8 +137,8 @@
     <splitter id="input-splitter" orient="vertical" collapse="after"
       collapsed="true"/>
   
-    <hbox id="input-widgets">
-      <text id="server-nick" value=""/>
+    <hbox id="input-widgets" align="center">
+      <button id="server-nick" type="menu" label=""/>
       <hbox id="multiline-box" flex="1" collapsed="true">
         <textbox id="multiline-input" multiline="true" flex="1" height="100px"
           class="multiline-input-widget" onfocus="onInputFocus();"/>
@@ -161,7 +159,6 @@
           tooltiptext="&multiline-expand.tooltip;"/>
       </hbox>
     </hbox>
-  </vbox> <!-- outer-box -->
   
   <overlaytarget id="statusbar-overlay-target"/>
 

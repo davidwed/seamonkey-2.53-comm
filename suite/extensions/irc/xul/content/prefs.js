@@ -80,12 +80,35 @@ function initPrefs()
     var logDefault = client.prefManager.logPath.clone();
     logDefault.append(escapeFileName("client.log"));
 
-    var gotos = ["goto-url",        "goto-url-newwin", 
+    var gotos = ["goto-url",        "goto-url-newwin",
                  "goto-url-newtab", "goto-url-newtab"];
     if (client.host == "XULrunner")
     {
-        gotos = ["goto-url-external", "goto-url-external", 
+        gotos = ["goto-url-external", "goto-url-external",
                  "goto-url-external", "goto-url-external"];
+    }
+
+    // Set up default nickname, if possible.
+    var defaultNick = DEFAULT_NICK;
+    var en = getService("@mozilla.org/process/environment;1", "nsIEnvironment");
+    if (en)
+    {
+        /* Get the enviroment variables used by various OSes:
+         *   USER     - Linux, Mac OSX and other *nix-types.
+         *   USERNAME - Windows.
+         *   LOGNAME  - *nix again.
+         */
+        const vars = ["USER", "USERNAME", "LOGNAME"];
+
+        for (var i = 0; i < vars.length; i++)
+        {
+            var nick = en.get(vars[i]);
+            if (nick)
+            {
+                defaultNick = nick;
+                break;
+            }
+        }
     }
 
     var prefs =
@@ -102,13 +125,16 @@ function initPrefs()
          ["channelMaxLines",    500,      "global.maxLines"],
          ["charset",            "utf-8",  ".connect"],
          ["clientMaxLines",     200,      "global.maxLines"],
+         ["collapseActions",    true,     "appearance.misc"],
          ["collapseMsgs",       false,    "appearance.misc"],
-         ["connectTries",       5,        ".connect"],
+         ["conference.limit",   150,      "appearance.misc"],
+         ["connectTries",       -1,       ".connect"],
          ["copyMessages",       true,     "global"],
          ["dcc.enabled",        true,     "dcc"],
          ["dcc.listenPorts",    [],       "dcc.ports"],
          ["dcc.useServerIP",    true,     "dcc"],
          ["debugMode",          "",       "global"],
+         ["defaultQuitMsg",     "",       "global"],
          ["desc",               "New Now Know How", ".ident"],
          ["deleteOnPart",       true,     "global"],
          ["displayHeader",      true,     "appearance.misc"],
@@ -162,7 +188,7 @@ function initPrefs()
          ["newTabLimit",        15,       "global"],
          ["notify.aggressive",  true,     "global"],
          ["nickCompleteStr",    ":",      "global"],
-         ["nickname",           DEFAULT_NICK, ".ident"],
+         ["nickname",           defaultNick, ".ident"],
          ["nicknameList",       [],       "lists.nicknameList"],
          ["outgoing.colorCodes",  false,  "global"],
          ["outputWindowURL",   "chrome://chatzilla/content/output-window.html",
@@ -196,7 +222,8 @@ function initPrefs()
          ["usermode",           "+i",     ".ident"],
          ["userHeader",         true,     "global.header"],
          ["userLog",            false,    "global.log"],
-         ["userMaxLines",       200,      "global.maxLines"]
+         ["userMaxLines",       200,      "global.maxLines"],
+         ["warnOnClose",        true,     "global"]
         ];
 
     client.prefManager.addPrefs(prefs);
@@ -358,7 +385,9 @@ function getNetworkPrefManager(network)
          ["awayNick",         defer, ".ident"],
          ["bugURL",           defer, "appearance.misc"],
          ["charset",          defer, ".connect"],
+         ["collapseActions",  defer, "appearance.misc"],
          ["collapseMsgs",     defer, "appearance.misc"],
+         ["conference.limit", defer, "appearance.misc"],
          ["connectTries",     defer, ".connect"],
          ["dcc.useServerIP",  defer, "dcc"],
          ["desc",             defer, ".ident"],
@@ -443,7 +472,10 @@ function getChannelPrefManager(channel)
          ["autoRejoin",       defer, ".connect"],
          ["bugURL",           defer, "appearance.misc"],
          ["charset",          defer, ".connect"],
+         ["collapseActions",  defer, "appearance.misc"],
          ["collapseMsgs",     defer, "appearance.misc"],
+         ["conference.enabled", false, "hidden"],
+         ["conference.limit", defer, "appearance.misc"],
          ["displayHeader",    client.prefs["channelHeader"],
                                                              "appearance.misc"],
          ["font.family",      defer, "appearance.misc"],
@@ -496,6 +528,7 @@ function getUserPrefManager(user)
     var prefs =
         [
          ["charset",          defer, ".connect"],
+         ["collapseActions",  defer, "appearance.misc"],
          ["collapseMsgs",     defer, "appearance.misc"],
          ["displayHeader",    client.prefs["userHeader"], "appearance.misc"],
          ["font.family",      defer, "appearance.misc"],
@@ -721,6 +754,21 @@ function onChannelPrefChanged(channel, prefName, newValue, oldValue)
 
     switch (prefName)
     {
+        case "conference.enabled":
+            // Wouldn't want to display a message to a hidden view.
+            if ("messages" in channel)
+            {
+                if (newValue)
+                    channel.display(MSG_CONF_MODE_ON);
+                else
+                    channel.display(MSG_CONF_MODE_OFF);
+            }
+            break;
+            
+        case "conference.limit":
+            channel._updateConferenceMode();
+            break;
+        
         case "font.family":
         case "font.size":
             channel.dispatch("sync-font");

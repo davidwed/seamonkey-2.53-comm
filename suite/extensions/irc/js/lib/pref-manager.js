@@ -204,10 +204,11 @@ function pm_ispref(prefName)
 PrefManager.prototype.addPrefs =
 function pm_addprefs(prefSpecs)
 {
+    var bundle = "stringBundle" in prefSpecs ? prefSpecs.stringBundle : null;
     for (var i = 0; i < prefSpecs.length; ++i)
     {
         this.addPref(prefSpecs[i][0], prefSpecs[i][1],
-                     3 in prefSpecs[i] ? prefSpecs[i][3] : null, null,
+                     3 in prefSpecs[i] ? prefSpecs[i][3] : null, bundle,
                      2 in prefSpecs[i] ? prefSpecs[i][2] : null);
     }
 }
@@ -253,7 +254,6 @@ function pm_arrayupdate(prefName)
         return;
 
     this.prefBranch.setCharPref(prefName, this.arrayToString(record.realValue));
-    this.prefService.savePrefFile(null);
 }
 
 PrefManager.prototype.stringToArray =
@@ -390,8 +390,6 @@ function pm_setpref(prefName, value)
     {
         this.prefBranch.setCharPref(prefName, fromUnicode(value, PREF_CHARSET));
     }
-    
-    this.prefService.savePrefFile(null);
 
     record.realValue = value;
     
@@ -403,7 +401,6 @@ function pm_reset(prefName)
 {
     this.prefRecords[prefName].realValue = null;
     this.prefBranch.clearUserPref(prefName);
-    this.prefService.savePrefFile(null);
 }
 
 PrefManager.prototype.addPref =
@@ -432,11 +429,13 @@ function pm_addpref(prefName, defaultValue, setter, bundle, group)
     var label = getMsgFrom(bundle, "pref." + prefName + ".label", null, prefName);
     var help  = getMsgFrom(bundle, "pref." + prefName + ".help", null, 
                            MSG_NO_HELP);
-    
-    if (label == prefName)
-        dd("WARNING: !!! Preference without label: " + prefName);
-    if (help == MSG_NO_HELP)
-        dd("WARNING: Preference without help text: " + prefName);
+    if (group != "hidden")
+    {
+        if (label == prefName)
+            dd("WARNING: !!! Preference without label: " + prefName);
+        if (help == MSG_NO_HELP)
+            dd("WARNING: Preference without help text: " + prefName);
+    }
     
     this.prefRecords[prefName] = new PrefRecord (prefName, defaultValue, 
                                                  label, help, group);

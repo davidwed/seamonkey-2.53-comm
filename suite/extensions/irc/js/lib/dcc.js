@@ -55,13 +55,12 @@ function CIRCDCC(parent)
     this.last = null;
     this.lastTime = null;
 
-    this.sendChunk = 1024;
-    this.maxUnAcked = 0;
+    this.sendChunk = 4096;
+    this.maxUnAcked = 32; // 4096 * 32 == 128KiB 'in transit'.
 
     this.requestTimeout = 3 * 60 * 1000; // 3 minutes.
 
     // Can't do anything 'til this is set!
-    //FIXME: Can we use Moz's Components here?
     this.localIPlist = new Array();
     this.localIP = null;
     this._lastPort = null;
@@ -117,11 +116,24 @@ function dcc_addfile(user, port, file, size)
 CIRCDCC.prototype.addHost =
 function dcc_addhost(host, auth)
 {
-    try {
-        var dnsRecord = this._dnsSvc.resolve(host, false);
+    var me = this;
+    var listener = {
+        onLookupComplete: function _onLookupComplete(request, record, status) {
+            // record == null if it failed. We can't do anything with a failure.
+            if (record)
+            {
+                while (record.hasMore())
+                    me.addIP(record.getNextAddrAsString(), auth);
+            }
+        }
+    };
 
-        while (dnsRecord.hasMore())
-            this.addIP(dnsRecord.getNextAddrAsString(), auth);
+    try {
+        const EQS = getService("@mozilla.org/event-queue-service;1",
+                               "nsIEventQueueService");
+        var th = EQS.getSpecialEventQueue(EQS.CURRENT_THREAD_EVENT_QUEUE);
+
+        var dnsRecord = this._dnsSvc.asyncResolve(host, false, listener, th);
     } catch (ex) {
         dd("Error resolving host to IP: " + ex);
     }
@@ -1108,7 +1120,11 @@ function dfile_onSocketAccepted(socket, transport)
         this.filestream.setInputStream(this.localFile.baseInputStream);
 
         // Start the reading!
-        var d = this.filestream.readBytes(this.parent.sendChunk);
+        var d;
+        if (this.parent.sendChunk > this.size)
+            d = this.filestream.readBytes(this.size);
+        else
+            d = this.filestream.readBytes(this.parent.sendChunk);
         this.position += d.length;
         this.connection.sendData(d);
     }

@@ -108,6 +108,8 @@ function initHandlers()
     node = document.getElementById("multiline-input");
     node.addEventListener("keypress", onMultilineInputKeyPress, false);
     node.active = false;
+    node = document.getElementById("security-button");
+    node.addEventListener("dblclick", onSecurityIconDblClick, false);
 
     window.onkeypress = onWindowKeyPress;
 
@@ -123,9 +125,6 @@ function onClose()
     if ("userClose" in client && client.userClose)
         return true;
 
-    client.userClose = true;
-    display(MSG_CLOSING);
-
     if (!("getConnectionCount" in client) ||
         client.getConnectionCount() == 0)
     {
@@ -134,7 +133,23 @@ function onClose()
     }
 
     /* otherwise, try to close out gracefully */
-    client.quit(client.userAgent);
+    var close = true;
+    if (client.prefs["warnOnClose"])
+    {
+        const buttons = ["!yes", "!no"];
+        var checkState = { value: true };
+        var rv = confirmEx(MSG_CONFIRM_QUIT, buttons, 0, MSG_WARN_ON_EXIT,
+                           checkState);
+        close = (rv == 0);
+        client.prefs["warnOnClose"] = checkState.value;
+    }
+
+    if (close)
+    {
+        client.userClose = true;
+        display(MSG_CLOSING);
+        client.quit(client.userAgent);
+    }
     return false;
 }
 
@@ -150,12 +165,12 @@ function onNotImplemented()
 }
 
 /* tab click */
-function onTabClick (e, id)
+function onTabClick(e, id)
 {
-    if ((e.which != 1) && (e.which != 2))
+    if (e.which != 2)
         return;
 
-    var tbi = document.getElementById (id);
+    var tbi = document.getElementById(id);
     var view = client.viewsArray[tbi.getAttribute("viewKey")];
 
     if (e.which == 2)
@@ -163,10 +178,22 @@ function onTabClick (e, id)
         dispatch("hide", { view: view.source });
         return;
     }
-    else if (e.which == 1)
-    {
-        dispatch("set-current-view", { view: view.source });
-    }
+}
+
+function onTabSelect(e)
+{
+    var tabs = e.target;
+
+    /* Hackaround, bug 314230. XBL likes focusing a tab before onload has fired.
+     * That means the tab we're trying to select here will be the hidden one,
+     * which doesn't have a viewKey. We catch that case.
+     */
+    if (!tabs.selectedItem.hasAttribute("viewKey"))
+        return;
+
+    var key = tabs.selectedItem.getAttribute("viewKey");
+    var view = client.viewsArray[key];
+    dispatch("set-current-view", {view:view.source});
 }
 
 function onMessageViewClick(e)
@@ -243,6 +270,12 @@ function onSortCol(sortColName)
     sortUserList(node, sortDirection);
 
     return false;
+}
+
+function onSecurityIconDblClick(e)
+{
+    if (e.button == 0)
+        displayCertificateInfo();
 }
 
 function onMultilineInputKeyPress (e)
@@ -327,6 +360,11 @@ function onInputKeyPress (e)
             onInputCompleteLine (e);
             break;
 
+        case 37: /* left */
+             if (e.altKey && e.metaKey)
+                 cycleView(-1);
+             break;
+
         case 38: /* up */
             if (e.ctrlKey || e.metaKey)
             {
@@ -349,6 +387,11 @@ function onInputKeyPress (e)
             }
             e.preventDefault();
             break;
+
+        case 39: /* right */
+             if (e.altKey && e.metaKey)
+                 cycleView(+1);
+             break;
 
         case 40: /* down */
             if (client.lastHistoryReferenced > 0)
@@ -510,15 +553,22 @@ function onWindowKeyPress (e)
         case 119:
         case 120:
         case 121: /* F10 */
+            var modifier = (e.ctrlKey || e.shiftKey || e.Altkey || e.metaKey);
             var idx = code - 112;
-            if ((idx in client.viewsArray) && client.viewsArray[idx].source)
-                dispatch("set-current-view", { view: client.viewsArray[idx].source });
+            if (!modifier && (idx in client.viewsArray) &&
+                client.viewsArray[idx].source)
+            {
+                var newView = client.viewsArray[idx].source;
+                dispatch("set-current-view", { view: newView });
+                e.preventDefault();
+            }
             break;
 
         case 33: /* pgup */
             if (e.ctrlKey)
             {
                 cycleView(-1);
+                e.preventDefault();
                 break;
             }
 
@@ -538,6 +588,7 @@ function onWindowKeyPress (e)
             if (e.ctrlKey)
             {
                 cycleView(1);
+                e.preventDefault();
                 break;
             }
 
@@ -707,6 +758,37 @@ function my_remfgraph (user)
 
 }
 
+CIRCChannel.prototype._updateConferenceMode =
+function my_updateconfmode()
+{
+    const minDiff = client.CONFERENCE_LOW_PASS;
+
+    var enabled   = this.prefs["conference.enabled"];
+    var userLimit = this.prefs["conference.limit"];
+    var userCount = this.getUsersLength();
+
+    if (userLimit == 0)
+    {
+        // userLimit == 0 --> always off.
+        if (enabled)
+            this.prefs["conference.enabled"] = false;
+    }
+    else if (userLimit == 1)
+    {
+        // userLimit == 1 --> always on.
+        if (!enabled)
+            this.prefs["conference.enabled"] = true;
+    }
+    else if (enabled && (userCount < userLimit - minDiff))
+    {
+        this.prefs["conference.enabled"] = false;
+    }
+    else if (!enabled && (userCount > userLimit + minDiff))
+    {
+        this.prefs["conference.enabled"] = true;
+    }
+}
+
 CIRCServer.prototype.CTCPHelpClientinfo =
 function serv_ccinfohelp()
 {
@@ -731,6 +813,12 @@ function serv_ccinfohelp()
     return MSG_CTCPHELP_VERSION;
 }
 
+CIRCServer.prototype.CTCPHelpSource =
+function serv_csrchelp()
+{
+    return MSG_CTCPHELP_SOURCE;
+}
+
 CIRCServer.prototype.CTCPHelpOs =
 function serv_oshelp()
 {
@@ -753,6 +841,35 @@ CIRCServer.prototype.CTCPHelpDcc =
 function serv_ccinfohelp()
 {
     return MSG_CTCPHELP_DCC;
+}
+
+/**
+ * Calculates delay before the next automatic connection attempt.
+ *
+ * If the number of connection attempts is limited, use fixed interval
+ * MIN_RECONNECT_MS. For unlimited attempts (-1), use exponential backoff: the
+ * interval between connection attempts to the network (not individual
+ * servers) is doubled after each attempt, up to MAX_RECONNECT_MS.
+ */
+CIRCNetwork.prototype.getReconnectDelayMs =
+function my_getReconnectDelayMs()
+{
+    var nServers = this.serverList.length;
+
+    if ((-1 != this.MAX_CONNECT_ATTEMPTS) ||
+        (0 != this.connectCandidate % nServers))
+    {
+        return this.MIN_RECONNECT_MS;
+    }
+
+    var networkRound = Math.ceil(this.connectCandidate / nServers);
+
+    var rv = this.MIN_RECONNECT_MS * Math.pow(2, networkRound - 1);
+
+    // clamp rv between MIN/MAX_RECONNECT_MS
+    rv = Math.min(Math.max(rv, this.MIN_RECONNECT_MS), this.MAX_RECONNECT_MS);
+
+    return rv;
 }
 
 CIRCNetwork.prototype.onInit =
@@ -788,11 +905,30 @@ function my_unknown (e)
     var msg = getMsg("msg.err.irc." + e.code, null, "");
     if (msg)
     {
-        this.display(msg);
         if (arrayIndexOf(e.server.channelTypes, e.params[0][0]) != -1)
         {
             // Message about a channel (e.g. join failed).
             e.channel = new CIRCChannel(e.server, null, e.params[0]);
+        }
+
+        // Check for /knock support for the +i message.
+        if (((e.code == 471) || (e.code == 473) || (e.code == 475)) &&
+            ("knock" in e.server.servCmds))
+        {
+            var args = [msg, e.channel.unicodeName,
+                        "knock " + e.channel.unicodeName];
+            msg = getMsg("msg.err.irc." + e.code + ".knock", args, "");
+            client.munger.entries[".inline-buttons"].enabled = true;
+            this.display(msg);
+            client.munger.entries[".inline-buttons"].enabled = false;
+        }
+        else
+        {
+            this.display(msg);
+        }
+
+        if (e.channel)
+        {
             if (e.channel.busy)
             {
                 e.channel.busy = false;
@@ -853,32 +989,35 @@ function my_showtonet (e)
 
         case "001":
             // Code moved to lower down to speed this bit up. :)
+            var c, u;
+            // If we've switched servers, *first* we must rehome our objects.
+            if (this.lastServer && (this.lastServer != this.primServ))
+            {
+                for (c in this.lastServer.channels)
+                    this.lastServer.channels[c].rehome(this.primServ);
+                for (u in this.lastServer.users)
+                    this.lastServer.users[u].rehome(this.primServ);
 
+                // This makes sure we have the *right* me object.
+                this.primServ.me.rehome(this.primServ);
+            }
+
+            // After rehoming it is now safe for the user's commands.
             var cmdary = this.prefs["autoperform"];
             for (var i = 0; i < cmdary.length; ++i)
-                this.dispatch(cmdary[i])
+            {
+                if (cmdary[i][0] == "/")
+                    this.dispatch(cmdary[i].substr(1));
+                else
+                    this.dispatch(cmdary[i]);
+            }
 
             if (this.prefs["away"])
                 this.dispatch("away", { reason: this.prefs["away"] });
 
             if (this.lastServer)
             {
-                var c, u;
-
-                // Re-home channels and users only if nessessary.
-                if (this.lastServer != this.primServ)
-                {
-                    for (c in this.lastServer.channels)
-                        this.lastServer.channels[c].rehome(this.primServ);
-                    for (u in this.lastServer.users)
-                        this.lastServer.users[u].rehome(this.primServ);
-
-                    // This makes sure we have the *right* me object.
-                    this.primServ.me.rehome(this.primServ);
-                }
-
                 // Re-join channels from previous connection.
-                // (note they're all on .primServ now, not .lastServer)
                 for (c in this.primServ.channels)
                 {
                     var chan = this.primServ.channels[c];
@@ -906,6 +1045,7 @@ function my_showtonet (e)
             updateTitle(this);
             this.updateHeader();
             client.updateHeader();
+            updateSecurityIcon();
             updateStalkExpression(this);
 
             // Do this after the JOINs, so they are quicker.
@@ -1334,7 +1474,6 @@ function my_315 (e)
     }
 
     delete this.pendingWhoReply;
-    delete e.server.LIGHTWEIGHT_WHO;
     delete this.whoMatches;
 }
 
@@ -1460,8 +1599,12 @@ function my_341 (e)
 CIRCNetwork.prototype.onInvite = /* invite message */
 function my_invite (e)
 {
-    this.display (getMsg(MSG_INVITE_YOU, [e.user.unicodeName, e.user.name,
-                                          e.user.host, e.params[2]]), "INVITE");
+    this.display(getMsg(MSG_INVITE_YOU, [e.user.unicodeName, e.user.name,
+                                         e.user.host, e.channel.unicodeName]),
+                 "INVITE");
+
+    if ("messages" in e.channel)
+        e.channel.join();
 }
 
 CIRCNetwork.prototype.on433 = /* nickname in use */
@@ -1537,9 +1680,18 @@ function my_sconnect (e)
     if ("_firstNick" in this)
         delete this._firstNick;
 
-    this.display (getMsg(MSG_CONNECTION_ATTEMPT,
-                         [this.getURL(), e.server.getURL(), e.connectAttempt,
-                          this.MAX_CONNECT_ATTEMPTS]), "INFO");
+    if (-1 == this.MAX_CONNECT_ATTEMPTS)
+        this.display (getMsg(MSG_CONNECTION_ATTEMPT_UNLIMITED,
+                             [this.getURL(),
+                              e.server.getURL(),
+                              e.connectAttempt,
+                              e.reconnectDelayMs / 1000]), "INFO");
+    else
+        this.display (getMsg(MSG_CONNECTION_ATTEMPT,
+                             [this.getURL(),
+                              e.server.getURL(),
+                              e.connectAttempt,
+                              this.MAX_CONNECT_ATTEMPTS]), "INFO");
 }
 
 CIRCNetwork.prototype.onError =
@@ -1562,6 +1714,10 @@ function my_neterror (e)
 
             case JSIRC_ERR_OFFLINE:
                 msg = MSG_ERR_OFFLINE;
+                break;
+
+            case JSIRC_ERR_NO_SECURE:
+                msg = getMsg(MSG_ERR_NO_SECURE, this.unicodeName);
                 break;
 
             case JSIRC_ERR_CANCELLED:
@@ -1635,10 +1791,10 @@ function my_netdisconnect (e)
                      [this.getURL(), e.server.getURL()]);
     }
 
-    // e.quitting signals the disconnect was intended: use "INFO", not "ERROR".
+    // e.quitting signals the disconnect was intended: don't use "ERROR".
     if (e.quitting)
     {
-        msgType = "INFO";
+        msgType = "DISCONNECT";
         msg = getMsg(MSG_CONNECTION_QUIT, [this.getURL(), e.server.getURL()]);
     }
 
@@ -1676,6 +1832,8 @@ function my_netdisconnect (e)
     dispatch("sync-header");
     updateTitle();
     updateProgress();
+    updateSecurityIcon();
+
     if ("userClose" in client && client.userClose &&
         client.getConnectionCount() == 0)
         window.close();
@@ -1855,6 +2013,9 @@ function my_366 (e)
                                     e.params[3], "366");
     }
     this.pendingNamesReply = false;
+
+    // Update conference mode now we have a complete user list.
+    this._updateConferenceMode();
 }
 
 CIRCChannel.prototype.onTopic = /* user changed topic */
@@ -1949,8 +2110,8 @@ function my_cjoin (e)
     if (userIsMe(e.user))
     {
         var params = [e.user.unicodeName, e.channel.unicodeName];
-        this.display (getMsg(MSG_YOU_JOINED, params), "JOIN", 
-                      e.server.me, this);
+        this.display(getMsg(MSG_YOU_JOINED, params), "JOIN", 
+                     e.server.me, this);
         if (client.globalHistory)
             client.globalHistory.addPage(this.getURL());
 
@@ -1970,10 +2131,20 @@ function my_cjoin (e)
     }
     else
     {
-        this.display(getMsg(MSG_SOMEONE_JOINED,
-                            [e.user.unicodeName, e.user.name, e.user.host,
-                             e.channel.unicodeName]),
-                     "JOIN", e.user, this);
+        if (!this.prefs["conference.enabled"])
+        {
+            this.display(getMsg(MSG_SOMEONE_JOINED,
+                                [e.user.unicodeName, e.user.name, e.user.host,
+                                 e.channel.unicodeName]),
+                         "JOIN", e.user, this);
+        }
+
+        /* Only do this for non-me joins so us joining doesn't reset it (when
+         * we join the usercount is always 1). Also, do this after displaying
+         * the join message so we don't get cryptic effects such as a user
+         * joining causes *only* a "Conference mode enabled" message.
+         */
+        this._updateConferenceMode();
     }
 
     this._addUserToGraph(e.user);
@@ -2025,18 +2196,20 @@ function my_cpart (e)
     }
     else
     {
-        if (e.reason)
+        /* We're ok to update this before the message, because the only thing
+         * that can happen is *disabling* of conference mode.
+         */
+        this._updateConferenceMode();
+
+        if (!this.prefs["conference.enabled"])
         {
-            this.display (getMsg(MSG_SOMEONE_LEFT_REASON,
-                                 [e.user.unicodeName, e.channel.unicodeName,
-                                  e.reason]),
-                          "PART", e.user, this);
-        }
-        else
-        {
-            this.display (getMsg(MSG_SOMEONE_LEFT,
-                                 [e.user.unicodeName, e.channel.unicodeName]),
-                          "PART", e.user, this);
+            var msg = MSG_SOMEONE_LEFT;
+            if (e.reason)
+                msg = MSG_SOMEONE_LEFT_REASON;
+
+            this.display(getMsg(msg, [e.user.unicodeName, e.channel.unicodeName,
+                                      e.reason]),
+                         "PART", e.user, this);
         }
     }
 }
@@ -2084,9 +2257,10 @@ function my_ckick (e)
             enforcerNick = MSG_SERVER;
         }
 
-        this.display (getMsg(MSG_SOMEONE_GONE,
-                             [e.lamer.unicodeName, e.channel.unicodeName,
-                              enforcerProper, e.reason]), "KICK", e.user, this);
+        this.display(getMsg(MSG_SOMEONE_GONE,
+                            [e.lamer.unicodeName, e.channel.unicodeName,
+                             enforcerProper, e.reason]),
+                     "KICK", e.user, this);
     }
 
     this._removeUserFromGraph(e.lamer);
@@ -2133,9 +2307,10 @@ function my_cnick (e)
         }
         this.parent.parent.updateHeader();
     }
-    else
+    else if (!this.prefs["conference.enabled"])
     {
-        this.display(getMsg(MSG_NEWNICK_NOTYOU, [e.oldNick, e.user.unicodeName]),
+        this.display(getMsg(MSG_NEWNICK_NOTYOU, [e.oldNick,
+                                                 e.user.unicodeName]),
                      "NICK", e.user, this);
     }
 
@@ -2162,10 +2337,16 @@ function my_cquit (e)
     }
     else
     {
-        this.display (getMsg(MSG_SOMEONE_QUIT,
-                             [e.user.unicodeName, e.server.parent.unicodeName,
-                              e.reason]),
-                      "QUIT", e.user, this);
+        // See onPart for why this is ok before the message.
+        this._updateConferenceMode();
+
+        if (!this.prefs["conference.enabled"])
+        {
+            this.display(getMsg(MSG_SOMEONE_QUIT,
+                                [e.user.unicodeName,
+                                 e.server.parent.unicodeName, e.reason]),
+                         "QUIT", e.user, this);
+        }
     }
 
     this._removeUserFromGraph(e.user);
@@ -2215,7 +2396,20 @@ function my_unick (e)
 CIRCUser.prototype.onNotice =
 function my_notice (e)
 {
-    this.display(e.decodeParam(2), "NOTICE", this, e.server.me);
+    var msg = e.decodeParam(2);
+
+    var ary = msg.match(/^\[(\S+)\]\s+/);
+    if (ary)
+    {
+        var channel = e.server.getChannel(ary[1]);
+        if (channel)
+        {
+            channel.display(msg, "NOTICE", this, e.server.me);
+            return;
+        }
+    }
+
+    this.display(msg, "NOTICE", this, e.server.me);
 }
 
 CIRCUser.prototype.onCTCPAction =
@@ -2253,7 +2447,7 @@ function my_dccchat(e)
     var cmds = getMsg(MSG_DCC_COMMAND_ACCEPT, "dcc-accept " + c.id) + " " +
                getMsg(MSG_DCC_COMMAND_DECLINE, "dcc-decline " + c.id);
     this.parent.parent.display(getMsg(MSG_DCCCHAT_GOT_REQUEST,
-                                      [e.user.unicodeName, e.host, e.port, cmds]),
+                                      c._getParams().concat(cmds)),
                                "DCC-CHAT");
     client.munger.entries[".inline-buttons"].enabled = false;
 
@@ -2277,7 +2471,7 @@ function my_dccchat(e)
                getMsg(MSG_DCC_COMMAND_DECLINE, "dcc-decline " + f.id);
     this.parent.parent.display(getMsg(MSG_DCCFILE_GOT_REQUEST,
                                       [e.user.unicodeName, e.host, e.port,
-                                       e.file, e.size, cmds]),
+                                       e.file, getSISize(e.size), cmds]),
                                "DCC-FILE");
     client.munger.entries[".inline-buttons"].enabled = false;
 
@@ -2387,7 +2581,7 @@ function my_dccfilegetparams()
         dir = MSG_DCCLIST_TO;
 
     return [this.filename, dir, this.user.unicodeName,
-            this.localIP, this.port];
+            this.localIP/*FIXME*/, this.port/*FIXME?*/];
 }
 
 CIRCDCCFileTransfer.prototype.onConnect =
@@ -2396,9 +2590,11 @@ function my_dccfileconnect(e)
     this.displayHere(getMsg(MSG_DCCFILE_OPENED, this._getParams()), "DCC-FILE");
     this.busy = true;
     this.progress = 0;
+    this.speed = 0;
     updateProgress();
     this._lastUpdate = new Date();
     this._lastPosition = 0;
+    this._lastSpeedTime = new Date();
 }
 
 CIRCDCCFileTransfer.prototype.onProgress =
@@ -2418,8 +2614,15 @@ function my_dccfileprogress(e)
         if (tab)
             tab.setAttribute("label", this.viewName + " (" + pcent + "%)");
 
-        this.updateHeader();
+        var change = (this.position - this._lastPosition);
+        var speed = change / ((now - this._lastSpeedTime) / 1000); // B/s
+        this._lastSpeedTime = now;
 
+        /* Use an average of the last speed, and this speed, so we get a little
+         * smoothing to it.
+         */
+        this.speed = (this.speed + speed) / 2;
+        this.updateHeader();
         this._lastPosition = this.position;
     }
 
@@ -2427,7 +2630,8 @@ function my_dccfileprogress(e)
     if (now - this._lastUpdate > 10000)
     {
         this.displayHere(getMsg(MSG_DCCFILE_PROGRESS,
-                                [pcent, this.position, this.size]),
+                                [pcent, getSISize(this.position),
+                                 getSISize(this.size), getSISpeed(this.speed)]),
                          "DCC-FILE");
 
         this._lastUpdate = now;
