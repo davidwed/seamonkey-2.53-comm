@@ -43,7 +43,7 @@ const __cz_version   = "0.9.67+";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.67.1";
+const __cz_locale    = "0.9.67.2";
 
 var warn;
 var ASSERT;
@@ -111,6 +111,7 @@ client.CONFERENCE_LOW_PASS = 10;
 
 client.viewsArray = new Array();
 client.activityList = new Object();
+client.hostCompat = new Object();
 client.inputHistory = new Array();
 client.lastHistoryReferenced = -1;
 client.incompleteLine = "";
@@ -352,9 +353,40 @@ function initApplicationCompatibility()
     // This routine does nothing more than tweak the UI based on the host
     // application.
 
+    /* client.hostCompat.typeChromeBrowser indicates whether we should use 
+     * type="chrome" <browser> elements for the output window documents.
+     * Using these is necessary to work properly with xpcnativewrappers, but
+     * broke selection in older builds.
+     */
+    client.hostCompat.typeChromeBrowser = false;
+
     // Set up simple host and platform information.
     client.host = "Unknown";
-    if ("getBrowserURL" in window)
+    var app = getService("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+    if (app)
+    {
+        // Use the XULAppInfo.ID to find out what host we run on.
+        switch (app.ID)
+        {
+            case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                client.host = "Firefox";
+                if (compareVersions(app.version, "1.4") <= 0)
+                    client.hostCompat.typeChromeBrowser = true;
+                break;
+            case "{" + __cz_guid + "}":
+                // We ARE the app, in other words, we're running in XULrunner.
+                client.host = "XULrunner";
+                client.hostCompat.typeChromeBrowser = true;
+                break;
+            case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}": // SeaMonkey
+                client.host = "Mozilla";
+                client.hostCompat.typeChromeBrowser = true;
+                break;
+            default:
+                client.host = ""; // Unknown host, show an error later.
+        }
+    }
+    else if ("getBrowserURL" in window)
     {
         var url = getBrowserURL();
         if (url == "chrome://navigator/content/navigator.xul")
@@ -363,10 +395,6 @@ function initApplicationCompatibility()
             client.host = "Firefox";
         else
             client.host = ""; // We don't know this host. Show an error later.
-    }
-    else
-    {
-        client.host = "XULrunner";
     }
 
     client.platform = "Unknown";
@@ -479,6 +507,23 @@ function getFindData(e)
     findData.browser = e.sourceObject.frame;
     findData.rootSearchWindow = e.sourceObject.frame.contentWindow;
     findData.currentSearchWindow = e.sourceObject.frame.contentWindow;
+
+    /* Yay, evil hacks! findData.init doesn't care about the findService, it
+     * gets option settings from webBrowserFind. As we want the wrap option *on*
+     * when we use /find foo, we set it on the findService there. However, 
+     * restoring the original value afterwards doesn't help, because init() here 
+     * overrides that value. Unless we make .init do something else, of course:
+     */
+    findData._init = findData.init;
+    findData.init = 
+        function init()
+        { 
+            this._init();
+            const FINDSVC_ID = "@mozilla.org/find/find_service;1";
+            var findService = getService(FINDSVC_ID, "nsIFindService");
+            this.webBrowserFind.wrapFind = findService.wrapFind;
+        };
+
     return findData;
 }
 
@@ -844,7 +889,7 @@ function insertChannelLink (matchText, containerTag, eventData)
 
 function insertBugzillaLink (matchText, containerTag, eventData)
 {
-    var number = matchText.match (/(\d+)/)[1];
+    var idOrAlias = matchText.match(/bug\s+#?(\d{3,6}|[^\s,]{1,20})/i)[1];
 
     var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
                                            "html:a");
@@ -857,7 +902,7 @@ function insertBugzillaLink (matchText, containerTag, eventData)
     else
         bugURL = client.prefs["bugURL"];
 
-    anchor.setAttribute ("href", bugURL.replace("%s", number));
+    anchor.setAttribute ("href", bugURL.replace("%s", idOrAlias));
     anchor.setAttribute ("class", "chatzilla-link");
     anchor.setAttribute ("target", "_content");
     insertHyphenatedWord (matchText, anchor);
@@ -979,41 +1024,31 @@ function mircChangeColor (colorInfo, containerTag, data)
 
     var ary = colorInfo.match (/.(\d{1,2}|)(,(\d{1,2})|)/);
 
-    var fgColor = ary[1];
-    if (fgColor > 16)
-        fgColor &= 16;
-
-    switch (fgColor.length)
+    // Do we have a BG color specified...?
+    if (!arrayHasElementAt(ary, 1) || !ary[1])
     {
-        case 0:
-            delete data.currFgColor;
-            delete data.currBgColor;
-            return;
-
-        case 1:
-            data.currFgColor = "0" + fgColor;
-            break;
-
-        case 2:
-            data.currFgColor = fgColor;
-            break;
+        // Oops, no colors.
+        delete data.currFgColor;
+        delete data.currBgColor;
+        return;
     }
 
-    if (fgColor == 1)
-        delete data.currFgColor;
-    if (arrayHasElementAt(ary, 3))
+    var fgColor = String(Number(ary[1]) % 16);
+
+    if (fgColor.length == 1)
+        data.currFgColor = "0" + fgColor;
+    else
+        data.currFgColor = fgColor;
+
+    // Do we have a BG color specified...?
+    if (arrayHasElementAt(ary, 3) && ary[3])
     {
-        var bgColor = ary[3];
-        if (bgColor > 16)
-            bgColor &= 16;
+        var bgColor = String(Number(ary[3]) % 16);
 
         if (bgColor.length == 1)
             data.currBgColor = "0" + bgColor;
         else
             data.currBgColor = bgColor;
-
-        if (bgColor == 0)
-            delete data.currBgColor;
     }
 
     data.hasColorInfo = true;
@@ -1077,13 +1112,16 @@ function mircReverseColor (text, containerTag, data)
         return;
     }
 
-    var tempColor = ("currFgColor" in data ? data.currFgColor : "01");
+    var tempColor = ("currFgColor" in data ? data.currFgColor : "");
 
     if ("currBgColor" in data)
         data.currFgColor = data.currBgColor;
     else
-        data.currFgColor = "00";
-    data.currBgColor = tempColor;
+        delete data.currFgColor;
+    if (tempColor)
+        data.currBgColor = tempColor;
+    else
+        delete data.currBgColor;
     data.hasColorInfo = true;
 }
 
@@ -1315,7 +1353,10 @@ function getTabContext(cx, element)
     while (element)
     {
         if (element.localName == "tab")
-            return getObjectDetails(element.view);
+        {
+            cx.__proto__ = getObjectDetails(element.view);
+            return cx;
+        }
         element = element.parentNode;
     }
 
@@ -1330,13 +1371,35 @@ function getUserlistContext(cx)
     if (!cx.channel)
         return cx;
 
+    var user, tree = document.getElementById("user-list");
     cx.userList = new Array();
-    cx.nicknameList = new Array();
     cx.canonNickList = new Array();
+    cx.nicknameList = getSelectedNicknames(tree);
 
-    var tree = document.getElementById("user-list");
+    for (var i = 0; i < cx.nicknameList.length; ++i)
+    {
+        user = cx.channel.getUser(cx.nicknameList[i])
+        cx.userList.push(user);
+        cx.canonNickList.push(user.canonicalName);
+        if (i == 0)
+        {
+            cx.user = user;
+            cx.nickname = user.unicodeName;
+            cx.canonNick = user.canonicalName;
+        }
+    }
+
+    return cx;
+}
+
+function getSelectedNicknames(tree)
+{
+    var rv = [];
+    if (!tree || !tree.view || !tree.view.selection)
+        return rv;
     var rangeCount = tree.view.selection.getRangeCount();
 
+    // Loop through the selection ranges.
     for (var i = 0; i < rangeCount; ++i)
     {
         var start = {}, end = {};
@@ -1344,29 +1407,41 @@ function getUserlistContext(cx)
 
         // If they == -1, we've got no selection, so bail.
         if ((start.value == -1) && (end.value == -1))
-            return cx;
+            continue;
 
+        // Loop through the contents of the current selection range.
         for (var k = start.value; k <= end.value; ++k)
         {
-            var item = tree.contentView.getItemAtIndex(k);
-            var cell = item.firstChild.firstChild;
-            var user = cx.channel.getUser(cell.getAttribute("unicodeName"));
-            if (user)
-            {
-                cx.userList.push(user);
-                cx.nicknameList.push(user.unicodeName);
-                cx.canonNickList.push(user.canonicalName);
-                if (i == 0 && k == start.value)
-                {
-                    cx.user = user;
-                    cx.nickname = user.unicodeName;
-                    cx.canonNick = user.canonicalName;
-                }
-            }
+            var item = tree.contentView.getItemAtIndex(k).firstChild.firstChild;
+            var userName = item.getAttribute("unicodeName");
+            rv.push(userName);
         }
     }
+    return rv;
+}
 
-    return cx;
+function setSelectedNicknames(tree, nicknameAry)
+{
+    if (!nicknameAry)
+        return;
+    var item, unicodeName, resultAry = [];
+    // Clear selection:
+    tree.view.selection.select(-1);
+    // Loop through the tree to (re-)select nicknames
+    for (var i = 0; i < tree.view.rowCount; i++)
+    {
+        item = tree.contentView.getItemAtIndex(i).firstChild.firstChild;
+        unicodeName = item.getAttribute("unicodeName");
+        if ((unicodeName != "") && arrayContains(nicknameAry, unicodeName))
+        {
+            tree.view.selection.toggleSelect(i);
+            resultAry.push(unicodeName);
+        }
+    }
+    // Make sure we pass back a correct array:
+    nicknameAry.length = 0;
+    for (var j = 0; j < resultAry.length; j++)
+        nicknameAry.push(resultAry[j]);
 }
 
 function getFontContext(cx)
@@ -1687,6 +1762,26 @@ function getObjectDetails (obj, rv)
 
         case "IRCClient":
             rv.viewType = MSG_TAB;
+            break;
+
+        case "IRCDCCUser":
+            //rv.viewType = MSG_USER;
+            rv.user = obj;
+            rv.userName = obj.unicodeName;
+            break;
+
+        case "IRCDCCChat":
+            //rv.viewType = MSG_USER;
+            rv.chat = obj;
+            rv.user = obj.user;
+            rv.userName = obj.unicodeName;
+            break;
+
+        case "IRCDCCFileTransfer":
+            //rv.viewType = MSG_USER;
+            rv.file = obj;
+            rv.user = obj.user;
+            rv.fileName = obj.unicodeName;
             break;
 
         default:
@@ -2308,6 +2403,7 @@ function multilineInputMode (state)
         multiInputBox.setAttribute ("collapsed", "false");
         // multiInput should have the same direction as singleInput
         multiInput.setAttribute("dir", singleInput.getAttribute("dir"));
+        multiInput.value = (client.input ? client.input.value : "");
         client.input = multiInput;
     }
     else  /* turn off multiline input mode */
@@ -2321,6 +2417,7 @@ function multilineInputMode (state)
         singleInputBox.setAttribute ("collapsed", "false");
         // singleInput should have the same direction as multiInput
         singleInput.setAttribute("dir", multiInput.getAttribute("dir"));
+        singleInput.value = (client.input ? client.input.value : "");
         client.input = singleInput;
     }
 
@@ -2429,10 +2526,15 @@ function setCurrentObject (obj)
         return;
 
     var tb, userList;
+    userList = document.getElementById("user-list");
 
     if ("currentObject" in client && client.currentObject)
     {
-        tb = getTabForObject(client.currentObject);
+        var co = client.currentObject;
+        // Save any nicknames selected
+        if (client.currentObject.TYPE == "IRCChannel")
+            co.userlistSelection = getSelectedNicknames(userList);
+        tb = getTabForObject(co);
     }
     if (tb)
     {
@@ -2440,9 +2542,8 @@ function setCurrentObject (obj)
         tb.setAttribute ("state", "normal");
     }
 
-    /* Unselect currently selected users. */
-    userList = document.getElementById("user-list");
-    /* If the splitter's collapsed, the userlist *isn't* visible, but we'll not
+    /* Unselect currently selected users.
+     * If the splitter's collapsed, the userlist *isn't* visible, but we'll not
      * get told when it becomes visible, so update it even if it's only the
      * splitter visible. */
     if (isVisible("user-list-box") || isVisible("main-splitter"))
@@ -2455,7 +2556,10 @@ function setCurrentObject (obj)
         if (obj.TYPE == "IRCChannel")
         {
             client.rdf.setTreeRoot("user-list", obj.getGraphResource());
-            updateUserList();
+            reSortUserlist(userList);
+            // Restore any selections previously made
+            if (("userlistSelection" in obj) && obj.userlistSelection)
+                setSelectedNicknames(userList, obj.userlistSelection);
         }
         else
         {
@@ -2654,13 +2758,28 @@ function setListMode(mode)
 
 function updateUserList()
 {
-    var node;
-    var sortDirection;
+    var node, chan;
 
     node = document.getElementById("user-list");
     if (!node.view)
         return;
 
+    // We'll lose the selection in a bit, if we don't save it if necessary:
+    if (("currentObject" in client) && client.currentObject &&
+        client.currentObject.TYPE == "IRCChannel")
+    {
+        chan = client.currentObject;
+        chan.userlistSelection = getSelectedNicknames(node, chan);
+    }
+    reSortUserlist(node);
+
+    // If this is a channel, restore the selection in the userlist.
+    if (chan)
+        setSelectedNicknames(node, client.currentObject.userlistSelection);
+}
+
+function reSortUserlist(node)
+{
     const nsIXULSortService = Components.interfaces.nsIXULSortService;
     const isupports_uri = "@mozilla.org/xul/xul-sort-service;1";
 
@@ -2958,7 +3077,11 @@ function getTabForObject (source, create)
 
         var browser = document.createElement ("browser");
         browser.setAttribute("class", "output-container");
-        browser.setAttribute("type", "content");
+        // Only use type="chrome" if the host app supports it properly:
+        if (client.hostCompat.typeChromeBrowser)
+            browser.setAttribute("type", "chrome");
+        else
+            browser.setAttribute("type", "content");
         browser.setAttribute("flex", "1");
         browser.setAttribute("tooltip", "html-tooltip-node");
         browser.setAttribute("context", "context:messages");
@@ -3272,6 +3395,54 @@ function usr_getprefmgr()
     }
 
     return this._prefManager;
+}
+
+CIRCDCCUser.prototype.__defineGetter__("prefs", dccusr_getprefs);
+function dccusr_getprefs()
+{
+    if (!("_prefs" in this))
+    {
+        this._prefManager = getDCCUserPrefManager(this);
+        this._prefs = this._prefManager.prefs;
+    }
+
+    return this._prefs;
+}
+
+CIRCDCCUser.prototype.__defineGetter__("prefManager", dccusr_getprefmgr);
+function dccusr_getprefmgr()
+{
+    if (!("_prefManager" in this))
+    {
+        this._prefManager = getDCCUserPrefManager(this);
+        this._prefs = this._prefManager.prefs;
+    }
+
+    return this._prefManager;
+}
+
+CIRCDCCChat.prototype.__defineGetter__("prefs", dccchat_getprefs);
+function dccchat_getprefs()
+{
+    return this.user.prefs;
+}
+
+CIRCDCCChat.prototype.__defineGetter__("prefManager", dccchat_getprefmgr);
+function dccchat_getprefmgr()
+{
+    return this.user.prefManager;
+}
+
+CIRCDCCFileTransfer.prototype.__defineGetter__("prefs", dccfile_getprefs);
+function dccfile_getprefs()
+{
+    return this.user.prefs;
+}
+
+CIRCDCCFileTransfer.prototype.__defineGetter__("prefManager", dccfile_getprefmgr);
+function dccfile_getprefmgr()
+{
+    return this.user.prefManager;
 }
 
 CIRCNetwork.prototype.display =

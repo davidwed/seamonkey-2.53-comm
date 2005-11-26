@@ -553,15 +553,15 @@ function onWindowKeyPress (e)
         case 119:
         case 120:
         case 121: /* F10 */
-            var modifier = (e.ctrlKey || e.shiftKey || e.Altkey || e.metaKey);
+            if (e.ctrlKey || e.shiftKey || e.Altkey || e.metaKey)
+                break;
             var idx = code - 112;
-            if (!modifier && (idx in client.viewsArray) &&
-                client.viewsArray[idx].source)
+            if ((idx in client.viewsArray) && client.viewsArray[idx].source)
             {
                 var newView = client.viewsArray[idx].source;
                 dispatch("set-current-view", { view: newView });
-                e.preventDefault();
             }
+            e.preventDefault();
             break;
 
         case 33: /* pgup */
@@ -902,7 +902,7 @@ function my_unknown (e)
     e.params.shift(); /* and the dest. nick (always me) */
 
     // Handle random IRC numerics automatically.
-    var msg = getMsg("msg.err.irc." + e.code, null, "");
+    var msg = getMsg("msg.irc." + e.code, null, "");
     if (msg)
     {
         if (arrayIndexOf(e.server.channelTypes, e.params[0][0]) != -1)
@@ -917,7 +917,7 @@ function my_unknown (e)
         {
             var args = [msg, e.channel.unicodeName,
                         "knock " + e.channel.unicodeName];
-            msg = getMsg("msg.err.irc." + e.code + ".knock", args, "");
+            msg = getMsg("msg.irc." + e.code + ".knock", args, "");
             client.munger.entries[".inline-buttons"].enabled = true;
             this.display(msg);
             client.munger.entries[".inline-buttons"].enabled = false;
@@ -1001,6 +1001,10 @@ function my_showtonet (e)
                 // This makes sure we have the *right* me object.
                 this.primServ.me.rehome(this.primServ);
             }
+            // Update the list of ignored users from the prefs:
+            var ignoreAry = this.prefs["ignoreList"];
+            for (var j = 0; j < ignoreAry.length; ++j)
+                this.ignoreList[ignoreAry[j]] = getHostmaskParts(ignoreAry[j]);
 
             // After rehoming it is now safe for the user's commands.
             var cmdary = this.prefs["autoperform"];
@@ -1440,7 +1444,7 @@ function my_464(e)
     {
         // If we are in the process of connecting we are needing a login
         // password, subtly different from after user registration.
-        this.display(MSG_ERR_IRC_464_LOGIN);
+        this.display(MSG_IRC_464_LOGIN);
     }
     else
     {
@@ -2498,10 +2502,6 @@ function my_dccchat(e)
 CIRCDCCChat.prototype.onInit =
 function my_dccinit(e)
 {
-    /* FIXME: we're currently 'borrowing' the client views' prefs until we have
-     * our own pref manager.
-     */
-    this.prefs = client.prefs;
 }
 
 CIRCDCCChat.prototype._getParams =
@@ -2513,7 +2513,7 @@ function my_dccgetparams()
 CIRCDCCChat.prototype.onPrivmsg =
 function my_dccprivmsg(e)
 {
-    this.displayHere(e.line, "PRIVMSG", e.user, "ME!");
+    this.displayHere(toUnicode(e.line, this), "PRIVMSG", e.user, "ME!");
 }
 
 CIRCDCCChat.prototype.onCTCPAction =

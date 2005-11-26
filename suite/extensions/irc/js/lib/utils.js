@@ -336,8 +336,21 @@ function Clone (obj)
 {
     var robj = new Object();
 
-    for (var p in obj)
-        robj[p] = obj[p];
+    if ("__proto__" in obj)
+    {
+        // Special clone for Spidermonkey.
+        for (var p in obj)
+        {
+            if (obj.hasOwnProperty(p))
+                robj[p] = obj[p];
+        }
+        robj.__proto__ = obj.__proto__;
+    }
+    else
+    {
+        for (var p in obj)
+            robj[p] = obj[p];
+    }
 
     return robj;
 
@@ -359,7 +372,7 @@ function Copy(source, dest, overwrite)
 
 /*
  * matches a real object against one or more pattern objects.
- * if you pass an array of pattern objects, |negate| controls wether to check
+ * if you pass an array of pattern objects, |negate| controls whether to check
  * if the object matches ANY of the patterns, or NONE of the patterns.
  */
 function matchObject (o, pattern, negate)
@@ -1039,8 +1052,8 @@ function confirmEx(msg, buttons, defaultButton, checkText,
     if (!checkVal)
         checkVal = new Object();
 
-    rv = ps.confirmEx(parent, title, msg, buttonFlags, buttonText[0], 
-                      buttonText[1], buttonText[2], checkText, checkVal);
+    var rv = ps.confirmEx(parent, title, msg, buttonFlags, buttonText[0],
+                          buttonText[1], buttonText[2], checkText, checkVal);
     return rv;
 }
 
@@ -1070,7 +1083,7 @@ function promptPassword(msg, initial, parent, title)
         parent = window;
     if (!title)
         title = MSG_PROMPT;
-    rv = { value: initial };
+    var rv = { value: initial };
 
     if (!ps.promptPassword (parent, title, msg, rv, null, {value: null}))
         return null;
