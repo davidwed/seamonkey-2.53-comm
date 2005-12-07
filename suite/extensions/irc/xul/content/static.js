@@ -43,7 +43,7 @@ const __cz_version   = "0.9.67+";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.67.4";
+const __cz_locale    = "0.9.67.5";
 
 var warn;
 var ASSERT;
@@ -1452,7 +1452,7 @@ function getSelectedNicknames(tree)
 
 function setSelectedNicknames(tree, nicknameAry)
 {
-    if (!nicknameAry)
+    if (!tree || !tree.view || !tree.view.selection || !nicknameAry)
         return;
     var item, unicodeName, resultAry = [];
     // Clear selection:
