@@ -120,12 +120,14 @@ function initCommands()
          ["join-charset",      cmdJoin,             CMD_NEED_SRV | CMD_CONSOLE],
          ["kick",              cmdKick,            CMD_NEED_CHAN | CMD_CONSOLE],
          ["kick-ban",          cmdKick,            CMD_NEED_CHAN | CMD_CONSOLE],
+         ["knock",             cmdKnock,            CMD_NEED_SRV | CMD_CONSOLE],
          ["leave",             cmdLeave,           CMD_NEED_CHAN | CMD_CONSOLE],
          ["links",             cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["list",              cmdList,             CMD_NEED_SRV | CMD_CONSOLE],
          ["list-plugins",      cmdListPlugins,                     CMD_CONSOLE],
          ["load",              cmdLoad,                            CMD_CONSOLE],
          ["log",               cmdLog,                             CMD_CONSOLE],
+         ["map",               cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["me",                cmdMe,                              CMD_CONSOLE],
          ["motd",              cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["mode",              cmdMode,             CMD_NEED_SRV | CMD_CONSOLE],
@@ -162,6 +164,7 @@ function initCommands()
          ["say",               cmdSay,              CMD_NEED_SRV | CMD_CONSOLE],
          ["server",            cmdServer,                          CMD_CONSOLE],
          ["set-current-view",  cmdSetCurrentView,                            0],
+         ["stats",             cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["squery",            cmdSquery,           CMD_NEED_SRV | CMD_CONSOLE],
          ["sslserver",         cmdSSLServer,                       CMD_CONSOLE],
          ["stalk",             cmdStalk,                           CMD_CONSOLE],
@@ -624,8 +627,9 @@ function dispatchCommand (command, e, flags)
     if (typeof e.command.func == "function")
     {
         /* dispatch a real function */
-        if (e.command.usage)
-            client.commandManager.parseArguments (e);
+
+        client.commandManager.parseArguments (e);
+
         if ("parseError" in e)
         {
             displayUsageError(e, e.parseError);
@@ -863,6 +867,9 @@ function cmdCancel(e)
              (network.state == NET_WAITING))
     {
         // We're trying to connect to a network, and want to cancel. Do so:
+        if (e.deleteWhenDone)
+            e.network.deleteWhenDone = true;
+
         display(getMsg(MSG_CANCELLING, network.unicodeName));
         network.cancel();
     }
@@ -1485,9 +1492,18 @@ function cmdDeleteView(e)
         e.view = e.sourceObject;
 
     if (e.view.TYPE == "IRCChannel" && e.view.active)
-        e.view.part();
+    {
+        e.view.dispatch("part", { deleteWhenDone: true });
+        return;
+    }
     if (e.view.TYPE == "IRCDCCChat" && e.view.active)
         e.view.disconnect();
+    if (e.view.TYPE == "IRCNetwork" && (e.view.state == NET_CONNECTING || 
+                                        e.view.state == NET_WAITING))
+    {
+        e.view.dispatch("cancel", { deleteWhenDone: true });
+        return;
+    }
 
     if (client.viewsArray.length < 2)
     {
@@ -1659,7 +1675,7 @@ function cmdRejoin(e)
     {
         if (!e.reason)
             e.reason = "";
-        e.channel.dispatch("part", { reason: e.reason, noDelete: true });
+        e.channel.dispatch("part", { reason: e.reason, deleteWhenDone: false });
     }
 
     e.channel.join(e.channel.mode.key);
@@ -2194,8 +2210,11 @@ function cmdJoin(e)
         return chan;
     }
 
-    if (arrayIndexOf(e.server.channelTypes, e.channelName[0]) == -1)
+    if ((arrayIndexOf(["#", "&", "+", "!"], e.channelName[0]) == -1) &&
+        (arrayIndexOf(e.server.channelTypes, e.channelName[0]) == -1))
+    {
         e.channelName = e.server.channelTypes[0] + e.channelName;
+    }
 
     var charset = e.charset ? e.charset : e.network.prefs["charset"];
     e.channel = e.server.addChannel(e.channelName, charset);
@@ -2280,13 +2299,15 @@ function cmdLeave(e)
         }
     }
 
+    if (!("deleteWhenDone" in e))
+        e.deleteWhenDone = client.prefs["deleteOnPart"];
+
     /* If it's not active, we're not actually in it, even though the view is
      * still here.
      */
     if (e.channel.active)
     {
-        if (e.noDelete)
-            e.channel.noDelete = true;
+        e.channel.deleteWhenDone = e.deleteWhenDone;
 
         if (!e.reason)
             e.reason = "";
@@ -2296,8 +2317,8 @@ function cmdLeave(e)
     }
     else
     {
-        if (!e.noDelete && client.prefs["deleteOnPart"])
-            e.channel.dispatch("delete");
+        if (e.deleteWhenDone)
+            e.channel.dispatch("delete-view");
     }
 }
 
@@ -2914,6 +2935,12 @@ function cmdKick(e)
         e.sourceObject.dispatch("ban", { nickname: e.user.encodedName });
 
     e.user.kick(e.reason);
+}
+
+function cmdKnock(e)
+{
+    var rest = (e.reason ? " :" + fromUnicode(e.reason, e.server) : "") + "\n";
+    e.server.sendData("KNOCK " + fromUnicode(e.channelName, e.server) + rest);
 }
 
 function cmdClient(e)

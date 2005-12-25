@@ -43,7 +43,7 @@ const __cz_version   = "0.9.67+";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.67.5";
+const __cz_locale    = "0.9.67.6";
 
 var warn;
 var ASSERT;
@@ -1438,6 +1438,12 @@ function getSelectedNicknames(tree)
         // If they == -1, we've got no selection, so bail.
         if ((start.value == -1) && (end.value == -1))
             continue;
+        /* Workaround: Because we use select(-1) instead of clearSelection()
+         * (see bug 197667) the tree will then give us selection ranges
+         * starting from -1 instead of 0! (See bug 319066.)
+         */
+        if (start.value == -1)
+            start.value = 0;
 
         // Loop through the contents of the current selection range.
         for (var k = start.value; k <= end.value; ++k)
@@ -2190,8 +2196,11 @@ function gotoIRCURL (url)
                  * NOTE: This is always a "#" so that URLs may be compared
                  * properly without involving the server (e.g. off-line).
                  */
-                if (arrayIndexOf(serv.channelTypes, target[0]) == -1)
+                if ((arrayIndexOf(["#", "&", "+", "!"], target[0]) == -1) &&
+                    (arrayIndexOf(serv.channelTypes, target[0]) == -1))
+                {
                     target = "#" + target;
+                }
 
                 var chan = new CIRCChannel(serv, null, target);
 
