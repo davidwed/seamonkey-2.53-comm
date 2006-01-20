@@ -148,7 +148,7 @@ function onClose()
     {
         client.userClose = true;
         display(MSG_CLOSING);
-        client.quit(client.userAgent);
+        client.quit();
     }
     return false;
 }
@@ -644,7 +644,7 @@ function onInputCompleteLine(e)
 
 function onNotifyTimeout()
 {
-    /* Workaround: bug 291386 - timers sometimes fire way too quickly.
+    /* Workaround: bug 318419 - timers sometimes fire way too quickly.
      * This catches us out, as it causes the notify code (this) and the who
      * code (below) to fire continuously, which completely floods the
      * sendQueue. We work around this for now by reporting the probable
@@ -656,19 +656,19 @@ function onNotifyTimeout()
         var net = client.networks[n];
         if (net.isConnected()) {
             // WORKAROUND BEGIN //
-            if (!("bug291386" in client) &&
+            if (!("bug318419" in client) &&
                 (net.primServ.sendQueue.length >= 1000))
             {
-                client.bug291386 = 10;
-                display(MSG_BUG291386_WARNING, MT_WARN);
+                client.bug318419 = 10;
+                display(MSG_BUG318419_WARNING, MT_WARN);
                 window.getAttention();
                 return;
             }
-            else if (("bug291386" in client) && (client.bug291386 > 0) &&
-                     (net.primServ.sendQueue.length >= (1000 * client.bug291386)))
+            else if (("bug318419" in client) && (client.bug318419 > 0) &&
+                     (net.primServ.sendQueue.length >= (1000 * client.bug318419)))
             {
-                client.bug291386++;
-                display(MSG_BUG291386_ERROR, MT_ERROR);
+                client.bug318419++;
+                display(MSG_BUG318419_ERROR, MT_ERROR);
                 window.getAttention();
                 return;
             }
@@ -1290,6 +1290,8 @@ function my_running_list()
 CIRCNetwork.prototype.list =
 function my_list(word, file)
 {
+    const NORMAL_FILE_TYPE = Components.interfaces.nsIFile.NORMAL_FILE_TYPE;
+
     if (("_list" in this) && !this._list.done)
         return false;
 
@@ -1299,7 +1301,15 @@ function my_list(word, file)
     this._list.done = false;
     this._list.count = 0;
     if (file)
-        this._list.saveTo = file;
+    {
+        var lfile = new LocalFile(file);
+        if (!lfile.localFile.exists())
+        {
+            // futils.umask may be 0022. Result is 0644.
+            lfile.localFile.create(NORMAL_FILE_TYPE, 0666 & ~futils.umask);
+        }
+        this._list.file = new LocalFile(lfile.localFile, ">");
+    }
 
     if (word instanceof RegExp)
     {
@@ -1319,8 +1329,6 @@ function my_list(word, file)
 CIRCNetwork.prototype.listInit =
 function my_list_init ()
 {
-    const NORMAL_FILE_TYPE = Components.interfaces.nsIFile.NORMAL_FILE_TYPE;
-
     function checkEndList (network)
     {
         if (network._list.count == network._list.lastLength)
@@ -1379,7 +1387,6 @@ function my_list_init ()
             }
             network.displayHere(getMsg(MSG_LIST_END,
                                        [list.displayed, list.count]));
-            delete network._list;
         }
         else
         {
@@ -1396,17 +1403,7 @@ function my_list_init ()
         this._list.count = 0;
     }
 
-    if ("saveTo" in this._list)
-    {
-        var file = new LocalFile(this._list.saveTo);
-        if (!file.localFile.exists())
-        {
-            // futils.umask may be 0022. Result is 0644.
-            file.localFile.create(NORMAL_FILE_TYPE, 0666 & ~futils.umask);
-        }
-        this._list.file = new LocalFile(file.localFile, ">");
-    }
-    else
+    if (!("saveTo" in this._list))
     {
         this._list.displayed = 0;
         if (client.currentObject != this)
@@ -1426,7 +1423,6 @@ function my_abortList()
 CIRCNetwork.prototype.on321 = /* LIST reply header */
 function my_321 (e)
 {
-
     this.listInit();
 
     if (!("saveTo" in this._list))
@@ -2392,13 +2388,7 @@ function my_cnick (e)
     }
 
     e.user.updateGraphResource();
-    //this.updateUsers([e.user]);
-    /* updateUsers isn't clever enough (currently) to handle a nick change, so
-     * we fake the user leaving (with the old nick) and coming back (with the
-     * new nick).
-     */
-    this.removeUsers([e.server.addUser(e.oldNick)]);
-    this.addUsers([e.user]);
+    this.updateUsers([e.user]);
     if (client.currentObject == this)
         updateUserList();
 }

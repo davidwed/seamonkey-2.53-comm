@@ -242,7 +242,10 @@ function initCommands()
          ["ltr",              "text-direction ltr",                CMD_CONSOLE],
          ["toggle-text-dir",  "text-direction toggle",                       0],
          ["irtl",             "input-text-direction rtl",          CMD_CONSOLE],
-         ["iltr",             "input-text-direction ltr",          CMD_CONSOLE]
+         ["iltr",             "input-text-direction ltr",          CMD_CONSOLE],
+         // Instrumentation aliases
+         ["allow-inst1",      "pref instrumentation.inst1 1",                0],
+         ["deny-inst1",       "pref instrumentation.inst1 2",                0]
         ];
 
     // set the stringbundle associated with these commands.
@@ -1224,24 +1227,32 @@ function cmdStatus(e)
     display(MSG_END_STATUS, MT_STATUS);
 }
 
-function cmdHelp (e)
+function cmdHelp(e)
 {
-    var ary;
-    ary = client.commandManager.list (e.pattern, CMD_CONSOLE);
+    if (!e.pattern)
+    {
+        if ("hello" in e)
+            display(MSG_HELP_INTRO, "HELLO");
+        else
+            display(MSG_HELP_INTRO);
+        return;
+    }
+
+    var ary = client.commandManager.list(e.pattern, CMD_CONSOLE);
 
     if (ary.length == 0)
     {
-        display (getMsg(MSG_ERR_NO_COMMAND, e.pattern), MT_ERROR);
-        return false;
+        display(getMsg(MSG_ERR_NO_COMMAND, e.pattern), MT_ERROR);
+        return;
     }
 
     for (var i in ary)
     {
-        display (getMsg(MSG_FMT_USAGE, [ary[i].name, ary[i].usage]), MT_USAGE);
-        display (ary[i].help, MT_HELP);
+        display(getMsg(MSG_FMT_USAGE, [ary[i].name, ary[i].usage]), MT_USAGE);
+        display(ary[i].help, MT_HELP);
     }
 
-    return true;
+    return;
 }
 
 function cmdTestDisplay(e)
@@ -1440,11 +1451,6 @@ function cmdSSLServer(e)
 
 function cmdQuit(e)
 {
-    if ((typeof e.reason != "string") || !e.reason)
-        e.reason = client.prefs["defaultQuitMsg"];
-    if (!e.reason)
-        e.reason = client.userAgent;
-
     client.quit(e.reason);
     window.close();
 }
@@ -1458,7 +1464,7 @@ function cmdQuitMozilla(e)
 function cmdDisconnect(e)
 {
     if ((typeof e.reason != "string") || !e.reason)
-        e.reason = client.prefs["defaultQuitMsg"];
+        e.reason = e.network.prefs["defaultQuitMsg"];
     if (!e.reason)
         e.reason = client.userAgent;
 
@@ -1467,6 +1473,7 @@ function cmdDisconnect(e)
 
 function cmdDisconnectAll(e)
 {
+    var netReason;
     if (confirmEx(MSG_CONFIRM_DISCONNECT_ALL, ["!yes", "!no"]) != 0)
         return;
 
@@ -1477,19 +1484,26 @@ function cmdDisconnectAll(e)
         return;
     }
 
-    if ((typeof e.reason != "string") || !e.reason)
-        e.reason = client.prefs["defaultQuitMsg"];
-    if (!e.reason)
-        e.reason = client.userAgent;
-
     for (var i = 0; i < conNetworks.length; i++)
-        conNetworks[i].quit(e.reason);
+    {
+        netReason = e.reason;
+        if ((typeof netReason != "string") || !netReason)
+            netReason = conNetworks[i].prefs["defaultQuitMsg"];
+        netReason = (netReason ? netReason : client.userAgent);
+        conNetworks[i].quit(netReason);
+    }
 }
 
 function cmdDeleteView(e)
 {
     if (!e.view)
         e.view = e.sourceObject;
+
+    if (("lockView" in e.view) && e.view.lockView)
+    {
+        setTabState(e.view, "attention");
+        return;
+    }
 
     if (e.view.TYPE == "IRCChannel" && e.view.active)
     {
@@ -2085,7 +2099,7 @@ function cmdGotoURL(e)
     {
         var ary = e.url.match(/^x-cz-command:(.*)$/i);
         e.sourceObject.frame.contentWindow.location.href = 
-            "javascript:void(view.dispatch('" + decodeURI(ary[1]) + "'))";
+            "javascript:void(view.dispatch('" + decodeURI(ary[1]) + "', null, true))";
         return;
     }
 
@@ -2179,7 +2193,8 @@ function cmdJoin(e)
     if (!e.hasOwnProperty("channelName") || !e.channelName)
     {
         window.openDialog("chrome://chatzilla/content/channels.xul", "",
-                          "modal,resizable=yes", { client: client })
+                          "modal,resizable=yes",
+                          { client: client, network: e.network })
         return null;
     }
 
@@ -3519,6 +3534,9 @@ function cmdTimestampFormat(e)
 
 function cmdSetCurrentView(e)
 {
+    if ("lockView" in e.view)
+        delete e.view.lockView;
+
     setCurrentObject(e.view);
 }
 
