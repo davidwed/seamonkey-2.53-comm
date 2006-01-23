@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.67+";
+const __cz_version   = "0.9.70";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.67.7";
+const __cz_locale    = "0.9.70.0";
 
 var warn;
 var ASSERT;
@@ -3332,15 +3332,19 @@ function tabdnd_dstart (aEvent, aXferData, aDragAction)
 var userlistDNDObserver = new Object();
 
 userlistDNDObserver.onDragStart =
-function userlistdnd_dstart(event, transferdata, dragAction)
+function userlistdnd_dstart(event, transferData, dragAction)
 {
+    var col = new Object(), row = new Object(), cell = new Object();
     var tree = document.getElementById('user-list');
-    var index = tree.treeBoxObject.getRowAt(event.clientX, event.clientY);
-    var user = tree.contentView.getItemAtIndex(index).firstChild.firstChild;
+    tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, cell);
+    // Check whether we're actually on a normal row and cell
+    if (!cell.value || (row.value == -1)) 
+        return;
+    var user = tree.contentView.getItemAtIndex(row.value).firstChild.firstChild;
     var nickname = user.getAttribute("unicodeName");
 
-    transferdata.data = new TransferData();
-    transferdata.data.addDataForFlavour("text/unicode", nickname);
+    transferData.data = new TransferData();
+    transferData.data.addDataForFlavour("text/unicode", nickname);
 }
 
 function deleteTab (tb)
@@ -4395,6 +4399,29 @@ function cli_quit (reason)
             netReason = (netReason ? netReason : client.userAgent);
             net.quit(netReason);
         }
+    }
+}
+
+client.wantToQuit =
+function cli_wantToQuit(reason)
+{
+    
+    var close = true;
+    if (client.prefs["warnOnClose"])
+    {
+        const buttons = ["!yes", "!no"];
+        var checkState = { value: true };
+        var rv = confirmEx(MSG_CONFIRM_QUIT, buttons, 0, MSG_WARN_ON_EXIT,
+                           checkState);
+        close = (rv == 0);
+        client.prefs["warnOnClose"] = checkState.value;
+    }
+
+    if (close)
+    {
+        client.userClose = true;
+        display(MSG_CLOSING);
+        client.quit(reason);
     }
 }
 
