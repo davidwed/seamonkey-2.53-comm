@@ -1205,53 +1205,6 @@ function serv_ppline(e)
 CIRCServer.prototype.onRawData =
 function serv_onRawData(e)
 {
-    var me = this;
-    function makeMaskRegExp(text)
-    {
-        function escapeChars(c)
-        {
-            if (c == "*")
-                return ".*";
-            if (c == "?")
-                return ".";
-            return "\\" + c;
-        }
-        // Anything that's not alpha-numeric gets escaped.
-        // "*" and "?" are 'escaped' to ".*" and ".".
-        // Optimisation; * translates as 'match all'.
-        return new RegExp("^" + text.replace(/[^\w\d]/g, escapeChars) + "$", "i");
-    };
-    function hostmaskMatches(user, mask)
-    {
-        // Need to match .nick, .user, and .host.
-        if (!("nickRE" in mask))
-        {
-            // We cache all the regexp objects, but use null if the term is
-            // just "*", so we can skip having the object *and* the .match
-            // later on.
-            if (mask.nick == "*")
-                mask.nickRE = null;
-            else
-                mask.nickRE = makeMaskRegExp(mask.nick);
-
-            if (mask.user == "*")
-                mask.userRE = null;
-            else
-                mask.userRE = makeMaskRegExp(mask.user);
-
-            if (mask.host == "*")
-                mask.hostRE = null;
-            else
-                mask.hostRE = makeMaskRegExp(mask.host);
-        }
-        var lowerNick = me.toLowerCase(user.unicodeName);
-        if ((!mask.nickRE || lowerNick.match(mask.nickRE)) &&
-            (!mask.userRE || user.name.match(mask.userRE)) &&
-            (!mask.hostRE || user.host.match(mask.hostRE)))
-            return true;
-        return false;
-    };
-
     var ary;
     var l = e.data;
 
@@ -2794,19 +2747,19 @@ function chan_userslen (mode)
 CIRCChannel.prototype.iAmOp =
 function chan_amop()
 {
-    return this.users[this.parent.me.canonicalName].isOp;
+    return this.active && this.users[this.parent.me.canonicalName].isOp;
 }
 
 CIRCChannel.prototype.iAmHalfOp =
 function chan_amhalfop()
 {
-    return this.users[this.parent.me.canonicalName].isHalfOp;
+    return this.active && this.users[this.parent.me.canonicalName].isHalfOp;
 }
 
 CIRCChannel.prototype.iAmVoice =
 function chan_amvoice()
 {
-    return this.parent.users[this.parent.parent.me.canonicalName].isVoice;
+    return this.active && this.users[this.parent.me.canonicalName].isVoice;
 }
 
 CIRCChannel.prototype.setTopic =

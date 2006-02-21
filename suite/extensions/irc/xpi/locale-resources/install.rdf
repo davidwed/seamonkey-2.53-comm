@@ -2,7 +2,15 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 	<Description about="urn:mozilla:install-manifest">
 		<!-- core data -->
-		<em:id>{59c81df5-4b7a-477b-912d-4e0fdf64e5f2}</em:id>
+		<!-- NOTES FOR LOCALIZERS
+		If you're using this file, remember to:
+		   * Copy this file to a new 'ab-CD' subdirectory, where 'ab-CD' is the
+		     localization you are doing. Doing this before modifying anything
+		     might be a good idea.
+		   * Change the front-end metadata to reflect the names of the translators
+		   * Change the following UUID to one you use for this translation only
+		     (do NOT use ChatZilla's UUID for this)  -->
+		<em:id>{00000000-0000-0000-0000-000000000000}</em:id>
 		<em:version>@REVISION@</em:version>
 		
 		<!-- target: Mozilla, version 1.0 to 1.8 -->
@@ -22,7 +30,7 @@
 				<em:maxVersion>1.6</em:maxVersion>
 			</Description>
 		</em:targetApplication>
-
+		
 		<!-- target: Flock, version 0.4 - 1.0+ -->
 		<em:targetApplication>
 			<Description>
@@ -31,26 +39,19 @@
 				<em:maxVersion>1.0+</em:maxVersion>
 			</Description>
 		</em:targetApplication>
-		
+
 		<!-- front-end metadata -->
-		<em:name>ChatZilla</em:name>
-		<em:description>A clean, easy to use and highly extensible Internet Relay Chat (IRC) client.</em:description>
-		<em:creator>The ChatZilla Team</em:creator>
-		<em:contributor>Robert Ginda</em:contributor>
-		<em:contributor>Samuel Sieb</em:contributor>
-		<em:contributor>James Ross</em:contributor>
-		<em:contributor>Lim Chee Aun (graphics)</em:contributor>
+		<em:name>ChatZilla @LOCALE@ localization</em:name>
+		<em:description>ChatZilla Localization.</em:description>
+		<em:creator>Some Localizer</em:creator>
+		<em:contributor>Some Contributor</em:contributor>
 		<em:iconURL>chrome://chatzilla/skin/images/logo.png</em:iconURL>
-		<em:homepageURL>http://www.hacksrus.com/~ginda/chatzilla/</em:homepageURL>
-		<em:optionsURL>javascript:opener.openDialog('chrome://chatzilla/content/config.xul','','chrome,modal,resizable');window.close();</em:optionsURL>
+		<em:homepageURL>http://my.locale.homepage.com/</em:homepageURL>
 		
 		<!-- package files -->
 		<em:file>
-			<Description about="urn:mozilla:extension:file:chatzilla.jar">
-				<em:package>content/chatzilla/</em:package>
-				<em:package>content/chatzilla/ff/</em:package>
-				<em:locale>locale/en-US/chatzilla/</em:locale>
-				<em:skin>skin/modern/chatzilla/</em:skin>
+			<Description about="urn:mozilla:extension:file:chatzilla-@LOCALE@.jar">
+				<em:locale>locale/@LOCALE@/chatzilla/</em:locale>
 			</Description>
 		</em:file>
 	</Description>

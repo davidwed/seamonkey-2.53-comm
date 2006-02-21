@@ -77,6 +77,11 @@ function initPrefs()
         mkdir(logPath);
     client.prefManager.logPath = logPath;
 
+    var downloadsPath = profilePath.clone();
+    downloadsPath.append("downloads");
+    if (!downloadsPath.exists())
+        mkdir(downloadsPath);
+
     var logDefault = client.prefManager.logPath.clone();
     logDefault.append(escapeFileName("client.log"));
 
@@ -111,6 +116,12 @@ function initPrefs()
         }
     }
 
+    // Set a property so network ident prefs get the same group later:
+    client.prefManager.identGroup = ".connect";
+    // Linux and OS X won't let non-root listen on port 113.
+    if ((client.platform == "Linux") || (client.platform == "Mac"))
+        client.prefManager.identGroup = "hidden";
+
     var prefs =
         [
          ["activityFlashDelay", 200,      "global"],
@@ -134,6 +145,8 @@ function initPrefs()
          ["dccUserLog",         false,    "global.log"],
          ["dccUserMaxLines",    500,      "global.maxLines"],
          ["dcc.enabled",        true,     "dcc"],
+         ["dcc.autoAccept.delay", 10000,  "hidden"],
+         ["dcc.downloadsFolder", getURLSpecFromFile(downloadsPath.path), "dcc"],
          ["dcc.listenPorts",    [],       "dcc.ports"],
          ["dcc.useServerIP",    true,     "dcc"],
          ["debugMode",          "",       "global"],
@@ -145,6 +158,7 @@ function initPrefs()
          ["hasPrefs",           false,    "hidden"],
          ["font.family",        "default", "appearance.misc"],
          ["font.size",          0,        "appearance.misc"],
+         ["identd.enabled",     false,    client.prefManager.identGroup],
          ["initialURLs",        [],       "startup.initialURLs"],
          ["initialScripts",     [getURLSpecFromFile(scriptPath.path)],
                                           "startup.initialScripts"],
@@ -185,6 +199,7 @@ function initPrefs()
          ["munger.mailto",      true,     "munger"],
          ["munger.quote",       true,     "munger"],
          ["munger.rheet",       true,     "munger"],
+         ["munger.talkback-link", true,   "munger"],
          ["munger.teletype",    true,     "munger"],
          ["munger.underline",   true,     "munger"],
          ["munger.word-hyphenator", true, "munger"],
@@ -400,6 +415,8 @@ function getNetworkPrefManager(network)
          ["conference.limit", defer, "appearance.misc"],
          ["connectTries",     defer, ".connect"],
          ["dcc.useServerIP",  defer, "dcc"],
+         ["dcc.downloadsFolder", defer, "dcc"],
+         ["dcc.autoAccept.list", [], "dcc.autoAccept"],
          ["defaultQuitMsg",   defer, ".connect"],
          ["desc",             defer, ".ident"],
          ["displayHeader",    client.prefs["networkHeader"],
@@ -407,6 +424,7 @@ function getNetworkPrefManager(network)
          ["font.family",      defer, "appearance.misc"],
          ["font.size",        defer, "appearance.misc"],
          ["hasPrefs",         false, "hidden"],
+         ["identd.enabled",   defer, client.prefManager.identGroup],
          ["ignoreList",       [],    "hidden"],
          ["log",              client.prefs["networkLog"], ".log"],
          ["logFileName",      makeLogNameNetwork,         ".log"],
@@ -738,6 +756,14 @@ function onPrefChanged(prefName, newValue, oldValue)
         case "aliases":
             initAliases();
             break;
+
+        default:
+            // Make munger prefs apply without a restart
+            if ((m = prefName.match(/^munger\.(\S+)$/))
+                && (m[1] in client.munger.entries))
+            {
+                client.munger.entries[m[1]].enabled = newValue;
+            }
     }
 }
 

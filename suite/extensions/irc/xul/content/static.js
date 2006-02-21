@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.70";
+const __cz_version   = "0.9.71";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.70.0";
+const __cz_locale    = "0.9.71.0";
 
 var warn;
 var ASSERT;
@@ -161,7 +161,7 @@ function init()
     initApplicationCompatibility();
     initMessages();
     if (client.host == "")
-        showErrorDlg(getMsg(MSG_ERR_UNKNOWN_HOST, getBrowserURL()));
+        showErrorDlg(getMsg(MSG_ERR_UNKNOWN_HOST, client.unknownUID));
 
     initRDF();
     initCommands();
@@ -174,6 +174,8 @@ function init()
 
     // Create DCC handler.
     client.dcc = new CIRCDCC(client);
+
+    client.ident = new IdentServer(client);
 
     // start logging.  nothing should call display() before this point.
     if (client.prefs["log"])
@@ -421,7 +423,12 @@ function initApplicationCompatibility()
                 client.host = "Mozilla";
                 client.hostCompat.typeChromeBrowser = true;
                 break;
+            case "{a463f10c-3994-11da-9945-000d60ca027b}": // Flock
+                client.host = "Flock";
+                client.hostCompat.typeChromeBrowser = true;
+                break;
             default:
+                client.unknownUID = app.ID;
                 client.host = ""; // Unknown host, show an error later.
         }
     }
@@ -429,11 +436,18 @@ function initApplicationCompatibility()
     {
         var url = getBrowserURL();
         if (url == "chrome://navigator/content/navigator.xul")
+        {
             client.host = "Mozilla";
+        }
         else if (url == "chrome://browser/content/browser.xul")
+        {
             client.host = "Firefox";
+        }
         else
+        {
             client.host = ""; // We don't know this host. Show an error later.
+            client.unknownUID = url;
+        }
     }
 
     client.platform = "Unknown";
@@ -489,7 +503,7 @@ function initIcons()
      * In XULRunner, things are more fun, as we're not an extension.
      */
     var sourceDir;
-    if (client.host == "Firefox")
+    if ((client.host == "Firefox") || (client.host == "Flock"))
     {
         sourceDir = getSpecialDirectory("ProfD");
         sourceDir.append("extensions");
@@ -1023,6 +1037,19 @@ function insertChannelLink (matchText, containerTag, eventData)
     anchor.setAttribute ("class", "chatzilla-link");
     insertHyphenatedWord (matchText, anchor);
     containerTag.appendChild (anchor);
+}
+
+function insertTalkbackLink(matchText, containerTag, eventData)
+{
+    var anchor = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                          "html:a");
+
+    anchor.setAttribute("href", "http://talkback-public.mozilla.org/" +
+                        "talkback/fastfind.jsp?search=2&type=iid&id=" + 
+                        matchText);
+    anchor.setAttribute("class", "chatzilla-link");
+    insertHyphenatedWord(matchText, anchor);
+    containerTag.appendChild(anchor);
 }
 
 function insertBugzillaLink (matchText, containerTag, eventData)
@@ -3924,6 +3951,19 @@ function __display(message, msgtype, sourceObj, destObj)
     if (fromUser && msgtype.match(/^(PRIVMSG|ACTION|NOTICE)$/))
     {
         var nick = sourceObj.unicodeName;
+        var decorSt = "";
+        var decorEn = "";
+
+        // Set default decorations.
+        if (msgtype == "ACTION")
+        {
+            decorSt = "* ";
+        }
+        else
+        {
+            decorSt = "<";
+            decorEn = ">";
+        }
 
         var nickURL;
         if ((sourceObj != me) && ("getURL" in sourceObj))
@@ -3939,18 +3979,12 @@ function __display(message, msgtype, sourceObj, destObj)
                 getAttention = true;
                 this.defaultCompletion = "/msg " + nick + " ";
 
-                if (msgtype == "ACTION")
+                // If this is a private message, and it's not in a query view,
+                // use *nick* instead of <nick>.
+                if ((msgtype != "ACTION") && (this.TYPE != "IRCUser"))
                 {
-                    logString += "* " + nick + " ";
-                }
-                else
-                {
-                    // If this private message is not in a query view, use
-                    // *nick* instead of <nick>.
-                    if (this.TYPE == "IRCUser")
-                        logString += "<" + nick + "> ";
-                    else
-                        logString += "*" + nick + "* ";
+                    decorSt = "*";
+                    decorEn = "*";
                 }
             }
             else
@@ -3966,41 +4000,20 @@ function __display(message, msgtype, sourceObj, destObj)
                             client.prefs["nickCompleteStr"] + " ";
                     }
                 }
-                if (msgtype == "ACTION")
-                    logString += "* " + nick + " ";
-                else
-                    logString += "<" + nick + "> ";
             }
         }
         else
         {
-            // Messages from us to somewhere...
-
-            if (toUser)
+            // Messages from us, on a channel or network view, to a user
+            if (toUser && (this.TYPE != "IRCUser"))
             {
-                // From us to a user.
-
-                if (this.TYPE == "IRCUser")
-                {
-                    if (msgtype == "ACTION")
-                        logString += "* " + nick + " ";
-                    else
-                        logString += "<" + nick + "> ";
-                }
-                else
-                {
-                    nick = destObj.unicodeName;
-                    logString += ">" + nick + "< ";
-                }
-            }
-            else
-            {
-                if (msgtype == "ACTION")
-                    logString += "*" + nick + " ";
-                else
-                    logString += "<" + nick + "> ";
+                nick = destObj.unicodeName;
+                decorSt = ">";
+                decorEn = "<";
             }
         }
+        // Log the nickname in the same format as we'll let the user copy.
+        logString += decorSt + nick + decorEn + " ";
 
         // Mark makes alternate "talkers" show up in different shades.
         //if (!("mark" in this))
@@ -4020,6 +4033,8 @@ function __display(message, msgtype, sourceObj, destObj)
         if (nick && (nick.length > client.MAX_NICK_DISPLAY))
             blockLevel = true;
 
+        if (decorSt)
+            msgRowSource.appendChild(newInlineText(decorSt, "chatzilla-decor"));
         if (nickURL)
         {
             var nick_anchor =
@@ -4034,6 +4049,8 @@ function __display(message, msgtype, sourceObj, destObj)
         {
             msgRowSource.appendChild(newInlineText(nick));
         }
+        if (decorEn)
+            msgRowSource.appendChild(newInlineText(decorEn, "chatzilla-decor"));
         canMergeData = this.prefs["collapseMsgs"];
     }
     else
