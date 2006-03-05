@@ -127,6 +127,7 @@ function initPrefs()
          ["activityFlashDelay", 200,      "global"],
          ["aliases",            [],       "lists.aliases"],
          ["autoAwayCap",        300,      "global"],
+         ["autoAwayPeriod",     2,        "appearance.misc"],
          ["autoRejoin",         false,    ".connect"],
          ["awayNick",           "",       ".ident"],
          ["bugURL",           "https://bugzilla.mozilla.org/show_bug.cgi?id=%s",
@@ -263,6 +264,7 @@ function initPrefs()
     var dccUserMaxLines = client.prefs["dccUserMaxLines"];
     CIRCDCCChat.prototype.MAX_MESSAGES  = dccUserMaxLines;
     CIRCDCCFileTransfer.prototype.MAX_MESSAGES = dccUserMaxLines;
+    CIRCDCC.prototype.listenPorts       = client.prefs["dcc.listenPorts"];
     client.MAX_MESSAGES                 = client.prefs["clientMaxLines"];
     client.charset                      = client.prefs["charset"];
 
@@ -340,6 +342,17 @@ function makeLogName(obj, type)
     // Get details for $-replacement variables.
     var info = getObjectDetails(obj);
 
+    // Store the most specific time short code on the object.
+    obj.smallestLogInterval = "";
+    if (file.indexOf("$y") != -1)
+        obj.smallestLogInterval = "y";
+    if (file.indexOf("$m") != -1)
+        obj.smallestLogInterval = "m";
+    if (file.indexOf("$d") != -1)
+        obj.smallestLogInterval = "d";
+    if (file.indexOf("$h") != -1)
+        obj.smallestLogInterval = "h";
+
     // Three longs codes: $(network), $(channel) and $(user).
     // Each is available only if appropriate for the object.
     var longCodes = new Object();
@@ -350,15 +363,13 @@ function makeLogName(obj, type)
     if (info.user)
         longCodes["user"] = info.user.unicodeName;
 
-    // Six short codes: $y, $m, $d, $h, $n, $s.
+    // 4 short codes: $y, $m, $d, $h.
     // These are time codes, each replaced with a fixed-length number.
     var d = new Date();
     var shortCodes = { y: formatTimeNumber(d.getFullYear(), 4),
                        m: formatTimeNumber(d.getMonth() + 1, 2),
                        d: formatTimeNumber(d.getDate(), 2),
-                       h: formatTimeNumber(d.getHours(), 2),
-                       n: formatTimeNumber(d.getMinutes(), 2),
-                       s: formatTimeNumber(d.getSeconds(), 2)
+                       h: formatTimeNumber(d.getHours(), 2)
                      };
 
     // Replace all $-variables in one go.
@@ -405,6 +416,7 @@ function getNetworkPrefManager(network)
 
     var prefs =
         [
+         ["autoAwayPeriod",   defer, "appearance.misc"],
          ["autoRejoin",       defer, ".connect"],
          ["away",             "",    "hidden"],
          ["awayNick",         defer, ".ident"],
@@ -657,6 +669,10 @@ function onPrefChanged(prefName, newValue, oldValue)
 
         case "connectTries":
             CIRCNetwork.prototype.MAX_CONNECT_ATTEMPTS = newValue;
+            break;
+
+        case "dcc.listenPorts":
+            CIRCDCC.prototype.listenPorts = newValue;
             break;
 
         case "dccUserMaxLines":

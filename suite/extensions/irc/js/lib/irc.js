@@ -1172,7 +1172,7 @@ function serv_ppline(e)
         ev.data = lines[i].replace(/\r/g, "");
         if (ev.data)
         {
-            if (ev.data.match(/^(?::[^ ]+ )?32[123] /i))
+            if (ev.data.match(/^(?::[^ ]+ )?(?:32[123]|352|315) /i))
                 this.parent.eventPump.addBulkEvent(ev);
             else
                 this.parent.eventPump.addEvent(ev);
@@ -2462,7 +2462,7 @@ function serv_cact (e)
 CIRCServer.prototype.onCTCPFinger =
 function serv_cfinger (e)
 {
-    e.user.ctcp("FINGER", this.parent.prefs["desc"], "NOTICE");
+    e.user.ctcp("FINGER", this.parent.INITIAL_DESC, "NOTICE");
     return true;
 }
 
@@ -2863,7 +2863,7 @@ function chan_modestr (f)
     /* modeA are 'list' ones, and so should not be shown.
      * modeB are 'param' ones, like +k key, so we wont show them either.
      * modeC are 'on-param' ones, like +l limit, which we will show.
-     * modeD are 'boolean' ones, which we will definately show.
+     * modeD are 'boolean' ones, which we will definitely show.
      */
 
     // Add modeD:
@@ -3177,6 +3177,10 @@ function CIRCChanUser(parent, unicodeName, encodedName, modes)
                 }
             }
         }
+        existingUser.isFounder = (arrayContains(existingUser.modes, "q")) ?
+            true : false;
+        existingUser.isAdmin = (arrayContains(existingUser.modes, "a")) ?
+            true : false;
         existingUser.isOp = (arrayContains(existingUser.modes, "o")) ?
             true : false;
         existingUser.isHalfOp = (arrayContains(existingUser.modes, "h")) ?
@@ -3207,6 +3211,8 @@ function CIRCChanUser(parent, unicodeName, encodedName, modes)
     this.modes = new Array();
     if (typeof modes != "undefined")
         this.modes = modes;
+    this.isFounder = (arrayContains(this.modes, "q")) ? true : false;
+    this.isAdmin = (arrayContains(this.modes, "a")) ? true : false;
     this.isOp = (arrayContains(this.modes, "o")) ? true : false;
     this.isHalfOp = (arrayContains(this.modes, "h")) ? true : false;
     this.isVoice = (arrayContains(this.modes, "v")) ? true : false;
