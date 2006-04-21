@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.72";
+const __cz_version   = "0.9.73";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.71.1";
+const __cz_locale    = "0.9.73";
 
 var warn;
 var ASSERT;
@@ -477,25 +477,6 @@ function initApplicationCompatibility()
         client.lineEnd = "\r\n";
     else
         client.lineEnd = "\n";
-}
-
-function initNetworks()
-{
-    client.addNetwork("moznet",
-                      [{name: "irc.mozilla.org", port:6667},
-                       {name: "irc.mozilla.org", port:6697, isSecure:true}]);
-    client.addNetwork("hybridnet", [{name: "irc.ssc.net", port: 6667}]);
-    client.addNetwork("slashnet", [{name: "irc.slashnet.org", port:6667}]);
-    client.addNetwork("dalnet", [{name: "irc.dal.net", port:6667}]);
-    client.addNetwork("undernet", [{name: "irc.undernet.org", port:6667}]);
-    client.addNetwork("webbnet", [{name: "irc.webbnet.info", port:6667}]);
-    client.addNetwork("quakenet", [{name: "irc.quakenet.org", port:6667}]);
-    client.addNetwork("freenode", [{name: "irc.freenode.net", port:6667}]);
-    client.addNetwork("serenia",
-                      [{name: "chat.serenia.net", port:9999, isSecure:true}]);
-    client.addNetwork("efnet",
-                      [{name: "irc.prison.net", port: 6667},
-                       {name: "irc.magic.ca", port: 6667}]);
 }
 
 function initIcons()
@@ -1051,8 +1032,7 @@ function insertTalkbackLink(matchText, containerTag, eventData)
                                           "html:a");
 
     anchor.setAttribute("href", "http://talkback-public.mozilla.org/" +
-                        "talkback/fastfind.jsp?search=2&type=iid&id=" + 
-                        matchText);
+                        "search/start.jsp?search=2&type=iid&id=" + matchText);
     anchor.setAttribute("class", "chatzilla-link");
     insertHyphenatedWord(matchText, anchor);
     containerTag.appendChild(anchor);
@@ -2006,7 +1986,7 @@ function addDynamicRule (rule)
 function getCommandEnabled(command)
 {
     try {
-        var dispatcher = top.document.commandDispatcher;
+        var dispatcher = document.commandDispatcher;
         var controller = dispatcher.getControllerForCommand(command);
 
         return controller.isCommandEnabled(command);
@@ -2020,10 +2000,32 @@ function getCommandEnabled(command)
 function doCommand(command)
 {
     try {
-        var dispatcher = top.document.commandDispatcher;
+        var dispatcher = document.commandDispatcher;
         var controller = dispatcher.getControllerForCommand(command);
         if (controller && controller.isCommandEnabled(command))
             controller.doCommand(command);
+    }
+    catch (e)
+    {
+    }
+}
+
+function doCommandWithParams(command, params)
+{
+    try {
+        var dispatcher = document.commandDispatcher;
+        var controller = dispatcher.getControllerForCommand(command);
+        controller.QueryInterface(Components.interfaces.nsICommandController);
+
+        if (!controller || !controller.isCommandEnabled(command))
+            return;
+
+        var cmdparams = newObject("@mozilla.org/embedcomp/command-params;1",
+                                  "nsICommandParams");
+        for (var i in params)
+            cmdparams.setISupportsValue(i, params[i]);
+
+        controller.doCommandWithParams(command, cmdparams);
     }
     catch (e)
     {
@@ -3390,7 +3392,7 @@ function userlistdnd_dstart(event, transferData, dragAction)
     var tree = document.getElementById('user-list');
     tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, cell);
     // Check whether we're actually on a normal row and cell
-    if (!cell.value || (row.value == -1)) 
+    if (!cell.value || (row.value == -1))
         return;
     var user = tree.contentView.getItemAtIndex(row.value).firstChild.firstChild;
     var nickname = user.getAttribute("unicodeName");
@@ -3440,7 +3442,17 @@ client.addNetwork =
 function cli_addnet(name, serverList, temporary)
 {
     client.networks[name] =
-        new CIRCNetwork (name, serverList, client.eventPump, temporary);
+        new CIRCNetwork(name, serverList, client.eventPump, temporary);
+}
+
+client.removeNetwork =
+function cli_removenet(name)
+{
+    // Allow network a chance to clean up any mess.
+    if (typeof client.networks[name].destroy == "function")
+        client.networks[name].destroy();
+
+    delete client.networks[name];
 }
 
 client.connectToNetwork =
@@ -4447,7 +4459,7 @@ function cli_quit (reason)
 client.wantToQuit =
 function cli_wantToQuit(reason, deliberate)
 {
-    
+
     var close = true;
     if (client.prefs["warnOnClose"] && !deliberate)
     {

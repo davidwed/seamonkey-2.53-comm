@@ -193,6 +193,16 @@ function net_hasSecure()
     return false;
 }
 
+CIRCNetwork.prototype.clearServerList =
+function net_clearserverlist()
+{
+    /* Note: we don't have to worry about being connected, since primServ
+     * keeps the currently connected server alive if we still need it.
+     */
+    this.servers = new Object();
+    this.serverList = new Array();
+}
+
 /** Trigger an onDoConnect event after a delay. */
 CIRCNetwork.prototype.delayedConnect =
 function net_delayedConnect(eventProperties)
@@ -531,9 +541,9 @@ CIRCServer.prototype.canonicalChanModes = {
            getValue: function (modifier) { return (modifier == "+"); }
        },
     k: {
-           name: "key", 
-           getValue: function (modifier, data) 
-                     { 
+           name: "key",
+           getValue: function (modifier, data)
+                     {
                          if (modifier == "+")
                              return data;
                          else
@@ -958,13 +968,13 @@ function serv_uptimer()
     this.lastPing = this.lastPingSent = new Date();
 }
 
-CIRCServer.prototype.userhost = 
+CIRCServer.prototype.userhost =
 function serv_userhost(target)
 {
     this.sendData("USERHOST " + fromUnicode(target, this) + "\n");
 }
 
-CIRCServer.prototype.userip = 
+CIRCServer.prototype.userip =
 function serv_userip(target)
 {
     this.sendData("USERIP " + fromUnicode(target, this) + "\n");
@@ -1816,6 +1826,15 @@ function serv_348(e)
     e.channel = new CIRCChannel(this, null, e.params[2]);
     e.destObject = e.channel;
     e.set = "channel";
+    e.except = e.params[3];
+    e.user = new CIRCUser(this, null, e.params[4]);
+    e.exceptTime = new Date (Number(e.params[5]) * 1000);
+
+    if (typeof e.channel.excepts[e.except] == "undefined")
+    {
+        e.channel.excepts[e.except] = {host: e.except, user: e.user,
+                                       time: e.exceptTime };
+    }
 
     return true;
 }
@@ -2623,6 +2642,7 @@ function CIRCChannel(parent, unicodeName, encodedName)
 
     this.users = new Object();
     this.bans = new Object();
+    this.excepts = new Object();
     this.mode = new CIRCChanMode(this);
     this.usersStable = true;
     /* These next two flags represent a subtle difference in state:
@@ -3080,6 +3100,9 @@ function usr_hostmask (pfx)
 CIRCUser.prototype.getBanMask =
 function usr_banmask()
 {
+    if (!this.host)
+        return this.unicodeName + "!*@*";
+
     var hostmask = this.host;
     if (!/^\d+\.\d+\.\d+\.\d+$/.test(hostmask))
         hostmask = hostmask.replace(/^[^.]+/, "*");
@@ -3282,7 +3305,7 @@ function cusr_setban (f)
         return false;
 
     var modifier = (f) ? " +b " : " -b ";
-    modifier += this.getBanMask() + " ";
+    modifier += fromUnicode(this.getBanMask(), server) + " ";
 
     server.sendData("MODE " + this.parent.encodedName + modifier + "\n");
 
@@ -3298,7 +3321,8 @@ function cusr_kban (reason)
         return false;
 
     reason = (typeof reason != "undefined") ? reason : this.encodedName;
-    var modifier = " -o+b " + this.encodedName + " " + this.getBanMask() + " ";
+    var modifier = " -o+b " + this.encodedName + " " +
+                   fromUnicode(this.getBanMask(), server) + " ";
 
     server.sendData("MODE " + this.parent.encodedName + modifier + "\n" +
                     "KICK " + this.parent.encodedName + " " +
