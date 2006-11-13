@@ -184,7 +184,6 @@ function initCommands()
          ["text-direction",    cmdTextDirection,                             0],
          ["time",              cmdTime,             CMD_NEED_SRV | CMD_CONSOLE],
          ["timestamps",        cmdTimestamps,                      CMD_CONSOLE],
-         ["timestamp-format",  cmdTimestampFormat,                 CMD_CONSOLE],
          ["toggle-ui",         cmdToggleUI,                        CMD_CONSOLE],
          ["toggle-pref",       cmdTogglePref,                                0],
          ["topic",             cmdTopic,           CMD_NEED_CHAN | CMD_CONSOLE],
@@ -1110,8 +1109,7 @@ function cmdSync(e)
         case "sync-timestamp":
             fun = function ()
                   {
-                      view.changeCSS(view.getTimestampCSS("data"),
-                                     "cz-timestamp-format");
+                      updateTimestamps(view);
                   };
             break;
 
@@ -2555,6 +2553,9 @@ function cmdWho(e)
 
 function cmdWhoIs(e)
 {
+    if (!isinstance(e.network.whoisList, Object))
+        e.network.whoisList = {};
+
     for (var i = 0; i < e.nicknameList.length; i++)
     {
         if ((i < e.nicknameList.length - 1) &&
@@ -2568,6 +2569,7 @@ function cmdWhoIs(e)
         {
             e.server.whois(e.nicknameList[i]);
         }
+        e.network.whoisList[e.server.toLowerCase(e.nicknameList[i])] = null;
     }
 }
 
@@ -3311,6 +3313,8 @@ function cmdSave(e)
                  */
                 else if (!requestSpec && saveType > 0)
                 {
+                    if (wbp)
+                        wbp.progressListener = null;
                     pm = [e.sourceObject.viewName, e.filename];
                     display(getMsg(MSG_SAVE_SUCCESSFUL, pm), MT_INFO);
                 }
@@ -3598,21 +3602,6 @@ function cmdTimestamps(e)
     {
         display(getMsg(MSG_FMT_PREF, ["timestamps",
                                       view.prefs["timestamps"]]));
-    }
-}
-
-function cmdTimestampFormat(e)
-{
-    var view = e.sourceObject;
-
-    if (e.format != null)
-    {
-        view.prefs["timestampFormat"] = e.format;
-    }
-    else
-    {
-        display(getMsg(MSG_FMT_PREF, ["timestampFormat",
-                                      view.prefs["timestampFormat"]]));
     }
 }
 

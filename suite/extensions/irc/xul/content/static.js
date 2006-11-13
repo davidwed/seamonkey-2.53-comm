@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.75";
+const __cz_version   = "0.9.76";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.75";
+const __cz_locale    = "0.9.76.0";
 
 var warn;
 var ASSERT;
@@ -372,7 +372,7 @@ function initStatic()
         {
             // Load the first item from the file.
             var item = awayLoader.deserialize();
-            if (item instanceof Array)
+            if (isinstance(item, Array))
             {
                 // If the first item is an array, it is the entire thing.
                 client.awayMsgs = item;
@@ -1959,7 +1959,7 @@ function findDynamicRule (selector)
 {
     var rules = frames[0].document.styleSheets[1].cssRules;
 
-    if (selector instanceof RegExp)
+    if (isinstance(selector, RegExp))
         fun = "search";
     else
         fun = "indexOf";
@@ -3139,8 +3139,6 @@ function client_statechange (webProgress, request, stateFlags, status)
             {
                 cwin.getMsg = getMsg;
                 cwin.initOutputWindow(client, frame.source, onMessageViewClick);
-                cwin.changeCSS(frame.source.getTimestampCSS("data"),
-                               "cz-timestamp-format");
                 cwin.changeCSS(frame.source.getFontCSS("data"),
                                "cz-fonts");
                 scrollDown(frame, true);
@@ -3325,6 +3323,8 @@ function getTabForObject (source, create)
         browser.setAttribute("ondraggesture",
                              "nsDragAndDrop.startDrag(event, " +
                              "contentAreaDNDObserver);");
+        if (typeof startScrolling == "function")
+            browser.setAttribute("onmousedown", "startScrolling(event);");
         browser.source = source;
         source.frame = browser;
         ASSERT(client.deck, "no deck?");
@@ -3447,6 +3447,45 @@ function filterOutput(msg, msgtype, dest)
     return msg;
 }
 
+function updateTimestamps(view)
+{
+    if (!("messages" in view))
+        return;
+
+    view._timestampLast = "";
+    var node = view.messages.firstChild.firstChild;
+    while (node)
+    {
+        updateTimestampFor(view, node);
+        node = node.nextSibling;
+    }
+}
+
+function updateTimestampFor(view, displayRow)
+{
+    var time = new Date(1 * displayRow.getAttribute("timestamp"));
+    var tsCell = displayRow.firstChild;
+    if (!tsCell)
+        return;
+
+    var fmt;
+    if (view.prefs["timestamps"])
+        fmt = strftime(view.prefs["timestamps.display"], time);
+
+    while (tsCell.lastChild)
+        tsCell.removeChild(tsCell.lastChild);
+
+    if (fmt && (!client.prefs["collapseMsgs"] || (fmt != view._timestampLast)))
+        tsCell.appendChild(document.createTextNode(fmt));
+    view._timestampLast = fmt;
+}
+
+client.updateMenus =
+function c_updatemenus(menus)
+{
+    return this.menuManager.updateMenus(document, menus);
+}
+
 client.addNetwork =
 function cli_addnet(name, serverList, temporary)
 {
@@ -3471,7 +3510,7 @@ function cli_connect(networkOrName, requireSecurity)
     var name;
 
 
-    if (networkOrName instanceof CIRCNetwork)
+    if (isinstance(networkOrName, CIRCNetwork))
     {
         network = networkOrName;
     }
@@ -3770,47 +3809,6 @@ function display (message, msgtype, sourceObj, destObj)
     client.currentObject.display (message, msgtype, sourceObj, destObj);
 }
 
-client.getTimestampCSS =
-CIRCNetwork.prototype.getTimestampCSS =
-CIRCChannel.prototype.getTimestampCSS =
-CIRCUser.prototype.getTimestampCSS =
-CIRCDCCChat.prototype.getTimestampCSS =
-CIRCDCCFileTransfer.prototype.getTimestampCSS =
-function this_getTimestampCSS(format)
-{
-    /* Wow, this is cool. We just put together a CSS-rule string based on the
-     * "timestampFormat" preferences. *This* is what CSS is all about. :)
-     * We also provide a "data: URL" format, to simplify other code.
-     */
-    var css;
-
-    if (this.prefs["timestamps"])
-    {
-        /* Hack. To get around a Mozilla bug, we must force the display back
-         * to a displayed value.
-         */
-        css = ".msg-timestamp { display: table-cell; } " +
-              ".msg-timestamp:before { content: '" +
-              this.prefs["timestampFormat"] + "'; }";
-
-        var letters = new Array('y', 'm', 'd', 'h', 'n', 's');
-        for (var i = 0; i < letters.length; i++)
-        {
-            css = css.replace("%" + letters[i], "' attr(time-" +
-                              letters[i] + ") '");
-        }
-    }
-    else
-    {
-        /* Completely remove the <td>s if they're off, neatens display. */
-        css = ".msg-timestamp { display: none; }";
-    }
-
-    if (format == "data")
-        return "data:text/css," + encodeURIComponent(css);
-    return css;
-}
-
 client.getFontCSS =
 CIRCNetwork.prototype.getFontCSS =
 CIRCChannel.prototype.getFontCSS =
@@ -3819,7 +3817,10 @@ CIRCDCCChat.prototype.getFontCSS =
 CIRCDCCFileTransfer.prototype.getFontCSS =
 function this_getFontCSS(format)
 {
-    /* See this_getTimestampCSS. */
+    /* Wow, this is cool. We just put together a CSS-rule string based on the
+     * font preferences. *This* is what CSS is all about. :)
+     * We also provide a "data: URL" format, to simplify other code.
+     */
     var css;
     var fs;
     var fn;
@@ -3850,15 +3851,6 @@ CIRCDCCChat.prototype.displayHere =
 CIRCDCCFileTransfer.prototype.displayHere =
 function __display(message, msgtype, sourceObj, destObj)
 {
-    // We like some control on the number of digits.
-    function formatTimeNumber (num, digits)
-    {
-        var rv = num.toString();
-        while (rv.length < digits)
-            rv = "0" + rv;
-        return rv;
-    };
-
     // We need a message type, assume "INFO".
     if (!msgtype)
         msgtype = MT_INFO;
@@ -3924,28 +3916,14 @@ function __display(message, msgtype, sourceObj, destObj)
     var isImportant = false, getAttention = false, isSuperfluous = false;
     var viewType = this.TYPE;
     var code;
+    var time = new Date();
 
-    var d = new Date();
-    var dateInfo = { y: formatTimeNumber(d.getFullYear(), 4),
-                     m: formatTimeNumber(d.getMonth() + 1, 2),
-                     d: formatTimeNumber(d.getDate(), 2),
-                     h: formatTimeNumber(d.getHours(), 2),
-                     n: formatTimeNumber(d.getMinutes(), 2),
-                     s: formatTimeNumber(d.getSeconds(), 2)
-                   };
+    var timeStamp = strftime(this.prefs["timestamps.log"], time);
 
     // Statusbar text, and the line that gets saved to the log.
     var statusString;
-    var logString;
-
-    var dtf = client.dtFormatter;
-    var timeStamp = dtf.FormatDateTime("", dtf.dateFormatShort,
-                                       dtf.timeFormatNoSeconds, d.getFullYear(),
-                                       d.getMonth() + 1, d.getDate(),
-                                       d.getHours(), d.getMinutes(),
-                                       d.getSeconds()
-                                      );
-    logString = "[" + timeStamp + "] ";
+    var logStringPfx = timeStamp + " ";
+    var logStrings = new Array();
 
     if (fromUser)
     {
@@ -3975,6 +3953,7 @@ function __display(message, msgtype, sourceObj, destObj)
     msgRow.setAttribute("dest-type", toType);
     msgRow.setAttribute("view-type", viewType);
     msgRow.setAttribute("statusText", statusString);
+    msgRow.setAttribute("timestamp", Number(time));
     if (fromAttr)
     {
         if (fromUser)
@@ -3989,8 +3968,6 @@ function __display(message, msgtype, sourceObj, destObj)
     var msgRowTimestamp = document.createElementNS("http://www.w3.org/1999/xhtml",
                                                    "html:td");
     msgRowTimestamp.setAttribute("class", "msg-timestamp");
-    for (var key in dateInfo)
-        msgRowTimestamp.setAttribute("time-" + key, dateInfo[key]);
 
     var canMergeData;
     var msgRowSource, msgRowType, msgRowData;
@@ -4059,7 +4036,7 @@ function __display(message, msgtype, sourceObj, destObj)
             }
         }
         // Log the nickname in the same format as we'll let the user copy.
-        logString += decorSt + nick + decorEn + " ";
+        logStringPfx += decorSt + nick + decorEn + " ";
 
         // Mark makes alternate "talkers" show up in different shades.
         //if (!("mark" in this))
@@ -4120,7 +4097,7 @@ function __display(message, msgtype, sourceObj, destObj)
         msgRowType.setAttribute("class", "msg-type");
 
         msgRowType.appendChild(newInlineText(code));
-        logString += code + " ";
+        logStringPfx += code + " ";
     }
 
     if (message)
@@ -4129,16 +4106,19 @@ function __display(message, msgtype, sourceObj, destObj)
                                            "html:td");
         msgRowData.setAttribute("class", "msg-data");
 
+        var tmpMsgs = message;
         if (typeof message == "string")
         {
             msgRowData.appendChild(stringToMsg(message, this));
-            logString += message;
         }
         else
         {
             msgRowData.appendChild(message);
-            logString += message.innerHTML.replace(/<[^<]*>/g, "");
+            tmpMsgs = tmpMsgs.innerHTML.replace(/<[^<]*>/g, "");
         }
+        tmpMsgs = tmpMsgs.split(/\r?\n/);
+        for (var l = 0; l < tmpMsgs.length; l++)
+            logStrings[l] = logStringPfx + tmpMsgs[l];
     }
 
     if ("mark" in this)
@@ -4156,6 +4136,7 @@ function __display(message, msgtype, sourceObj, destObj)
         msgRow.appendChild(msgRowType);
     if (msgRowData)
         msgRow.appendChild(msgRowData);
+    updateTimestampFor(this, msgRow);
 
     if (blockLevel)
     {
@@ -4220,7 +4201,9 @@ function __display(message, msgtype, sourceObj, destObj)
 
         try
         {
-            this.logFile.write(fromUnicode(logString + client.lineEnd, "utf-8"));
+            var LE = client.lineEnd;
+            for (var l = 0; l < logStrings.length; l++)
+                this.logFile.write(fromUnicode(logStrings[l] + LE, "utf-8"));
         }
         catch (ex)
         {
@@ -4472,7 +4455,7 @@ function cli_wantToQuit(reason, deliberate)
     var close = true;
     if (client.prefs["warnOnClose"] && !deliberate)
     {
-        const buttons = ["!yes", "!no"];
+        const buttons = [MSG_QUIT_ANYWAY, MSG_DONT_QUIT];
         var checkState = { value: true };
         var rv = confirmEx(MSG_CONFIRM_QUIT, buttons, 0, MSG_WARN_ON_EXIT,
                            checkState);

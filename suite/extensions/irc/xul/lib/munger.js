@@ -84,7 +84,7 @@ function initMunger()
     munger.addRule ("channel-link",
                 /(?:\s|\W|^)[@+]?(#[^<>\[\](){}\"\s\u201d]*[^:,.<>\[\](){}\'\"\s\u201d])/i,
                     insertChannelLink);
-    munger.addRule("talkback-link", /(?:\W|^)(TB\d+[A-Z]?)(?:\W|$)/,
+    munger.addRule("talkback-link", /(?:\W|^)(TB\d{8,}[A-Z]?)(?:\W|$)/,
                    insertTalkbackLink);
     
     munger.addRule ("face",
@@ -123,7 +123,7 @@ function CMungerEntry (name, regex, className, enable, tagName)
     this.enabledDefault = this.enabled;
     this.tagName = (tagName) ? tagName : "html:span";
 
-    if (regex instanceof RegExp)
+    if (isinstance(regex, RegExp))
         this.regex = regex;
     else
         this.lambdaMatch = regex;

@@ -1021,12 +1021,29 @@ function my_showtonet (e)
                 // This makes sure we have the *right* me object.
                 this.primServ.me.rehome(this.primServ);
             }
+
             // Update the list of ignored users from the prefs:
             var ignoreAry = this.prefs["ignoreList"];
             for (var j = 0; j < ignoreAry.length; ++j)
                 this.ignoreList[ignoreAry[j]] = getHostmaskParts(ignoreAry[j]);
 
-            // After rehoming it is now safe for the user's commands.
+            // Update everything.
+            // Welcome to history.
+            if (client.globalHistory)
+                client.globalHistory.addPage(this.getURL());
+            updateTitle(this);
+            this.updateHeader();
+            client.updateHeader();
+            updateSecurityIcon();
+            updateStalkExpression(this);
+
+            client.ident.removeNetwork(this);
+
+            str = e.decodeParam(2);
+
+            break;
+
+        case "251": /* users */
             var cmdary = this.prefs["autoperform"];
             for (var i = 0; i < cmdary.length; ++i)
             {
@@ -1062,16 +1079,6 @@ function my_showtonet (e)
                 delete this.pendingURLs;
             }
 
-            // Update everything.
-            // Welcome to history.
-            if (client.globalHistory)
-                client.globalHistory.addPage(this.getURL());
-            updateTitle(this);
-            this.updateHeader();
-            client.updateHeader();
-            updateSecurityIcon();
-            updateStalkExpression(this);
-
             // Do this after the JOINs, so they are quicker.
             // This is not time-critical code.
             if (jsenv.HAS_SERVER_SOCKETS && client.prefs["dcc.enabled"] &&
@@ -1086,8 +1093,6 @@ function my_showtonet (e)
                 setTimeout(delayFn, 1000 * Math.random(), this);
             }
 
-            client.ident.removeNetwork(this);
-
             // Had some collision during connect.
             if (this.primServ.me.unicodeName != this.prefs["nickname"])
             {
@@ -1095,12 +1100,13 @@ function my_showtonet (e)
                 this.reclaimName();
             }
 
-            str = e.decodeParam(2);
             if ("onLogin" in this)
             {
                 ev = new CEvent("network", "login", this, "onLogin");
                 client.eventPump.addEvent(ev);
             }
+
+            str = e.decodeParam(e.params.length - 1);
             break;
 
         case "376": /* end of MOTD */
@@ -1122,7 +1128,6 @@ function my_showtonet (e)
     }
 
     this.displayHere(p + str, e.code.toUpperCase());
-
 }
 
 CIRCNetwork.prototype.onUnknownCTCPReply =
@@ -1308,7 +1313,7 @@ function my_list(word, file)
         this._list.file = new LocalFile(lfile.localFile, ">");
     }
 
-    if (word instanceof RegExp)
+    if (isinstance(word, RegExp))
     {
         this._list.regexp = word;
         this._list.string = "";
@@ -1489,7 +1494,10 @@ function my_401 (e)
     }
     else
     {
-        display(toUnicode(e.params[3], this));
+        if (this.whoisList && (target in this.whoisList))
+            this.whoisList[target] = false;
+        else
+            display(toUnicode(e.params[3], this));
     }
 }
 
@@ -1582,6 +1590,17 @@ function my_352 (e)
     }
 }
 
+CIRCNetwork.prototype.on301 = /* user away message */
+function my_301(e)
+{
+    if (e.user.awayMessage != e.user.lastShownAwayMessage)
+    {
+        var params = [e.user.unicodeName, e.user.awayMessage];
+        e.user.display(getMsg(MSG_WHOIS_AWAY, params), e.code);
+        e.user.lastShownAwayMessage = e.user.awayMessage;
+    }
+}
+
 CIRCNetwork.prototype.on311 = /* whois name */
 CIRCNetwork.prototype.on319 = /* whois channels */
 CIRCNetwork.prototype.on312 = /* whois server */
@@ -1592,7 +1611,11 @@ function my_whoisreply (e)
 {
     var text = "egads!";
     var nick = e.params[2];
+    var lowerNick = this.primServ.toLowerCase(nick);
     var user;
+
+    if (this.whoisList && (e.code != 318) && (lowerNick in this.whoisList))
+        this.whoisList[lowerNick] = true;
 
     if (e.user)
     {
@@ -1603,6 +1626,10 @@ function my_whoisreply (e)
     switch (Number(e.code))
     {
         case 311:
+            // Clear saved away message so it appears and can be reset.
+            if (e.user)
+                e.user.lastShownAwayMessage = "";
+
             text = getMsg(MSG_WHOIS_NAME,
                           [nick, e.params[3], e.params[4],
                            e.decodeParam(6)]);
@@ -1625,6 +1652,15 @@ function my_whoisreply (e)
             break;
 
         case 318:
+            // If this user isn't here, don't display anything and do a whowas
+            if (this.whoisList && (lowerNick in this.whoisList) &&
+                !this.whoisList[lowerNick])
+            {
+                delete this.whoisList[lowerNick];
+                this.primServ.whowas(nick, 1);
+                return;
+            }
+            delete this.whoisList[lowerNick];
             text = getMsg(MSG_WHOIS_END, nick);
             if (user)
                 user.updateHeader();
@@ -1845,6 +1881,15 @@ function my_netdisconnect (e)
                 msg = getMsg(MSG_UNKNOWN_HOST,
                              [e.server.hostname, this.getURL(),
                               e.server.getURL()]);
+                break;
+
+            case NS_ERROR_UNKNOWN_PROXY_HOST:
+                msg = getMsg(MSG_UNKNOWN_PROXY_HOST,
+                             [this.getURL(), e.server.getURL()]);
+                break;
+
+            case NS_ERROR_PROXY_CONNECTION_REFUSED:
+                msg = MSG_PROXY_CONNECTION_REFUSED;
                 break;
 
             default:
@@ -2229,6 +2274,9 @@ function my_endofexcepts(e)
 CIRCChannel.prototype.on482 =
 function my_needops(e)
 {
+    if ("pendingExceptList" in this)
+        return;
+
     this.display(getMsg(MSG_CHANNEL_NEEDOPS, this.unicodeName), MT_ERROR);
 }
 
@@ -2263,6 +2311,11 @@ function my_cjoin (e)
         var params = [e.user.unicodeName, e.channel.unicodeName];
         this.display(getMsg(MSG_YOU_JOINED, params), "JOIN",
                      e.server.me, this);
+        /* Tell the user that conference mode is on, lest they forget (if it
+         * subsequently turns itself off, they'll get a message anyway).
+         */
+        if (this.prefs["conference.enabled"])
+            this.display(MSG_CONF_MODE_STAYON);
         if (client.globalHistory)
             client.globalHistory.addPage(this.getURL());
 
@@ -2514,6 +2567,7 @@ CIRCUser.prototype.onInit =
 function user_oninit ()
 {
     this.logFile = null;
+    this.lastShownAwayMessage = "";
 }
 
 CIRCUser.prototype.onPrivmsg =
@@ -2913,6 +2967,14 @@ function my_dccfiledisconnect(e)
 }
 
 var CopyPasteHandler = new Object();
+
+CopyPasteHandler.allowDrop =
+CopyPasteHandler.allowStartDrag =
+CopyPasteHandler.onCopyOrDrag =
+function phand_bogus()
+{
+    return true;
+}
 
 CopyPasteHandler.onPasteOrDrop =
 function phand_onpaste(e, data)
