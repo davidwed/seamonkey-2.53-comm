@@ -39,7 +39,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.76";
+const __cz_version   = "0.9.77";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
@@ -78,7 +78,6 @@ client.MAX_HISTORY = 50;
 client.MAX_NICK_DISPLAY = 14;
 /* longest word to show in display before abbreviating */
 client.MAX_WORD_DISPLAY = 20;
-client.PRINT_DIRECTION = 1; /*1 => new messages at bottom, -1 => at top */
 
 client.MAX_MSG_PER_ROW = 3; /* default number of messages to collapse into a
                              * single row, max. */
@@ -2816,8 +2815,7 @@ function setCurrentObject (obj)
     updateProgress();
     updateSecurityIcon();
 
-    if (client.PRINT_DIRECTION == 1)
-        scrollDown(obj.frame, false);
+    scrollDown(obj.frame, false);
 
     // Input area should have the same direction as the output area
     if (("frame" in client.currentObject) &&
@@ -3454,9 +3452,22 @@ function updateTimestamps(view)
 
     view._timestampLast = "";
     var node = view.messages.firstChild.firstChild;
+    var nested;
     while (node)
     {
-        updateTimestampFor(view, node);
+        if(node.className == "msg-nested-tr")
+        {
+            nested = node.firstChild.firstChild.firstChild.firstChild;
+            while (nested)
+            {
+                updateTimestampFor(view, nested);
+                nested = nested.nextSibling;
+            }
+        }
+        else
+        {
+            updateTimestampFor(view, node);
+        }
         node = node.nextSibling;
     }
 }
@@ -3484,6 +3495,29 @@ client.updateMenus =
 function c_updatemenus(menus)
 {
     return this.menuManager.updateMenus(document, menus);
+}
+
+client.adoptNode =
+function cli_adoptnode(node, doc)
+{
+    try
+    {
+        doc.adoptNode(node);
+    }
+    catch(ex)
+    {
+        dd(formatException(ex));
+        var err = ex.name;
+        // TypeError from before adoptNode was added; NOT_IMPL after.
+        if ((err == "TypeError") || (err == "NS_ERROR_NOT_IMPLEMENTED"))
+            client.adoptNode = cli_adoptnode_noop;
+    }
+    return node;
+}
+
+function cli_adoptnode_noop(node, doc)
+{
+    return node;
 }
 
 client.addNetwork =
@@ -4306,7 +4340,7 @@ function addHistory (source, obj, mergeData)
     if ("frame" in source)
         needScroll = checkScroll(source.frame);
     if (obj)
-        appendTo.appendChild(obj);
+        appendTo.appendChild(client.adoptNode(obj, appendTo.ownerDocument));
 
     if (source.MAX_MESSAGES)
     {
@@ -4317,36 +4351,23 @@ function addHistory (source, obj, mergeData)
 
         if (source.messageCount > source.MAX_MESSAGES)
         {
-            if (client.PRINT_DIRECTION == 1)
+            // Get the top of row 2, and subtract the top of row 1.
+            var height = tbody.firstChild.nextSibling.firstChild.offsetTop -
+                         tbody.firstChild.firstChild.offsetTop;
+            var window = getContentWindow(source.frame);
+            var x = window.pageXOffset;
+            var y = window.pageYOffset;
+            tbody.removeChild (tbody.firstChild);
+            --source.messageCount;
+            while (tbody.firstChild && tbody.firstChild.childNodes[1] &&
+                   tbody.firstChild.childNodes[1].getAttribute("class") ==
+                   "msg-data")
             {
-                var height = tbody.firstChild.scrollHeight;
-                var window = getContentWindow(source.frame);
-                var x = window.pageXOffset;
-                var y = window.pageYOffset;
+                --source.messageCount;
                 tbody.removeChild (tbody.firstChild);
-                --source.messageCount;
-                while (tbody.firstChild && tbody.firstChild.childNodes[1] &&
-                       tbody.firstChild.childNodes[1].getAttribute("class") ==
-                       "msg-data")
-                {
-                    --source.messageCount;
-                    tbody.removeChild (tbody.firstChild);
-                }
-                if (!checkScroll(source.frame) && (y > height))
-                    window.scrollTo(x, y - height);
             }
-            else
-            {
-                tbody.removeChild (tbody.lastChild);
-                --source.messageCount;
-                while (tbody.lastChild && tbody.lastChild.childNodes[1] &&
-                       tbody.lastChild.childNodes[1].getAttribute("class") ==
-                       "msg-data")
-                {
-                    --source.messageCount;
-                    tbody.removeChild (tbody.lastChild);
-                }
-            }
+            if (!checkScroll(source.frame) && (y > height))
+                window.scrollTo(x, y - height);
         }
     }
 

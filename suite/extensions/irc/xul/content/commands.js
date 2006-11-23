@@ -264,8 +264,8 @@ function initCommands()
     client.commandManager.defineCommands(cmdary);
 
     var restList = ["reason", "action", "text", "message", "params", "font",
-                    "expression", "ircCommand", "prefValue", "newTopic",
-                    "commandList", "file", "commands", "description"];
+                    "expression", "ircCommand", "prefValue", "newTopic", "file",
+                    "password", "commandList", "commands", "description"];
     client.commandManager.argTypes.__aliasTypes__(restList, "rest");
     client.commandManager.argTypes["plugin"] = parsePlugin;
 }
@@ -1389,7 +1389,7 @@ function cmdNetwork(e)
     var network = client.networks[e.networkName];
 
     if (!("messages" in network))
-        network.displayHere(getMsg(MSG_NETWORK_OPENED, network.name));
+        network.displayHere(getMsg(MSG_NETWORK_OPENED, network.unicodeName));
 
     dispatch("set-current-view", { view: network });
 }
