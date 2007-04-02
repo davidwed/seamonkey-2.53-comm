@@ -24,6 +24,7 @@
  *   Robert Ginda, rginda@netscape.com, original author
  *   Samuel Sieb, samuel@sieb.net
  *   Chiaki Koufugata chiaki@mozilla.gr.jp UI i18n
+ *   Shawn Wilsher <me@shawnwilsher.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -141,6 +142,7 @@ function onClose()
 function onUnload()
 {
     dd("Shutting down ChatZilla.");
+    uninitOfflineIcon();
     destroy();
 }
 
@@ -187,26 +189,41 @@ function onMessageViewClick(e)
         return true;
 
     var cx = getMessagesContext(null, e.target);
-    var command;
+    var command = getEventCommand(e);
+    if (!client.commandManager.isCommandSatisfied(cx, command))
+        return false;
 
-    if (e.which == 2)
-        command = client.prefs["messages.middleClick"];
-    else if (e.metaKey || e.altKey)
-        command = client.prefs["messages.metaClick"];
-    else if (e.ctrlKey)
-        command = client.prefs["messages.ctrlClick"];
-    else
-        command = client.prefs["messages.click"];
+    dispatch(command, cx);
+    dispatch("focus-input");
+    e.preventDefault();
+    return true;
+}
 
-    if (client.commandManager.isCommandSatisfied(cx, command))
+function onMessageViewMouseDown(e)
+{
+    if ((typeof startScrolling != "function") ||
+        ((e.which != 1) && (e.which != 2)))
     {
-        dispatch(command, cx);
-        dispatch("focus-input");
-        e.preventDefault();
         return true;
     }
+        
+    var cx = getMessagesContext(null, e.target);
+    var command = getEventCommand(e);
+    if (!client.commandManager.isCommandSatisfied(cx, command))
+        startScrolling(e);
+    return true;
+}
 
-    return false;
+function getEventCommand(e)
+{
+    if (e.which == 2)
+        return client.prefs["messages.middleClick"];
+    if (e.metaKey || e.altKey)
+        return client.prefs["messages.metaClick"];
+    if (e.ctrlKey)
+        return client.prefs["messages.ctrlClick"];
+    
+    return client.prefs["messages.click"];
 }
 
 function onMouseOver (e)
@@ -340,10 +357,10 @@ function onInputKeyPress (e)
         case 13: /* CR */
             e.line = e.target.value;
             e.target.value = "";
-            if (e.ctrlKey)
-                e.line = client.COMMAND_CHAR + "say " + e.line;
             if (e.line.search(/\S/) == -1)
                 return;
+            if (e.ctrlKey)
+                e.line = client.COMMAND_CHAR + "say " + e.line;
             onInputCompleteLine (e);
             break;
 
@@ -442,6 +459,13 @@ function onTabCompleteRequest (e)
     else
         wordEnd += selStart;
 
+    // Double tab on nothing, inform user how to get out of the input box
+    if (wordEnd == wordStart)
+    {
+        display(MSG_LEAVE_INPUTBOX, MT_INFO);
+        return;
+    }
+
     if ("performTabMatch" in client.currentObject)
     {
         var word = line.substring(wordStart, wordEnd);
@@ -530,27 +554,6 @@ function onWindowKeyPress (e)
             }
             break;
 
-        case 112: /* F1 */
-        case 113: /* ... */
-        case 114:
-        case 115:
-        case 116:
-        case 117:
-        case 118:
-        case 119:
-        case 120:
-        case 121: /* F10 */
-            if (e.ctrlKey || e.shiftKey || e.Altkey || e.metaKey)
-                break;
-            var idx = code - 112;
-            if ((idx in client.viewsArray) && client.viewsArray[idx].source)
-            {
-                var newView = client.viewsArray[idx].source;
-                dispatch("set-current-view", { view: newView });
-            }
-            e.preventDefault();
-            break;
-
         case 33: /* pgup */
             if (e.ctrlKey)
             {
@@ -590,6 +593,64 @@ function onWindowKeyPress (e)
                 w.scrollTo (w.pageXOffset, (w.innerHeight + w.pageYOffset));
             e.preventDefault();
             break;
+
+        case 117: /* F6 */
+            advanceKeyboardFocus(e.shiftKey ? -1 : 1);
+            e.preventDefault();
+            break;
+    }
+
+    // Code is zero if we have an alphanumeric being given to us in the event.
+    if (code != 0)
+      return;
+
+    // The following code is copied from:
+    //   /mozilla/browser/base/content/browser.js
+    //   Revision: 1.748
+    //   Lines: 1397-1421
+
+    // \d in a RegExp will find any Unicode character with the "decimal digit"
+    // property (Nd)
+    var regExp = /\d/;
+    if (!regExp.test(String.fromCharCode(e.charCode)))
+        return;
+
+    // Some Unicode decimal digits are in the range U+xxx0 - U+xxx9 and some are
+    // in the range U+xxx6 - U+xxxF. Find the digit 1 corresponding to our
+    // character.
+    var digit1 = (e.charCode & 0xFFF0) | 1;
+    if (!regExp.test(String.fromCharCode(digit1)))
+      digit1 += 6;
+
+    var idx = e.charCode - digit1;
+
+    const isMac     = client.platform == "Mac";
+    const isLinux   = client.platform == "Linux";
+    const isWindows = client.platform == "Windows";
+    const isOS2     = client.platform == "OS/2";
+    const isUnknown = !(isMac || isLinux || isWindows || isOS2);
+    const isSuite   = client.host == "Mozilla";
+
+    if ((0 <= idx) && (idx <= 8))
+    {
+        if ((!isSuite && isMac && e.metaKey) ||
+            (!isSuite && (isLinux || isOS2) && e.altKey) ||
+            (!isSuite && (isWindows || isUnknown) && e.ctrlKey) ||
+            (isSuite && e.altKey))
+        {
+            // Pressing 1-8 takes you to that tab, while pressing 9 takes you
+            // to the last tab always.
+            if (idx == 8)
+                idx = client.viewsArray.length - 1;
+
+            if ((idx in client.viewsArray) && client.viewsArray[idx].source)
+            {
+                var newView = client.viewsArray[idx].source;
+                dispatch("set-current-view", { view: newView });
+            }
+            e.preventDefault();
+            return;
+        }
     }
 }
 
@@ -936,9 +997,9 @@ function my_unknown (e)
             var args = [msg, e.channel.unicodeName,
                         "knock " + e.channel.unicodeName];
             msg = getMsg("msg.irc." + e.code + ".knock", args, "");
-            client.munger.entries[".inline-buttons"].enabled = true;
+            client.munger.getRule(".inline-buttons").enabled = true;
             targetDisplayObj.display(msg);
-            client.munger.entries[".inline-buttons"].enabled = false;
+            client.munger.getRule(".inline-buttons").enabled = false;
         }
         else
         {
@@ -1142,7 +1203,9 @@ function my_ctcprunk (e)
 CIRCNetwork.prototype.onNotice =
 function my_notice (e)
 {
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display(e.decodeParam(2), "NOTICE", this, e.server.me);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 /* userhost reply */
@@ -1274,7 +1337,7 @@ function my_263 (e)
         this._list.done = true;
         this._list.error = e.decodeParam(2);
         // Return early for this one if we're saving it.
-        if ("saveTo" in this._list)
+        if ("file" in this._list)
             return true;
     }
 
@@ -1405,7 +1468,7 @@ function my_list_init ()
         this._list.count = 0;
     }
 
-    if (!("saveTo" in this._list))
+    if (!("file" in this._list))
     {
         this._list.displayed = 0;
         if (client.currentObject != this)
@@ -1427,7 +1490,7 @@ function my_321 (e)
 {
     this.listInit();
 
-    if (!("saveTo" in this._list))
+    if (!("file" in this._list))
         this.displayHere (e.params[2] + " " + e.params[3], "321");
 }
 
@@ -1660,7 +1723,9 @@ function my_whoisreply (e)
                 this.primServ.whowas(nick, 1);
                 return;
             }
-            delete this.whoisList[lowerNick];
+            if (this.whoisList)
+                delete this.whoisList[lowerNick];
+
             text = getMsg(MSG_WHOIS_END, nick);
             if (user)
                 user.updateHeader();
@@ -1892,6 +1957,20 @@ function my_netdisconnect (e)
                 msg = MSG_PROXY_CONNECTION_REFUSED;
                 break;
 
+            case NS_ERROR_ABORT:
+                if (client.iosvc.offline)
+                {
+                    msg = getMsg(MSG_CONNECTION_ABORT_OFFLINE,
+                                 [this.getURL(), e.server.getURL()]);
+                }
+                else
+                {
+                    msg = getMsg(MSG_CONNECTION_ABORT_UNKNOWN,
+                                 [this.getURL(), e.server.getURL(),
+                                  formatException(e.exception)]);
+                }
+                break;
+
             default:
                 msg = getMsg(MSG_CLOSE_STATUS,
                              [this.getURL(), e.server.getURL(),
@@ -1910,6 +1989,12 @@ function my_netdisconnect (e)
     {
         msgType = "DISCONNECT";
         msg = getMsg(MSG_CONNECTION_QUIT, [this.getURL(), e.server.getURL()]);
+        msgNetwork = msg;
+    }
+    // We won't reconnect if the error was really bad.
+    else if ((typeof e.disconnectStatus != "undefined") &&
+             (e.disconnectStatus == NS_ERROR_ABORT))
+    {
         msgNetwork = msg;
     }
     else
@@ -2139,7 +2224,9 @@ function my_cprivmsg (e)
 {
     var msg = e.decodeParam(2);
 
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display (msg, "PRIVMSG", e.user, this);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 /* end of names */
@@ -2180,7 +2267,7 @@ CIRCChannel.prototype.onTopic = /* user changed topic */
 CIRCChannel.prototype.on332 = /* TOPIC reply */
 function my_topic (e)
 {
-
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     if (e.code == "TOPIC")
         this.display (getMsg(MSG_TOPIC_CHANGED, [this.topicBy, this.topic]),
                       "TOPIC");
@@ -2201,7 +2288,7 @@ function my_topic (e)
 
     this.updateHeader();
     updateTitle(this);
-
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCChannel.prototype.on333 = /* Topic setter information */
@@ -2232,9 +2319,9 @@ function my_bans(e)
     if (this.iAmHalfOp() || this.iAmOp())
         msg += " " + getMsg(MSG_BANLIST_BUTTON, "mode -b " + e.ban);
 
-    client.munger.entries[".inline-buttons"].enabled = true;
+    client.munger.getRule(".inline-buttons").enabled = true;
     this.display(msg, "BAN");
-    client.munger.entries[".inline-buttons"].enabled = false;
+    client.munger.getRule(".inline-buttons").enabled = false;
 }
 
 CIRCChannel.prototype.on368 =
@@ -2257,9 +2344,9 @@ function my_excepts(e)
     if (this.iAmHalfOp() || this.iAmOp())
         msg += " " + getMsg(MSG_EXCEPTLIST_BUTTON, "mode -e " + e.except);
 
-    client.munger.entries[".inline-buttons"].enabled = true;
+    client.munger.getRule(".inline-buttons").enabled = true;
     this.display(msg, "EXCEPT");
-    client.munger.entries[".inline-buttons"].enabled = false;
+    client.munger.getRule(".inline-buttons").enabled = false;
 }
 
 CIRCChannel.prototype.on349 =
@@ -2283,13 +2370,17 @@ function my_needops(e)
 CIRCChannel.prototype.onNotice =
 function my_notice (e)
 {
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display(e.decodeParam(2), "NOTICE", e.user, this);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCChannel.prototype.onCTCPAction =
 function my_caction (e)
 {
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display (e.CTCPData, "ACTION", e.user, this);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCChannel.prototype.onUnknownCTCP =
@@ -2580,7 +2671,9 @@ function my_cprivmsg(e)
             openQueryTab(e.server, e.user.unicodeName);
     }
 
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display(e.decodeParam(2), "PRIVMSG", e.user, e.server.me);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCUser.prototype.onNick =
@@ -2607,19 +2700,24 @@ CIRCUser.prototype.onNotice =
 function my_notice (e)
 {
     var msg = e.decodeParam(2);
+    var displayMailto = client.prefs["munger.mailto"];
 
-    var ary = msg.match(/^\[(\S+)\]\s+/);
+    var ary = msg.match(/^\[([^ ]+)\]\s+/);
     if (ary)
     {
         var channel = e.server.getChannel(ary[1]);
         if (channel)
         {
+            client.munger.getRule(".mailto").enabled = displayMailto;
             channel.display(msg, "NOTICE", this, e.server.me);
+            client.munger.getRule(".mailto").enabled = false;
             return;
         }
     }
 
+    client.munger.getRule(".mailto").enabled = displayMailto;
     this.display(msg, "NOTICE", this, e.server.me);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCUser.prototype.onCTCPAction =
@@ -2632,7 +2730,9 @@ function my_uaction(e)
             openQueryTab(e.server, e.user.unicodeName);
     }
 
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display(e.CTCPData, "ACTION", this, e.server.me);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCUser.prototype.onUnknownCTCP =
@@ -2718,10 +2818,10 @@ function my_dccchat(e)
         }
     }
 
-    client.munger.entries[".inline-buttons"].enabled = true;
+    client.munger.getRule(".inline-buttons").enabled = true;
     this.parent.parent.display(getMsg(str, c._getParams().concat(cmds)),
                                "DCC-CHAT");
-    client.munger.entries[".inline-buttons"].enabled = false;
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     // Pass the event over to the DCC Chat object.
     e.set = "dcc-chat";
@@ -2764,12 +2864,12 @@ function my_dccsend(e)
         }
     }
 
-    client.munger.entries[".inline-buttons"].enabled = true;
+    client.munger.getRule(".inline-buttons").enabled = true;
     this.parent.parent.display(getMsg(str,[e.user.unicodeName,
                                            e.host, e.port, e.file,
                                            getSISize(e.size)].concat(cmds)),
                                "DCC-FILE");
-    client.munger.entries[".inline-buttons"].enabled = false;
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     // Pass the event over to the DCC File object.
     e.set = "dcc-file";
@@ -2805,13 +2905,17 @@ function my_dccgetparams()
 CIRCDCCChat.prototype.onPrivmsg =
 function my_dccprivmsg(e)
 {
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.displayHere(toUnicode(e.line, this), "PRIVMSG", e.user, "ME!");
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCDCCChat.prototype.onCTCPAction =
 function my_uaction(e)
 {
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.displayHere(e.CTCPData, "ACTION", e.user, "ME!");
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 CIRCDCCChat.prototype.onUnknownCTCP =
@@ -2992,10 +3096,19 @@ function phand_onpaste(e, data)
     str.value.QueryInterface(Components.interfaces.nsISupportsString);
     str.value.data = str.value.data.replace(/(^\s*[\r\n]+|[\r\n]+\s*$)/g, "");
 
-    if (str.value.data.indexOf("\n") == -1)
+    // XXX part of what follows is a very ugly hack to make links (with a title)
+    // not open the multiline box. We 'should' be able to ask the transferable
+    // what flavours it supports, but testing showed that by the time we can ask
+    // for that info, it's forgotten about everything apart from text/unicode.
+    var lines = str.value.data.split("\n");
+    var m = lines[0].match(client.linkRE);
+
+    if ((str.value.data.indexOf("\n") == -1) ||
+        (m && (m[0] == lines[0]) && (lines.length == 2)))
     {
         // If, after stripping leading/trailing empty lines, the string is a
-        // single line, put it back in the transferable and return.
+        // single line, or it's a link with a title, put it back in
+        // the transferable and return.
         data.setTransferData("text/unicode", str.value,
                              str.value.data.length * 2);
         return true;

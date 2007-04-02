@@ -56,7 +56,7 @@ function initPrefs()
     profilePath.append("chatzilla");
 
     client.prefManager.addPref("profilePath", profilePath.path, null, null,
-                                                                      "global");
+                                                                      "hidden");
 
     profilePath = new nsLocalFile(client.prefs["profilePath"]);
 
@@ -236,6 +236,7 @@ function initPrefs()
          ["sound.channel.stalk", "beep",      "global.soundEvts"],
          ["sound.user.start",    "beep beep", "global.soundEvts"],
          ["sound.user.stalk",    "beep",      "global.soundEvts"],
+         ["inputSpellcheck",     true,                  "global"],
          ["timestamps",         false,        "appearance.timestamps"],
          ["timestamps.display", "[%H:%M]",    "appearance.timestamps"],
          ["timestamps.log",     "[%Y-%m-%d %H:%M:%S]", "hidden"],
@@ -778,6 +779,10 @@ function onPrefChanged(prefName, newValue, oldValue)
 
         case "aliases":
             initAliases();
+            break;
+
+        case "inputSpellcheck":
+            updateSpellcheck(newValue);
             break;
 
         default:

@@ -134,6 +134,7 @@ function initCommands()
          ["load",              cmdLoad,                            CMD_CONSOLE],
          ["log",               cmdLog,                             CMD_CONSOLE],
          ["map",               cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
+         ["match-users",       cmdMatchUsers,      CMD_NEED_CHAN | CMD_CONSOLE],
          ["me",                cmdMe,                              CMD_CONSOLE],
          ["motd",              cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["mode",              cmdMode,             CMD_NEED_SRV | CMD_CONSOLE],
@@ -166,7 +167,7 @@ function initCommands()
                                    CMD_NEED_SRV |  CMD_NEED_CHAN | CMD_CONSOLE],
          ["reload-ui",         cmdReloadUI,                                  0],
          ["save",              cmdSave,                            CMD_CONSOLE],
-         ["say",               cmdSay,              CMD_NEED_SRV | CMD_CONSOLE],
+         ["say",               cmdSay,                             CMD_CONSOLE],
          ["server",            cmdServer,                          CMD_CONSOLE],
          ["set-current-view",  cmdSetCurrentView,                            0],
          ["stats",             cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
@@ -211,8 +212,8 @@ function initCommands()
          ["part",             "leave",                             CMD_CONSOLE],
          ["raw",              "quote",                             CMD_CONSOLE],
          // Shortcuts to useful URLs:
-         ["faq",              "goto-url http://chatzilla.hacksrus.com/faq/", 0],
-         ["homepage",         "goto-url http://chatzilla.hacksrus.com/",     0],
+         ["faq",              "goto-url faq",                                0],
+         ["homepage",         "goto-url homepage",                           0],
          // Used to display a nickname in the menu only.
          ["label-user",       "echo",                                        0],
          // These are all the font family/size menu commands...
@@ -837,6 +838,7 @@ function cmdAblePlugin(e)
             e.plugin.scope.disablePlugin();
         }
 
+        display(getMsg(MSG_PLUGIN_DISABLED, e.plugin.id));
         e.plugin.enabled = false;
     }
     else
@@ -867,6 +869,7 @@ function cmdAblePlugin(e)
             e.plugin.scope.enablePlugin();
         }
 
+        display(getMsg(MSG_PLUGIN_ENABLED, e.plugin.id));
         e.plugin.enabled = true;
     }
 }
@@ -1083,8 +1086,7 @@ function cmdSync(e)
                   {
                       if (view.prefs["displayHeader"])
                           view.setHeaderState(false);
-                      view.changeCSS(view.getFontCSS("data"),
-                                     "cz-fonts");
+                      view.changeCSS(view.getFontCSS("data"), "cz-fonts");
                       if (view.prefs["displayHeader"])
                           view.setHeaderState(true);
                   };
@@ -1101,6 +1103,7 @@ function cmdSync(e)
             fun = function ()
                   {
                       view.changeCSS(view.prefs["motif.current"]);
+                      updateAppMotif(view.prefs["motif.current"]);
                       // Refresh the motif settings.
                       view.updateMotifSettings();
                   };
@@ -1141,7 +1144,7 @@ function cmdSync(e)
     var view = e.sourceObject;
     var window;
     if (("frame" in view) && view.frame)
-        window = view.frame.contentWindow;
+        window = getContentWindow(view.frame);
 
     try
     {
@@ -1867,6 +1870,29 @@ function cmdAttach(e)
     gotoIRCURL(e.ircUrl);
 }
 
+function cmdMatchUsers(e)
+{
+    var matches = e.channel.findUsers(e.mask);
+    var uc = matches.unchecked;
+    var msgNotChecked = "";
+
+    // Get a pretty list of nicknames:
+    var nicknames = [];
+    for (var i = 0; i < matches.users.length; i++)
+        nicknames.push(matches.users[i].unicodeName);
+
+    var nicknameStr = arraySpeak(nicknames);
+
+    // Were we unable to check one or more of the users?
+    if (uc != 0)
+        msgNotChecked = getMsg(MSG_MATCH_UNCHECKED, uc);
+
+    if (matches.users.length == 0)
+        display(getMsg(MSG_NO_MATCHING_NICKS, msgNotChecked));
+    else 
+        display(getMsg(MSG_MATCHING_NICKS, [nicknameStr, msgNotChecked]));
+}
+
 function cmdMe(e)
 {
     if (!("act" in e.sourceObject))
@@ -1876,7 +1902,9 @@ function cmdMe(e)
     }
 
     var msg = filterOutput(e.action, "ACTION", e.sourceObject);
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     e.sourceObject.display(msg, "ACTION", "ME!", e.sourceObject);
+    client.munger.getRule(".mailto").enabled = false;
     e.sourceObject.act(msg);
 }
 
@@ -2083,7 +2111,9 @@ function cmdSay(e)
     }
 
     var msg = filterOutput(e.message, "PRIVMSG", e.sourceObject);
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     e.sourceObject.display(msg, "PRIVMSG", "ME!", e.sourceObject);
+    client.munger.getRule(".mailto").enabled = false;
     e.sourceObject.say(msg);
 }
 
@@ -2092,7 +2122,9 @@ function cmdMsg(e)
     var target = e.server.addTarget(e.nickname);
 
     var msg = filterOutput(e.message, "PRIVMSG", target);
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     e.sourceObject.display(msg, "PRIVMSG", "ME!", target);
+    client.munger.getRule(".mailto").enabled = false;
     target.say(msg);
 }
 
@@ -2125,7 +2157,9 @@ function cmdNotice(e)
     var target = e.server.addTarget(e.nickname);
 
     var msg = filterOutput(e.message, "NOTICE", target);
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     e.sourceObject.display(msg, "NOTICE", "ME!", target);
+    client.munger.getRule(".mailto").enabled = false;
     target.notice(msg);
 }
 
@@ -2167,7 +2201,6 @@ function cmdFocusInput(e)
 
 function cmdGotoURL(e)
 {
-    const IO_SVC = "@mozilla.org/network/io-service;1";
     const EXT_PROTO_SVC = "@mozilla.org/uriloader/external-protocol-service;1";
 
     if (e.url.search(/^ircs?:/i) == 0)
@@ -2179,18 +2212,33 @@ function cmdGotoURL(e)
     if (e.url.search(/^x-cz-command:/i) == 0)
     {
         var ary = e.url.match(/^x-cz-command:(.*)$/i);
-        e.sourceObject.frame.contentWindow.location.href = 
+        getContentWindow(e.sourceObject.frame).location.href = 
             "javascript:void(view.dispatch('" + decodeURI(ary[1]) + "', null, true))";
+        return;
+    }
+
+    try
+    {
+        var uri = client.iosvc.newURI(e.url, "UTF-8", null);
+    }
+    catch (ex)
+    {
+        var localeURLKey = "msg.localeurl." + e.url;
+        if (localeURLKey != getMsg(localeURLKey))
+            dispatch(e.command.name + " " + getMsg(localeURLKey));
+        else
+            display(getMsg(MSG_ERR_INVALID_URL, e.url), MT_ERROR);
+
+        dispatch("focus-input");
         return;
     }
 
     if ((e.command.name == "goto-url-external") || (client.host == "XULrunner"))
     {
-        const ioSvc = getService(IO_SVC, "nsIIOService");
         const extProtoSvc = getService(EXT_PROTO_SVC,
                                        "nsIExternalProtocolService");
-        var uri = ioSvc.newURI(e.url, "UTF-8", null);
         extProtoSvc.loadUrl(uri);
+        dispatch("focus-input");
         return;
     }
 
@@ -2444,7 +2492,7 @@ function cmdLoad(e)
                 if (!oldPlugin.disable())
                 {
                     display(getMsg(MSG_CANT_DISABLE, oldPlugin.id));
-                    display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
+                    display(getMsg(MSG_ERR_SCRIPTLOAD, e.url));
                     return null;
                 }
                 client.prefManager.removeObserver(oldPlugin.prefManager);
@@ -2457,9 +2505,10 @@ function cmdLoad(e)
             else
             {
                 display(getMsg(MSG_CANT_DISABLE, oldPlugin.id));
-                display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
+                display(getMsg(MSG_ERR_SCRIPTLOAD, e.url));
                 return null;
             }
+            display(getMsg(MSG_PLUGIN_DISABLED, oldPlugin.id));
         }
 
         return i;
@@ -2818,7 +2867,7 @@ function cmdOper(e)
 {
     // Password is optional, if it is not given, we use a safe prompt.
     if (!e.password)
-        e.password = promptPassword(getMsg(MSG_NEED_OPER_PASSWORD), "");
+        e.password = promptPassword(MSG_NEED_OPER_PASSWORD, "");
 
     if (!e.password)
         return;
@@ -2976,10 +3025,9 @@ function cmdPref (e)
 function cmdPrint(e)
 {
     if (("frame" in e.sourceObject) && e.sourceObject.frame &&
-        ("contentWindow" in e.sourceObject.frame) &&
-        e.sourceObject.frame.contentWindow)
+        getContentWindow(e.sourceObject.frame))
     {
-        e.sourceObject.frame.contentWindow.print();
+        getContentWindow(e.sourceObject.frame).print();
     }
     else
     {
@@ -2997,7 +3045,9 @@ function cmdVersion(e)
 
 function cmdEcho(e)
 {
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     display(e.message);
+    client.munger.getRule(".mailto").enabled = false;
 }
 
 function cmdInvite(e)
@@ -3453,7 +3503,7 @@ function cmdSave(e)
                         | nsIWBP.PERSIST_FLAGS_DONT_CHANGE_FILENAMES;
 
     // Set the document from the current view, and set a usable title
-    docToBeSaved = e.sourceObject.frame.contentDocument;
+    docToBeSaved = getContentDocument(e.sourceObject.frame);
     var headElement = docToBeSaved.getElementsByTagName("HEAD")[0];
     var titleElements = docToBeSaved.getElementsByTagName("title");
     // Remove an existing title, there shouldn't be more than one.
@@ -3760,11 +3810,11 @@ function cmdDCCChat(e)
     var c = client.dcc.addChat(u, client.dcc.getNextPort());
     c.request();
 
-    client.munger.entries[".inline-buttons"].enabled = true;
+    client.munger.getRule(".inline-buttons").enabled = true;
     var cmd = getMsg(MSG_DCC_COMMAND_CANCEL, "dcc-close " + c.id);
     display(getMsg(MSG_DCCCHAT_SENT_REQUEST, c._getParams().concat(cmd)),
             "DCC-CHAT");
-    client.munger.entries[".inline-buttons"].enabled = false;
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     return true;
 }
@@ -3879,13 +3929,13 @@ function cmdDCCSend(e)
     var c = client.dcc.addFileTransfer(u, client.dcc.getNextPort());
     c.request(file);
 
-    client.munger.entries[".inline-buttons"].enabled = true;
+    client.munger.getRule(".inline-buttons").enabled = true;
     var cmd = getMsg(MSG_DCC_COMMAND_CANCEL, "dcc-close " + c.id);
     display(getMsg(MSG_DCCFILE_SENT_REQUEST, [c.user.unicodeName, c.localIP,
                                               c.port, c.filename,
                                               getSISize(c.size), cmd]),
             "DCC-FILE");
-    client.munger.entries[".inline-buttons"].enabled = false;
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     return true;
 }
@@ -3967,11 +4017,11 @@ function cmdDCCList(e) {
                 counts.failed++;
                 break;
         }
-        client.munger.entries[".inline-buttons"].enabled = true;
+        client.munger.getRule(".inline-buttons").enabled = true;
         display(getMsg(MSG_DCCLIST_LINE, [k + 1, state, dir, type, tf,
                                           c.unicodeName, c.remoteIP, c.port,
                                           cmds]));
-        client.munger.entries[".inline-buttons"].enabled = false;
+        client.munger.getRule(".inline-buttons").enabled = false;
     }
     display(getMsg(MSG_DCCLIST_SUMMARY, [counts.pending, counts.connected,
                                          counts.failed]));
@@ -4174,7 +4224,7 @@ function cmdDCCDecline(e)
 function cmdTextDirection(e)
 {
     var direction;
-    var sourceObject = e.sourceObject.frame.contentDocument.body;
+    var sourceObject = getContentDocument(e.sourceObject.frame).body;
 
     switch (e.dir)
     {

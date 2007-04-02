@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.77";
+const __cz_version   = "0.9.78";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.76.0";
+const __cz_locale    = "0.9.78.0";
 
 var warn;
 var ASSERT;
@@ -208,6 +208,7 @@ function init()
 
     client.busy = false;
     updateProgress();
+    initOfflineIcon();
 
     client.initialized = true;
 
@@ -215,6 +216,7 @@ function init()
     dispatch("networks");
 
     initInstrumentation();
+    setTimeout("dispatch('focus-input')", 0);
     setTimeout(processStartupURLs, 0);
 }
 
@@ -282,6 +284,7 @@ function initStatic()
     }
 
     multilineInputMode(client.prefs["multiline"]);
+    updateSpellcheck(client.prefs["inputSpellcheck"]);
     if (client.prefs["showModeSymbols"])
         setListMode("symbol");
     else
@@ -396,19 +399,17 @@ function initStatic()
 
 function initApplicationCompatibility()
 {
-    // This routine does nothing more than tweak the UI based on the host
+    // This function does nothing more than tweak the UI based on the host
     // application.
-
-    /* client.hostCompat.typeChromeBrowser indicates whether we should use
-     * type="chrome" <browser> elements for the output window documents.
-     * Using these is necessary to work properly with xpcnativewrappers, but
-     * broke selection in older builds.
-     */
-    client.hostCompat.typeChromeBrowser = false;
 
     // Set up simple host and platform information.
     client.host = "Unknown";
+    // Do we need to copy the icons? (not necessary on Gecko 1.8 and onwards,
+    // and install.js does it for us on SeaMonkey)
+    client.hostCompat.needToCopyIcons = false;
+
     var app = getService("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+    // nsIXULAppInfo wasn't implemented before 1.8...
     if (app)
     {
         // Use the XULAppInfo.ID to find out what host we run on.
@@ -416,21 +417,16 @@ function initApplicationCompatibility()
         {
             case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                 client.host = "Firefox";
-                if (compareVersions(app.version, "1.4") <= 0)
-                    client.hostCompat.typeChromeBrowser = true;
                 break;
             case "{" + __cz_guid + "}":
                 // We ARE the app, in other words, we're running in XULrunner.
                 client.host = "XULrunner";
-                client.hostCompat.typeChromeBrowser = true;
                 break;
             case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}": // SeaMonkey
                 client.host = "Mozilla";
-                client.hostCompat.typeChromeBrowser = true;
                 break;
             case "{a463f10c-3994-11da-9945-000d60ca027b}": // Flock
                 client.host = "Flock";
-                client.hostCompat.typeChromeBrowser = true;
                 break;
             default:
                 client.unknownUID = app.ID;
@@ -446,6 +442,7 @@ function initApplicationCompatibility()
         }
         else if (url == "chrome://browser/content/browser.xul")
         {
+            client.hostCompat.needToCopyIcons = true;
             client.host = "Firefox";
         }
         else
@@ -485,27 +482,17 @@ function initIcons()
     const suffixes = [".ico", ".xpm", "16.xpm"];
 
     /* when installing on Mozilla, the XPI has the power to put the icons where
-     * they are needed - in Firefox, it doesn't. So we move them here, instead.
-     * In XULRunner, things are more fun, as we're not an extension.
+     * they are needed - in older versions of Firefox, it doesn't.
      */
-    var sourceDir;
-    if ((client.host == "Firefox") || (client.host == "Flock"))
-    {
-        sourceDir = getSpecialDirectory("ProfD");
-        sourceDir.append("extensions");
-        sourceDir.append("{" + __cz_guid + "}");
-        sourceDir.append("defaults");
-    }
-    else if (client.host == "XULrunner")
-    {
-        sourceDir = getSpecialDirectory("resource:app");
-        sourceDir.append("chrome");
-        sourceDir.append("icons");
-    }
-    else
-    {
+    if (!client.hostCompat.needToCopyIcons)
         return;
-    }
+
+    var sourceDir = getSpecialDirectory("ProfD");
+    sourceDir.append("extensions");
+    sourceDir.append("{" + __cz_guid + "}");
+    sourceDir.append("chrome");
+    sourceDir.append("icons");
+    sourceDir.append("default");
 
     var destDir = getSpecialDirectory("AChrom");
     destDir.append("icons");
@@ -574,10 +561,10 @@ function runInstrumentation(name, firstRun)
         var cmdNo = "deny-" + name;
         var btnYes = getMsg(MSG_INST1_COMMAND_YES, cmdYes);
         var btnNo  = getMsg(MSG_INST1_COMMAND_NO,  cmdNo);
-        client.munger.entries[".inline-buttons"].enabled = true;
+        client.munger.getRule(".inline-buttons").enabled = true;
         client.display(getMsg("msg." + name + ".msg1", [btnYes, btnNo]));
         client.display(getMsg("msg." + name + ".msg2", [cmdYes, cmdNo]));
-        client.munger.entries[".inline-buttons"].enabled = false;
+        client.munger.getRule(".inline-buttons").enabled = false;
 
         // Don't hide *client* if we're asking the user about the startup ping.
         client.lockView = true;
@@ -643,8 +630,8 @@ function getFindData(e)
 {
     var findData = new nsFindInstData();
     findData.browser = e.sourceObject.frame;
-    findData.rootSearchWindow = e.sourceObject.frame.contentWindow;
-    findData.currentSearchWindow = e.sourceObject.frame.contentWindow;
+    findData.rootSearchWindow = getContentWindow(e.sourceObject.frame);
+    findData.currentSearchWindow = getContentWindow(e.sourceObject.frame);
 
     /* Yay, evil hacks! findData.init doesn't care about the findService, it
      * gets option settings from webBrowserFind. As we want the wrap option *on*
@@ -683,11 +670,14 @@ function importFromFrame(method)
 
         try
         {
-            var window = getContentWindow(this.frame)
+            var window = getContentWindow(this.frame);
             if (window && "initialized" in window && window.initialized &&
                 method in window)
             {
-                return window[method];
+                return function import_wrapper_apply()
+                {
+                    window[method].apply(this, arguments);
+                };
             }
         }
         catch (ex)
@@ -911,428 +901,6 @@ function getConnectedNetworks()
     return rv;
 }
 
-function insertLink (matchText, containerTag, data)
-{
-    var href;
-    var linkText;
-
-    var trailing;
-    ary = matchText.match(/([.,?]+)$/);
-    if (ary)
-    {
-        linkText = RegExp.leftContext;
-        trailing = ary[1];
-    }
-    else
-    {
-        linkText = matchText;
-    }
-
-    var ary = linkText.match (/^(\w[\w-]+):/);
-    if (ary)
-    {
-        if (!("schemes" in client))
-        {
-            var pfx = "@mozilla.org/network/protocol;1?name=";
-            var len = pfx.length;
-
-            client.schemes = new Object();
-            for (var c in Components.classes)
-            {
-                if (c.indexOf(pfx) == 0)
-                    client.schemes[c.substr(len)] = true;
-            }
-        }
-
-        if (!(ary[1] in client.schemes))
-        {
-            insertHyphenatedWord(matchText, containerTag);
-            return;
-        }
-
-        href = linkText;
-    }
-    else
-    {
-        href = "http://" + linkText;
-    }
-
-    /* This gives callers to the munger control over URLs being logged; the
-     * channel topic munger uses this, as well as the "is important" checker.
-     * If either of |dontLogURLs| or |noStateChange| is present and true, we
-     * don't log.
-     */
-    if ((!("dontLogURLs" in data) || !data.dontLogURLs) &&
-        (!("noStateChange" in data) || !data.noStateChange))
-    {
-        var max = client.prefs["urls.store.max"];
-        if (client.prefs["urls.list"].unshift(href) > max)
-            client.prefs["urls.list"].pop();
-        client.prefs["urls.list"].update();
-    }
-
-    var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:a");
-    anchor.setAttribute ("href", href);
-    anchor.setAttribute ("class", "chatzilla-link");
-    anchor.setAttribute ("target", "_content");
-    insertHyphenatedWord (linkText, anchor);
-    containerTag.appendChild (anchor);
-    if (trailing)
-        insertHyphenatedWord (trailing, containerTag);
-
-}
-
-function insertMailToLink (matchText, containerTag)
-{
-
-    var href;
-
-    if (matchText.indexOf ("mailto:") != 0)
-        href = "mailto:" + matchText;
-    else
-        href = matchText;
-
-    var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:a");
-    anchor.setAttribute ("href", href);
-    anchor.setAttribute ("class", "chatzilla-link");
-    //anchor.setAttribute ("target", "_content");
-    insertHyphenatedWord (matchText, anchor);
-    containerTag.appendChild (anchor);
-
-}
-
-function insertChannelLink (matchText, containerTag, eventData)
-{
-    var bogusChannels =
-        /^#(include|error|define|if|ifdef|else|elsif|endif|\d+)$/i;
-
-    if (!("network" in eventData) || !eventData.network ||
-        matchText.search(bogusChannels) != -1)
-    {
-        containerTag.appendChild(document.createTextNode(matchText));
-        return;
-    }
-
-    var encodedMatchText = fromUnicode(matchText, eventData.sourceObject);
-    var anchor = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                          "html:a");
-    anchor.setAttribute ("href", eventData.network.getURL() +
-                         ecmaEscape(encodedMatchText));
-    anchor.setAttribute ("class", "chatzilla-link");
-    insertHyphenatedWord (matchText, anchor);
-    containerTag.appendChild (anchor);
-}
-
-function insertTalkbackLink(matchText, containerTag, eventData)
-{
-    var anchor = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                          "html:a");
-
-    anchor.setAttribute("href", "http://talkback-public.mozilla.org/" +
-                        "search/start.jsp?search=2&type=iid&id=" + matchText);
-    anchor.setAttribute("class", "chatzilla-link");
-    insertHyphenatedWord(matchText, anchor);
-    containerTag.appendChild(anchor);
-}
-
-function insertBugzillaLink (matchText, containerTag, eventData)
-{
-    var idOrAlias = matchText.match(/bug\s+#?(\d{3,6}|[^\s,]{1,20})/i)[1];
-
-    var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:a");
-
-    var bugURL;
-    if (eventData.channel)
-        bugURL = eventData.channel.prefs["bugURL"];
-    else if (eventData.network)
-        bugURL = eventData.network.prefs["bugURL"];
-    else
-        bugURL = client.prefs["bugURL"];
-
-    anchor.setAttribute ("href", bugURL.replace("%s", idOrAlias));
-    anchor.setAttribute ("class", "chatzilla-link");
-    anchor.setAttribute ("target", "_content");
-    insertHyphenatedWord (matchText, anchor);
-    containerTag.appendChild (anchor);
-
-}
-
-function insertRheet (matchText, containerTag)
-{
-
-    var anchor = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:a");
-    anchor.setAttribute ("href",
-                         "http://ftp.mozilla.org/pub/mozilla.org/mozilla/libraries/bonus-tracks/rheet.wav");
-    anchor.setAttribute ("class", "chatzilla-rheet chatzilla-link");
-    //anchor.setAttribute ("target", "_content");
-    insertHyphenatedWord (matchText, anchor);
-    containerTag.appendChild (anchor);
-}
-
-function insertQuote (matchText, containerTag)
-{
-    if (matchText == "``")
-        containerTag.appendChild(document.createTextNode("\u201c"));
-    else
-        containerTag.appendChild(document.createTextNode("\u201d"));
-}
-
-function insertSmiley(emoticon, containerTag)
-{
-    var type = "error";
-
-    if (emoticon.search(/\>[-^v]?\)/) != -1)
-        type = "face-alien";
-    else if (emoticon.search(/\>[=:;][-^v]?[(|]/) != -1)
-        type = "face-angry";
-    else if (emoticon.search(/[=:;][-^v]?[Ss\\\/]/) != -1)
-        type = "face-confused";
-    else if (emoticon.search(/[B8][-^v]?[)\]]/) != -1)
-        type = "face-cool";
-    else if (emoticon.search(/[=:;][~'][-^v]?\(/) != -1)
-        type = "face-cry";
-    else if (emoticon.search(/o[._]O/) != -1)
-        type = "face-dizzy";
-    else if (emoticon.search(/O[._]o/) != -1)
-        type = "face-dizzy-back";
-    else if (emoticon.search(/o[._]o|O[._]O/) != -1)
-        type = "face-eek";
-    else if (emoticon.search(/\>[=:;][-^v]?D/) != -1)
-        type = "face-evil";
-    else if (emoticon.search(/[=:;][-^v]?DD/) != -1)
-        type = "face-lol";
-    else if (emoticon.search(/[=:;][-^v]?D/) != -1)
-        type = "face-laugh";
-    else if (emoticon.search(/\([-^v]?D|[xX][-^v]?D/) != -1)
-        type = "face-rofl";
-    else if (emoticon.search(/[=:;][-^v]?\|/) != -1)
-        type = "face-normal";
-    else if (emoticon.search(/[=:;][-^v]?\?/) != -1)
-        type = "face-question";
-    else if (emoticon.search(/[=:;]"[)\]]/) != -1)
-        type = "face-red";
-    else if (emoticon.search(/9[._]9/) != -1)
-        type = "face-rolleyes";
-    else if (emoticon.search(/[=:;][-^v]?[(\[]/) != -1)
-        type = "face-sad";
-    else if (emoticon.search(/[=:][-^v]?[)\]]/) != -1)
-        type = "face-smile";
-    else if (emoticon.search(/[=:;][-^v]?[0oO]/) != -1)
-        type = "face-surprised";
-    else if (emoticon.search(/[=:;][-^v]?[pP]/) != -1)
-        type = "face-tongue";
-    else if (emoticon.search(/;[-^v]?[)\]]/) != -1)
-        type = "face-wink";
-
-    if (type == "error")
-    {
-        // We didn't actually match anything, so it'll be a too-generic match
-        // from the munger RegExp.
-        containerTag.appendChild(document.createTextNode(emoticon));
-        return;
-    }
-
-    var span = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                         "html:span");
-
-    /* create a span to hold the emoticon text */
-    span.setAttribute ("class", "chatzilla-emote-txt");
-    span.setAttribute ("type", type);
-    span.appendChild (document.createTextNode (emoticon));
-    containerTag.appendChild (span);
-
-    /* create an empty span after the text.  this span will have an image added
-     * after it with a chatzilla-emote:after css rule. using
-     * chatzilla-emote-txt:after is not good enough because it does not allow us
-     * to turn off the emoticon text, but keep the image.  ie.
-     * chatzilla-emote-txt { display: none; } turns off
-     * chatzilla-emote-txt:after as well.*/
-    span = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                     "html:span");
-    span.setAttribute ("class", "chatzilla-emote");
-    span.setAttribute ("type", type);
-    span.setAttribute ("title", emoticon);
-    containerTag.appendChild (span);
-
-}
-
-function mircChangeColor (colorInfo, containerTag, data)
-{
-    /* If colors are disabled, the caller doesn't want colors specifically, or
-     * the caller doesn't want any state-changing effects, we drop out.
-     */
-    if (!client.enableColors ||
-        (("noMircColors" in data) && data.noMircColors) ||
-        (("noStateChange" in data) && data.noStateChange))
-    {
-        return;
-    }
-
-    var ary = colorInfo.match (/.(\d{1,2}|)(,(\d{1,2})|)/);
-
-    // Do we have a BG color specified...?
-    if (!arrayHasElementAt(ary, 1) || !ary[1])
-    {
-        // Oops, no colors.
-        delete data.currFgColor;
-        delete data.currBgColor;
-        return;
-    }
-
-    var fgColor = String(Number(ary[1]) % 16);
-
-    if (fgColor.length == 1)
-        data.currFgColor = "0" + fgColor;
-    else
-        data.currFgColor = fgColor;
-
-    // Do we have a BG color specified...?
-    if (arrayHasElementAt(ary, 3) && ary[3])
-    {
-        var bgColor = String(Number(ary[3]) % 16);
-
-        if (bgColor.length == 1)
-            data.currBgColor = "0" + bgColor;
-        else
-            data.currBgColor = bgColor;
-    }
-
-    data.hasColorInfo = true;
-}
-
-function mircToggleBold (colorInfo, containerTag, data)
-{
-    if (!client.enableColors ||
-        (("noMircColors" in data) && data.noMircColors) ||
-        (("noStateChange" in data) && data.noStateChange))
-    {
-        return;
-    }
-
-    if ("isBold" in data)
-        delete data.isBold;
-    else
-        data.isBold = true;
-    data.hasColorInfo = true;
-}
-
-function mircToggleUnder (colorInfo, containerTag, data)
-{
-    if (!client.enableColors ||
-        (("noMircColors" in data) && data.noMircColors) ||
-        (("noStateChange" in data) && data.noStateChange))
-    {
-        return;
-    }
-
-    if ("isUnderline" in data)
-        delete data.isUnderline;
-    else
-        data.isUnderline = true;
-    data.hasColorInfo = true;
-}
-
-function mircResetColor (text, containerTag, data)
-{
-    if (!client.enableColors ||
-        (("noMircColors" in data) && data.noMircColors) ||
-        (("noStateChange" in data) && data.noStateChange) ||
-        !("hasColorInfo" in data))
-    {
-        return;
-    }
-
-    delete data.currFgColor;
-    delete data.currBgColor;
-    delete data.isBold;
-    delete data.isUnder;
-    delete data.hasColorInfo;
-}
-
-function mircReverseColor (text, containerTag, data)
-{
-    if (!client.enableColors ||
-        (("noMircColors" in data) && data.noMircColors) ||
-        (("noStateChange" in data) && data.noStateChange))
-    {
-        return;
-    }
-
-    var tempColor = ("currFgColor" in data ? data.currFgColor : "");
-
-    if ("currBgColor" in data)
-        data.currFgColor = data.currBgColor;
-    else
-        delete data.currFgColor;
-    if (tempColor)
-        data.currBgColor = tempColor;
-    else
-        delete data.currBgColor;
-    data.hasColorInfo = true;
-}
-
-function showCtrlChar(c, containerTag)
-{
-    var span = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                         "html:span");
-    span.setAttribute ("class", "chatzilla-control-char");
-    if (c == "\t")
-    {
-        containerTag.appendChild(document.createTextNode(c));
-        return;
-    }
-
-    var ctrlStr = c.charCodeAt(0).toString(16);
-    if (ctrlStr.length < 2)
-        ctrlStr = "0" + ctrlStr;
-    span.appendChild (document.createTextNode ("0x" + ctrlStr));
-    containerTag.appendChild (span);
-}
-
-function insertHyphenatedWord (longWord, containerTag)
-{
-    var wordParts = splitLongWord (longWord, client.MAX_WORD_DISPLAY);
-    for (var i = 0; i < wordParts.length; ++i)
-    {
-        containerTag.appendChild (document.createTextNode (wordParts[i]));
-        if (i != wordParts.length)
-        {
-            var wbr = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                                "html:wbr");
-            containerTag.appendChild (wbr);
-        }
-    }
-}
-
-function insertInlineButton(text, containerTag, data)
-{
-    var ary = text.match(/\[\[([^\]]+)\]\[([^\]]+)\]\[([^\]]+)\]\]/);
-
-    if (!ary)
-    {
-        containerTag.appendChild(document.createTextNode(text));
-        return;
-    }
-
-    var label = ary[1];
-    var title = ary[2];
-    var command = ary[3];
-
-    var link = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
-    link.setAttribute("href", "x-cz-command:" + encodeURI(command));
-    link.setAttribute("title", title);
-    link.setAttribute("class", "chatzilla-link");
-    link.appendChild(document.createTextNode(label));
-
-    containerTag.appendChild(document.createTextNode("["));
-    containerTag.appendChild(link);
-    containerTag.appendChild(document.createTextNode("]"));
-}
-
 function combineNicks(nickList, max)
 {
     if (!max)
@@ -1464,7 +1032,7 @@ function getMessagesContext(cx, element)
                     break;
 
                 // strip out  a potential ME! suffix
-                var ary = nickname.match(/(\S+)/);
+                var ary = nickname.match(/([^ ]+)/);
                 nickname = ary[1];
 
                 if (!cx.network)
@@ -2452,6 +2020,229 @@ function updateSecurityIcon()
     }
 }
 
+function initOfflineIcon()
+{
+    const IOSVC2_CID = "@mozilla.org/network/io-service;1";
+    const PRBool_CID = "@mozilla.org/supports-PRBool;1";
+    const OS_CID = "@mozilla.org/observer-service;1";
+    const nsISupportsPRBool = Components.interfaces.nsISupportsPRBool;
+
+    client.offlineObserver = {
+        _element: document.getElementById("offline-status"),
+        _getNewIOSvc: function offline_getNewIOSvc()
+        {
+            try
+            {
+                return getService(IOSVC2_CID, "nsIIOService2");
+            }
+            catch (ex) {}
+
+            // If it failed, it's probably just not there. We don't care.
+            return null;
+        },
+        state: function offline_state()
+        {
+            return (client.iosvc.offline ? "offline" : "online");
+        },
+        observe: function offline_observe(subject, topic, state)
+        {
+            if ((topic == "offline-requested") &&
+                (client.getConnectionCount() > 0))
+            {
+                var buttonAry = [MSG_REALLY_GO_OFFLINE, MSG_DONT_GO_OFFLINE];
+                var rv = confirmEx(MSG_GOING_OFFLINE, buttonAry);
+                if (rv == 1) // Don't go offline, please!
+                {
+                    subject.QueryInterface(nsISupportsPRBool);
+                    subject.data = true;
+                }
+            }
+            else if (topic == "network:offline-status-changed")
+            {
+                this.updateOfflineUI();
+            }
+        },
+        updateOfflineUI: function offline_uiUpdate()
+        {
+            this._element.setAttribute("offlinestate", this.state());
+            var tooltipMsgId = "MSG_OFFLINESTATE_" + this.state().toUpperCase();
+            this._element.setAttribute("tooltiptext", window[tooltipMsgId]);
+        },
+        toggleOffline: function offline_toggle()
+        {
+            // Check whether people are OK with us going offline:
+            if (!client.iosvc.offline && !this.canGoOffline())
+                return;
+
+            // Stop automatic management of the offline status, if existing.
+            try
+            {
+                var ioSvc2 = this._getNewIOSvc();
+                if (ioSvc2 && ("manageOfflineStatus" in ioSvc2))
+                    ioSvc2.manageOfflineStatus = false;
+            }
+            catch (ex)
+            {
+                dd("Turning off managed offline status failed!\n" + ex);
+            }
+
+            // Actually change the offline state.
+            client.iosvc.offline = !client.iosvc.offline;
+            // Update the pref:
+            this.updatePrefFromOffline();
+        },
+        canGoOffline: function offline_check()
+        {
+            try
+            {
+                var os = getService(OS_CID, "nsIObserverService");
+                var canGoOffline = newObject(PRBool_CID, "nsISupportsPRBool");
+                os.notifyObservers(canGoOffline, "offline-requested", null);
+                // Someone called for a halt
+                if (canGoOffline.data)
+                    return false;
+            }
+            catch (ex)
+            {
+                dd("Exception when trying to ask if we could go offline:" + ex);
+            }
+            return true;
+        },
+        updateOfflineFromPref: function offline_syncFromPref()
+        {
+            // On toolkit, we might have smart management of offline mode.
+            // Don't interfere.
+            var ioSvc2 = this._getNewIOSvc();
+            if (ioSvc2 && ioSvc2.manageOfflineStatus)
+                return;
+
+            // This is app-managed, or should be, on startup:
+            if (client.host == "Mozilla")
+                return;
+
+            var isOffline = false;
+            var prefSvc = getService("@mozilla.org/preferences-service;1",
+                                     "nsIPrefBranch");
+            // Let the app-specific hacks begin:
+            try {
+                if ((client.host == "Firefox") || (client.host == "Flock"))
+                    isOffline = prefSvc.getBoolPref("browser.offline");
+                else if (client.host == "XULrunner")
+                    isOffline = !prefSvc.getBoolPref("network.online");
+            }
+            catch (ex) { /* Whatever. */ }
+
+            // Actually do it:
+            client.iosvc.offline = isOffline;
+        },
+        updatePrefFromOffline: function offline_syncToPref()
+        {
+            // This is app-managed, or should be.
+            if (client.host == "Mozilla")
+                return;
+
+            var isOffline = client.iosvc.offline;
+            var prefSvc = getService("@mozilla.org/preferences-service;1",
+                                     "nsIPrefBranch");
+            // Let the app-specific hacks begin:
+            try {
+                if ((client.host == "Firefox") || (client.host == "Flock"))
+                    prefSvc.setBoolPref("browser.offline", isOffline);
+                else if (client.host == "XULrunner")
+                    prefSvc.setBoolPref("network.online", !isOffline);
+            }
+            catch (ex)
+            {
+                dd("Couldn't set offline pref! Error:" + ex);
+            }
+        }
+    };
+
+    try
+    {
+        var os = getService(OS_CID, "nsIObserverService");
+        os.addObserver(client.offlineObserver, "offline-requested", false);
+        os.addObserver(client.offlineObserver,
+                       "network:offline-status-changed", false);
+    }
+    catch (ex)
+    {
+        dd("Exception when trying to register offline observers: " + ex);
+    }
+
+    var elem = client.offlineObserver._element;
+    elem.setAttribute("onclick", "client.offlineObserver.toggleOffline()");
+    client.offlineObserver.updateOfflineFromPref();
+    client.offlineObserver.updateOfflineUI();
+
+    // Don't leak:
+    delete os;
+    delete elem;
+}
+
+function uninitOfflineIcon()
+{
+    const OS_CID = "@mozilla.org/observer-service;1";
+    try
+    {
+        var os = getService(OS_CID, "nsIObserverService");
+        os.removeObserver(client.offlineObserver, "offline-requested", false);
+        os.removeObserver(client.offlineObserver,
+                          "network:offline-status-changed", false);
+    }
+    catch (ex)
+    {
+        dd("Exception when trying to unregister offline observers: " + ex);
+    }
+}
+
+function updateAppMotif(motifURL)
+{
+    var node = document.firstChild;
+    while (node && ((node.nodeType != node.PROCESSING_INSTRUCTION_NODE) ||
+                    !(/name="dyn-motif"/).test(node.data)))
+    {
+        node = node.nextSibling;
+    }
+
+    motifURL = motifURL.replace(/"/g, "%22");
+    var dataStr = "href=\"" + motifURL + "\" name=\"dyn-motif\"";
+    try 
+    {
+        // No dynamic style node yet.
+        if (!node)
+        {
+            node = document.createProcessingInstruction("xml-stylesheet", dataStr);
+            document.insertBefore(node, document.firstChild);
+        }
+        else
+        {
+            node.data = dataStr;
+        }
+    }
+    catch (ex)
+    {
+        dd(formatException(ex));
+        var err = ex.name;
+        // Mozilla 1.0 doesn't like document.insertBefore(...,
+        // document.firstChild); though it has a prototype for it -
+        // check for the right error:
+        if (err == "NS_ERROR_NOT_IMPLEMENTED")
+        {
+            display(MSG_NO_DYNAMIC_STYLE, MT_INFO);
+            updateAppMotif = function() {};
+        }
+    }
+}
+
+function updateSpellcheck(value)
+{
+    value = value.toString();
+    document.getElementById("input").setAttribute("spellcheck", value);
+    document.getElementById("multiline-input").setAttribute("spellcheck",
+                                                            value);
+}
+
 function updateNetwork()
 {
     var o = getObjectDetails (client.currentObject);
@@ -2753,6 +2544,10 @@ function setCurrentObject (obj)
     if ("currentObject" in client && client.currentObject == obj)
         return;
 
+    // Set window.content to make screenreader apps find the chat content.
+    if (obj.frame && getContentWindow(obj.frame))
+        window.content = getContentWindow(obj.frame);
+
     var tb, userList;
     userList = document.getElementById("user-list");
 
@@ -2765,10 +2560,7 @@ function setCurrentObject (obj)
         tb = getTabForObject(co);
     }
     if (tb)
-    {
-        tb.selected = false;
-        tb.setAttribute ("state", "normal");
-    }
+        tb.setAttribute("state", "normal");
 
     /* Unselect currently selected users.
      * If the splitter's collapsed, the userlist *isn't* visible, but we'll not
@@ -2803,13 +2595,16 @@ function setCurrentObject (obj)
     tb = dispatch("create-tab-for-view", { view: obj });
     if (tb)
     {
-        tb.selected = true;
-        tb.setAttribute ("state", "current");
+        tb.parentNode.selectedItem = tb;
+        tb.setAttribute("state", "current");
     }
 
     var vk = Number(tb.getAttribute("viewKey"));
     delete client.activityList[vk];
     client.deck.selectedIndex = vk;
+
+    // Style userlist and the like:
+    updateAppMotif(obj.prefs["motif.current"]);
 
     updateTitle();
     updateProgress();
@@ -2820,12 +2615,11 @@ function setCurrentObject (obj)
     // Input area should have the same direction as the output area
     if (("frame" in client.currentObject) &&
         client.currentObject.frame &&
-        ("contentDocument" in client.currentObject.frame) &&
-        client.currentObject.frame.contentDocument &&
-        ("body" in client.currentObject.frame.contentDocument) &&
-        client.currentObject.frame.contentDocument.body)
+        getContentDocument(client.currentObject.frame) &&
+        ("body" in getContentDocument(client.currentObject.frame)) &&
+        getContentDocument(client.currentObject.frame).body)
     {
-        var contentArea = client.currentObject.frame.contentDocument.body;
+        var contentArea = getContentDocument(client.currentObject.frame).body;
         client.input.setAttribute("dir", contentArea.getAttribute("dir"));
     }
     client.input.focus();
@@ -2846,6 +2640,26 @@ function scrollDown(frame, force)
     var window = getContentWindow(frame);
     if (window && (force || checkScroll(frame)))
         window.scrollTo(0, window.document.height);
+}
+
+function advanceKeyboardFocus(amount)
+{
+    var contentWin = getContentWindow(client.currentObject.frame);
+    var contentDoc = getContentDocument(client.currentObject.frame);
+    var userList = document.getElementById("user-list");
+
+    // Focus userlist, inputbox and outputwindow in turn:
+    var focusableElems = [userList, client.input.inputField, contentWin];
+
+    var elem = document.commandDispatcher.focusedElement;
+    // Finding focus in the content window is "hard". It's going to be null
+    // if the window itself is focused, and "some element" inside of it if the
+    // user starts tabbing through.
+    if (!elem || (elem.ownerDocument == contentDoc))
+        elem = contentWin;
+
+    var newIndex = (arrayIndexOf(focusableElems, elem) * 1 + 3 + amount) % 3;
+    focusableElems[newIndex].focus();
 }
 
 /* valid values for |what| are "superfluous", "activity", and "attention".
@@ -3049,6 +2863,16 @@ function getFrameForDOMWindow(window)
 
 function replaceColorCodes(msg)
 {
+    // find things that look like URLs and escape the color code inside of those to
+    // prevent munging the URLs resulting in broken links
+    msg = msg.replace(new RegExp(client.linkRE.source, "g"), function(url) {
+        return url.replace(/%[BC][0-9A-Fa-f]/g, function(hex, index) {
+            // as JS does not support lookbehind and we don't want to consume the
+            // preceding character, we test for an existing %% manually
+            return (("%" == url.substr(index - 1, 1)) ? "" : "%") + hex;
+        });
+    });
+    
     // mIRC codes: underline, bold, Original (reset), colors, reverse colors.
     msg = msg.replace(/(^|[^%])%U/g, "$1\x1f");
     msg = msg.replace(/(^|[^%])%B/g, "$1\x02");
@@ -3137,8 +2961,7 @@ function client_statechange (webProgress, request, stateFlags, status)
             {
                 cwin.getMsg = getMsg;
                 cwin.initOutputWindow(client, frame.source, onMessageViewClick);
-                cwin.changeCSS(frame.source.getFontCSS("data"),
-                               "cz-fonts");
+                cwin.changeCSS(frame.source.getFontCSS("data"), "cz-fonts");
                 scrollDown(frame, true);
 
                 try
@@ -3149,6 +2972,15 @@ function client_statechange (webProgress, request, stateFlags, status)
                 {
                     dd("Exception removing progress listener (done): " + ex);
                 }
+            }
+            // XXX: For about:blank it won't find initOutputWindow. Cope.
+            else if (!cwin || !cwin.location ||
+                     (cwin.location.href != "about:blank"))
+            {
+                // This should totally never ever happen. It will if we get in a
+                // fight with xpcnativewrappers, though. Oops:
+                dd("Couldn't find a content window or its initOutputWindow " + 
+                   "function. This is BAD!");
             }
         }
     }
@@ -3200,7 +3032,7 @@ function syncOutputFrame(obj, nesting)
 
     try
     {
-        if (("contentDocument" in iframe) && ("webProgress" in iframe))
+        if (getContentDocument(iframe) && ("webProgress" in iframe))
         {
             var url = obj.prefs["outputWindowURL"];
             iframe.addProgressListener(client.progressListener, ALL);
@@ -3302,17 +3134,15 @@ function getTabForObject (source, create)
 
         var browser = document.createElement ("browser");
         browser.setAttribute("class", "output-container");
-        // Only use type="chrome" if the host app supports it properly:
-        if (client.hostCompat.typeChromeBrowser)
-            browser.setAttribute("type", "chrome");
-        else
-            browser.setAttribute("type", "content");
+        browser.setAttribute("type", "content");
         browser.setAttribute("flex", "1");
         browser.setAttribute("tooltip", "html-tooltip-node");
         browser.setAttribute("context", "context:messages");
         //browser.setAttribute ("onload", "scrollDown(true);");
         browser.setAttribute("onclick",
                              "return onMessageViewClick(event)");
+        browser.setAttribute("onmousedown",
+                             "return onMessageViewMouseDown(event)");
         browser.setAttribute("ondragover",
                              "nsDragAndDrop.dragOver(event, " +
                              "contentDropObserver);");
@@ -3321,8 +3151,6 @@ function getTabForObject (source, create)
         browser.setAttribute("ondraggesture",
                              "nsDragAndDrop.startDrag(event, " +
                              "contentAreaDNDObserver);");
-        if (typeof startScrolling == "function")
-            browser.setAttribute("onmousedown", "startScrolling(event);");
         browser.source = source;
         source.frame = browser;
         ASSERT(client.deck, "no deck?");
@@ -3494,6 +3322,10 @@ function updateTimestampFor(view, displayRow)
 client.updateMenus =
 function c_updatemenus(menus)
 {
+    // Don't bother if the menus aren't even created yet.
+    if (!client.initialized)
+        return null;
+
     return this.menuManager.updateMenus(document, menus);
 }
 
@@ -3620,10 +3452,7 @@ function cli_say(msg)
 {
     if ("say" in client.currentObject)
     {
-        msg = filterOutput(msg, "PRIVMSG", client.currentObject);
-        display(msg, "PRIVMSG", "ME!", client.currentObject);
-        client.currentObject.say(msg);
-
+        client.currentObject.dispatch("say", {message: msg});
         return;
     }
 

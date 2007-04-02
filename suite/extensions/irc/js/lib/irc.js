@@ -734,6 +734,9 @@ function serv_sockdiscon(status)
     var ev = new CEvent ("server", "disconnect", this, "onDisconnect");
     ev.server = this;
     ev.disconnectStatus = status;
+    if (ev.disconnectStatus == NS_ERROR_BINDING_ABORTED)
+        ev.disconnectStatus = NS_ERROR_ABORT;
+
     this.parent.eventPump.addEvent (ev);
 }
 
@@ -1025,10 +1028,12 @@ function serv_disconnect(e)
         network.delayedConnect();
     };
 
-    if ((this.parent.state == NET_CONNECTING) ||
+    // Don't reconnect if our connection was aborted.
+    var wasAborted = (e.disconnectStatus == NS_ERROR_ABORT);
+    if (((this.parent.state == NET_CONNECTING) && !wasAborted) ||
         /* fell off while connecting, try again */
         (this.parent.primServ == this) && (this.parent.state == NET_ONLINE) &&
-        (!("quitting" in this) && this.parent.stayingPower))
+        (!("quitting" in this) && this.parent.stayingPower && !wasAborted))
     { /* fell off primary server, reconnect to any host in the serverList */
         setTimeout(delayedConnectFn, 0, this.parent);
     }
@@ -1097,6 +1102,7 @@ function serv_onsenddata (e)
                 ev.server = this;
                 ev.reason = "error";
                 ev.exception = ex;
+                ev.disconnectStatus = NS_ERROR_ABORT;
                 this.parent.eventPump.addEvent(ev);
 
                 return false;
@@ -1144,6 +1150,7 @@ function serv_poll(e)
             ev.server = this;
             ev.reason = "error";
             ev.exception = ex;
+            ev.disconnectStatus = NS_ERROR_ABORT;
             this.parent.eventPump.addEvent (ev);
             return false;
         }
@@ -1233,24 +1240,24 @@ function serv_onRawData(e)
     if (l[0] == ":")
     {
         // Must split only on a REAL space here, not just any old whitespace.
-        ary = l.match(/:(\S+) (.*)/);
+        ary = l.match(/:([^ ]+) (.*)/);
         e.source = ary[1];
         l = ary[2];
-        ary = e.source.match(/(\S+)!(\S+)@(.*)/);
+        ary = e.source.match(/([^ ]+)!([^ ]+)@(.*)/);
         if (ary)
         {
             e.user = new CIRCUser(this, null, ary[1], ary[2], ary[3]);
         }
         else
         {
-            ary = e.source.match(/(\S+)@(.*)/);
+            ary = e.source.match(/([^ ]+)@(.*)/);
             if (ary)
             {
                 e.user = new CIRCUser(this, null, ary[1], null, ary[2]);
             }
             else
             {
-                ary = e.source.match(/(\S+)!(.*)/);
+                ary = e.source.match(/([^ ]+)!(.*)/);
                 if (ary)
                     e.user = new CIRCUser(this, null, ary[1], ary[2], null);
             }
@@ -2404,7 +2411,7 @@ function serv_privmsg (e)
 CIRCServer.prototype.onCTCPReply =
 function serv_ctcpr (e)
 {
-    var ary = e.params[2].match (/^\x01(\S+) ?(.*)\x01$/i);
+    var ary = e.params[2].match (/^\x01([^ ]+) ?(.*)\x01$/i);
 
     if (ary == null)
         return false;
@@ -2446,7 +2453,7 @@ function serv_ctcpr (e)
 CIRCServer.prototype.onCTCP =
 function serv_ctcp (e)
 {
-    var ary = e.params[2].match (/^\x01(\S+) ?(.*)\x01$/i);
+    var ary = e.params[2].match (/^\x01([^ ]+) ?(.*)\x01$/i);
 
     if (ary == null)
         return false;
@@ -2610,7 +2617,7 @@ function serv_cping (e)
 CIRCServer.prototype.onCTCPDcc =
 function serv_dcc (e)
 {
-    var ary = e.CTCPData.match (/(\S+)? ?(.*)/);
+    var ary = e.CTCPData.match (/([^ ]+)? ?(.*)/);
 
     e.DCCData = ary[2];
     e.type = "dcc-" + ary[1].toLowerCase();
@@ -2653,7 +2660,7 @@ function serv_dccchat (e)
 CIRCServer.prototype.onDCCSend =
 function serv_dccsend (e)
 {
-    var ary = e.DCCData.match(/(\S+) (\d+) (\d+) (\d+)/);
+    var ary = e.DCCData.match(/([^ ]+) (\d+) (\d+) (\d+)/);
 
     /* Just for mIRC: filenames with spaces may be enclosed in double-quotes.
      * (though by default it replaces spaces with underscores, but we might as
@@ -2912,6 +2919,23 @@ function chan_inviteuser (nick)
 {
     this.parent.sendData("INVITE " + nick + " " + this.encodedName + "\n");
     return true;
+}
+
+CIRCChannel.prototype.findUsers = 
+function chan_findUsers(mask)
+{
+    var ary = [];
+    var unchecked = 0;
+    mask = getHostmaskParts(mask);
+    for (var nick in this.users)
+    {
+        var user = this.users[nick];
+        if (!user.host || !user.name)
+            unchecked++;
+        else if (hostmaskMatches(user, mask))
+            ary.push(user);
+    }
+    return { users: ary, unchecked: unchecked };
 }
 
 /*

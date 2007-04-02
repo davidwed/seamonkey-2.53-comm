@@ -47,6 +47,10 @@ const NS_ERROR_NET_RESET = NS_ERROR_MODULE_NETWORK + 20;
 const NS_ERROR_UNKNOWN_PROXY_HOST = NS_ERROR_MODULE_NETWORK + 42;
 const NS_ERROR_PROXY_CONNECTION_REFUSED = NS_ERROR_MODULE_NETWORK + 72;
 
+// Offline error constants:
+const NS_ERROR_BINDING_ABORTED = NS_ERROR_MODULE_NETWORK + 2;
+const NS_ERROR_ABORT = 0x80004004;
+
 const NS_NET_STATUS_RESOLVING_HOST = NS_ERROR_MODULE_NETWORK + 3;
 const NS_NET_STATUS_CONNECTED_TO = NS_ERROR_MODULE_NETWORK + 4;
 const NS_NET_STATUS_SENDING_TO = NS_ERROR_MODULE_NETWORK + 5;
@@ -445,8 +449,16 @@ function bc_readdata(timeout, count)
 
     var rv;
 
+    if (!("_sInputStream" in this)) {
+        this._sInputStream = toSInputStream(this._inputStream);
+        dump("OMG, setting up _sInputStream!\n");
+    }
+
     try
     {
+        // XPCshell h4x
+        if (typeof count == "undefined")
+            count = this._sInputStream.available();
         if (this.binaryMode)
             rv = this._sInputStream.readBytes(count);
         else
