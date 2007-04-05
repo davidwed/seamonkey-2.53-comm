@@ -787,10 +787,11 @@ function onPrefChanged(prefName, newValue, oldValue)
 
         default:
             // Make munger prefs apply without a restart
-            if ((m = prefName.match(/^munger\.(\S+)$/))
-                && (m[1] in client.munger.entries))
+            var m, rule;
+            if ((m = prefName.match(/^munger\.(\S+)$/)) &&
+                (rule = client.munger.getRule(m[1])))
             {
-                client.munger.entries[m[1]].enabled = newValue;
+                rule.enabled = newValue;
             }
     }
 }

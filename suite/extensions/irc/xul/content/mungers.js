@@ -116,15 +116,21 @@ function initMunger()
                    insertHyphenatedWord, LOW_PRIORITY, NORMAL_PRIORITY);
 
     client.enableColors = client.prefs["munger.colorCodes"];
-    for (var entry in client.munger.entries)
+    var branch = client.prefManager.prefBranch;
+    for (var entry in munger.entries)
     {
-        var branch = client.prefManager.prefBranch;
-        if (entry[0] != ".")
+        if (!isinstance(munger.entries[entry], Object))
+            continue;
+
+        for (var rule in munger.entries[entry])
         {
+            if (rule[0] == ".")
+                continue;
+
             try
             {
-                munger.entries[entry].enabled =
-                    branch.getBoolPref("munger." + entry);
+                munger.entries[entry][rule].enabled =
+                    branch.getBoolPref("munger." + rule);
             }
             catch (ex)
             {
@@ -210,16 +216,25 @@ function insertLink(matchText, containerTag, data, mungerEntry)
 
     anchor.setAttribute("target", "_content");
     mungerEntry.enabled = false;
+    data.inLink = true;
     client.munger.munge(linkText, anchor, data);
     mungerEntry.enabled = true;
+    delete data.inLink;
     containerTag.appendChild(anchor);
     if (trailing)
-        insertHyphenatedWord(trailing, containerTag);
+        insertHyphenatedWord(trailing, containerTag, data);
 
 }
 
 function insertMailToLink(matchText, containerTag, eventData, mungerEntry)
 {
+    if (("inLink" in eventData) && eventData.inLink)
+    {
+        mungerEntry.enabled = false;
+        client.munger.munge(matchText, containerTag, eventData);
+        mungerEntry.enabled = true;
+        return;
+    }
 
     var href;
 
@@ -242,14 +257,24 @@ function insertMailToLink(matchText, containerTag, eventData, mungerEntry)
 
     //anchor.setAttribute ("target", "_content");
     mungerEntry.enabled = false;
+    eventData.inLink = true;
     client.munger.munge(matchText, anchor, eventData);
     mungerEntry.enabled = true;
+    delete eventData.inLink;
     containerTag.appendChild(anchor);
 
 }
 
 function insertChannelLink(matchText, containerTag, eventData, mungerEntry)
 {
+    if (("inLink" in eventData) && eventData.inLink)
+    {
+        mungerEntry.enabled = false;
+        client.munger.munge(matchText, containerTag, eventData);
+        mungerEntry.enabled = true;
+        return;
+    }
+
     var bogusChannels =
         /^#(include|error|define|if|ifdef|else|elsif|endif|\d+)$/i;
 
@@ -274,13 +299,23 @@ function insertChannelLink(matchText, containerTag, eventData, mungerEntry)
         anchor.setAttribute("class", "chatzilla-link");
 
     mungerEntry.enabled = false;
+    eventData.inLink = true;
     client.munger.munge(matchText, anchor, eventData);
     mungerEntry.enabled = true;
+    delete eventData.inLink;
     containerTag.appendChild(anchor);
 }
 
 function insertTalkbackLink(matchText, containerTag, eventData, mungerEntry)
 {
+    if (("inLink" in eventData) && eventData.inLink)
+    {
+        mungerEntry.enabled = false;
+        client.munger.munge(matchText, containerTag, eventData);
+        mungerEntry.enabled = true;
+        return;
+    }
+
     var anchor = document.createElementNS("http://www.w3.org/1999/xhtml",
                                           "html:a");
 
@@ -302,6 +337,14 @@ function insertTalkbackLink(matchText, containerTag, eventData, mungerEntry)
 
 function insertBugzillaLink (matchText, containerTag, eventData, mungerEntry)
 {
+    if (("inLink" in eventData) && eventData.inLink)
+    {
+        mungerEntry.enabled = false;
+        client.munger.munge(matchText, containerTag, eventData);
+        mungerEntry.enabled = true;
+        return;
+    }
+
     var bugURL;
     if (eventData.channel)
         bugURL = eventData.channel.prefs["bugURL"];
@@ -326,8 +369,10 @@ function insertBugzillaLink (matchText, containerTag, eventData, mungerEntry)
 
         anchor.setAttribute("target", "_content");
         mungerEntry.enabled = false;
+        eventData.inLink = true;
         client.munger.munge(matchText, anchor, eventData);
         mungerEntry.enabled = true;
+        delete eventData.inLink;
         containerTag.appendChild(anchor);
     }
     else
@@ -338,8 +383,15 @@ function insertBugzillaLink (matchText, containerTag, eventData, mungerEntry)
     }
 }
 
-function insertRheet (matchText, containerTag)
+function insertRheet(matchText, containerTag, eventData, mungerEntry)
 {
+    if (("inLink" in eventData) && eventData.inLink)
+    {
+        mungerEntry.enabled = false;
+        client.munger.munge(matchText, containerTag, eventData);
+        mungerEntry.enabled = true;
+        return;
+    }
 
     var anchor = document.createElementNS("http://www.w3.org/1999/xhtml",
                                           "html:a");
@@ -347,7 +399,7 @@ function insertRheet (matchText, containerTag)
                         "http://ftp.mozilla.org/pub/mozilla.org/mozilla/libraries/bonus-tracks/rheet.wav");
     anchor.setAttribute("class", "chatzilla-rheet chatzilla-link");
     //anchor.setAttribute ("target", "_content");
-    insertHyphenatedWord(matchText, anchor);
+    insertHyphenatedWord(matchText, anchor, data);
     containerTag.appendChild(anchor);
 }
 
@@ -571,9 +623,13 @@ function showCtrlChar(c, containerTag)
     containerTag.appendChild (span);
 }
 
-function insertHyphenatedWord (longWord, containerTag)
+function insertHyphenatedWord(longWord, containerTag, data)
 {
-    var wordParts = splitLongWord (longWord, client.MAX_WORD_DISPLAY);
+    var wordParts = splitLongWord(longWord, client.MAX_WORD_DISPLAY);
+    var newClass = "";
+    if (data && ("hasColorInfo" in data))
+        newClass = calcClass(data);
+
     for (var i = 0; i < wordParts.length; ++i)
     {
         if (i > 0)
@@ -582,7 +638,19 @@ function insertHyphenatedWord (longWord, containerTag)
                                                "html:wbr");
             containerTag.appendChild(wbr);
         }
-        containerTag.appendChild (document.createTextNode (wordParts[i]));
+
+        if (newClass)
+        {
+            var newTag = document.createElementNS(NS_XHTML, "html:span");
+            newTag.setAttribute("class", newClass);
+            newTag.appendChild(document.createTextNode(wordParts[i]));
+            containerTag.appendChild(newTag);
+        }
+        else
+        {
+            delete data.hasColorInfo;
+            containerTag.appendChild(document.createTextNode(wordParts[i]));
+        }
     }
 }
 
@@ -611,5 +679,20 @@ function insertInlineButton(text, containerTag, data)
     containerTag.appendChild(document.createTextNode("]"));
 }
 
-
+function calcClass(data)
+{
+    var className = "";
+    if ("hasColorInfo" in data)
+    {
+        if ("currFgColor" in data)
+            className += " chatzilla-fg" + data.currFgColor;
+        if ("currBgColor" in data)
+            className += " chatzilla-bg" + data.currBgColor;
+        if ("isBold" in data)
+            className += " chatzilla-bold";
+        if ("isUnderline" in data)
+            className += " chatzilla-underline";
+    }
+    return className;
+}
 
