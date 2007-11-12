@@ -1,3 +1,4 @@
+#! /bin/sh
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -11,14 +12,15 @@
 # for the specific language governing rights and limitations under the
 # License.
 #
-# The Original Code is ChatZilla.
+# The Original Code is Mozilla Build System
 #
-# The Initial Developer of the Original Code is James Ross.
-# Portions created by the Initial Developer are Copyright (C) 2004
+# The Initial Developer of the Original Code is
+# Ben Turner <mozilla@songbirdnest.com>
+#
+# Portions created by the Initial Developer are Copyright (C) 2007
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
-#   James Ross, silver@warwickcompsoc.co.uk, initial version.
 #
 # Alternatively, the contents of this file may be used under the terms of
 # either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,19 +36,6 @@
 #
 # ***** END LICENSE BLOCK *****
 
-DEPTH		= ../../..
-topsrcdir	= @top_srcdir@
-srcdir		= @srcdir@
-VPATH		= @srcdir@
-
-include $(DEPTH)/config/autoconf.mk
-
-CHATZILLA_VERSION=$(shell grep "const __cz_version" "$(srcdir)/../xul/content/static.js" | sed "s|.*\"\([^\"]\{1,\}\)\".*|\1|")
-
-XPI_NAME               = chatzilla
-USE_EXTENSION_MANIFEST = 1
-NO_JAR_AUTO_REG        = 1
-INSTALL_EXTENSION_ID   = {59c81df5-4b7a-477b-912d-4e0fdf64e5f2}
-XPI_PKGNAME            = chatzilla-$(CHATZILLA_VERSION)
-
-include $(topsrcdir)/config/rules.mk
+add_makefiles "
+  extensions/irc/Makefile
+"

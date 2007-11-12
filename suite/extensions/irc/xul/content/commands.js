@@ -151,14 +151,13 @@ function initCommands()
          ["notify",            cmdNotify,           CMD_NEED_SRV | CMD_CONSOLE],
          ["open-at-startup",   cmdOpenAtStartup,                   CMD_CONSOLE],
          ["oper",              cmdOper,             CMD_NEED_SRV | CMD_CONSOLE],
-         ["pass",              cmdPass,             CMD_NEED_NET | CMD_CONSOLE],
          ["ping",              cmdPing,             CMD_NEED_SRV | CMD_CONSOLE],
          ["plugin-pref",       cmdPref,                            CMD_CONSOLE],
          ["pref",              cmdPref,                            CMD_CONSOLE],
          ["print",             cmdPrint,                           CMD_CONSOLE],
          ["query",             cmdQuery,            CMD_NEED_SRV | CMD_CONSOLE],
          ["quit",              cmdQuit,                            CMD_CONSOLE],
-         ["quote",             cmdQuote,            CMD_NEED_SRV | CMD_CONSOLE],
+         ["quote",             cmdQuote,            CMD_NEED_NET | CMD_CONSOLE],
          ["reload-plugin",     cmdReload,                          CMD_CONSOLE],
          ["rlist",             cmdRlist,            CMD_NEED_SRV | CMD_CONSOLE],
          ["reconnect",         cmdReconnect,        CMD_NEED_NET | CMD_CONSOLE],
@@ -206,9 +205,9 @@ function initCommands()
          ["wii",               cmdWhoIsIdle,        CMD_NEED_SRV | CMD_CONSOLE],
 
          /* aliases */
-         ["css",              "motif",                             CMD_CONSOLE],
          ["exit",             "quit",                              CMD_CONSOLE],
          ["j",                "join",                              CMD_CONSOLE],
+         ["pass",             "quote PASS",                        CMD_CONSOLE],
          ["part",             "leave",                             CMD_CONSOLE],
          ["raw",              "quote",                             CMD_CONSOLE],
          // Shortcuts to useful URLs:
@@ -1399,9 +1398,7 @@ function cmdNetwork(e)
 
 function cmdNetworks(e)
 {
-    const ns = "http://www.w3.org/1999/xhtml";
-
-    var span = document.createElementNS(ns, "html:span");
+    var span = document.createElementNS(XHTML_NS, "html:span");
 
     span.appendChild(newInlineText(MSG_NETWORKS_HEADA));
 
@@ -1411,7 +1408,7 @@ function cmdNetworks(e)
     for (n in netnames)
     {
         var net = client.networks[netnames[n]];
-        var a = document.createElementNS(ns, "html:a");
+        var a = document.createElementNS(XHTML_NS, "html:a");
         /* Test for an all-SSL network */
         var isSecure = true;
         for (var s in client.networks[netnames[n]].serverList)
@@ -1629,6 +1626,13 @@ function cmdHideView(e)
     {
         display(MSG_ERR_LAST_VIEW_HIDE, MT_ERROR);
         return;
+    }
+
+    if ("messages" in e.view)
+    {
+        // Detach messages from output window content.
+        if (e.view.messages.parentNode)
+            e.view.messages.parentNode.removeChild(e.view.messages);
     }
 
     var tb = getTabForObject(e.view);
@@ -2004,7 +2008,7 @@ function cmdMotif(e)
             pm.clearPref("motif.current");
             e.motif = pm.prefs["motif.current"];
         }
-        else if (e.motif.search(/\.css$/i) != -1)
+        else if (e.motif.search(/^(file|https?|ftp):/i) != -1)
         {
             // specific css file
             pm.prefs["motif.current"] = e.motif;
@@ -2073,7 +2077,16 @@ function cmdListPlugins(e)
 
 function cmdRlist(e)
 {
-    e.network.list(new RegExp(e.regexp, "i"));
+    try
+    {
+        var re = new RegExp(e.regexp, "i");
+    }
+    catch (ex)
+    {
+        display(MSG_ERR_INVALID_REGEX, MT_ERROR);
+        return;
+    }
+    e.network.list(re);
 }
 
 function cmdReloadUI(e)
@@ -2165,6 +2178,17 @@ function cmdNotice(e)
 
 function cmdQuote(e)
 {
+    /* Check we are connected, or at least pretending to be connected, so this
+     * can actually send something. The only thing that's allowed to send
+     * before the 001 is PASS, so if the command is not that and the net is not
+     * online, we stop too.
+     */
+    if ((e.network.state != NET_ONLINE) &&
+        (!e.server.isConnected || !e.ircCommand.match(/^\s*PASS/i)))
+    {
+        feedback(e, MSG_ERR_NOT_CONNECTED);
+        return;
+    }
     e.server.sendData(fromUnicode(e.ircCommand) + "\n", e.sourceObject);
 }
 
@@ -2223,9 +2247,11 @@ function cmdGotoURL(e)
     }
     catch (ex)
     {
+        // Given "goto-url faq bar", expand to "http://.../faq/#bar"
         var localeURLKey = "msg.localeurl." + e.url;
+        var hash = (("anchor" in e) && e.anchor) ? "#" + e.anchor : "";
         if (localeURLKey != getMsg(localeURLKey))
-            dispatch(e.command.name + " " + getMsg(localeURLKey));
+            dispatch(e.command.name + " " + getMsg(localeURLKey) + hash);
         else
             display(getMsg(MSG_ERR_INVALID_URL, e.url), MT_ERROR);
 
@@ -2238,13 +2264,6 @@ function cmdGotoURL(e)
         const extProtoSvc = getService(EXT_PROTO_SVC,
                                        "nsIExternalProtocolService");
         extProtoSvc.loadUrl(uri);
-        dispatch("focus-input");
-        return;
-    }
-
-    if (e.command.name == "goto-url-newwin")
-    {
-        openTopWin(e.url);
         dispatch("focus-input");
         return;
     }
@@ -2271,6 +2290,23 @@ function cmdGotoURL(e)
         
     }
 
+    if (e.command.name == "goto-url-newwin")
+    {
+        try
+        {
+            if (client.host == "Mozilla")
+                window.openNewWindowWith(e.url, false);
+            else
+                window.openNewWindowWith(e.url, null, null, null);
+        }
+        catch (ex)
+        {
+            dd(formatException(ex));
+        }
+        dispatch("focus-input");
+        return;
+    }
+
     if (e.command.name == "goto-url-newtab")
     {
         try
@@ -2278,7 +2314,7 @@ function cmdGotoURL(e)
             if (client.host == "Mozilla")
                 window.openNewTabWith(e.url, false, false);
             else
-                window.openNewTabWith(e.url, null, null, null, null, false);
+                window.openNewTabWith(e.url, null, null, null, null);
         }
         catch (ex)
         {
@@ -2321,9 +2357,13 @@ function cmdJoin(e)
      */
     if (!e.hasOwnProperty("channelName") || !e.channelName)
     {
+        if (e.network.joinDialog)
+            return e.network.joinDialog.focus();
+
         window.openDialog("chrome://chatzilla/content/channels.xul", "",
-                          "modal,resizable=yes",
-                          { client: client, network: e.network })
+                          "resizable=yes",
+                          { client: client, network: e.network,
+                            opener: window });
         return null;
     }
 
@@ -2874,20 +2914,6 @@ function cmdOper(e)
 
     e.server.sendData("OPER " + fromUnicode(e.opername, e.server) + " " + 
                       fromUnicode(e.password, e.server) + "\n");
-}
-
-function cmdPass(e)
-{
-    /* Check we are connected, or at least pretending to be connected, so this
-     * can actually send something.
-     */
-   if ((e.network.state != NET_ONLINE) && !e.server.isConnected)
-   {
-       feedback(e, MSG_ERR_NOT_CONNECTED);
-       return;
-   }
-
-   e.server.sendData("PASS " + fromUnicode(e.password, e.server) + "\n");
 }
 
 function cmdPing (e)

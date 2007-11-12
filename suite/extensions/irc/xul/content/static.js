@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.78.1";
+const __cz_version   = "0.9.79";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.78.0";
+const __cz_locale    = "0.9.79";
 
 var warn;
 var ASSERT;
@@ -109,6 +109,8 @@ client.DEFAULT_RESPONSE_CODE = "===";
  */
 client.CONFERENCE_LOW_PASS = 10;
 
+// Namespaces we happen to need:
+const XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 client.viewsArray = new Array();
 client.activityList = new Object();
@@ -427,6 +429,9 @@ function initApplicationCompatibility()
                 break;
             case "{a463f10c-3994-11da-9945-000d60ca027b}": // Flock
                 client.host = "Flock";
+                break;
+            case "{3db10fab-e461-4c80-8b97-957ad5f8ea47}": // Netscape
+                client.host = "Netscape";
                 break;
             default:
                 client.unknownUID = app.ID;
@@ -961,7 +966,6 @@ function getDefaultFontSize()
     const PREF_CTRID = "@mozilla.org/preferences-service;1";
     const nsIPrefService = Components.interfaces.nsIPrefService;
     const nsIPrefBranch = Components.interfaces.nsIPrefBranch;
-    const XHTML_NS = "http://www.w3.org/1999/xhtml";
 
     var prefSvc = Components.classes[PREF_CTRID].getService(nsIPrefService);
     var prefBranch = prefSvc.getBranch(null);
@@ -1695,7 +1699,7 @@ function parseIRCURL (url)
 
         rv.target = arrayHasElementAt(ary, 1) ? ecmaUnescape(ary[1]) : "";
 
-        if (rv.target.search(/[\x07,:\s]/) != -1)
+        if (rv.target.search(/[\x07,\s]/) != -1)
         {
             dd ("parseIRCURL: invalid characters in channel name");
             return null;
@@ -1802,6 +1806,7 @@ function gotoIRCURL (url)
     if (url.isserver)
     {
         var alreadyThere = false;
+        var gettingThere = false;
         for (var n in client.networks)
         {
             if ((client.networks[n].isConnected()) &&
@@ -1810,29 +1815,43 @@ function gotoIRCURL (url)
             {
                 /* already connected to this server/port */
                 network = client.networks[n];
-                alreadyThere = true;
+                gettingThere = true;
+                // Have we actually had the 001 reply yet?
+                alreadyThere = (client.networks[n].state == NET_ONLINE);
                 break;
             }
         }
 
         if (!alreadyThere)
         {
-            /*
-            dd ("gotoIRCURL: not already connected to " +
-                "server " + url.host + " trying to connect...");
-            */
-            var pass = "";
-            if (url.needpass)
+            if (!gettingThere)
             {
-                if (url.pass)
-                    pass = url.pass;
-                else
-                    pass = promptPassword(getMsg(MSG_HOST_PASSWORD, url.host));
-            }
+                /*
+                dd ("gotoIRCURL: not yet had connected to server" + url.host +
+                    " trying to connect...");
+                */
 
-            network = dispatch((url.scheme == "ircs" ? "sslserver" : "server"),
-                               {hostname: url.host, port: url.port,
-                                password: pass});
+                // Do we have a password, if needed?
+                var pass = "";
+                if (url.needpass)
+                {
+                    if (url.pass)
+                    {
+                        pass = url.pass;
+                    }
+                    else
+                    {
+                        pass = promptPassword(getMsg(MSG_HOST_PASSWORD,
+                                                     url.host));
+                    }
+                }
+
+                
+                var params = {hostname: url.host, port: url.port,
+                              password: pass};
+                var cmd = (url.scheme == "ircs" ? "sslserver" : "server");
+                network = dispatch(cmd, params);
+            }
 
             if (!url.target)
                 return;
@@ -1853,13 +1872,15 @@ function gotoIRCURL (url)
         }
 
         network = client.networks[url.host];
-        if (!network.isConnected())
+        if (network.state != NET_ONLINE)
         {
             /*
             dd ("gotoIRCURL: not already connected to " +
                 "network " + url.host + " trying to connect...");
             */
-            client.connectToNetwork(network, (url.scheme == "ircs" ? true : false));
+            var secure = (url.scheme == "ircs" ? true : false);
+            if (!network.isConnected())
+                client.connectToNetwork(network, secure);
 
             if (!url.target)
                 return;
@@ -2125,10 +2146,10 @@ function initOfflineIcon()
                                      "nsIPrefBranch");
             // Let the app-specific hacks begin:
             try {
-                if ((client.host == "Firefox") || (client.host == "Flock"))
-                    isOffline = prefSvc.getBoolPref("browser.offline");
-                else if (client.host == "XULrunner")
+                if (client.host == "XULrunner")
                     isOffline = !prefSvc.getBoolPref("network.online");
+                else // Toolkit based, but not standalone
+                    isOffline = prefSvc.getBoolPref("browser.offline");
             }
             catch (ex) { /* Whatever. */ }
 
@@ -2146,10 +2167,10 @@ function initOfflineIcon()
                                      "nsIPrefBranch");
             // Let the app-specific hacks begin:
             try {
-                if ((client.host == "Firefox") || (client.host == "Flock"))
-                    prefSvc.setBoolPref("browser.offline", isOffline);
-                else if (client.host == "XULrunner")
+                if (client.host == "XULrunner")
                     prefSvc.setBoolPref("network.online", !isOffline);
+                else // Toolkit based, but not standalone
+                    prefSvc.setBoolPref("browser.offline", isOffline);
             }
             catch (ex)
             {
@@ -2463,8 +2484,7 @@ function newInlineText (data, className, tagName)
     if (typeof tagName == "undefined")
         tagName = "html:span";
 
-    var a = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                      tagName);
+    var a = document.createElementNS(XHTML_NS, tagName);
     if (className)
         a.setAttribute ("class", className);
 
@@ -2499,8 +2519,7 @@ function newInlineText (data, className, tagName)
 function stringToMsg (message, obj)
 {
     var ary = message.split ("\n");
-    var span = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                         "html:span");
+    var span = document.createElementNS(XHTML_NS, "html:span");
     var data = getObjectDetails(obj);
 
     if (ary.length == 1)
@@ -2510,9 +2529,7 @@ function stringToMsg (message, obj)
         for (var l = 0; l < ary.length - 1; ++l)
         {
             client.munger.munge(ary[l], span, data);
-            span.appendChild
-                (document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:br"));
+            span.appendChild(document.createElementNS(XHTML_NS, "html:br"));
         }
         client.munger.munge(ary[l], span, data);
     }
@@ -2660,6 +2677,36 @@ function advanceKeyboardFocus(amount)
 
     var newIndex = (arrayIndexOf(focusableElems, elem) * 1 + 3 + amount) % 3;
     focusableElems[newIndex].focus();
+
+    // Make it obvious this element now has focus.
+    var outlinedElem;
+    if (focusableElems[newIndex] == client.input.inputField)
+        outlinedElem = client.input.parentNode.id;
+    else if (focusableElems[newIndex] == userList)
+        outlinedElem = "user-list-box"
+    else
+        outlinedElem = "browser-box";
+
+    // Do magic, and make sure it gets undone at the right time:
+    if (("focusedElemTimeout" in client) && client.focusedElemTimeout)
+        clearTimeout(client.focusedElemTimeout);
+    outlineFocusedElem(outlinedElem);
+    client.focusedElemTimeout = setTimeout(outlineFocusedElem, 1000, "");
+}
+
+function outlineFocusedElem(id)
+{
+    var outlinedElements = ["user-list-box", "browser-box", "multiline-hug-box",
+                            "singleline-hug-box"];
+    for (var i = 0; i < outlinedElements.length; i++)
+    {
+        var elem = document.getElementById(outlinedElements[i]);
+        if (outlinedElements[i] == id)
+            elem.setAttribute("focusobvious", "true");
+        else
+            elem.removeAttribute("focusobvious");
+    }
+    client.focusedElemTimeout = 0;
 }
 
 /* valid values for |what| are "superfluous", "activity", and "attention".
@@ -3055,15 +3102,13 @@ function createMessages(source)
 {
     playEventSounds(source.TYPE, "start");
 
-    source.messages =
-    document.createElementNS ("http://www.w3.org/1999/xhtml",
-                              "html:table");
+    source.messages = document.createElementNS(XHTML_NS, "html:table");
+    source.messages.setAttribute("class", "msg-table");
+    source.messages.setAttribute("view-type", source.TYPE);
+    source.messages.setAttribute("role", "log");
+    source.messages.setAttribute("aria-live", "polite");
 
-    source.messages.setAttribute ("class", "msg-table");
-    source.messages.setAttribute ("view-type", source.TYPE);
-    var tbody =
-        document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                  "html:tbody");
+    var tbody = document.createElementNS(XHTML_NS, "html:tbody");
     source.messages.appendChild (tbody);
     source.messageCount = 0;
 }
@@ -3808,8 +3853,7 @@ function __display(message, msgtype, sourceObj, destObj)
     }
 
     // The table row, and it's attributes.
-    var msgRow = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                          "html:tr");
+    var msgRow = document.createElementNS(XHTML_NS, "html:tr");
     msgRow.setAttribute("class", "msg");
     msgRow.setAttribute("msg-type", msgtype);
     msgRow.setAttribute("msg-dest", toAttr);
@@ -3824,12 +3868,9 @@ function __display(message, msgtype, sourceObj, destObj)
         else
             msgRow.setAttribute("msg-source", fromAttr);
     }
-    if (isImportant)
-        msgTimestamp.setAttribute ("important", "true");
 
     // Timestamp cell.
-    var msgRowTimestamp = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                                   "html:td");
+    var msgRowTimestamp = document.createElementNS(XHTML_NS, "html:td");
     msgRowTimestamp.setAttribute("class", "msg-timestamp");
 
     var canMergeData;
@@ -3911,8 +3952,7 @@ function __display(message, msgtype, sourceObj, destObj)
             this.mark = (("mark" in this) && this.mark == "even") ? "odd" : "even";
         }
 
-        msgRowSource = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                             "html:td");
+        msgRowSource = document.createElementNS(XHTML_NS, "html:td");
         msgRowSource.setAttribute("class", "msg-user");
 
         // Make excessive nicks get shunted.
@@ -3923,9 +3963,7 @@ function __display(message, msgtype, sourceObj, destObj)
             msgRowSource.appendChild(newInlineText(decorSt, "chatzilla-decor"));
         if (nickURL)
         {
-            var nick_anchor =
-                document.createElementNS("http://www.w3.org/1999/xhtml",
-                                         "html:a");
+            var nick_anchor = document.createElementNS(XHTML_NS, "html:a");
             nick_anchor.setAttribute("class", "chatzilla-link");
             nick_anchor.setAttribute("href", nickURL);
             nick_anchor.appendChild(newInlineText(nick));
@@ -3955,8 +3993,7 @@ function __display(message, msgtype, sourceObj, destObj)
         }
 
         /* Display the message code */
-        msgRowType = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                           "html:td");
+        msgRowType = document.createElementNS(XHTML_NS, "html:td");
         msgRowType.setAttribute("class", "msg-type");
 
         msgRowType.appendChild(newInlineText(code));
@@ -3965,8 +4002,7 @@ function __display(message, msgtype, sourceObj, destObj)
 
     if (message)
     {
-        msgRowData = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                           "html:td");
+        msgRowData = document.createElementNS(XHTML_NS, "html:td");
         msgRowData.setAttribute("class", "msg-data");
 
         var tmpMsgs = message;
@@ -3988,7 +4024,10 @@ function __display(message, msgtype, sourceObj, destObj)
         msgRow.setAttribute("mark", this.mark);
 
     if (isImportant)
-        msgRow.setAttribute ("important", "true");
+    {
+        msgRow.setAttribute("important", "true");
+        msgRow.setAttribute("aria-channel", "notify");
+    }
 
     // Timestamps first...
     msgRow.appendChild(msgRowTimestamp);
@@ -4005,22 +4044,19 @@ function __display(message, msgtype, sourceObj, destObj)
     {
         /* putting a div here crashes mozilla, so fake it with nested tables
          * for now */
-        var tr = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:tr");
+        var tr = document.createElementNS(XHTML_NS, "html:tr");
         tr.setAttribute ("class", "msg-nested-tr");
-        var td = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                           "html:td");
+        var td = document.createElementNS(XHTML_NS, "html:td");
         td.setAttribute ("class", "msg-nested-td");
         td.setAttribute ("colspan", "3");
 
         tr.appendChild(td);
-        var table = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                              "html:table");
+        var table = document.createElementNS(XHTML_NS, "html:table");
         table.setAttribute ("class", "msg-nested-table");
+        table.setAttribute("role", "presentation");
 
         td.appendChild (table);
-        var tbody =  document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                               "html:tbody");
+        var tbody =  document.createElementNS(XHTML_NS, "html:tbody");
 
         tbody.appendChild(msgRow);
         table.appendChild(tbody);

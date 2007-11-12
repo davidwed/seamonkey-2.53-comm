@@ -51,6 +51,7 @@
 
 <window id="chatzilla-window"
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:aaa="http://www.w3.org/2005/07/aaa"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   orient="vertical" onload="onLoad();" onunload="onUnload();"
   onclose="return onClose();" onmouseover="onMouseOver(event);"
@@ -69,8 +70,8 @@
  
           <tree id="user-list" container="true" datasources="rdf:null" flex="1"
             containment="http://home.netscape.com/NC-irc#chanuser"
-            hidecolumnpicker="true"
-            context="context:userlist">
+            hidecolumnpicker="true" context="context:userlist"
+            aaa:live="off" aaa:relevant="additions removals text">
 
             <template>
               <rule>
@@ -117,7 +118,7 @@
           <grippy/>
         </splitter>
   
-        <vbox flex="1">
+        <vbox flex="1" id="browser-box">
           <deck id="output-deck" flex="1"/>
         </vbox>
   
@@ -142,9 +143,11 @@
     <hbox id="input-widgets" align="center">
       <button id="server-nick" type="menu" label="" tooltiptext="&server-nick.tooltip;"/>
       <hbox id="multiline-box" flex="1" collapsed="true">
-        <textbox id="multiline-input" multiline="true" flex="1" height="100px"
-          class="multiline-input-widget" onfocus="onInputFocus();"
-          tabindex="-1"/>
+        <box id="multiline-hug-box" flex="1">
+          <textbox id="multiline-input" multiline="true" flex="1" height="100px"
+            class="multiline-input-widget" onfocus="onInputFocus();"
+            tabindex="-1"/>
+        </box>
         <vbox>
           <toolbarbutton id="button-input" flex="1"
             oncommand="onMultilineSend(event);"
@@ -155,14 +158,16 @@
         </vbox>
       </hbox>
       <hbox id="singleline-box" flex="1" collapsed="true">
-        <textbox id="input" class="input-widget" flex="1"
-          onfocus="onInputFocus();" tabindex="-1"/>
+        <box id="singleline-hug-box" flex="1">
+          <textbox id="input" class="input-widget" flex="1"
+            onfocus="onInputFocus();" tabindex="-1"/>
+        </box>
         <toolbarbutton id="button-multiline-expand" 
           oncommand="dispatch('pref multiline true');" 
           tooltiptext="&multiline-expand.tooltip;"/>
       </hbox>
     </hbox>
-  
+
   <overlaytarget id="statusbar-overlay-target"/>
 
 </window>

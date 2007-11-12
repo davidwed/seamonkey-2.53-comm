@@ -70,9 +70,9 @@ function initMunger()
                    10, 5, false);
     munger.addRule("quote", /(``|'')/, insertQuote,
                    NORMAL_PRIORITY, NORMAL_PRIORITY);
-    munger.addRule("bold", /(?:\s|^)(\*[^*()]*\*)(?:[\s.,]|$)/,
+    munger.addRule("bold", /(?:[\s(\[]|^)(\*[^*()]*\*)(?:[\s\]).,;!\?]|$)/,
                    "chatzilla-bold", NORMAL_PRIORITY, NORMAL_PRIORITY);
-    munger.addRule("underline", /(?:\s|^)(\_[^_()]*\_)(?:[\s.,]|$)/,
+    munger.addRule("underline", /(?:[\s(\[]|^)(\_[^_()]*\_)(?:[\s\]).,;!\?]|$)/,
                    "chatzilla-underline", NORMAL_PRIORITY, NORMAL_PRIORITY);
     munger.addRule("italic", /(?:\s|^)(\/[^\/()]*\/)(?:[\s.,]|$)/,
                    "chatzilla-italic", NORMAL_PRIORITY, NORMAL_PRIORITY);
@@ -399,7 +399,7 @@ function insertRheet(matchText, containerTag, eventData, mungerEntry)
                         "http://ftp.mozilla.org/pub/mozilla.org/mozilla/libraries/bonus-tracks/rheet.wav");
     anchor.setAttribute("class", "chatzilla-rheet chatzilla-link");
     //anchor.setAttribute ("target", "_content");
-    insertHyphenatedWord(matchText, anchor, data);
+    insertHyphenatedWord(matchText, anchor, eventData);
     containerTag.appendChild(anchor);
 }
 

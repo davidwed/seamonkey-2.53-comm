@@ -1028,6 +1028,14 @@ function serv_disconnect(e)
         network.delayedConnect();
     };
 
+    /* If we're not connected and get this, it means we have almost certainly
+     * encountered a read or write error on the socket post-disconnect. There's
+     * no point propagating this any further, as we've already notified the
+     * user of the disconnect (with the right error).
+     */
+    if (!this.isConnected)
+        return;
+
     // Don't reconnect if our connection was aborted.
     var wasAborted = (e.disconnectStatus == NS_ERROR_ABORT);
     if (((this.parent.state == NET_CONNECTING) && !wasAborted) ||
@@ -1058,8 +1066,6 @@ function serv_disconnect(e)
     this.isConnected = false;
 
     delete this.quitting;
-
-    return true;
 }
 
 CIRCServer.prototype.onSendData =
@@ -1239,8 +1245,8 @@ function serv_onRawData(e)
 
     if (l[0] == ":")
     {
-        // Must split only on a REAL space here, not just any old whitespace.
-        ary = l.match(/:([^ ]+) (.*)/);
+        // Must split only on REAL spaces here, not just any old whitespace.
+        ary = l.match(/:([^ ]+) +(.*)/);
         e.source = ary[1];
         l = ary[2];
         ary = e.source.match(/([^ ]+)!([^ ]+)@(.*)/);
@@ -1298,12 +1304,12 @@ function serv_onRawData(e)
     if (sep != -1) /* <trailing> param, if there is one */
     {
         var trail = l.substr (sep + 2, l.length);
-        e.params = l.substr(0, sep).split(" ");
+        e.params = l.substr(0, sep).split(/ +/);
         e.params[e.params.length] = trail;
     }
     else
     {
-        e.params = l.split(" ");
+        e.params = l.split(/ +/);
     }
 
     e.decodeParam = decodeParam;
@@ -1774,7 +1780,7 @@ function serv_353 (e)
             }
         } while (found && ("namesx" in this.supports) && this.supports.namesx);
 
-        new CIRCChanUser(e.channel, null, nick, modes);
+        new CIRCChanUser(e.channel, null, nick, modes, true);
     }
 
     return true;
@@ -2215,7 +2221,9 @@ CIRCServer.prototype.onJoin =
 function serv_join(e)
 {
     e.channel = new CIRCChannel(this, null, e.params[1]);
-    e.user = new CIRCChanUser(e.channel, e.user.unicodeName);
+    // Passing undefined here because CIRCChanUser doesn't like "null"
+    e.user = new CIRCChanUser(e.channel, e.user.unicodeName, null,
+                              undefined, true);
 
     if (userIsMe(e.user))
     {
@@ -2754,7 +2762,7 @@ function chan_geturl ()
         target = ecmaEscape(target);
     }
 
-    target = target.replace("/", "%2f");
+    target = target.replace(/\//g, "%2f");
 
     return this.parent.parent.getURL(target);
 }
@@ -3236,7 +3244,7 @@ function usr_whois ()
 /*
  * channel user
  */
-function CIRCChanUser(parent, unicodeName, encodedName, modes)
+function CIRCChanUser(parent, unicodeName, encodedName, modes, userInChannel)
 {
     // Both unicodeName and encodedName are optional, but at least one must be
     // present.
@@ -3328,7 +3336,8 @@ function CIRCChanUser(parent, unicodeName, encodedName, modes)
     this.isHalfOp = (arrayContains(this.modes, "h")) ? true : false;
     this.isVoice = (arrayContains(this.modes, "v")) ? true : false;
 
-    parent.users[this.canonicalName] = this;
+    if (userInChannel)
+        parent.users[this.canonicalName] = this;
 
     return this;
 }

@@ -437,6 +437,9 @@ function onTabCompleteRequest (e)
     {
         if ("defaultCompletion" in client.currentObject)
             singleInput.value = client.currentObject.defaultCompletion;
+        // If there was nothing to complete, help the user:
+        if (!singleInput.value)
+            display(MSG_LEAVE_INPUTBOX, MT_INFO);
         return;
     }
 
@@ -1558,9 +1561,15 @@ function my_401 (e)
     else
     {
         if (this.whoisList && (target in this.whoisList))
+        {
+            // if this is from a whois, send a whowas and don't display anything
+            this.primServ.whowas(target, 1);
             this.whoisList[target] = false;
+        }
         else
+        {
             display(toUnicode(e.params[3], this));
+        }
     }
 }
 
@@ -1715,12 +1724,12 @@ function my_whoisreply (e)
             break;
 
         case 318:
-            // If this user isn't here, don't display anything and do a whowas
+            // If the user isn't here, then we sent a whowas in on401.
+            // Don't display the "end of whois" message.
             if (this.whoisList && (lowerNick in this.whoisList) &&
                 !this.whoisList[lowerNick])
             {
                 delete this.whoisList[lowerNick];
-                this.primServ.whowas(nick, 1);
                 return;
             }
             if (this.whoisList)
@@ -1843,8 +1852,11 @@ function my_sconnect (e)
     if ("_firstNick" in this)
         delete this._firstNick;
 
+    client.munger.getRule(".inline-buttons").enabled = true;
     this.display(getMsg(MSG_CONNECTION_ATTEMPT,
-                        [this.getURL(), e.server.getURL()]), "INFO");
+                        [this.getURL(), e.server.getURL(), this.unicodeName,
+                         "cancel"]), "INFO");
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     if (this.prefs["identd.enabled"])
     {
@@ -1988,7 +2000,9 @@ function my_netdisconnect (e)
     if (e.quitting)
     {
         msgType = "DISCONNECT";
-        msg = getMsg(MSG_CONNECTION_QUIT, [this.getURL(), e.server.getURL()]);
+        msg = getMsg(MSG_CONNECTION_QUIT,
+                     [this.getURL(), e.server.getURL(), this.unicodeName,
+                      "reconnect"]);
         msgNetwork = msg;
     }
     // We won't reconnect if the error was really bad.
@@ -2002,19 +2016,23 @@ function my_netdisconnect (e)
         var delayStr = formatDateOffset(this.getReconnectDelayMs() / 1000);
         if (this.MAX_CONNECT_ATTEMPTS == -1)
         {
-            msgNetwork = getMsg(MSG_RECONNECTING_IN, [msg, delayStr]);
+            msgNetwork = getMsg(MSG_RECONNECTING_IN,
+                                [msg, delayStr, this.unicodeName, "cancel"]);
         }
         else if (this.connectAttempt < this.MAX_CONNECT_ATTEMPTS)
         {
             var left = this.MAX_CONNECT_ATTEMPTS - this.connectAttempt;
             if (left == 1)
             {
-                msgNetwork = getMsg(MSG_RECONNECTING_IN_LEFT1, [msg, delayStr]);
+                msgNetwork = getMsg(MSG_RECONNECTING_IN_LEFT1,
+                                    [msg, delayStr, this.unicodeName,
+                                     "cancel"]);
             }
             else
             {
                 msgNetwork = getMsg(MSG_RECONNECTING_IN_LEFT,
-                                    [msg, left, delayStr]);
+                                    [msg, left, delayStr, this.unicodeName,
+                                     "cancel"]);
             }
         }
         else
@@ -2026,6 +2044,7 @@ function my_netdisconnect (e)
     /* If we were connected ok, put an error on all tabs. If we were only
      * /trying/ to connect, and failed, just put it on the network tab. 
      */
+    client.munger.getRule(".inline-buttons").enabled = true;
     if (this.state == NET_ONLINE)
     {
         for (var v in client.viewsArray)
@@ -2054,6 +2073,7 @@ function my_netdisconnect (e)
             this.displayHere(msgNetwork, msgType);
         }
     }
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     for (var c in this.primServ.channels)
     {
@@ -2995,6 +3015,8 @@ function my_dccfileprogress(e)
     var now = new Date();
     var pcent = Math.floor(100 * this.position / this.size);
 
+    var tab = getTabForObject(this);
+
     // If we've moved 100KiB or waited 10s, update the progress bar.
     if ((this.position > this._lastPosition + 102400) ||
         (now - this._lastUpdate > 10000))
@@ -3003,7 +3025,6 @@ function my_dccfileprogress(e)
         updateProgress();
         updateTitle();
 
-        var tab = getTabForObject(this);
         if (tab)
             tab.setAttribute("label", this.viewName + " (" + pcent + "%)");
 
@@ -3022,12 +3043,14 @@ function my_dccfileprogress(e)
     // If it's also been 10s or more since we last displayed a msg...
     if (now - this._lastUpdate > 10000)
     {
-        this.displayHere(getMsg(MSG_DCCFILE_PROGRESS,
-                                [pcent, getSISize(this.position),
-                                 getSISize(this.size), getSISpeed(this.speed)]),
-                         "DCC-FILE");
-
         this._lastUpdate = now;
+
+        var args = [pcent, getSISize(this.position), getSISize(this.size),
+                    getSISpeed(this.speed)];
+
+        // We supress this message if the view is hidden.
+        if (tab)
+            this.displayHere(getMsg(MSG_DCCFILE_PROGRESS, args), "DCC-FILE");
     }
 }
 

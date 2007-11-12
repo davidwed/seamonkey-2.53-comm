@@ -15,8 +15,8 @@
 # The Original Code is mozilla.org code.
 #
 # The Initial Developer of the Original Code is
-# Netscape Communications Corporation.
-# Portions created by the Initial Developer are Copyright (C) 1998
+# Robert Kaiser <kairo@kairo.at>.
+# Portions created by the Initial Developer are Copyright (C) 2007
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
@@ -35,10 +35,27 @@
 #
 # ***** END LICENSE BLOCK *****
 
-DEPTH		= ../../../../..
-topsrcdir	= @top_srcdir@
-srcdir		= @srcdir@
-VPATH		= @srcdir@
 
-include $(DEPTH)/config/autoconf.mk
+DEPTH=../../..
+topsrcdir=@top_srcdir@
+srcdir=@srcdir@
+VPATH=@srcdir@
+relativesrcdir = extensions/irc/locales
+
+# include config.mk before we override the AB_CD var it sets
+include $(topsrcdir)/config/config.mk
+
+# if the wanted language is not in all-locales, fall back to en-US
+ifeq (,$(filter $(AB_CD),$(shell cat $(srcdir)/all-locales)))
+AB_CD = en-US
+endif
+
+DEFINES += -DAB_CD=$(AB_CD)
+
 include $(topsrcdir)/config/rules.mk
+
+ifneq (en-US,$(AB_CD))
+libs realchrome::
+	@echo "Comparing $(AB_CD) to en-US"
+	@$(PERL) $(topsrcdir)/toolkit/locales/compare-locales.pl $(srcdir)/en-US $(LOCALE_SRCDIR)
+endif
