@@ -488,6 +488,7 @@ function CIRCServer (parent, hostname, port, isSecure, password)
     s.supports = null;
     s.channelTypes = null;
     s.channelModes = null;
+    s.channelCount = -1;
     s.userModes = null;
     s.maxLineLength = 400;
 
@@ -768,7 +769,7 @@ function serv_login(nick, name, desc)
     this.me = new CIRCUser(this, nick, null, name);
     if (this.password)
        this.sendData("PASS " + this.password + "\n");
-    this.sendData("NICK " + this.me.encodedName + "\n");
+    this.changeNick(this.me.unicodeName);
     this.sendData("USER " + name + " * * :" +
                   fromUnicode(desc, this) + "\n");
 }
@@ -1588,6 +1589,15 @@ function serv_251(e)
     e.set = "network";
 }
 
+/* channels */
+CIRCServer.prototype.on254 =
+function serv_254(e)
+{
+    this.channelCount = e.params[2];
+    e.destObject = this.parent;
+    e.set = "network";
+}
+
 /* user away message */
 CIRCServer.prototype.on301 =
 function serv_301(e)
@@ -2126,6 +2136,9 @@ function serv_nick (e)
             ev.server = this;
             ev.oldNick = e.oldNick;
             this.parent.eventPump.addEvent(ev);
+
+            // User must be a channel user, update sort name for userlist:
+            cuser.updateSortName();
         }
 
     }
@@ -2325,6 +2338,7 @@ function serv_notice (e)
         {
             if (targetName[0] == this.userModes[i].symbol)
             {
+                e.msgPrefix = this.userModes[i];
                 targetName = targetName.substr(1);
                 break;
             }
@@ -2379,6 +2393,7 @@ function serv_privmsg (e)
         {
             if (targetName[0] == this.userModes[i].symbol)
             {
+                e.msgPrefix = this.userModes[i];
                 targetName = targetName.substr(1);
                 break;
             }
@@ -2412,6 +2427,26 @@ function serv_privmsg (e)
         e.destObject = e.replyTo;
         e.msg = e.decodeParam(2, e.replyTo);
     }
+
+    return true;
+}
+
+CIRCServer.prototype.onWallops =
+function serv_wallops(e)
+{
+    if (("user" in e) && e.user)
+    {
+        e.msg = e.decodeParam(1, e.user);
+        e.replyTo = e.user;
+    }
+    else
+    {
+        e.msg = e.decodeParam(1);
+        e.replyTo = this;
+    }
+
+    e.destObject = this.parent;
+    e.set = "network";
 
     return true;
 }
@@ -3306,7 +3341,7 @@ function CIRCChanUser(parent, unicodeName, encodedName, modes, userInChannel)
             true : false;
         existingUser.isVoice = (arrayContains(existingUser.modes, "v")) ?
             true : false;
-
+        existingUser.updateSortName();
         return existingUser;
     }
 
@@ -3324,6 +3359,7 @@ function CIRCChanUser(parent, unicodeName, encodedName, modes, userInChannel)
     this.notice = cusr_notice;
     this.act = cusr_act;
     this.whois = cusr_whois;
+    this.updateSortName = cusr_updatesortname;
     this.parent = parent;
     this.TYPE = "IRCChanUser";
 
@@ -3335,11 +3371,37 @@ function CIRCChanUser(parent, unicodeName, encodedName, modes, userInChannel)
     this.isOp = (arrayContains(this.modes, "o")) ? true : false;
     this.isHalfOp = (arrayContains(this.modes, "h")) ? true : false;
     this.isVoice = (arrayContains(this.modes, "v")) ? true : false;
+    this.updateSortName();
 
     if (userInChannel)
         parent.users[this.canonicalName] = this;
 
     return this;
+}
+
+function cusr_updatesortname()
+{
+    // Check for the highest mode the user has (for sorting the userlist)
+    const userModes = this.parent.parent.userModes;
+    var modeLevel = 0;
+    var mode;
+    for (var i = 0; i < this.modes.length; i++)
+    {
+        for (var j = 0; j < userModes.length; j++)
+        {
+            if (userModes[j].mode == this.modes[i])
+            {
+                if (userModes.length - j > modeLevel)
+                {
+                    modeLevel = userModes.length - j;
+                    mode = userModes[j];
+                }
+                break;
+            }
+        }
+    }
+    // Counts numerically down from 9.
+    this.sortName = (9 - modeLevel) + "-" + this.unicodeName;
 }
 
 function cusr_geturl ()
@@ -3447,3 +3509,226 @@ function cusr_whois ()
 {
     this.__proto__.whois ();
 }
+
+
+// IRC URL parsing and generating
+
+function parseIRCURL(url)
+{
+    var specifiedHost = "";
+
+    var rv = new Object();
+    rv.spec = url;
+    rv.scheme = url.split(":")[0];
+    rv.host = null;
+    rv.target = "";
+    rv.port = (rv.scheme == "ircs" ? 9999 : 6667);
+    rv.msg = "";
+    rv.pass = null;
+    rv.key = null;
+    rv.charset = null;
+    rv.needpass = false;
+    rv.needkey = false;
+    rv.isnick = false;
+    rv.isserver = false;
+
+    if (url.search(/^(ircs?:\/?\/?)$/i) != -1)
+        return rv;
+
+    /* split url into <host>/<everything-else> pieces */
+    var ary = url.match(/^ircs?:\/\/([^\/\s]+)?(\/[^\s]*)?$/i);
+    if (!ary || !ary[1])
+    {
+        dd("parseIRCURL: initial split failed");
+        return null;
+    }
+    var host = ary[1];
+    var rest = arrayHasElementAt(ary, 2) ? ary[2] : "";
+
+    /* split <host> into server (or network) / port */
+    ary = host.match(/^([^\:]+)(\:\d+)?$/);
+    if (!ary)
+    {
+        dd("parseIRCURL: host/port split failed");
+        return null;
+    }
+
+    specifiedHost = rv.host = ary[1].toLowerCase();
+    if (arrayHasElementAt(ary, 2))
+    {
+        rv.isserver = true;
+        rv.port = parseInt(ary[2].substr(1));
+    }
+    else
+    {
+        if (specifiedHost.indexOf(".") != -1)
+            rv.isserver = true;
+    }
+
+    if (rest)
+    {
+        ary = rest.match(/^\/([^\?\s\/,]*)?\/?(,[^\?]*)?(\?.*)?$/);
+        if (!ary)
+        {
+            dd("parseIRCURL: rest split failed ``" + rest + "''");
+            return null;
+        }
+
+        rv.target = arrayHasElementAt(ary, 1) ? ecmaUnescape(ary[1]) : "";
+
+        if (rv.target.search(/[\x07,\s]/) != -1)
+        {
+            dd("parseIRCURL: invalid characters in channel name");
+            return null;
+        }
+
+        var params = arrayHasElementAt(ary, 2) ? ary[2].toLowerCase() : "";
+        var query = arrayHasElementAt(ary, 3) ? ary[3] : "";
+
+        if (params)
+        {
+            params = params.split(",");
+            while (params.length)
+            {
+                var param = params.pop();
+                // split doesn't take out empty bits:
+                if (param == "")
+                    continue;
+                switch (param)
+                {
+                    case "isnick":
+                        rv.isnick = true;
+                        if (!rv.target)
+                        {
+                            dd("parseIRCURL: isnick w/o target");
+                            /* isnick w/o a target is bogus */
+                            return null;
+                        }
+                        break;
+
+                    case "isserver":
+                        rv.isserver = true;
+                        if (!specifiedHost)
+                        {
+                            dd("parseIRCURL: isserver w/o host");
+                            /* isserver w/o a host is bogus */
+                            return null;
+                        }
+                        break;
+
+                    case "needpass":
+                    case "needkey":
+                        rv[param] = true;
+                        break;
+
+                    default:
+                        /* If we didn't understand it, ignore but warn: */
+                        dd("parseIRCURL: Unrecognized param '" + param +
+                           "' in URL!");
+                }
+            }
+        }
+
+        if (query)
+        {
+            ary = query.substr(1).split("&");
+            while (ary.length)
+            {
+                var arg = ary.pop().split("=");
+                /*
+                 * we don't want to accept *any* query, or folks could
+                 * say things like "target=foo", and overwrite what we've
+                 * already parsed, so we only use query args we know about.
+                 */
+                switch (arg[0].toLowerCase())
+                {
+                    case "msg":
+                        rv.msg = ecmaUnescape(arg[1]).replace("\n", "\\n");
+                         break;
+
+                    case "pass":
+                        rv.needpass = true;
+                        rv.pass = ecmaUnescape(arg[1]).replace("\n", "\\n");
+                        break;
+
+                    case "key":
+                        rv.needkey = true;
+                        rv.key = ecmaUnescape(arg[1]).replace("\n", "\\n");
+                        break;
+
+                    case "charset":
+                        rv.charset = ecmaUnescape(arg[1]).replace("\n", "\\n");
+                        break;
+                }
+            }
+        }
+    }
+
+    return rv;
+}
+
+function constructIRCURL(obj)
+{
+    function parseQuery(obj)
+    {
+        var rv = new Array();
+        if ("msg" in obj)
+            rv.push("msg=" + ecmaEscape(obj.msg.replace("\\n", "\n")));
+        if ("pass" in obj)
+            rv.push("pass=" + ecmaEscape(obj.pass.replace("\\n", "\n")));
+        if ("key" in obj)
+            rv.push("key=" + ecmaEscape(obj.key.replace("\\n", "\n")));
+        if ("charset" in obj)
+            rv.push("charset=" + ecmaEscape(obj.charset.replace("\\n", "\n")));
+
+        return rv.length ? "?" + rv.join("&") : "";
+    };
+    function parseFlags(obj)
+    {
+        var rv = new Array();
+        var haveTarget = ("target" in obj) && obj.target;
+        if (("needpass" in obj) && obj.needpass)
+            rv.push(",needpass");
+        if (("needkey" in obj) && obj.needkey && haveTarget)
+            rv.push(",needkey");
+        if (("isnick" in obj) && obj.isnick && haveTarget)
+            rv.push(",isnick");
+
+        return rv.join("");
+    };
+
+    var flags = "";
+    var scheme = ("scheme" in obj) ? obj.scheme : "irc";
+    if (!("host" in obj) || !obj.host)
+        return scheme + "://";
+
+    var url = scheme + "://" + obj.host;
+
+    // Add port if non-standard:
+    if (("port" in obj) && (((scheme == "ircs") && (obj.port != 9999)) ||
+                            ((scheme == "irc")  && (obj.port != 6667))))
+    {
+        url += ":" + obj.port;
+    }
+    // Need to add ",isserver" if there's no port and no dots in the hostname:
+    else if (("isserver" in obj) && obj.isserver &&
+             (obj.host.indexOf(".") == -1))
+    {
+        flags += ",isserver";
+    }
+    url += "/";
+
+    if (("target" in obj) && obj.target)
+    {
+        if (obj.target.search(/[\x07,\s]/) != -1)
+        {
+            dd("parseIRCObject: invalid characters in channel/nick name");
+            return null;
+        }
+        url += ecmaEscape(obj.target);
+    }
+
+    return url + flags + parseFlags(obj) + parseQuery(obj);
+}
+
+

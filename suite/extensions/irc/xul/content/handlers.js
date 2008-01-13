@@ -143,6 +143,7 @@ function onUnload()
 {
     dd("Shutting down ChatZilla.");
     uninitOfflineIcon();
+    uninitIdleAutoAway(client.prefs["awayIdleTime"]);
     destroy();
 }
 
@@ -254,26 +255,6 @@ function onMouseOver (e)
     }
 }
 
-function onSortCol(sortColName)
-{
-    var node = document.getElementById(sortColName);
-    if (!node)
-        return false;
-
-    // determine column resource to sort on
-    var sortResource = node.getAttribute("resource");
-    var sortDirection = node.getAttribute("sortDirection");
-
-    if (sortDirection == "ascending")
-        sortDirection = "descending";
-    else
-        sortDirection = "ascending";
-
-    sortUserList(node, sortDirection);
-
-    return false;
-}
-
 function onSecurityIconDblClick(e)
 {
     if (e.button == 0)
@@ -352,7 +333,14 @@ function onInputKeyPress (e)
                 onTabCompleteRequest(e);
                 e.preventDefault();
             }
-            break;
+            return;
+
+        case 77: /* Hackaround for carbon on mac sending us this instead of 13
+                  * for ctrl+enter. 77 = "M", and ctrl+M was originally used
+                  * to send a CR in a terminal. */
+            // Fallthrough if ctrl was pressed, otherwise break out to default:
+            if (!e.ctrlKey)
+                break;
 
         case 13: /* CR */
             e.line = e.target.value;
@@ -362,12 +350,12 @@ function onInputKeyPress (e)
             if (e.ctrlKey)
                 e.line = client.COMMAND_CHAR + "say " + e.line;
             onInputCompleteLine (e);
-            break;
+            return;
 
         case 37: /* left */
-             if (e.altKey && e.metaKey)
-                 cycleView(-1);
-             break;
+            if (e.altKey && e.metaKey)
+                cycleView(-1);
+            return;
 
         case 38: /* up */
             if (e.ctrlKey || e.metaKey)
@@ -390,12 +378,12 @@ function onInputKeyPress (e)
                 }
             }
             e.preventDefault();
-            break;
+            return;
 
         case 39: /* right */
-             if (e.altKey && e.metaKey)
-                 cycleView(+1);
-             break;
+            if (e.altKey && e.metaKey)
+                cycleView(+1);
+            return;
 
         case 40: /* down */
             if (client.lastHistoryReferenced > 0)
@@ -412,14 +400,10 @@ function onInputKeyPress (e)
                 e.target.value = client.incompleteLine;
             }
             e.preventDefault();
-            break;
-
-        default:
-            client.lastHistoryReferenced = -1;
-            client.incompleteLine = e.target.value;
-            break;
+            return;
     }
-
+    client.lastHistoryReferenced = -1;
+    client.incompleteLine = e.target.value;
 }
 
 function onTabCompleteRequest (e)
@@ -814,28 +798,6 @@ function onInputKeyPressCallback (el)
         doPopup(null);
 }
 
-/* 'private' function, should only be used from inside */
-CIRCChannel.prototype._addUserToGraph =
-function my_addtograph (user)
-{
-    if (!user.TYPE)
-        dd (getStackTrace());
-
-    client.rdf.Assert (this.getGraphResource(), client.rdf.resChanUser,
-                       user.getGraphResource(), true);
-
-}
-
-/* 'private' function, should only be used from inside */
-CIRCChannel.prototype._removeUserFromGraph =
-function my_remfgraph (user)
-{
-
-    client.rdf.Unassert (this.getGraphResource(), client.rdf.resChanUser,
-                         user.getGraphResource());
-
-}
-
 CIRCChannel.prototype._updateConferenceMode =
 function my_updateconfmode()
 {
@@ -1103,6 +1065,12 @@ function my_showtonet (e)
 
             client.ident.removeNetwork(this);
 
+            // Figure out what nick we *really* want:
+            if (this.prefs["away"] && this.prefs["awayNick"])
+                this.preferredNick = this.prefs["awayNick"];
+            else
+                this.preferredNick = this.prefs["nickname"];
+
             str = e.decodeParam(2);
 
             break;
@@ -1117,6 +1085,7 @@ function my_showtonet (e)
                     this.dispatch(cmdary[i]);
             }
 
+            this.isIdleAway = client.isIdleAway;
             if (this.prefs["away"])
                 this.dispatch("away", { reason: this.prefs["away"] });
 
@@ -1134,11 +1103,11 @@ function my_showtonet (e)
 
             if ("pendingURLs" in this)
             {
-                var url = this.pendingURLs.pop();
-                while (url)
+                var target = this.pendingURLs.pop();
+                while (target)
                 {
-                    gotoIRCURL(url);
-                    url = this.pendingURLs.pop();
+                    gotoIRCURL(target.url, target.e);
+                    target = this.pendingURLs.pop();
                 }
                 delete this.pendingURLs;
             }
@@ -1158,7 +1127,7 @@ function my_showtonet (e)
             }
 
             // Had some collision during connect.
-            if (this.primServ.me.unicodeName != this.prefs["nickname"])
+            if (this.primServ.me.unicodeName != this.preferredNick)
             {
                 this.reclaimLeft = this.RECLAIM_TIMEOUT;
                 this.reclaimName();
@@ -1318,7 +1287,11 @@ function my_305(e)
 CIRCNetwork.prototype.on306 =
 function my_306(e)
 {
-    this.display(getMsg(MSG_AWAY_ON, this.prefs["away"]));
+    var idleMsgParams = [this.prefs["away"], client.prefs["awayIdleTime"]];
+    if (!this.isIdleAway)
+        this.display(getMsg(MSG_AWAY_ON, this.prefs["away"]));
+    else
+        this.display(getMsg(MSG_IDLE_AWAY_ON, idleMsgParams));
 
     return true;
 }
@@ -1352,7 +1325,13 @@ function my_263 (e)
 CIRCNetwork.prototype.isRunningList =
 function my_running_list()
 {
-    return (("_list" in this) && !this._list.done && !this._list.cancelled);
+    /* The list is considered "running" when a cancel is effective. This means
+     * that even if _list.done is true (finished recieving data), we will still
+     * be "running" whilst we have undisplayed items.
+     */
+    return (("_list" in this) &&
+            (!this._list.done || (this._list.length > this._list.displayed)) &&
+            !this._list.cancelled);
 }
 
 CIRCNetwork.prototype.list =
@@ -1606,10 +1585,14 @@ function my_315 (e)
 
     if ("whoUpdates" in this)
     {
+        var userlist = document.getElementById("user-list");
         for (var c in this.whoUpdates)
         {
             for (var i = 0; i < this.whoUpdates[c].length; i++)
-                this.whoUpdates[c][i].updateGraphResource();
+            {
+                var index = this.whoUpdates[c][i].chanListEntry.childIndex;
+                userlist.treeBoxObject.invalidateRow(index);
+            }
             this.primServ.channels[c].updateUsers(this.whoUpdates[c]);
         }
         delete this.whoUpdates;
@@ -1836,7 +1819,7 @@ function my_433 (e)
 
         this.INITIAL_NICK = newnick;
         this.display(getMsg(MSG_RETRY_NICK, [nick, newnick]), "433");
-        this.primServ.sendData("NICK " + fromUnicode(newnick, this) + "\n");
+        this.primServ.changeNick(newnick);
     }
     else
     {
@@ -2005,9 +1988,11 @@ function my_netdisconnect (e)
                       "reconnect"]);
         msgNetwork = msg;
     }
-    // We won't reconnect if the error was really bad.
-    else if ((typeof e.disconnectStatus != "undefined") &&
-             (e.disconnectStatus == NS_ERROR_ABORT))
+    // We won't reconnect if the error was really bad, or if the user doesn't
+    // want us to do so.
+    else if (((typeof e.disconnectStatus != "undefined") &&
+              (e.disconnectStatus == NS_ERROR_ABORT)) ||
+             !this.stayingPower)
     {
         msgNetwork = msg;
     }
@@ -2078,8 +2063,7 @@ function my_netdisconnect (e)
     for (var c in this.primServ.channels)
     {
         var channel = this.primServ.channels[c];
-        client.rdf.clearTargets(channel.getGraphResource(),
-                                client.rdf.resChanUser);
+        channel._clearUserList();
     }
 
     dispatch("sync-header");
@@ -2162,6 +2146,17 @@ function my_netpong (e)
     this.updateHeader(this);
 }
 
+CIRCNetwork.prototype.onWallops =
+function my_netwallops(e)
+{
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
+    if (e.user)
+        this.display(e.msg, "WALLOPS/WALLOPS", e.user, this);
+    else
+        this.display(e.msg, "WALLOPS/WALLOPS", undefined, this);
+    client.munger.getRule(".mailto").enabled = false;
+}
+
 CIRCNetwork.prototype.reclaimName =
 function my_reclaimname()
 {
@@ -2178,7 +2173,7 @@ function my_reclaimname()
     if ((this.state != NET_ONLINE) || !this.primServ)
         return false;
 
-    if (this.primServ.me.unicodeName == this.prefs["nickname"])
+    if (this.primServ.me.unicodeName == this.preferredNick)
         return false;
 
     this.reclaimLeft -= this.RECLAIM_WAIT;
@@ -2187,7 +2182,7 @@ function my_reclaimname()
         return false;
 
     this.pendingReclaimCheck = true;
-    this.primServ.sendData("NICK " + fromUnicode(this.prefs["nickname"], this) + "\n");
+    this.primServ.changeNick(this.preferredNick);
 
     setTimeout(callback, this.RECLAIM_WAIT);
 
@@ -2243,9 +2238,12 @@ CIRCChannel.prototype.onPrivmsg =
 function my_cprivmsg (e)
 {
     var msg = e.decodeParam(2);
+    var msgtype = "PRIVMSG";
+    if ("msgPrefix" in e)
+        msgtype += "/" + e.msgPrefix.symbol;
 
     client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
-    this.display (msg, "PRIVMSG", e.user, this);
+    this.display (msg, msgtype, e.user, this);
     client.munger.getRule(".mailto").enabled = false;
 }
 
@@ -2253,24 +2251,15 @@ function my_cprivmsg (e)
 CIRCChannel.prototype.on366 =
 function my_366 (e)
 {
-    if (client.currentObject == this)
-        /* hide the tree while we add (possibly tons) of nodes */
-        client.rdf.setTreeRoot("user-list", client.rdf.resNullChan);
-
-    client.rdf.clearTargets(this.getGraphResource(), client.rdf.resChanUser);
-
-    var updates = new Array();
+    var entries = new Array(), updates = new Array();
     for (var u in this.users)
     {
-        this.users[u].updateGraphResource();
-        this._addUserToGraph (this.users[u]);
+        entries.push(new UserEntry(this.users[u], this.userListShare));
         updates.push(this.users[u]);
     }
     this.addUsers(updates);
 
-    if (client.currentObject == this)
-        /* redisplay the tree */
-        client.rdf.setTreeRoot("user-list", this.getGraphResource());
+    this.userList.childData.appendChildren(entries);
 
     if (this.pendingNamesReply)
     {
@@ -2390,8 +2379,12 @@ function my_needops(e)
 CIRCChannel.prototype.onNotice =
 function my_notice (e)
 {
+    var msgtype = "NOTICE";
+    if ("msgPrefix" in e)
+        msgtype += "/" + e.msgPrefix.symbol;
+
     client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
-    this.display(e.decodeParam(2), "NOTICE", e.user, this);
+    this.display(e.decodeParam(2), msgtype, e.user, this);
     client.munger.getRule(".mailto").enabled = false;
 }
 
@@ -2462,21 +2455,22 @@ function my_cjoin (e)
         this._updateConferenceMode();
     }
 
-    this._addUserToGraph(e.user);
     /* We don't want to add ourself here, since the names reply we'll be
      * getting right after the join will include us as well! (FIXME)
      */
     if (!userIsMe(e.user))
+    {
         this.addUsers([e.user]);
-    if (client.currentObject == this)
-        updateUserList();
+        var entry = new UserEntry(e.user, this.userListShare);
+        this.userList.childData.appendChild(entry);
+        this.userList.childData.reSort();
+    }
     this.updateHeader();
 }
 
 CIRCChannel.prototype.onPart =
 function my_cpart (e)
 {
-    this._removeUserFromGraph(e.user);
     this.removeUsers([e.user]);
     this.updateHeader();
 
@@ -2484,13 +2478,7 @@ function my_cpart (e)
     {
         var params = [e.user.unicodeName, e.channel.unicodeName];
         this.display (getMsg(MSG_YOU_LEFT, params), "PART", e.user, this);
-
-        if (client.currentObject == this)
-            /* hide the tree while we remove (possibly tons) of nodes */
-            client.rdf.setTreeRoot("user-list", client.rdf.resNullChan);
-
-        client.rdf.clearTargets(this.getGraphResource(),
-                                client.rdf.resChanUser, true);
+        this._clearUserList();
 
         if ("partTimer" in this)
         {
@@ -2499,10 +2487,6 @@ function my_cpart (e)
             this.busy = false;
             updateProgress();
         }
-
-        if (client.currentObject == this)
-            /* redisplay the tree */
-            client.rdf.setTreeRoot("user-list", this.getGraphResource());
 
         if (this.deleteWhenDone)
             this.dispatch("delete-view");
@@ -2526,6 +2510,8 @@ function my_cpart (e)
                                       e.reason]),
                          "PART", e.user, this);
         }
+
+        this.removeFromList(e.user);
     }
 }
 
@@ -2549,6 +2535,7 @@ function my_ckick (e)
                           "KICK", (void 0), this);
         }
 
+        this._clearUserList();
         /* Try 1 re-join attempt if allowed. */
         if (this.prefs["autoRejoin"])
             this.join(this.mode.key);
@@ -2576,11 +2563,23 @@ function my_ckick (e)
                             [e.lamer.unicodeName, e.channel.unicodeName,
                              enforcerProper, e.reason]),
                      "KICK", e.user, this);
+
+        this.removeFromList(e.lamer);
     }
 
-    this._removeUserFromGraph(e.lamer);
     this.removeUsers([e.lamer]);
     this.updateHeader();
+}
+
+CIRCChannel.prototype.removeFromList =
+function my_removeFromList(user)
+{
+    // Remove the user from the list and 'disconnect' the user from their entry:
+    var idx = user.chanListEntry.childIndex;
+    this.userList.childData.removeChildAtIndex(idx);
+
+    delete user.chanListEntry._userObj;
+    delete user.chanListEntry;
 }
 
 CIRCChannel.prototype.onChanMode =
@@ -2606,13 +2605,9 @@ function my_cmode (e)
         view.display(getMsg(MSG_MODE_ALL, [this.unicodeName, msg]), "MODE");
         delete this.pendingModeReply;
     }
-
     var updates = new Array();
     for (var u in e.usersAffected)
-    {
-        e.usersAffected[u].updateGraphResource();
         updates.push(e.usersAffected[u]);
-    }
     this.updateUsers(updates);
 
     this.updateHeader();
@@ -2640,7 +2635,6 @@ function my_cnick (e)
                      "NICK", e.user, this);
     }
 
-    e.user.updateGraphResource();
     this.updateUsers([e.user]);
     if (client.currentObject == this)
         updateUserList();
@@ -2654,6 +2648,7 @@ function my_cquit (e)
         /* I dont think this can happen */
         var pms = [e.user.unicodeName, e.server.parent.unicodeName, e.reason];
         this.display (getMsg(MSG_YOU_QUIT, pms),"QUIT", e.user, this);
+        this._clearUserList();
     }
     else
     {
@@ -2669,9 +2664,29 @@ function my_cquit (e)
         }
     }
 
-    this._removeUserFromGraph(e.user);
     this.removeUsers([e.user]);
+    this.removeFromList(e.user);
+
     this.updateHeader();
+}
+
+CIRCChannel.prototype._clearUserList =
+function _my_clearuserlist()
+{
+    if (this.userList && this.userList.childData &&
+        this.userList.childData.childData)
+    {
+        this.userList.freeze();
+        var len = this.userList.childData.childData.length;
+        while (len > 0)
+        {
+            var entry = this.userList.childData.childData[--len];
+            this.userList.childData.removeChildAtIndex(len);
+            delete entry._userObj.chanListEntry;
+            delete entry._userObj;
+        }
+        this.userList.thaw();
+    }
 }
 
 CIRCUser.prototype.onInit =
@@ -3157,3 +3172,62 @@ function phand_qi(iid)
 
     throw Components.results.NS_ERROR_NO_INTERFACE;
 }
+
+function UserEntry(userObj, channelListShare)
+{
+    var self = this;
+    function getUName()
+    {
+        return userObj.unicodeName;
+    };
+    function getSortFn()
+    {
+        if (client.prefs["sortUsersByMode"])
+            return ule_sortByMode;
+        return ule_sortByName;
+    };
+
+    // This object is used to represent a user in the userlist. To work with our
+    // JS tree view, it needs a bunch of stuff that is set through the
+    // constructor and the prototype (see also a couple of lines down). Here we
+    // call the original constructor to do some work for us:
+    XULTreeViewRecord.call(this, channelListShare);
+
+    // This magic function means the unicodeName is used for display:
+    this.setColumnPropertyName("usercol", getUName);
+
+    // We need this for sorting by mode (op, hop, voice, etc.)
+    this._userObj = userObj;
+
+    // When the user leaves, we need to have the entry so we can remove it:
+    userObj.chanListEntry = this;
+
+    // Gross hack: we set up the sort function by getter so we don't have to go
+    // back (array sort -> xpc -> our pref lib -> xpc -> pref interfaces) for
+    // every bloody compare. Now it will be a function that doesn't need prefs
+    // after being retrieved, which is much much faster.
+    this.__defineGetter__("sortCompare", getSortFn);
+}
+
+// See explanation in the constructor.
+UserEntry.prototype = XULTreeViewRecord.prototype;
+
+function ule_sortByName(a, b)
+{
+    if (a._userObj.unicodeName == b._userObj.unicodeName)
+        return 0;
+    var aName = a._userObj.unicodeName.toLowerCase();
+    var bName = b._userObj.unicodeName.toLowerCase();
+    return (aName < bName ? -1 : 1);
+}
+
+function ule_sortByMode(a, b)
+{
+    if (a._userObj.sortName == b._userObj.sortName)
+        return 0;
+    var aName = a._userObj.sortName.toLowerCase();
+    var bName = b._userObj.sortName.toLowerCase();
+    return (aName < bName ? -1 : 1);
+}
+
+

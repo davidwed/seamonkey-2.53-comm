@@ -119,6 +119,8 @@ function initCommands()
          ["goto-url-external", cmdGotoURL,                                   0],
          ["help",              cmdHelp,                            CMD_CONSOLE],
          ["hide-view",         cmdHideView,                        CMD_CONSOLE],
+         ["idle-away",         cmdAway,                                      0],
+         ["idle-back",         cmdAway,                                      0],
          ["ignore",            cmdIgnore,           CMD_NEED_NET | CMD_CONSOLE],
          ["input-text-direction", cmdInputTextDirection,                     0],
          ["invite",            cmdInvite,           CMD_NEED_SRV | CMD_CONSOLE],
@@ -875,6 +877,30 @@ function cmdAblePlugin(e)
 
 function cmdBanOrExcept(e)
 {
+    var modestr;
+    switch (e.command.name)
+    {
+        case "ban":
+            modestr = "+bbbb";
+            break;
+
+        case "unban":
+            modestr = "-bbbb";
+            break;
+
+        case "except":
+            modestr = "+eeee";
+            break;
+
+        case "unexcept":
+            modestr = "-eeee";
+            break;
+
+        default:
+            ASSERT(0, "Dispatch from unknown name " + e.command.name);
+            return;
+    }
+
     /* If we're unbanning, or banning in odd cases, we may actually be talking
      * about a user who is not in the channel, so we need to check the server
      * for information as well.
@@ -884,11 +910,17 @@ function cmdBanOrExcept(e)
     if (!e.user && e.nickname)
         e.user = e.server.getUser(e.nickname);
 
-    var mask = "";
-    if (e.user)
+    var masks = new Array();
+
+    if (e.userList)
+    {
+        for (var i = 0; i < e.userList.length; i++)
+            masks.push(fromUnicode(e.userList[i].getBanMask(), e.server));
+    }
+    else if (e.user)
     {
         // We have a real user object, so get their proper 'ban mask'.
-        mask = fromUnicode(e.user.getBanMask(), e.server);
+        masks = [fromUnicode(e.user.getBanMask(), e.server)];
     }
     else if (e.nickname)
     {
@@ -896,41 +928,33 @@ function cmdBanOrExcept(e)
          * us a complete mask and pass it directly, otherwise assume it is
          * only the nickname and use * for username/host.
          */
-        mask = fromUnicode(e.nickname, e.server);
+        masks = [fromUnicode(e.nickname, e.server)];
         if (!/[!@]/.test(e.nickname))
-            mask = mask + "!*@*";
+            masks[0] = masks[0] + "!*@*";
     }
 
-    var op;
-    switch (e.command.name)
+    // Collapses into groups we can do individually.
+    masks = combineNicks(masks);
+
+    for (var i = 0; i < masks.length; i++)
     {
-        case "ban":
-            op = " +b ";
-            break;
-        case "unban":
-            op = " -b ";
-            break;
-        case "except":
-            op = " +e ";
-            break;
-        case "unexcept":
-            op = " -e ";
-            break;
+        e.server.sendData("MODE " + e.channel.encodedName + " " +
+                          modestr.substr(0, masks[i].count + 1) +
+                          " " + masks[i] + "\n");
     }
-    e.server.sendData("MODE " + e.channel.encodedName + op + mask + "\n");
 }
 
 function cmdCancel(e)
 {
     var network = e.network;
-    
-    if ((network.state == NET_ONLINE) && network.isRunningList())
+
+    if (network.isRunningList())
     {
-        // We're running a /list, terminate the output so we return to sanity
+        // We're running a /list, terminate the output so we return to sanity.
         display(MSG_CANCELLING_LIST);
         network.abortList();
     }
-    else if ((network.state == NET_CONNECTING) || 
+    else if ((network.state == NET_CONNECTING) ||
              (network.state == NET_WAITING))
     {
         // We're trying to connect to a network, and want to cancel. Do so:
@@ -1805,41 +1829,12 @@ function cmdToggleUI(e)
     var newState;
     var elem = document.getElementById(ids[0]);
     var sourceObject = e.sourceObject;
-
-    if (elem.getAttribute("collapsed") == "true")
-    {
-        if (e.thing == "userlist")
-        {
-            if (sourceObject.TYPE == "IRCChannel")
-            {
-                client.rdf.setTreeRoot("user-list",
-                                       sourceObject.getGraphResource());
-                setSelectedNicknames(document.getElementById("user-list"),
-                                     sourceObject.userlistSelection);
-                
-            }
-            else
-            {
-                client.rdf.setTreeRoot("user-list", client.rdf.resNullChan);
-            }
-        }
-
-        newState = "false";
-    }
-    else
-    {
-        if ((e.thing == "userlist") && (sourceObject.TYPE == "IRCChannel"))
-        {
-            var rv = getSelectedNicknames(document.getElementById("user-list"));
-            sourceObject.userlistSelection = rv;
-        }
-        newState = "true";
-    }
+    var newState = !elem.collapsed;
 
     for (var i in ids)
     {
         elem = document.getElementById(ids[i]);
-        elem.setAttribute ("collapsed", newState);
+        elem.collapsed = newState;
     }
 
     updateTitle();
@@ -2038,7 +2033,19 @@ function cmdMotif(e)
 function cmdList(e)
 {
     if (!e.channelName)
+    {
         e.channelName = "";
+        var c = e.server.channelCount;
+        if ((c > client.SAFE_LIST_COUNT) && !("listWarned" in e.network))
+        {
+            client.munger.getRule(".inline-buttons").enabled = true;
+            display(getMsg(MSG_LIST_CHANCOUNT, [c, "list"]), MT_WARN);
+            client.munger.getRule(".inline-buttons").enabled = false;
+            e.network.listWarned = true;
+            return;
+        }
+    }
+
     e.network.list(e.channelName);
 }
 
@@ -2084,6 +2091,16 @@ function cmdRlist(e)
     catch (ex)
     {
         display(MSG_ERR_INVALID_REGEX, MT_ERROR);
+        return;
+    }
+
+    var c = e.server.channelCount;
+    if ((c > client.SAFE_LIST_COUNT) && !("listWarned" in e.network))
+    {
+        client.munger.getRule(".inline-buttons").enabled = true;
+        display(getMsg(MSG_LIST_CHANCOUNT, [c, "rlist " + e.regexp]), MT_WARN);
+        client.munger.getRule(".inline-buttons").enabled = false;
+        e.network.listWarned = true;
         return;
     }
     e.network.list(re);
@@ -2146,7 +2163,9 @@ function cmdNick(e)
     if (!e.nickname)
     {
         var curNick;
-        if (e.network)
+        if (e.server && e.server.isConnected)
+            curNick = e.server.me.unicodeName;
+        else if (e.network)
             curNick = e.network.prefs["nickname"];
         else
             curNick = client.prefs["nickname"];
@@ -2160,9 +2179,15 @@ function cmdNick(e)
         e.server.changeNick(e.nickname);
 
     if (e.network)
+    {
         e.network.prefs["nickname"] = e.nickname;
+        e.network.preferredNick = e.nickname;
+    }
     else
+    {
         client.prefs["nickname"] = e.nickname;
+        updateTitle(client);
+    }
 }
 
 function cmdNotice(e)
@@ -2579,10 +2604,20 @@ function cmdLoad(e)
 
         if ("init" in plugin)
         {
+            // Sanity check plugin's methods and properties:
+            if (!("id" in plugin) || (plugin.id == MSG_UNKNOWN))
+                display(getMsg(MSG_ERR_PLUGINAPI_NOID, e.url));
+            else if (!(plugin.id.match(/^[A-Za-z-_]+$/)))
+                display(getMsg(MSG_ERR_PLUGINAPI_FAULTYID, e.url));
+            else if (!("enable" in plugin))
+                display(getMsg(MSG_ERR_PLUGINAPI_NOENABLE, e.url));
+            else if (!("disable" in plugin))
+                display(getMsg(MSG_ERR_PLUGINAPI_NODISABLE, e.url));
+
             if (!("enable" in plugin) || !("disable" in plugin) ||
-                !("id" in plugin) || !(plugin.id.match(/^[A-Za-z-_]+$/)))
+                !("id" in plugin) || (plugin.id == MSG_UNKNOWN) ||
+                !(plugin.id.match(/^[A-Za-z-_]+$/)))
             {
-                display (getMsg(MSG_ERR_PLUGINAPI, e.url));
                 display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
                 return null;
             }
@@ -2761,15 +2796,25 @@ function cmdAway(e)
     {
         for (var n in client.networks)
         {
-            if (client.networks[n].primServ &&
-                (client.networks[n].state == NET_ONLINE))
+            var net = client.networks[n];
+            if (net.primServ && (net.state == NET_ONLINE))
             {
-                client.networks[n].dispatch(command, { reason: reason });
+                // If we can override the network's away state, or they are
+                // already idly-away, or they're not away to begin with:
+                if (overrideAway || net.isIdleAway || !net.prefs["away"])
+                {
+                    net.dispatch(command, {reason: reason });
+                    net.isIdleAway = (e.command.name == "idle-away");
+                }
             }
         }
     };
 
-    if ((e.command.name == "away") || (e.command.name == "custom-away"))
+    // Idle away shouldn't override away state set by the user.
+    var overrideAway = (e.command.name.indexOf("idle") != 0);
+
+    if ((e.command.name == "away") || (e.command.name == "custom-away") ||
+        (e.command.name == "idle-away"))
     {
         /* going away */
         if (e.command.name == "custom-away")
@@ -2815,22 +2860,43 @@ function cmdAway(e)
             display(getMsg(MSG_ERR_AWAY_SAVE, formatException(ex)), MT_ERROR);
         }
 
+        // Actually do away stuff, is this on a specific network?
         if (e.server)
         {
+            var normalNick = e.network.prefs["nickname"];
+            var awayNick = e.network.prefs["awayNick"];
             if (e.network.state == NET_ONLINE)
             {
-                if (e.network.prefs["awayNick"])
-                    e.server.sendData("NICK " + e.network.prefs["awayNick"] + "\n");
-
-                e.server.sendData("AWAY :" + fromUnicode(e.reason, e.network) + "\n");
+                // Postulate that if normal nick and away nick are the same,
+                // user doesn't want to change nicks:
+                if (awayNick && (normalNick != awayNick))
+                    e.server.changeNick(awayNick);
+                e.server.sendData("AWAY :" + fromUnicode(e.reason, e.network) +
+                                  "\n");
             }
+            if (awayNick && (normalNick != awayNick))
+                e.network.preferredNick = awayNick;
             e.network.prefs["away"] = e.reason;
         }
         else
         {
             // Client view, do command for all networks.
             sendToAllNetworks("away", e.reason);
-            display(getMsg(MSG_AWAY_ON, e.reason));
+            client.prefs["away"] = e.reason;
+
+            // Don't tell people how to get back if they're idle:
+            var idleMsgParams = [e.reason, client.prefs["awayIdleTime"]];
+            if (e.command.name == "idle-away")
+                var msg = getMsg(MSG_IDLE_AWAY_ON, idleMsgParams);
+            else
+                msg = getMsg(MSG_AWAY_ON, e.reason);
+
+            // Display on the *client* tab, or on the current tab iff
+            // there's nowhere else they'll hear about it:
+            if (("frame" in client) && client.frame)
+                client.display(msg);
+            else if (!client.getConnectedNetworks())
+                display(msg);
         }
     }
     else
@@ -2840,18 +2906,26 @@ function cmdAway(e)
         {
             if (e.network.state == NET_ONLINE)
             {
-                if (e.network.prefs["awayNick"])
-                    e.server.sendData("NICK " + e.network.prefs["nickname"] + "\n");
-
+                var curNick = e.server.me.unicodeName;
+                var awayNick = e.network.prefs["awayNick"];
+                if (awayNick && (curNick == awayNick))
+                    e.server.changeNick(e.network.prefs["nickname"]);
                 e.server.sendData("AWAY\n");
             }
+            // Go back to old nick, even if not connected:
+            if (awayNick && (curNick == awayNick))
+                e.network.preferredNick = e.network.prefs["nickname"];
             e.network.prefs["away"] = "";
         }
         else
         {
+            client.prefs["away"] = "";
             // Client view, do command for all networks.
             sendToAllNetworks("back");
-            display(MSG_AWAY_OFF);
+            if (("frame" in client) && client.frame)
+                client.display(MSG_AWAY_OFF);
+            else if (!client.getConnectedNetworks())
+                display(MSG_AWAY_OFF);
         }
     }
 }
@@ -3080,11 +3154,7 @@ function cmdInvite(e)
 {
     var channel;
 
-    if (!e.channelName)
-    {
-        channel = e.channel;
-    }
-    else
+    if (e.channelName)
     {
         channel = e.server.getChannel(e.channelName);
         if (!channel)
@@ -3093,12 +3163,46 @@ function cmdInvite(e)
             return;
         }
     }
+    else if (e.channel)
+    {
+        channel = e.channel;
+    }
+    else
+    {
+        display(getMsg(MSG_ERR_NO_CHANNEL, e.command.name), MT_ERROR);
+        return;
+    }
 
     channel.invite(e.nickname);
 }
 
 function cmdKick(e)
 {
+    if (e.userList)
+    {
+        if (e.command.name == "kick-ban")
+        {
+            e.sourceObject.dispatch("ban", { userList: e.userList,
+                                             canonNickList: e.canonNickList,
+                                             user: e.user,
+                                             nickname: e.user.encodedName });
+        }
+
+        /* Note that we always do /kick below; the /ban is covered above.
+         * Also note that we are required to pass the nickname, to satisfy
+         * the dispatching of the command (which is defined with a required
+         * <nickname> parameter). It's not required for /ban, above, but it
+         * seems prudent to include it anyway.
+         */
+        for (var i = 0; i < e.userList.length; i++)
+        {
+            var e2 = { user: e.userList[i],
+                       nickname: e.userList[i].encodedName };
+            e.sourceObject.dispatch("kick", e2);
+        }
+        return;
+    }
+
     if (!e.user)
         e.user = e.channel.getUser(e.nickname);
 

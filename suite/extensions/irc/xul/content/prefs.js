@@ -129,9 +129,13 @@ function initPrefs()
          ["autoAwayCap",        300,      "global"],
          ["autoAwayPeriod",     2,        "appearance.misc"],
          ["autoRejoin",         false,    ".connect"],
+         ["away",               "",       "hidden"],
          ["awayNick",           "",       ".ident"],
+         ["awayIdleTime",       0,        ".ident"],
+         ["awayIdleMsg",        "",       ".ident"],
          ["bugURL",           "https://bugzilla.mozilla.org/show_bug.cgi?id=%s",
                                           "appearance.misc"],
+         ["bugURL.comment",     "#c%s",   "appearance.misc"],
          ["channelHeader",      true,     "global.header"],
          ["channelLog",         false,    "global.log"],
          ["channelMaxLines",    500,      "global.maxLines"],
@@ -413,9 +417,10 @@ function getNetworkPrefManager(network)
         [
          ["autoAwayPeriod",   defer, "appearance.misc"],
          ["autoRejoin",       defer, ".connect"],
-         ["away",             "",    "hidden"],
+         ["away",             defer, "hidden"],
          ["awayNick",         defer, ".ident"],
          ["bugURL",           defer, "appearance.misc"],
+         ["bugURL.comment",   defer, "appearance.misc"],
          ["charset",          defer, ".connect"],
          ["collapseActions",  defer, "appearance.misc"],
          ["collapseMsgs",     defer, "appearance.misc"],
@@ -514,6 +519,7 @@ function getChannelPrefManager(channel)
         [
          ["autoRejoin",       defer, ".connect"],
          ["bugURL",           defer, "appearance.misc"],
+         ["bugURL.comment",   defer, "appearance.misc"],
          ["charset",          defer, ".connect"],
          ["collapseActions",  defer, "appearance.misc"],
          ["collapseMsgs",     defer, "appearance.misc"],
@@ -659,6 +665,11 @@ function onPrefChanged(prefName, newValue, oldValue)
 {
     switch (prefName)
     {
+        case "awayIdleTime":
+            uninitIdleAutoAway(oldValue);
+            initIdleAutoAway(newValue);
+            break;
+
         case "channelMaxLines":
             CIRCChannel.prototype.MAX_MESSAGES = newValue;
             break;
@@ -698,6 +709,10 @@ function onPrefChanged(prefName, newValue, oldValue)
 
         case "proxy.typeOverride":
             CIRCNetwork.prototype.PROXY_TYPE_OVERRIDE = newValue;
+            break;
+
+        case "reconnect":
+            CIRCNetwork.prototype.stayingPower = newValue;
             break;
 
         case "showModeSymbols":
