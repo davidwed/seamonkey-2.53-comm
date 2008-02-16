@@ -292,8 +292,7 @@ function insertChannelLink(matchText, containerTag, eventData, mungerEntry)
     var encodedLinkText = fromUnicode(linkText, eventData.sourceObject);
     var anchor = document.createElementNS("http://www.w3.org/1999/xhtml",
                                           "html:a");
-    anchor.setAttribute("href", eventData.network.getURL() +
-                        ecmaEscape(encodedLinkText));
+    anchor.setAttribute("href", eventData.network.getURL(encodedLinkText));
 
     // Carry over formatting.
     var otherFormatting = calcClass(eventData);
@@ -507,12 +506,13 @@ function insertSmiley(emoticon, containerTag)
      * to turn off the emoticon text, but keep the image.  ie.
      * chatzilla-emote-txt { display: none; } turns off
      * chatzilla-emote-txt:after as well.*/
-    span = document.createElementNS ("http://www.w3.org/1999/xhtml",
-                                     "html:span");
-    span.setAttribute ("class", "chatzilla-emote");
-    span.setAttribute ("type", type);
-    span.setAttribute ("title", emoticon);
-    containerTag.appendChild (span);
+    span = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                    "html:span");
+    span.setAttribute("class", "chatzilla-emote");
+    span.setAttribute("type", type);
+    span.setAttribute("title", emoticon);
+    span.setAttribute("role", "image");
+    containerTag.appendChild(span);
 
 }
 

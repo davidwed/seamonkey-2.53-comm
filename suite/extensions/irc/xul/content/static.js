@@ -39,11 +39,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.80";
+const __cz_version   = "0.9.81";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.80";
+const __cz_locale    = "0.9.81";
 
 var warn;
 var ASSERT;
@@ -283,6 +283,9 @@ function initStatic()
     {
         dd("Locale-correct date formatting failed to initialize: " + ex);
     }
+
+    // XXX Bug 335998: See cmdHideView for usage of this.
+    client.hiddenDocument = document.implementation.createDocument(null, null, null);
 
     multilineInputMode(client.prefs["multiline"]);
     updateSpellcheck(client.prefs["inputSpellcheck"]);
@@ -1121,6 +1124,7 @@ function getUserlistContext(cx)
             cx.canonNick = user.canonicalName;
         }
     }
+    cx.userCount = cx.userList.length;
 
     return cx;
 }
@@ -1188,12 +1192,30 @@ function msgIsImportant(msg, sourceNick, network)
     return false;
 }
 
-function isStartupURL(url)
+function ensureCachedCanonicalURLs(array)
 {
-    return arrayContains(client.prefs["initialURLs"], url);
+    if ("canonicalURLs" in array)
+        return;
+
+    /* Caching this on the array is safe because the PrefManager constructs
+     * a new array if the preference changes, but otherwise keeps the same
+     * one around.
+     */
+    array.canonicalURLs = new Array();
+    for (var i = 0; i < array.length; i++)
+        array.canonicalURLs.push(makeCanonicalIRCURL(array[i]));
 }
 
-function cycleView (amount)
+function isStartupURL(url)
+{
+    // We canonicalize all URLs before we do the (string) comparison.
+    url = makeCanonicalIRCURL(url);
+    var list = client.prefs["initialURLs"];
+    ensureCachedCanonicalURLs(list);
+    return arrayContains(list.canonicalURLs, url);
+}
+
+function cycleView(amount)
 {
     var len = client.viewsArray.length;
     if (len <= 1)
@@ -1828,8 +1850,7 @@ function gotoIRCURL(url, e)
                 var chan = new CIRCChannel(serv, null, target);
 
                 client.pendingViewContext = e;
-                d = { channelName: chan.unicodeName, key: key,
-                      charset: url.charset };
+                d = {channelToJoin: chan, key: key};
                 targetObject = network.dispatch("join", d);
                 delete client.pendingViewContext;
             }
@@ -3374,7 +3395,7 @@ function tabdnd_dover(aEvent, aFlavour, aDragSession)
      * somewhere beyond all the tabs.
      */
     var ltr = (window.getComputedStyle(client.tabs, null).direction == "ltr");
-    var newPosition = 0;
+    var newPosition = client.tabs.firstChild.boxObject.x;
     for (var dropTab = client.tabs.firstChild; dropTab;
          dropTab = dropTab.nextSibling)
     {
@@ -3386,7 +3407,7 @@ function tabdnd_dover(aEvent, aFlavour, aDragSession)
         {
             break;
         }
-        newPosition += dropTab.boxObject.width;
+        newPosition = bo.x + bo.width;
     }
 
     // Reposition the drop marker and show it. In that order.

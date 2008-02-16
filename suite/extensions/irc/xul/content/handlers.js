@@ -142,6 +142,18 @@ function onClose()
 function onUnload()
 {
     dd("Shutting down ChatZilla.");
+
+    // Close all dialogs.
+    for (var net in client.networks)
+    {
+        if ("joinDialog" in client.networks[net])
+            client.networks[net].joinDialog.close();
+    }
+    if ("configWindow" in client)
+        client.configWindow.close();
+
+    // We don't trust anybody.
+    client.hiddenDocument = null;
     uninitOfflineIcon();
     uninitIdleAutoAway(client.prefs["awayIdleTime"]);
     destroy();
@@ -1173,10 +1185,18 @@ function my_ctcprunk (e)
 }
 
 CIRCNetwork.prototype.onNotice =
-function my_notice (e)
+function my_notice(e)
 {
     client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
     this.display(e.decodeParam(2), "NOTICE", this, e.server.me);
+    client.munger.getRule(".mailto").enabled = false;
+}
+
+CIRCNetwork.prototype.onPrivmsg =
+function my_privmsg(e)
+{
+    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
+    this.display(e.decodeParam(2), "PRIVMSG", this, e.server.me);
     client.munger.getRule(".mailto").enabled = false;
 }
 
@@ -1754,9 +1774,14 @@ function my_341 (e)
 CIRCNetwork.prototype.onInvite = /* invite message */
 function my_invite (e)
 {
+    client.munger.getRule(".inline-buttons").enabled = true;
     this.display(getMsg(MSG_INVITE_YOU, [e.user.unicodeName, e.user.name,
-                                         e.user.host, e.channel.unicodeName]),
+                                         e.user.host,
+                                         e.channel.unicodeName,
+                                         e.channel.unicodeName,
+                                         e.channel.getURL()]),
                  "INVITE");
+    client.munger.getRule(".inline-buttons").enabled = false;
 
     if ("messages" in e.channel)
         e.channel.join();
@@ -2251,6 +2276,16 @@ function my_cprivmsg (e)
 CIRCChannel.prototype.on366 =
 function my_366 (e)
 {
+    // First clear up old users:
+    var removals = new Array();
+    while (this.userList.childData.childData.length > 0)
+    {
+        var userToRemove = this.userList.childData.childData[0]._userObj;
+        this.removeFromList(userToRemove);
+        removals.push(userToRemove);
+    }
+    this.removeUsers(removals);
+
     var entries = new Array(), updates = new Array();
     for (var u in this.users)
     {
@@ -2992,7 +3027,6 @@ CIRCDCCFileTransfer.prototype.onInit =
 function my_dccfileinit(e)
 {
     this.busy = false;
-    this.progress = -1;
     updateProgress();
 }
 
@@ -3016,7 +3050,6 @@ function my_dccfileconnect(e)
 {
     this.displayHere(getMsg(MSG_DCCFILE_OPENED, this._getParams()), "DCC-FILE");
     this.busy = true;
-    this.progress = 0;
     this.speed = 0;
     updateProgress();
     this._lastUpdate = new Date();
@@ -3028,7 +3061,7 @@ CIRCDCCFileTransfer.prototype.onProgress =
 function my_dccfileprogress(e)
 {
     var now = new Date();
-    var pcent = Math.floor(100 * this.position / this.size);
+    var pcent = this.progress;
 
     var tab = getTabForObject(this);
 
@@ -3036,7 +3069,6 @@ function my_dccfileprogress(e)
     if ((this.position > this._lastPosition + 102400) ||
         (now - this._lastUpdate > 10000))
     {
-        this.progress = pcent;
         updateProgress();
         updateTitle();
 
@@ -3074,6 +3106,7 @@ function my_dccfileabort(e)
 {
     this.busy = false;
     updateProgress();
+    updateTitle();
     this.display(getMsg(MSG_DCCFILE_ABORTED, this._getParams()), "DCC-FILE");
 }
 
@@ -3082,6 +3115,7 @@ function my_dccfilefail(e)
 {
     this.busy = false;
     updateProgress();
+    updateTitle();
     this.display(getMsg(MSG_DCCFILE_FAILED, this._getParams()), "DCC-FILE");
 }
 
@@ -3091,6 +3125,7 @@ function my_dccfiledisconnect(e)
     this.busy = false;
     updateProgress();
     this.updateHeader();
+    updateTitle();
 
     var msg, tab = getTabForObject(this);
     if (tab)
