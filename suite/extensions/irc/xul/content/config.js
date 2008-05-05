@@ -904,6 +904,7 @@ function PrefWindow()
     this.tooltipShowing = false;
     this.tooltipShowDelay = 1000;
     this.tooltipHideDelay = 20000;
+    this.tooltipBug418798 = false;
 }
 PrefWindow.prototype.TYPE = "PrefWindow";
 
@@ -1053,13 +1054,15 @@ function pwin_onLoad()
     if (("arguments" in window) && (0 in window.arguments) && ("client" in window.arguments[0]))
     {
         /* Make sure we survive this, external data could be bad. :) */
-        try {
+        try
+        {
             var czWin = window.arguments[0];
             var s;
             var n, c, u;
             this.ownerClient = czWin.client;
             this.ownerClient.configWindow = window;
-            
+            client.ceip = this.ownerClient.ceip;
+
             /* Go nick the source window's view list. We can then show items in
              * the tree for the currently connected/shown networks, channels
              * and users even if they don't have any known prefs yet.
@@ -1070,7 +1073,7 @@ function pwin_onLoad()
             for (i = 0; i < czWin.client.viewsArray.length; i++)
             {
                 var view = czWin.client.viewsArray[i].source;
-                
+
                 // Network view...
                 if (view.TYPE == "IRCNetwork")
                 {
@@ -1078,10 +1081,14 @@ function pwin_onLoad()
                     if (view == czWin.client.currentObject)
                         currentView = n;
                 }
-                
+
                 if (view.TYPE.match(/^IRC(Channel|User)$/))
-                    s = client.networks[view.parent.parent.canonicalName].primServ;
-                
+                {
+                    n = new PrefNetwork(client, view.parent.parent.unicodeName,
+                                        false, true);
+                    s = n.primServ;
+                }
+
                 // Channel view...
                 if (view.TYPE == "IRCChannel")
                 {
@@ -1089,18 +1096,20 @@ function pwin_onLoad()
                     if (view == czWin.client.currentObject)
                         currentView = c;
                 }
-                
+
                 // User view...
                 if (view.TYPE == "IRCUser")
                 {
-                    u = new PrefUser(s, view.nick, false, true);
+                    u = new PrefUser(s, view.unicodeName, false, true);
                     if (view == czWin.client.currentObject)
                         currentView = u;
                 }
             }
-        } catch(ex) {}
+        }
+        catch(ex)
+        {}
     }
-    
+
     // Add the client object...
     this.prefObjects.addObject(client);
     // ...and everyone else.
@@ -1148,6 +1157,8 @@ function pwin_onLoad()
     // This allows [OK] to actually save, without this it'll just close.
     this.loaded = true;
     
+    client.ceip.logEvent({type: "dialog", dialog: "config", event: "open"});
+    
     // Force the window to be the right size now, not later.
     window.sizeToContent();
     
@@ -1165,6 +1176,7 @@ function pwin_onLoad()
 PrefWindow.prototype.onClose =
 function pwin_onClose()
 {
+    client.ceip.logEvent({type: "dialog", dialog: "config", event: "close"});
     if (this.ownerClient)
         delete this.ownerClient.configWindow;
     if (this.loaded)
@@ -1191,6 +1203,13 @@ function pwin_onApply()
     try {
         // Get an array of all the (XUL) items we have to save.
         var list = getPrefTags();
+        
+        // Log the application of preferences and how many, but not which.
+        if (list.length > 0)
+        {
+            client.ceip.logEvent({type: "dialog", dialog: "config",
+                                  event: "apply", prefs: list.length});
+        }
         
         //if (!confirm("There are " + list.length + " pref tags to save. OK?")) return false;
         
@@ -1309,9 +1328,22 @@ function pwin_onTooltipPopupShowing(popup)
     ttt.firstChild.nodeValue = this.tooltipTitle;
     var ttl = document.getElementById("czPrefTipLabel");
     ttl.firstChild.nodeValue = this.tooltipText;
-    
-    popup.sizeTo(popup.boxObject.width, fChild.boxObject.height + diff);
-    
+
+    /* In Gecko 1.9, the popup has done no layout at this point, unlike in
+     * earlier versions. As a result, the box object of all the elements
+     * within it are 0x0. It also means the height of the labels isn't
+     * updated. To deal with this, we avoid calling sizeTo with the box
+     * object (as it's 0) and instead just force the popup height to 0 -
+     * otherwise it will only ever get bigger each time, never smaller.
+     */
+    if (popup.boxObject.width == 0)
+        this.tooltipBug418798 = true;
+
+    if (this.tooltipBug418798)
+        popup.height = 0;
+    else
+        popup.sizeTo(popup.boxObject.width, fChild.boxObject.height + diff);
+
     return true;
 }
 
@@ -1370,7 +1402,16 @@ function pwin_onPrefBrowse(button)
     var rv;
     if (type == "folder")
     {
-        var current = getFileFromURLSpec(edit.value);
+        try
+        {
+            // if the user set the pref to an invalid folder, this will throw:
+            var current = getFileFromURLSpec(edit.value);
+        }
+        catch (ex)
+        {
+            // Just setting it to null will work:
+            current = null;
+        }
         rv = pickGetFolder(MSG_PREFS_BROWSE_TITLE, current);
     }
     else
@@ -1572,6 +1613,9 @@ function pwin_onAddObject()
     if (!rv.ok)
         return;
     
+    client.ceip.logEvent({type: "dialog", dialog: "config", event: "add",
+                          prefType: rv.type});
+    
     /* Ok, so what type did they want again?
      * 
      * NOTE: The param |true| in the object creation calls is for |force|. It
@@ -1610,6 +1654,9 @@ function pwin_onDeleteObject()
     if (!confirm(getMsg(MSG_PREFS_OBJECT_DELETE, sel.parent.unicodeName)))
         return;
     
+    client.ceip.logEvent({type: "dialog", dialog: "config", event: "delete",
+                          prefType: sel.parent.TYPE});
+    
     // Select a new item BEFORE removing the current item, so the <tree> 
     // doesn't freak out on us.
     var prefTree = document.getElementById("pref-tree-object");
@@ -1644,6 +1691,9 @@ function pwin_onResetObject()
     // Check they want to go ahead.
     if (!confirm(getMsg(MSG_PREFS_OBJECT_RESET, sel.parent.unicodeName)))
         return;
+    
+    client.ceip.logEvent({type: "dialog", dialog: "config", event: "reset",
+                          prefType: sel.parent.TYPE});
     
     // Reset the prefs.
     sel.reset();

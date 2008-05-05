@@ -154,6 +154,9 @@ function onUnload()
 
     // We don't trust anybody.
     client.hiddenDocument = null;
+    // Log client stop and shut down CEIP.
+    client.ceip.logEvent({type: "client", event: "stop"});
+    client.ceip.destroy();
     uninitOfflineIcon();
     uninitIdleAutoAway(client.prefs["awayIdleTime"]);
     destroy();
@@ -250,21 +253,14 @@ function onMouseOver (e)
         {
             status = target.getAttribute("href");
             if (!status)
-                status = target.getAttribute ("statusText");
+                status = target.getAttribute("statusText");
         }
         ++i;
         target = target.parentNode;
     }
 
-    if (status)
-    {
-        client.status = status;
-    }
-    else
-    {
-        if (client && "defaultStatus" in client)
-            client.status = client.defaultStatus;
-    }
+    // Setting client.status to "" will revert it to the default automatically.
+    client.status = status;
 }
 
 function onSecurityIconDblClick(e)
@@ -685,7 +681,7 @@ function onInputCompleteLine(e)
         /* color codes */
         if (client.prefs["outgoing.colorCodes"])
             e.line = replaceColorCodes(e.line);
-        client.sayToCurrentTarget (e.line);
+        client.sayToCurrentTarget(e.line, true);
     }
 }
 
@@ -1082,6 +1078,9 @@ function my_showtonet (e)
                 this.preferredNick = this.prefs["awayNick"];
             else
                 this.preferredNick = this.prefs["nickname"];
+
+            // Pretend this never happened.
+            delete this.pendingNickChange;
 
             str = e.decodeParam(2);
 
@@ -1802,7 +1801,7 @@ function my_433 (e)
     {
         // Force a number, thanks.
         var nickIndex = 1 * arrayIndexOf(this.prefs["nicknameList"], nick);
-        var newnick;
+        var newnick = null;
 
         dd("433: failed with " + nick + " (" + nickIndex + ")");
 
@@ -1836,15 +1835,23 @@ function my_433 (e)
             if (!("_firstNick" in this))
                 this._firstNick = nickIndex;
         }
-        else
+        else if (this.NICK_RETRIES > 0)
         {
             newnick = this.INITIAL_NICK + "_";
+            this.NICK_RETRIES--;
             dd("     trying " + newnick);
         }
 
-        this.INITIAL_NICK = newnick;
-        this.display(getMsg(MSG_RETRY_NICK, [nick, newnick]), "433");
-        this.primServ.changeNick(newnick);
+        if (newnick)
+        {
+            this.INITIAL_NICK = newnick;
+            this.display(getMsg(MSG_RETRY_NICK, [nick, newnick]), "433");
+            this.primServ.changeNick(newnick);
+        }
+        else
+        {
+            this.display(getMsg(MSG_NICK_IN_USE, nick), "433");
+        }
     }
     else
     {
@@ -1873,6 +1880,8 @@ function my_sconnect (e)
         else
             display(MSG_IDENT_SERVER_NOT_POSSIBLE, MT_WARN);
     }
+
+    this.NICK_RETRIES = this.prefs["nicknameList"].length + 3;
 }
 
 CIRCNetwork.prototype.onError =
@@ -2149,6 +2158,14 @@ function my_cnick (e)
     if (!ASSERT(userIsMe(e.user), "network nick event for third party"))
         return;
 
+    if (("pendingNickChange" in this) &&
+        (this.pendingNickChange == e.user.unicodeName))
+    {
+        this.prefs["nickname"] = e.user.unicodeName;
+        this.preferredNick = e.user.unicodeName;
+        delete this.pendingNickChange;
+    }
+
     if (getTabForObject(this))
     {
         this.displayHere(getMsg(MSG_NEWNICK_YOU, e.user.unicodeName),
@@ -2180,6 +2197,14 @@ function my_netwallops(e)
     else
         this.display(e.msg, "WALLOPS/WALLOPS", undefined, this);
     client.munger.getRule(".mailto").enabled = false;
+}
+
+/* unknown command reply */
+CIRCNetwork.prototype.on421 =
+function my_421(e)
+{
+    this.display(getMsg(MSG_ERR_UNKNOWN_COMMAND, e.params[2]), MT_ERROR);
+    return true;
 }
 
 CIRCNetwork.prototype.reclaimName =

@@ -22,6 +22,7 @@
  *
  * Contributor(s):
  *   Robert Ginda, <rginda@netscape.com>, original author
+ *   James Ross, silver@warwickcompsoc.co.uk
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -87,10 +88,16 @@ function initPrefs()
 
     var gotos = ["goto-url",        "goto-url-newwin",
                  "goto-url-newtab", "goto-url-newtab"];
-    if (client.host == "XULrunner")
+    if (client.host == "XULRunner")
     {
         gotos = ["goto-url-external", "goto-url-external",
                  "goto-url-external", "goto-url-external"];
+    }
+    else if (client.host == "Songbird")
+    {
+        // Songbird has a browser, but only supports a single browser window
+        gotos = ["goto-url",        "goto-url-newtab",
+                 "goto-url-newtab", "goto-url-newtab"];
     }
 
     // Set up default nickname, if possible.
@@ -110,7 +117,7 @@ function initPrefs()
             var nick = en.get(vars[i]);
             if (nick)
             {
-                defaultNick = nick;
+                defaultNick = nick.replace(/ /g, "_");
                 break;
             }
         }
@@ -136,6 +143,13 @@ function initPrefs()
          ["bugURL",           "https://bugzilla.mozilla.org/show_bug.cgi?id=%s",
                                           "appearance.misc"],
          ["bugURL.comment",     "#c%s",   "appearance.misc"],
+         ["ceip.userid",        "",       "hidden"],
+         ["ceip.uploadUrl",     "http://silver.warwickcompsoc.co.uk/mozilla/chatzilla/ceip/1/upload", "hidden"],
+         ["ceip.uploadSize",    32 * 1024, "hidden"],
+         ["ceip.log.client",    false,    "hidden"],
+         ["ceip.log.command",   false,    "hidden"],
+         ["ceip.log.menu",      false,    "hidden"],
+         ["ceip.log.dialog",    false,    "hidden"],
          ["channelHeader",      true,     "global.header"],
          ["channelLog",         false,    "global.log"],
          ["channelMaxLines",    500,      "global.maxLines"],
@@ -167,8 +181,8 @@ function initPrefs()
          ["initialURLs",        [],       "startup.initialURLs"],
          ["initialScripts",     [getURLSpecFromFile(scriptPath.path)],
                                           "startup.initialScripts"],
-         ["instrumentation.key", 0,      "hidden"],
-         ["instrumentation.inst1", 0,    "hidden"],
+         ["instrumentation.key", 0,       "hidden"],
+         ["instrumentation.ceip", false,  "hidden"],
          ["link.focus",         true,     "global.links"],
          ["log",                false,                                  ".log"],
          ["logFileName",        makeLogNameClient,                    "hidden"],
@@ -786,6 +800,8 @@ function onPrefChanged(prefName, newValue, oldValue)
 
         case "timestamps":
         case "timestamps.display":
+        case "collapseActions":
+        case "collapseMsgs":
             client.dispatch("sync-timestamp");
             break;
 
@@ -809,6 +825,8 @@ function onPrefChanged(prefName, newValue, oldValue)
             {
                 rule.enabled = newValue;
             }
+            if (prefName.substr(0, 5) == "ceip.")
+                client.ceip.notifyUpdate();
     }
 }
 
@@ -873,6 +891,8 @@ function onNetworkPrefChanged(network, prefName, newValue, oldValue)
 
         case "timestamps":
         case "timestamps.display":
+        case "collapseActions":
+        case "collapseMsgs":
             network.dispatch("sync-timestamp");
             break;
 
@@ -937,6 +957,8 @@ function onChannelPrefChanged(channel, prefName, newValue, oldValue)
 
         case "timestamps":
         case "timestamps.display":
+        case "collapseActions":
+        case "collapseMsgs":
             channel.dispatch("sync-timestamp");
             break;
 
@@ -982,6 +1004,8 @@ function onUserPrefChanged(user, prefName, newValue, oldValue)
 
         case "timestamps":
         case "timestamps.display":
+        case "collapseActions":
+        case "collapseMsgs":
             user.dispatch("sync-timestamp");
             break;
 
@@ -1024,6 +1048,8 @@ function onDCCUserPrefChanged(user, prefName, newValue, oldValue)
 
             case "timestamps":
             case "timestamps.display":
+            case "collapseActions":
+            case "collapseMsgs":
                 view.dispatch("sync-timestamp");
                 break;
 

@@ -68,6 +68,15 @@
       </Description>
     </em:targetApplication>
 
+    <!-- target: Songbird, version 0.5 to 0.6pre -->
+    <em:targetApplication>
+      <Description>
+        <em:id>songbird@songbirdnest.com</em:id>
+        <em:minVersion>0.5</em:minVersion>
+        <em:maxVersion>0.6pre</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
     <!-- package files -->
     <em:file>
       <Description about="urn:mozilla:extension:file:chatzilla.jar">

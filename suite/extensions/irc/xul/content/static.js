@@ -24,6 +24,7 @@
  *   Robert Ginda, <rginda@netscape.com>, original author
  *   Chiaki Koufugata chiaki@mozilla.gr.jp UI i18n
  *   Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
+ *   James Ross, silver@warwickcompsoc.co.uk
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,11 +40,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.81";
+const __cz_version   = "0.9.82";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.81";
+const __cz_locale    = "0.9.82";
 
 var warn;
 var ASSERT;
@@ -116,6 +117,7 @@ client.incompleteLine = "";
 client.lastTabUp = new Date();
 client.awayMsgs = new Array();
 client.awayMsgCount = 5;
+client.statusMessages = new Array();
 
 CIRCNetwork.prototype.INITIAL_CHANNEL = "";
 CIRCNetwork.prototype.MAX_MESSAGES = 100;
@@ -213,7 +215,10 @@ function init()
     dispatch("help", { hello: true });
     dispatch("networks");
 
+    // Do this after the standard commands are run or we'll log them too!
     initInstrumentation();
+    client.ceip.logEvent({type: "client", event: "start"});
+
     setTimeout("dispatch('focus-input')", 0);
     setTimeout(processStartupURLs, 0);
 }
@@ -309,7 +314,7 @@ function initStatic()
         // Use the XUL host app info, and Gecko build ID.
         if (app.ID == "{" + __cz_guid + "}")
         {
-            // We ARE the app, in other words, we're running in XULrunner.
+            // We ARE the app, in other words, we're running in XULRunner.
             // Because of this, we must disregard app.(name|vendor|version).
             // "XULRunner 1.7+/2005071506"
             ua = "XULRunner " + app.platformVersion + "/" + app.platformBuildID;
@@ -362,6 +367,7 @@ function initStatic()
     client.tabDragMarker = document.getElementById("tabs-drop-indicator");
 
     client.statusElement = document.getElementById("status-text");
+    client.currentStatus = "";
     client.defaultStatus = MSG_DEFAULT_STATUS;
 
     client.progressPanel = document.getElementById("status-progress-panel");
@@ -427,8 +433,8 @@ function initApplicationCompatibility()
                 client.host = "Firefox";
                 break;
             case "{" + __cz_guid + "}":
-                // We ARE the app, in other words, we're running in XULrunner.
-                client.host = "XULrunner";
+                // We ARE the app, in other words, we're running in XULRunner.
+                client.host = "XULRunner";
                 break;
             case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}": // SeaMonkey
                 client.host = "Mozilla";
@@ -438,6 +444,9 @@ function initApplicationCompatibility()
                 break;
             case "{3db10fab-e461-4c80-8b97-957ad5f8ea47}": // Netscape
                 client.host = "Netscape";
+                break;
+            case "songbird@songbirdnest.com": // Songbird
+                client.host = "Songbird";
                 break;
             default:
                 client.unknownUID = app.ID;
@@ -540,100 +549,39 @@ function initIcons()
 
 function initInstrumentation()
 {
-    // Make sure we assign the user a random key - this is not used for
-    // anything except percentage chance of participation.
+    /* Make sure we assign the user a random key - this is not used for
+     * anything except percentage chance of participation. The value is
+     * 1 through 10000, inclusive. 0 indicates unset.
+     */
     if (client.prefs["instrumentation.key"] == 0)
     {
-        var rand = 1 + Math.round(Math.random() * 10000);
+        var rand = 1 + Math.floor(Math.random() * 10000);
         client.prefs["instrumentation.key"] = rand;
     }
 
-    runInstrumentation("inst1");
-}
+    client.ceip = new CEIP();
 
-function runInstrumentation(name, firstRun)
-{
-    if (!/^inst\d+$/.test(name))
-        return;
-
-    // Values:
-    //   0 = not answered question
-    //   1 = allowed inst
-    //   2 = denied inst
-
-    if (client.prefs["instrumentation." + name] == 0)
+    if (!client.prefs["instrumentation.ceip"])
     {
-        // We only want 1% of people to be asked here.
-        if (client.prefs["instrumentation.key"] > 100)
+        /* We only want 1% of people to be asked here. Note: we select the 2nd
+         * percentile so we don't ask the same people we used for the pings.
+         */
+        var key = client.prefs["instrumentation.key"];
+        if ((key <= 100) || (key > 200))
             return;
 
         // User has not seen the info about this system. Show them the info.
-        var cmdYes = "allow-" + name;
-        var cmdNo = "deny-" + name;
-        var btnYes = getMsg(MSG_INST1_COMMAND_YES, cmdYes);
-        var btnNo  = getMsg(MSG_INST1_COMMAND_NO,  cmdNo);
+        var cmdYes = "allow-ceip";
+        var cmdNo = "deny-ceip";
+        var btnYes = getMsg(MSG_CEIP_COMMAND_YES, cmdYes);
+        var btnNo  = getMsg(MSG_CEIP_COMMAND_NO,  cmdNo);
         client.munger.getRule(".inline-buttons").enabled = true;
-        client.display(getMsg("msg." + name + ".msg1", [btnYes, btnNo]));
-        client.display(getMsg("msg." + name + ".msg2", [cmdYes, cmdNo]));
+        client.display(getMsg(MSG_CEIP_MSG1, [btnYes, btnNo]));
+        client.display(getMsg(MSG_CEIP_MSG2, [cmdYes, cmdNo]));
         client.munger.getRule(".inline-buttons").enabled = false;
 
         // Don't hide *client* if we're asking the user about the startup ping.
         client.lockView = true;
-        return;
-    }
-
-    if (client.prefs["instrumentation." + name] != 1)
-        return;
-
-    if (name == "inst1")
-        runInstrumentation1(firstRun);
-}
-
-function runInstrumentation1(firstRun)
-{
-    function inst1onLoad()
-    {
-        if (/OK/.test(req.responseText))
-            client.display(MSG_INST1_MSGRPLY2);
-        else
-            client.display(getMsg(MSG_INST1_MSGRPLY1, MSG_UNKNOWN));
-    };
-
-    function inst1onError()
-    {
-        client.display(getMsg(MSG_INST1_MSGRPLY1, req.statusText));
-    };
-
-    try
-    {
-        const baseURI = "http://silver.warwickcompsoc.co.uk/" +
-                        "mozilla/chatzilla/instrumentation/startup?";
-
-        if (firstRun)
-        {
-            // Do a first-run ping here.
-            var frReq = new XMLHttpRequest();
-            frReq.open("GET", baseURI + "first-run");
-            frReq.send(null);
-        }
-
-        var data = new Array();
-        data.push("ver=" + encodeURIComponent(CIRCServer.prototype.VERSION_RPLY));
-        data.push("host=" + encodeURIComponent(client.hostPlatform));
-        data.push("chost=" + encodeURIComponent(CIRCServer.prototype.HOST_RPLY));
-        data.push("cos=" + encodeURIComponent(CIRCServer.prototype.OS_RPLY));
-
-        var url = baseURI + data.join("&");
-
-        var req = new XMLHttpRequest();
-        req.onload = inst1onLoad;
-        req.onerror = inst1onError;
-        req.open("GET", url);
-        req.send(null);
-    }
-    catch (ex)
-    {
-        client.display(getMsg(MSG_INST1_MSGRPLY1, formatException(ex)));
     }
 }
 
@@ -882,20 +830,68 @@ function destroy()
     destroyPrefs();
 }
 
-function setStatus (str)
+function addStatusMessage(message)
 {
-    client.statusElement.setAttribute ("label", str);
+    const DELAY_SCALE = 100;
+    const DELAY_MINIMUM = 5000;
+
+    var delay = message.length * DELAY_SCALE;
+    if (delay < DELAY_MINIMUM)
+        delay = DELAY_MINIMUM;
+
+    client.statusMessages.push({ message: message, delay: delay });
+    updateStatusMessages();
+}
+
+function updateStatusMessages()
+{
+    if (client.statusMessages.length == 0)
+    {
+        var status = client.currentStatus || client.defaultStatus;
+        client.statusElement.setAttribute("label", status);
+        client.statusElement.removeAttribute("notice");
+        return;
+    }
+
+    var now = Number(new Date());
+    var currentMsg = client.statusMessages[0];
+    if ("expires" in currentMsg)
+    {
+        if (now >= currentMsg.expires)
+        {
+            client.statusMessages.shift();
+            setTimeout(updateStatusMessages, 0);
+        }
+        else
+        {
+            setTimeout(updateStatusMessages, 1000);
+        }
+    }
+    else
+    {
+        currentMsg.expires = now + currentMsg.delay;
+        client.statusElement.setAttribute("label", currentMsg.message);
+        client.statusElement.setAttribute("notice", "true");
+        setTimeout(updateStatusMessages, currentMsg.delay);
+    }
+}
+
+
+function setStatus(str)
+{
+    client.currentStatus = str;
+    updateStatusMessages();
     return str;
 }
 
-client.__defineSetter__ ("status", setStatus);
+client.__defineSetter__("status", setStatus);
 
-function getStatus ()
+function getStatus()
 {
-    return client.statusElement.getAttribute ("label");
+    return client.currentStatus;
 }
 
-client.__defineGetter__ ("status", getStatus);
+client.__defineGetter__("status", getStatus);
 
 function isVisible (id)
 {
@@ -2054,7 +2050,7 @@ function initOfflineIcon()
                                      "nsIPrefBranch");
             // Let the app-specific hacks begin:
             try {
-                if (client.host == "XULrunner")
+                if (client.host == "XULRunner")
                     isOffline = !prefSvc.getBoolPref("network.online");
                 else // Toolkit based, but not standalone
                     isOffline = prefSvc.getBoolPref("browser.offline");
@@ -2075,7 +2071,7 @@ function initOfflineIcon()
                                      "nsIPrefBranch");
             // Let the app-specific hacks begin:
             try {
-                if (client.host == "XULrunner")
+                if (client.host == "XULRunner")
                     prefSvc.setBoolPref("network.online", !isOffline);
                 else // Toolkit based, but not standalone
                     prefSvc.setBoolPref("browser.offline", isOffline);
@@ -3720,18 +3716,18 @@ function cli_load(url, scope)
 }
 
 client.sayToCurrentTarget =
-function cli_say(msg)
+function cli_say(msg, isInteractive)
 {
     if ("say" in client.currentObject)
     {
-        client.currentObject.dispatch("say", {message: msg});
+        client.currentObject.dispatch("say", {message: msg}, isInteractive);
         return;
     }
 
     switch (client.currentObject.TYPE)
     {
         case "IRCClient":
-            dispatch("eval", {expression: msg});
+            dispatch("eval", {expression: msg}, isInteractive);
             break;
 
         default:
@@ -3871,6 +3867,42 @@ CIRCDCCFileTransfer.prototype.__defineGetter__("prefManager", dccfile_getprefmgr
 function dccfile_getprefmgr()
 {
     return this.user.prefManager;
+}
+
+// This is a copy of the splitting done in CIRCServer.prototype.messageTo
+// Please keep this in mind when editing:
+CIRCServer.prototype.splitLinesForSending =
+function my_splitlinesforsending(line)
+{
+    var lines = line.split("\n");
+    var realLines = new Array();
+    for (var i = 0; i < lines.length; i++)
+    {
+        if (lines[i])
+        {
+            while (lines[i].length > this.maxLineLength)
+            {
+                var extraLine = lines[i].substr(0, this.maxLineLength - 5);
+                var pos = extraLine.lastIndexOf(" ");
+
+                if ((pos >= 0) && (pos >= this.maxLineLength - 15))
+                {
+                    // Smart-split.
+                    extraLine = lines[i].substr(0, pos) + "...";
+                    lines[i] = "..." + lines[i].substr(extraLine.length - 2);
+                }
+                else
+                {
+                    // Dump-split.
+                    extraLine = lines[i].substr(0, this.maxLineLength);
+                    lines[i] = lines[i].substr(extraLine.length);
+                }
+                realLines.push(extraLine);
+            }
+            realLines.push(lines[i]);
+        }
+    }
+    return realLines;
 }
 
 CIRCNetwork.prototype.display =

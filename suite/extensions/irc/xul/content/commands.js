@@ -23,6 +23,7 @@
  * Contributor(s):
  *   Robert Ginda, <rginda@netscape.com>, original author
  *   Chiaki Koufugata, chiaki@mozilla.gr.jp, UI i18n
+ *   James Ross, silver@warwickcompsoc.co.uk
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -92,6 +93,7 @@ function initCommands()
          ["dehop",             cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
          ["voice",             cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
          ["devoice",           cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
+         ["ceip",              cmdCEIP,                            CMD_CONSOLE],
          ["clear-view",        cmdClearView,                       CMD_CONSOLE],
          ["client",            cmdClient,                          CMD_CONSOLE],
          ["commands",          cmdCommands,                        CMD_CONSOLE],
@@ -254,8 +256,8 @@ function initCommands()
          ["irtl",             "input-text-direction rtl",          CMD_CONSOLE],
          ["iltr",             "input-text-direction ltr",          CMD_CONSOLE],
          // Instrumentation aliases
-         ["allow-inst1",      "pref instrumentation.inst1 1",                0],
-         ["deny-inst1",       "pref instrumentation.inst1 2",                0],
+         ["allow-ceip",       "ceip on; ceip",                               0],
+         ["deny-ceip",        "ceip off",                                    0],
          // Services aliases
          ["cs",               "quote cs",                                    0],
          ["ms",               "quote ms",                                    0],
@@ -1016,15 +1018,26 @@ function cmdChanUserMode(e)
 
     var nicks;
     var user;
-    // Prefer pre-canonicalised list, then a normal list, then finally a
-    // sigular item (canon. or otherwise).
+    var nickList = new Array();
+    // Prefer pre-canonicalised list, then a * passed to the command directly,
+    // then a normal list, then finally a singular item (canon. or otherwise).
     if (e.canonNickList)
     {
         nicks = combineNicks(e.canonNickList);
     }
+    else if (e.nickname && (e.nickname == "*"))
+    {
+        var me = e.server.me;
+        for (user in e.channel.users)
+        {
+            var user2 = e.channel.users[user];
+            if (user2.encodedName != me.encodedName)
+                nickList.push(user2.encodedName);
+        }
+        nicks = combineNicks(nickList);
+    }
     else if (e.nicknameList)
     {
-        var nickList = new Array();
         for (i = 0; i < e.nicknameList.length; i++)
         {
             user = e.channel.getUser(e.nicknameList[i]);
@@ -1915,21 +1928,13 @@ function cmdMe(e)
         display(getMsg(MSG_ERR_IMPROPER_VIEW, "me"), MT_ERROR);
         return;
     }
-
-    var msg = filterOutput(e.action, "ACTION", e.sourceObject);
-    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
-    e.sourceObject.display(msg, "ACTION", "ME!", e.sourceObject);
-    client.munger.getRule(".mailto").enabled = false;
-    e.sourceObject.act(msg);
+    _sendMsgTo(e.action, "ACTION", e.sourceObject);
 }
 
 function cmdDescribe(e)
 {
     var target = e.server.addTarget(e.target);
-
-    var msg = filterOutput(e.action, "ACTION", target);
-    e.sourceObject.display(msg, "ACTION", "ME!", target);
-    target.act(msg);
+    _sendMsgTo(e.action, "ACTION", target, e.sourceObject);
 }
 
 function cmdMode(e)
@@ -2139,11 +2144,7 @@ function cmdQuery(e)
     dispatch("set-current-view", { view: user });
 
     if (e.message)
-    {
-        e.message = filterOutput(e.message, "PRIVMSG", user);
-        user.display(e.message, "PRIVMSG", "ME!", user);
-        user.say(e.message);
-    }
+        _sendMsgTo(e.message, "PRIVMSG", user);
 
     return user;
 }
@@ -2156,22 +2157,38 @@ function cmdSay(e)
         return;
     }
 
-    var msg = filterOutput(e.message, "PRIVMSG", e.sourceObject);
-    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
-    e.sourceObject.display(msg, "PRIVMSG", "ME!", e.sourceObject);
-    client.munger.getRule(".mailto").enabled = false;
-    e.sourceObject.say(msg);
+    _sendMsgTo(e.message, "PRIVMSG", e.sourceObject)
 }
 
 function cmdMsg(e)
 {
     var target = e.server.addTarget(e.nickname);
+    _sendMsgTo(e.message, "PRIVMSG", target, e.sourceObject);
+}
 
-    var msg = filterOutput(e.message, "PRIVMSG", target);
-    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
-    e.sourceObject.display(msg, "PRIVMSG", "ME!", target);
-    client.munger.getRule(".mailto").enabled = false;
-    target.say(msg);
+function _sendMsgTo(message, msgType, target, displayObj)
+{
+    if (!displayObj)
+        displayObj = target;
+
+    var msg = filterOutput(message, msgType, target);
+
+    var o = getObjectDetails(target);
+    var lines = o.server.splitLinesForSending(msg);
+
+    for (var i = 0; i < lines.length; i++)
+    {
+        msg = lines[i];
+        client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
+        displayObj.display(msg, msgType, "ME!", target);
+        client.munger.getRule(".mailto").enabled = false;
+        if (msgType == "PRIVMSG")
+            target.say(msg);
+        else if (msgType == "NOTICE")
+            target.notice(msg);
+        else if (msgType == "ACTION")
+            target.act(msg);
+    }
 }
 
 function cmdNick(e)
@@ -2189,15 +2206,26 @@ function cmdNick(e)
         e.nickname = prompt(MSG_NICK_PROMPT, curNick);
         if (e.nickname == null)
             return;
+        e.nickname = e.nickname.replace(/ /g, "_");
     }
 
-    if (e.server)
+    if (e.server && e.server.isConnected)
         e.server.changeNick(e.nickname);
 
     if (e.network)
     {
-        e.network.prefs["nickname"] = e.nickname;
-        e.network.preferredNick = e.nickname;
+        /* We want to save in all non-online cases, including NET_CONNECTING,
+         * as we will only get a NICK reply if we are completely connected.
+         */
+        if (e.network.state == NET_ONLINE)
+        {
+            e.network.pendingNickChange = e.nickname;
+        }
+        else
+        {
+            e.network.prefs["nickname"] = e.nickname;
+            e.network.preferredNick = e.nickname;
+        }
     }
     else
     {
@@ -2209,12 +2237,7 @@ function cmdNick(e)
 function cmdNotice(e)
 {
     var target = e.server.addTarget(e.nickname);
-
-    var msg = filterOutput(e.message, "NOTICE", target);
-    client.munger.getRule(".mailto").enabled = client.prefs["munger.mailto"];
-    e.sourceObject.display(msg, "NOTICE", "ME!", target);
-    client.munger.getRule(".mailto").enabled = false;
-    target.notice(msg);
+    _sendMsgTo(e.message, "NOTICE", target, e.sourceObject);
 }
 
 function cmdQuote(e)
@@ -2303,7 +2326,7 @@ function cmdGotoURL(e)
         return;
     }
 
-    if ((e.command.name == "goto-url-external") || (client.host == "XULrunner"))
+    if ((e.command.name == "goto-url-external") || (client.host == "XULRunner"))
     {
         const extProtoSvc = getService(EXT_PROTO_SVC,
                                        "nsIExternalProtocolService");
@@ -2312,7 +2335,10 @@ function cmdGotoURL(e)
         return;
     }
 
-    var window = getWindowByType("navigator:browser");
+    if (client.host == "Songbird")
+        var window = getWindowByType("Songbird:Main");
+    else
+        window = getWindowByType("navigator:browser");
 
     if (!window)
     {
@@ -2952,6 +2978,39 @@ function cmdAway(e)
             else if (!client.getConnectedNetworks())
                 display(MSG_AWAY_OFF);
         }
+    }
+}
+
+function cmdCEIP(e)
+{
+    const INST_URL = "chrome://chatzilla/content/ceip/config.xul";
+    const INST_OPT = "chrome,resizable=no,dialog=no";
+
+    if (e.state != null)
+    {
+        // Stop us from ever asking the user about this now.
+        client.prefs["instrumentation.ceip"] = true;
+        // We have a state, so set all options accordingly.
+        var prefs = client.prefManager.listPrefs("ceip.");
+        for (var i = 0; i < prefs.length; i++)
+        {
+            if (typeof client.prefs[prefs[i]] == "boolean")
+                client.prefs[prefs[i]] = e.state;
+        }
+        if (e.state)
+            feedback(e, MSG_CEIP_ENABLED);
+        else
+            feedback(e, MSG_CEIP_DISABLED);
+    }
+    else if (client.ceip.dialog)
+    {
+        // No state, so show the existing dialog.
+        client.ceip.dialog.focus();
+    }
+    else
+    {
+        // No existing dialog either, create the dialog.
+        window.openDialog(INST_URL, "", INST_OPT, window);
     }
 }
 

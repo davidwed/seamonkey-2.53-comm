@@ -79,7 +79,7 @@ function initMenus()
         params.sourceWindow = window;
         params.source = "menu";
 
-        dispatch(commandName, params);
+        dispatch(commandName, params, true);
 
         delete client.menuManager.cx;
     };
@@ -113,7 +113,7 @@ function initMenus()
     var Mozilla    = "(client.host == 'Mozilla')";
     var NotMozilla = "(client.host != 'Mozilla')";
     var Toolkit    = NotMozilla;
-    var XULRunner  = "(client.host == 'XULrunner')";
+    var XULRunner  = "(client.host == 'XULRunner')";
 
     // Useful combinations
     var ToolkitOnLinux    = "(" + Toolkit + " and " + Linux + ")";
@@ -264,6 +264,7 @@ function initMenus()
          ["homepage"],
          ["faq"],
          ["-"],
+         ["ceip"],
          ["about"]
         ]
     };
@@ -330,7 +331,7 @@ function initMenus()
         label: MSG_MNU_USERCOMMANDS,
         items:
         [
-         ["query",    {visibleif: "cx.user"}],
+         ["query",    {visibleif: "cx.channel && cx.user"}],
          ["whois",    {visibleif: "cx.user"}],
          ["whowas",   {visibleif: "cx.nickname && !cx.user"}],
          ["ping",     {visibleif: "cx.user"}],
@@ -377,11 +378,11 @@ function initMenus()
          ["cmd-copy-link-url", {visibleif: urlenabled}],
          ["cmd-copy", {visibleif: "!" + urlenabled, enabledif: textselected }],
          ["cmd-selectall", {visibleif: "!" + urlenabled }],
-         ["-", {visibleif: "cx.channel && cx.nickname"}],
-         ["label-user", {visibleif: "cx.channel && cx.nickname", header: true}],
+         ["-", {visibleif: "cx.nickname"}],
+         ["label-user", {visibleif: "cx.nickname", header: true}],
          [">popup:opcommands", {visibleif: "cx.channel && cx.nickname",
                                 enabledif: isopish + "cx.user"}],
-         [">popup:usercommands", {visibleif: "cx.channel && cx.nickname"}],
+         [">popup:usercommands", {visibleif: "cx.nickname"}],
          ["-"],
          ["clear-view"],
          ["hide-view", {enabledif: "client.viewsArray.length > 1"}],
@@ -471,7 +472,7 @@ function createMenus()
         comBar.collapsed = false;
     }
 
-    if (client.host == "XULrunner")
+    if (client.host == "XULRunner")
     {
         // This is a hack to work around Gecko bug 98997, which means that
         // :empty causes menus to be hidden until we force a reflow.
