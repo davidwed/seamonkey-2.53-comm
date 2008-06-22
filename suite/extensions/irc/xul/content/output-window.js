@@ -66,7 +66,7 @@ var headers = {
     IRCChannel: {
         prefix: "ch-",
         fields: ["container", "url-anchor", "modestr", "usercount",
-                 "topicnodes", "topicinput"],
+                 "topicnodes", "topicinput", "topiccancel"],
         update: updateChannel
     },
 
@@ -125,10 +125,14 @@ function stock_initOutputWindow(newClient, newView, newClickHandler)
         {
             var msg = nodes[i].getAttribute("localize");
             msg = getMsg("msg." + msg);
-            nodes[i].appendChild(document.createTextNode(msg));
+            if (nodes[i].nodeName.toLowerCase() == "input")
+                nodes[i].value = msg;
+            else
+                nodes[i].appendChild(document.createTextNode(msg));
         }
     }
 
+    changeCSS("chrome://chatzilla/content/output-base.css", "cz-css-base");
     changeCSS(view.prefs["motif.current"]);
     updateMotifSettings();
 
@@ -182,10 +186,12 @@ function onTopicKeypress(e)
             var topic = header["topicinput"].value;
             topic = mainWindow.replaceColorCodes(topic);
             view.setTopic(topic);
+            cancelTopicEdit(true);
             view.dispatch("focus-input");
             break;
             
         case 27: /* esc */
+            cancelTopicEdit(true);
             view.dispatch("focus-input");
             break;
             
@@ -202,21 +208,27 @@ function startTopicEdit()
     {
         return;
     }
-    
+
     header["topicinput"].value = mainWindow.decodeColorCodes(view.topic);
 
     header["topicnodes"].setAttribute("hidden", "true")
     header["topicinput"].removeAttribute("hidden");
+    header["topiccancel"].removeAttribute("hidden");
     header["topicinput"].focus();
     header["topicinput"].selectionStart = 0;
 }
 
-function cancelTopicEdit()
+function cancelTopicEdit(force)
 {
-    if (!header["topicnodes"].hasAttribute("hidden"))
+    var originalTopic = mainWindow.decodeColorCodes(view.topic);
+    if (!header["topicnodes"].hasAttribute("hidden") ||
+        (!force && (header["topicinput"].value != originalTopic)))
+    {
         return;
-    
-    header["topicinput"].setAttribute("hidden", "true")
+    }
+
+    header["topicinput"].setAttribute("hidden", "true");
+    header["topiccancel"].setAttribute("hidden", "true");
     header["topicnodes"].removeAttribute("hidden");
 }
 
@@ -255,6 +267,77 @@ function changeCSS(url, id)
 
     node.setAttribute("href", url);
     window.scrollTo(0, window.document.height);
+}
+
+function scrollToElement(element, position)
+{
+    /* The following values can be used for element:
+     *   selection       - current selected text.
+     *   marker          - the activity marker.
+     *   [any DOM node]  - anything :)
+     *
+     * The following values can be used for position:
+     *   top             - scroll so it is at the top.
+     *   center          - scroll so it is in the middle.
+     *   bottom          - scroll so it is at the bottom.
+     *   inview          - scroll so it is in view.
+     */
+    switch (element)
+    {
+        case "selection":
+            var sel = window.getSelection();
+            if (sel)
+                element = sel.anchorNode;
+            else
+                element = null;
+            break;
+
+        case "marker":
+            if ("getActivityMarker" in view)
+                element = view.getActivityMarker().marker;
+            else
+                element = null;
+            break;
+    }
+    if (!element)
+        return;
+
+    // Calculate element's position in document.
+    var pos = { top: 0, center: 0, bottom: 0 };
+    // Find first parent with offset data.
+    while (element && !("offsetParent" in element))
+        element = element.parentNode;
+    var elt = element;
+    // Calc total offset data.
+    while (elt)
+    {
+        pos.top += 0 + elt.offsetTop;
+        elt = elt.offsetParent;
+    }
+    pos.center = pos.top + element.offsetHeight / 2;
+    pos.bottom = pos.top + element.offsetHeight;
+
+    // Store the positions to align the element with.
+    var cont = { top: 0, center: window.innerHeight / 2,
+                 bottom: window.innerHeight };
+    if (!hasAttribute("container", "hidden"))
+    {
+        cont.top    += header["container"].offsetHeight;
+        cont.center += header["container"].offsetHeight / 2;
+    }
+
+    // Pick between 'top' and 'bottom' for 'inview' position.
+    if (position == "inview")
+    {
+        if (pos.top - window.scrollY < cont.top)
+            position = "top";
+        else if (pos.bottom - window.scrollY > cont.bottom)
+            position = "bottom";
+        else
+            return;
+    }
+
+    window.scrollTo(0, pos[position] - cont[position]);
 }
 
 function updateMotifSettings(existingTimeout)

@@ -279,7 +279,7 @@ function insertChannelLink(matchText, containerTag, eventData, mungerEntry)
     }
 
     var bogusChannels =
-        /^#(include|error|define|if|ifdef|else|elsif|endif|\d+)$/i;
+        /^#(include|error|define|if|ifdef|else|elsif|endif)$/i;
 
     if (!("network" in eventData) || !eventData.network ||
         matchText.search(bogusChannels) != -1)
@@ -656,15 +656,10 @@ function insertHyphenatedWord(longWord, containerTag, data)
     if (data && ("hasColorInfo" in data))
         newClass = calcClass(data);
 
+    var wbr = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                       "html:wbr");
     for (var i = 0; i < wordParts.length; ++i)
     {
-        if (i > 0)
-        {
-            var wbr = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                               "html:wbr");
-            containerTag.appendChild(wbr);
-        }
-
         if (newClass)
         {
             var newTag = document.createElementNS(NS_XHTML, "html:span");
@@ -677,6 +672,7 @@ function insertHyphenatedWord(longWord, containerTag, data)
             delete data.hasColorInfo;
             containerTag.appendChild(document.createTextNode(wordParts[i]));
         }
+        containerTag.appendChild(wbr.cloneNode(true));
     }
 }
 

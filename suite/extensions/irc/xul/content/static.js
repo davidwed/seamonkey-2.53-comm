@@ -40,11 +40,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.82.1";
+const __cz_version   = "0.9.83";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.82";
+const __cz_locale    = "0.9.83";
 
 var warn;
 var ASSERT;
@@ -192,6 +192,7 @@ function init()
     importFromFrame("updateHeader");
     importFromFrame("setHeaderState");
     importFromFrame("changeCSS");
+    importFromFrame("scrollToElement");
     importFromFrame("updateMotifSettings");
     importFromFrame("addUsers");
     importFromFrame("updateUsers");
@@ -393,7 +394,7 @@ function initStatic()
                 // If the first item is an array, it is the entire thing.
                 client.awayMsgs = item;
             }
-            else
+            else if (item != null)
             {
                 /* Not an array, so we have the old format of a single object
                  * per entry.
@@ -403,6 +404,19 @@ function initStatic()
                     client.awayMsgs.push(item);
             }
             awayLoader.close();
+
+            /* we have to close the file before we can move it,
+             * hence the second if statement */
+            if (item == null)
+            {
+                var invalidFile = new nsLocalFile(client.prefs["profilePath"]);
+                invalidFile.append("awayMsgs.invalid");
+                invalidFile.createUnique(FTYPE_FILE, 0600);
+                var msg = getMsg(MSG_ERR_INVALID_FILE,
+                                 [awayFile.leafName, invalidFile.leafName]);
+                setTimeout("client.display(" + msg.quote() + ", MT_WARN)", 0);
+                awayFile.moveTo(null, invalidFile.leafName);
+            }
         }
     }
 
@@ -3292,6 +3306,10 @@ function ul_getcellprops(index, column, properties)
         return;
     }
 
+    // See bug 432482 - work around Gecko deficiency.
+    if (!this.selection.isSelected(index))
+        properties.AppendElement(client.atomSvc.getAtom("unselected"));
+
     var userObj = this.childData.childData[index]._userObj;
 
     properties.AppendElement(client.atomSvc.getAtom("voice-" + userObj.isVoice));
@@ -4078,9 +4096,6 @@ function __display(message, msgtype, sourceObj, destObj)
         else
             fromAttr = sourceObj.viewName;
     }
-    // Attach "ME!" if appropriate, so motifs can style differently.
-    if (sourceObj == me)
-        fromAttr = fromAttr + " ME!";
 
     // Get the dest TYPE too...
     var toType = (destObj) ? destObj.TYPE : "unk";
@@ -4097,7 +4112,14 @@ function __display(message, msgtype, sourceObj, destObj)
         else
             toAttr = destObj.viewName;
     }
-    // Also do "ME!" work for the dest.
+        
+    // Is the message 'to' or 'from' somewhere other than this view
+    var toOther = ((sourceObj == me) && destObj && (destObj != this));
+    var fromOther = (toUser && (destObj == me) && (sourceObj != this));
+
+    // Attach "ME!" if appropriate, so motifs can style differently.
+    if ((sourceObj == me) && !toOther)
+        fromAttr = fromAttr + " ME!";
     if (destObj && destObj == me)
         toAttr = me.unicodeName + " ME!";
 
@@ -4151,6 +4173,10 @@ function __display(message, msgtype, sourceObj, destObj)
         else
             msgRow.setAttribute("msg-source", fromAttr);
     }
+    if (toOther)
+        msgRow.setAttribute("to-other", toOther);
+    if (fromOther)
+        msgRow.setAttribute("from-other", fromOther);
 
     // Timestamp cell.
     var msgRowTimestamp = document.createElementNS(XHTML_NS, "html:td");
@@ -4178,6 +4204,8 @@ function __display(message, msgtype, sourceObj, destObj)
         var nickURL;
         if ((sourceObj != me) && ("getURL" in sourceObj))
             nickURL = sourceObj.getURL();
+        if (toOther && ("getURL" in destObj))
+            nickURL = destObj.getURL();
 
         if (sourceObj != me)
         {
@@ -4214,8 +4242,8 @@ function __display(message, msgtype, sourceObj, destObj)
         }
         else
         {
-            // Messages from us, on a channel or network view, to a user
-            if (toUser && (this.TYPE != "IRCUser"))
+            // Messages from us, to somewhere other than this view
+            if (toOther)
             {
                 nick = destObj.unicodeName;
                 decorSt = ">";
@@ -4334,6 +4362,11 @@ function __display(message, msgtype, sourceObj, destObj)
 
     if (isImportant)
     {
+        if ("importantMessages" in this)
+        {
+            var importantId = "important" + (this.importantMessages++);
+            msgRow.setAttribute("id", importantId);
+        }
         msgRow.setAttribute("important", "true");
         msgRow.setAttribute("aria-channel", "notify");
     }
@@ -4397,8 +4430,16 @@ function __display(message, msgtype, sourceObj, destObj)
     // Copy Important Messages [to network view].
     if (isImportant && client.prefs["copyMessages"] && (o.network != this))
     {
-        o.network.displayHere("{" + this.unicodeName + "} " + message, msgtype,
-                              sourceObj, destObj);
+        if (importantId)
+        {
+            var channel = this.unicodeName;
+            var cmd = "jump-to-anchor " + importantId + " " + channel;
+            var prefix = getMsg(MSG_JUMPTO_BUTTON, [channel, cmd]);
+            message = prefix + " " + message;
+        }
+        client.munger.getRule(".inline-buttons").enabled = true;
+        o.network.displayHere(message, msgtype, sourceObj, destObj);
+        client.munger.getRule(".inline-buttons").enabled = false;
     }
 
     // Log file time!

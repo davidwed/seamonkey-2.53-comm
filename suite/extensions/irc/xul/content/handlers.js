@@ -178,7 +178,7 @@ function onTabClick(e, id)
 
     if (e.which == 2)
     {
-        dispatch("hide", { view: view.source });
+        dispatch("hide", { view: view.source, source: "mouse" });
         return;
     }
 }
@@ -205,6 +205,7 @@ function onMessageViewClick(e)
         return true;
 
     var cx = getMessagesContext(null, e.target);
+    cx.source = "mouse";
     var command = getEventCommand(e);
     if (!client.commandManager.isCommandSatisfied(cx, command))
         return false;
@@ -294,6 +295,8 @@ function onMultilineSend(e)
         return;
     onInputCompleteLine (e);
     multiline.value = "";
+    if (("multiLineForPaste" in client) && client.multiLineForPaste)
+        client.prefs["multiline"] = false;
 }
 
 function onTooltip(event)
@@ -820,7 +823,7 @@ function onUserDoubleClick(event)
     if (currentIndex < 0)
         return;
     var nickname = getNicknameForUserlistRow(currentIndex);
-    dispatch("query", {nickname: nickname});
+    dispatch("query", {nickname: nickname, source: "mouse"});
 }
 
 CIRCChannel.prototype._updateConferenceMode =
@@ -2299,6 +2302,7 @@ function chan_oninit ()
 {
     this.logFile = null;
     this.pendingNamesReply = false;
+    this.importantMessages = 0;
 }
 
 CIRCChannel.prototype.onPrivmsg =
@@ -2546,15 +2550,16 @@ function my_cjoin (e)
 }
 
 CIRCChannel.prototype.onPart =
-function my_cpart (e)
+function my_cpart(e)
 {
     this.removeUsers([e.user]);
     this.updateHeader();
 
-    if (userIsMe (e.user))
+    if (userIsMe(e.user))
     {
-        var params = [e.user.unicodeName, e.channel.unicodeName];
-        this.display (getMsg(MSG_YOU_LEFT, params), "PART", e.user, this);
+        var msg = e.reason ? MSG_YOU_LEFT_REASON : MSG_YOU_LEFT;
+        var params = [e.user.unicodeName, e.channel.unicodeName, e.reason];
+        this.display(getMsg(msg, params), "PART", e.user, this);
         this._clearUserList();
 
         if ("partTimer" in this)
@@ -2579,13 +2584,9 @@ function my_cpart (e)
 
         if (!this.prefs["conference.enabled"])
         {
-            var msg = MSG_SOMEONE_LEFT;
-            if (e.reason)
-                msg = MSG_SOMEONE_LEFT_REASON;
-
-            this.display(getMsg(msg, [e.user.unicodeName, e.channel.unicodeName,
-                                      e.reason]),
-                         "PART", e.user, this);
+            var msg = e.reason ? MSG_SOMEONE_LEFT_REASON : MSG_SOMEONE_LEFT;
+            var params = [e.user.unicodeName, e.channel.unicodeName, e.reason];
+            this.display(getMsg(msg, params), "PART", e.user, this);
         }
 
         this.removeFromList(e.user);
@@ -3236,6 +3237,9 @@ function phand_onpaste(e, data)
     str = client.input.value.substr(0, client.input.selectionStart) +
           str.value.data + client.input.value.substr(client.input.selectionEnd);
     client.prefs["multiline"] = true;
+    // We want to auto-collapse after send, so the user is not thrown off by the
+    // "strange" input box if they didn't specifically ask for it:
+    client.multiLineForPaste = true;
     client.input.value = str;
     return false;
 }

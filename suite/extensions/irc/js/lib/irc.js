@@ -2374,7 +2374,7 @@ function serv_notice (e)
         e.replyTo = e.user; /* send replies to the user who sent the message */
     }
 
-    if (e.params[2].search (/\x01.*\x01/i) != -1)
+    if (e.params[2].search (/^\x01[^ ]+.*\x01$/) != -1)
     {
         e.type = "ctcp-reply";
         e.destMethod = "onCTCPReply";
@@ -2431,7 +2431,7 @@ function serv_privmsg (e)
         e.replyTo = e.user; /* send replys to the user who sent the message */
     }
 
-    if (e.params[2].search (/\x01.*\x01/i) != -1)
+    if (e.params[2].search (/^\x01[^ ]+.*\x01$/) != -1)
     {
         e.type = "ctcp";
         e.destMethod = "onCTCP";
@@ -3727,7 +3727,7 @@ function constructIRCURL(obj)
             dd("parseIRCObject: invalid characters in channel/nick name");
             return null;
         }
-        url += ecmaEscape(obj.target.replace(/\//g, "%2f"));
+        url += ecmaEscape(obj.target).replace(/\//g, "%2f");
     }
 
     return url + flags + parseFlags(obj) + parseQuery(obj);
