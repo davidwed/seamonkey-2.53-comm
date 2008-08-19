@@ -37,11 +37,11 @@
 #endif
    - ***** END LICENSE BLOCK ***** -->
 <!ENTITY jsCopyValue.label "Копировать значение">
-<!ENTITY jsEval.label "Выполнить JavaScript…">
+<!ENTITY jsEval.label "Вычислить JavaScript…">
 <!ENTITY jsProperty.label "Свойство">
 <!ENTITY jsValue.label "Значение">
-<!ENTITY evaluateDialog.title "Выполнить выражение">
-<!ENTITY jsEval.desc "Введите выражение JavaScript. Переменная «target» - выбранное в данный момент свойство. Любое возвращаемое значение будет отображено в области просмотра JavaScript.">
+<!ENTITY evaluateDialog.title "Вычислить выражение">
+<!ENTITY jsEval.desc "Введите выражение JavaScript. Переменная «target» — выбранное в данный момент свойство. Любое возвращаемое значение будет отображено в области просмотра JavaScript.">
 <!ENTITY jsExecute.label "Выполнить">
 <!ENTITY inspectReturn.label "Исследовать результаты в">
 <!ENTITY inspectReturnNew.label "Новом окне">

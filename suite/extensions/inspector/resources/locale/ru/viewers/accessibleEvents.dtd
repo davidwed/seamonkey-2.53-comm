@@ -20,6 +20,7 @@
    -
    - Contributor(s):
    -   Alexander Surkov <surkov.alexander@gmail.com>
+   -   Alexander L. Slovesnik <unghost@mozilla-russia.org> (Russian translation)
    -
    - Alternatively, the contents of this file may be used under the terms of
    - either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,9 +35,7 @@
    - the terms of any one of the MPL, the GPL or the LGPL.
    -
    - ***** END LICENSE BLOCK ***** -->
-
 <!ENTITY eventType.label "Тип события">
 <!ENTITY eventTime.label "Время">
 <!ENTITY eventNodeName.label "Имя узла">
 <!ENTITY clearEventList.label "Очистить список событий">
-

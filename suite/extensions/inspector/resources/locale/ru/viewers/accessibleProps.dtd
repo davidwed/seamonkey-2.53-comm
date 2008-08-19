@@ -43,3 +43,4 @@
 <!ENTITY descValue.label "Значение:">
 <!ENTITY descState.label "Состояние:">
 <!ENTITY descActionName.label "Имя действия:">
+<!ENTITY descBounds.label "Границы:">
