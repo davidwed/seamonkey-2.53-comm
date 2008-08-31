@@ -20,6 +20,7 @@
    - the Initial Developer. All Rights Reserved.
    -
    - Contributor(s):
+   -    Karsten Düsterloh <mnyromy@tprac.de>
    -
    - Alternatively, the contents of this file may be used under the terms of
    - either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,10 +39,15 @@
 
 <!ENTITY bindingContent.label      "Inhalt">
 <!ENTITY bindingMethods.label      "Methoden">
+<!ENTITY bindingMethodName.label   "Methodenname">
 <!ENTITY bindingProperties.label   "Eigenschaften">
 <!ENTITY bindingGetter.label       "Getter">
 <!ENTITY bindingSetter.label       "Setter">
 <!ENTITY bindingProperty.label     "Eigenschaft">
 <!ENTITY bindingHandlers.label     "Handler">
+<!ENTITY bindingHandlerEvent.label "Ereignis">
+<!ENTITY bindingHandlerPhase.label "Phase">
 <!ENTITY bindingResources.label    "Resourcen">
+<!ENTITY bindingResourceType.label "Typ">
+<!ENTITY bindingResourceSrc.label  "Quelle">
 <!ENTITY bindingSourceCode.label   "Quellcode">

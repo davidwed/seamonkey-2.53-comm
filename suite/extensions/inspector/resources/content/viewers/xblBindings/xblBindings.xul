@@ -43,7 +43,7 @@
             contextmenu="ppDOMContext"
             onselect="viewer.onMethodSelected()">
         <treecols>
-          <treecol id="olcMethodName" flex="1"/>
+          <treecol id="olcMethodName" label="&bindingMethodName.label;" flex="1"/>
         </treecols>
         <treechildren id="olbMethods"
                       alternatingbackground="true"
@@ -79,8 +79,9 @@
             contextmenu="ppDOMContext"
             onselect="viewer.onHandlerSelected()">
         <treecols>
-          <treecol id="olcHandlerEvent" flex="1"/>
-          <treecol id="olcHandlerPhase"/>
+          <treecol id="olcHandlerEvent" label="&bindingHandlerEvent.label;" flex="1"/>
+          <splitter class="tree-splitter"/>
+          <treecol id="olcHandlerPhase" label="&bindingHandlerPhase.label;"/>
         </treecols>
         <treechildren id="olbHandlers"
                       alternatingbackground="true"
@@ -94,8 +95,9 @@
             class="tree-list plain"
             flex="1">
         <treecols>
-          <treecol id="olcResourceType" flex="1"/>
-          <treecol id="olcResourceSrc" flex="2"/>
+          <treecol id="olcResourceType" label="&bindingResourceType.label;" flex="1"/>
+          <splitter class="tree-splitter"/>
+          <treecol id="olcResourceSrc" label="&bindingResourceSrc.label;" flex="2"/>
         </treecols>
         <treechildren id="olbResources"
                       alternatingbackground="true"
