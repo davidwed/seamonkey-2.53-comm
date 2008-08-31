@@ -16,7 +16,7 @@
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>  
 
-  <tree id="olStyleSheets" class="plain" flex="1"
+  <tree id="olStyleSheets" class="plain" treelines="true" flex="1"
             onselect="viewer.onItemSelected()">
     <treecols>
       <treecol id="olcHref" label="&styleLocation.label;" primary="true" persist="width,hidden,ordinal" flex="1"/>

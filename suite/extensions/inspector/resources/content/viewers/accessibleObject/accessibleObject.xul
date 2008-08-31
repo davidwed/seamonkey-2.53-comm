@@ -49,5 +49,5 @@
   <commandset id="cmdsJSObjectViewer"/>
 
   <popup id="popupContext"/>
-  <tree id="treeJSObject"/>
+  <tree id="treeJSObject" treelines="true"/>
 </page>

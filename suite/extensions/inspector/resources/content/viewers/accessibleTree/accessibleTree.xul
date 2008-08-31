@@ -69,7 +69,7 @@
     <menuitem label="&evaluateJS.label;" observes="cmdEvalJS"/>
   </popup>
 
-  <tree id="olAccessibleTree" class="plain" flex="1"
+  <tree id="olAccessibleTree" class="plain" treelines="true" flex="1"
         onselect="viewer.onItemSelected()"
         context="popupContext">
     <treecols>
