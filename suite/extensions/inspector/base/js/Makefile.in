@@ -42,9 +42,7 @@ VPATH=@srcdir@
 
 include $(DEPTH)/config/autoconf.mk
 
-ifdef MOZ_XUL_APP
 XPI_NAME = inspector
-endif
 
 EXTRA_COMPONENTS=inspector-cmdline.js
 
