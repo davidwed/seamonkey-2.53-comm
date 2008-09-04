@@ -70,9 +70,9 @@ include $(topsrcdir)/config/rules.mk
 
 export::
 	$(NSINSTALL) -D $(FINAL_TARGET)/platform/Linux/chrome/icons/default
-	$(INSTALL) $(srcdir)/resources/content/res/winInspectorMain.xpm $(FINAL_TARGET)/platform/Linux/chrome/icons/default
-	$(INSTALL) $(srcdir)/resources/content/res/winInspectorMain16.xpm $(FINAL_TARGET)/platform/Linux/chrome/icons/default
+	$(INSTALL) $(srcdir)/resources/content/res/Linux/winInspectorMain.xpm $(FINAL_TARGET)/platform/Linux/chrome/icons/default
+	$(INSTALL) $(srcdir)/resources/content/res/Linux/winInspectorMain16.xpm $(FINAL_TARGET)/platform/Linux/chrome/icons/default
 	$(NSINSTALL) -D $(FINAL_TARGET)/platform/WINNT/chrome/icons/default
-	$(INSTALL) $(srcdir)/resources/content/res/winInspectorMain.ico $(FINAL_TARGET)/platform/WINNT/chrome/icons/default
+	$(INSTALL) $(srcdir)/resources/content/res/WINNT/winInspectorMain.ico $(FINAL_TARGET)/platform/WINNT/chrome/icons/default
 	$(NSINSTALL) -D $(FINAL_TARGET)/platform/OS2/chrome/icons/default
-	cp $(srcdir)/resources/content/res/winInspectorMainOS2.ico $(FINAL_TARGET)/platform/OS2/chrome/icons/default/winInspectorMain.ico
+	$(INSTALL) $(srcdir)/resources/content/res/OS2/winInspectorMain.ico $(FINAL_TARGET)/platform/OS2/chrome/icons/default
