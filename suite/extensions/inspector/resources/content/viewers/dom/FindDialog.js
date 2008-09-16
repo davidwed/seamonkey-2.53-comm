@@ -128,7 +128,15 @@ FindDialog.prototype =
   setLabel1: function(aIndex)
   {
     var deck = document.getElementById("rwRow1Text");
+    
+    // We want to add a control attribute to the selected label so that 
+    // accessibility aids can get the textbox's label.
+    // Remove the control attribute from the old panel.
+    deck.selectedPanel.removeAttribute("control");
+
     deck.setAttribute("selectedIndex", aIndex);
+    // Add the control attribute to the new panel.
+    deck.selectedPanel.setAttribute("control", "tfText1");
   },
 
   showRow2: function(aTruth)

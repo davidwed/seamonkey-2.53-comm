@@ -63,18 +63,18 @@
         <rows>
           <row id="rwRow1">
             <deck id="rwRow1Text">
+            <!-- The script places a "control" attribute on the selected label 
+            so that accessibility aids can identify the proper label for the 
+            textbox. -->
               <label id="txText1Id"
                      value="&findNodesById.label;"
-                     accesskey="&findNodesById.accesskey;"
-                     control="tfText1"/>
+                     accesskey="&findNodesById.accesskey;"/>
               <label id="txText1Tag"
                      value="&findNodesByTag.label;"
-                     accesskey="&findNodesByTag.accesskey;"
-                     control="tfText1"/>
+                     accesskey="&findNodesByTag.accesskey;"/>
               <label id="txText1Attr"
                      value="&findNodesByAttr.label;"
-                     accesskey="&findNodesByAttr.accesskey;"
-                     control="tfText1"/>
+                     accesskey="&findNodesByAttr.accesskey;"/>
             </deck>
             <textbox id="tfText1"/>
           </row>
