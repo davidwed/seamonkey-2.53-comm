@@ -232,7 +232,7 @@ InspectorApp.prototype =
 
   showPrefsDialog: function()
   {
-    goPreferences("advancedItem", "chrome://inspector/content/prefs/pref-inspector.xul", "inspector");
+    goPreferences("inspector_pane");
   },
   
   toggleBrowser: function(aToggleSplitter)
