@@ -100,7 +100,6 @@ InspectorCmdLineHandler.prototype =
                            .getService(nsIWindowWatcher);
     wwatch.openWindow(null, "chrome://inspector/content/", "_blank",
                       "chrome,dialog=no,all", args);
-    cmdLine.preventDefault = true;
   },
 
   helpInfo : "  -inspector <url>     Open the DOM inspector.\n"
