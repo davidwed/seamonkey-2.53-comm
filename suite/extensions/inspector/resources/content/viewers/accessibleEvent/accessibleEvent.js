@@ -177,7 +177,13 @@ AccessibleEventViewer.prototype =
 
     var stateObj = {value: null};
     var extStateObj = {value: null};
-    accessible.getFinalState(stateObj, extStateObj);
+
+    // Since Firefox 3.1 nsIAccessible::getFinalState has been renamed to
+    // nsIAccessible::getState.
+    if ("getState" in accessible)
+      accessible.getState(stateObj, extStateObj);
+    else
+      accessible.getFinalState(stateObj, extStateObj);
 
     var list = [];
 

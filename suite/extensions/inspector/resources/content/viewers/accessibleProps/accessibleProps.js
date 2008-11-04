@@ -243,7 +243,13 @@ AccessiblePropsViewer.prototype =
   {
     var stateObj = {value: null};
     var extStateObj = {value: null};
-    this.mAccSubject.getFinalState(stateObj, extStateObj);
+
+    // Since Firefox 3.1 nsIAccessible::getFinalState has been renamed to
+    // nsIAccessible::getState.
+    if ("getState" in this.mAccSubject)
+      this.mAccSubject.getState(stateObj, extStateObj);
+    else
+      this.mAccSubject.getFinalState(stateObj, extStateObj);
 
     var list = [];
 
