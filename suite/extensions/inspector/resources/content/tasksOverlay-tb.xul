@@ -37,7 +37,8 @@
   </keyset>
   
   <menupopup id="taskPopup">
-    <menuitem id="menu_inspector" label="&inspectorTaskCmd.label;"  insertafter="javaScriptConsole" 
+    <menuitem id="menu_inspector" label="&inspectorTaskCmd.label;"
+              insertafter="javascriptConsole,javaScriptConsole" 
               accesskey="&inspectorTaskCmd.accesskey;" command="Tasks:Inspector"/>
   </menupopup>
 
