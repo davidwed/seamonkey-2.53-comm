@@ -25,6 +25,7 @@
   ]]>
   </script>
 
+  <!-- this fragment can be removed when support for Fennec alphas is no longer needed -->
   <commandset id="cmdset_main">
     <command id="Tasks:InspectPage" oncommand="inspectDOMDocument(content.document);"/>
   </commandset>
