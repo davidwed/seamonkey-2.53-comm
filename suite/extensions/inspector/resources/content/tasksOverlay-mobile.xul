@@ -25,6 +25,10 @@
   ]]>
   </script>
 
+  <commandset id="cmdset_main">
+    <command id="Tasks:InspectPage" oncommand="inspectDOMDocument(content.document);"/>
+  </commandset>
+
   <commandset id="mainCommandSet">
     <command id="Tasks:InspectPage" oncommand="inspectDOMDocument(content.document);"/>
   </commandset>
