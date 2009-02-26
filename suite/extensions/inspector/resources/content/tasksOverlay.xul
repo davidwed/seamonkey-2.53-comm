@@ -17,7 +17,7 @@
   </keyset>
   
   <menupopup id="toolsPopup">
-    <menuitem id="menu_inspector" label="&inspectorTaskCmd.label;" 
+    <menuitem id="menu_inspector" label="&inspectorTaskCmd.label;" key="key_inspectPage"
               accesskey="&inspectorTaskCmd.accesskey;" command="Tasks:Inspector"/>
   </menupopup>
 
