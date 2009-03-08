@@ -44,6 +44,9 @@
 
 //////////// global variables /////////////////////
 
+const kInspectorTitle = /Mac/.test(navigator.platform) ?
+                        "" : " - " + document.title;
+
 var inspector;
 
 //////////// global constants ////////////////////
@@ -179,13 +182,8 @@ InspectorApp.prototype =
             aEvent.subject && "location" in aEvent.subject) {
           this.locationText = aEvent.subject.location; // display document url
 
-          var docTitle = aEvent.subject.title || aEvent.subject.location; 
-          if (/Mac/.test(navigator.platform)) {
-            document.title = docTitle;
-          } else {
-            document.title = docTitle + " - " + 
-              document.documentElement.getAttribute("title");
-          }
+          document.title = (aEvent.subject.title || aEvent.subject.location) +
+                           kInspectorTitle;
 
           this.updateCommand("cmdSave");
         }
