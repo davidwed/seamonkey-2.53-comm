@@ -221,7 +221,10 @@ AccessiblePropsViewer.prototype =
 
   get role()
   {
-    return this.mAccService.getStringRole(this.mAccSubject.finalRole);
+    // 'finalRole' is replaced by 'role' property in Gecko 1.9.2.
+    var role = "finalRole" in this.mAccSubject ?
+      this.mAccSubject.finalRole : this.mAccSubject.role;
+    return this.mAccService.getStringRole(role);
   },
 
   get name()

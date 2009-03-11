@@ -207,8 +207,12 @@ function getCellText(aRow, aCol)
 
   var accessible = node.accessible;
 
-  if (aCol.id == "olcRole")
-    return this.mAccService.getStringRole(accessible.finalRole);
+  if (aCol.id == "olcRole") {
+    // 'finalRole' is replaced by 'role' property in Gecko 1.9.2.
+    var role = "finalRole" in this.mAccSubject ?
+      this.mAccSubject.finalRole : this.mAccSubject.role;
+    return this.mAccService.getStringRole(role);
+  }
 
   if (aCol.id == "olcName")
     return accessible.name;
