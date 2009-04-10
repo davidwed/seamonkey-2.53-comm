@@ -238,8 +238,8 @@ function getCellText(aRow, aCol)
     var accessible = this.getAccessible(aRow);
     if (accessible) {
       // 'finalRole' is replaced by 'role' property in Gecko 1.9.2.
-      var role = "finalRole" in this.mAccSubject ?
-        this.mAccSubject.finalRole : this.mAccSubject.role;
+      var role = "finalRole" in accessible ?
+        accessible.finalRole : accessible.role;
       return gAccService.getStringRole(role);
     }
   } else if (aCol.id == "olcNodeName") {

@@ -209,8 +209,8 @@ function getCellText(aRow, aCol)
 
   if (aCol.id == "olcRole") {
     // 'finalRole' is replaced by 'role' property in Gecko 1.9.2.
-    var role = "finalRole" in this.mAccSubject ?
-      this.mAccSubject.finalRole : this.mAccSubject.role;
+    var role = "finalRole" in accessible ?
+      accessible.finalRole : accessible.role;
     return this.mAccService.getStringRole(role);
   }
 
