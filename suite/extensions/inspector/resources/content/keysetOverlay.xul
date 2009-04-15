@@ -8,7 +8,7 @@
 <overlay id="ovKeyset" 
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <keyset id="ksGlobalKeyset" xulkey="ctrl"/>
+  <keyset id="ksGlobalKeyset"/>
 
 </overlay>
 
