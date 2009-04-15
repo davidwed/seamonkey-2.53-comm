@@ -3,7 +3,7 @@
 <!DOCTYPE overlay SYSTEM "chrome://inspector/locale/viewers/dom.dtd">
 
 <overlay id="ovDOMViewerKeyset"
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <keyset id="ksGlobalKeyset">
     <key id="key:find" key="&cmdShowFindDialog.accelkey;" observes="cmd:find"
@@ -12,5 +12,3 @@
   </keyset>
 
 </overlay>
-
-        
