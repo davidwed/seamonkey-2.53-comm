@@ -681,7 +681,11 @@ function onWindowBlue(e)
 function onInputCompleteLine(e)
 {
     if (!client.inputHistory.length || client.inputHistory[0] != e.line)
-        client.inputHistory.unshift (e.line);
+    {
+        client.inputHistory.unshift(e.line);
+        if (client.inputHistoryLogger)
+            client.inputHistoryLogger.append(e.line);
+    }
 
     if (client.inputHistory.length > client.MAX_HISTORY)
         client.inputHistory.pop();
@@ -1588,32 +1592,39 @@ function my_listrply (e)
     }
 }
 
-CIRCNetwork.prototype.on401 =
-function my_401 (e)
+CIRCNetwork.prototype.on401 = /* ERR_NOSUCHNICK */
+CIRCNetwork.prototype.on402 = /* ERR_NOSUCHSERVER */
+CIRCNetwork.prototype.on403 = /* ERR_NOSUCHCHANNEL */
+function my_401(e)
 {
-    var target = e.server.toLowerCase(e.params[2]);
-    if (target in this.users && "messages" in this.users[target])
-    {
-        this.users[target].displayHere(e.params[3]);
-    }
-    else if (target in this.primServ.channels &&
-             "messages" in this.primServ.channels[target])
-    {
-        this.primServ.channels[target].displayHere(e.params[3]);
-    }
+    var server, channel, user;
+
+    /* Note that servers generally only send 401 and 402, sharing the former
+     * between nicknames and channels, but we're ready for anything.
+     */
+    if (e.code == 402)
+        server = e.decodeParam(2);
+    else if (arrayIndexOf(e.server.channelTypes, e.params[2][0]) != -1)
+        channel = new CIRCChannel(e.server, null, e.params[2]);
     else
+        user = new CIRCUser(e.server, null, e.params[2]);
+
+    if (user && this.whoisList && (user.canonicalName in this.whoisList))
     {
-        if (this.whoisList && (target in this.whoisList))
-        {
-            // if this is from a whois, send a whowas and don't display anything
-            this.primServ.whowas(target, 1);
-            this.whoisList[target] = false;
-        }
-        else
-        {
-            display(toUnicode(e.params[3], this));
-        }
+        // If this is from a /whois, send a /whowas and don't display anything.
+        this.primServ.whowas(user.unicodeName, 1);
+        this.whoisList[user.canonicalName] = false;
+        return;
     }
+
+    if (user)
+        user.display(getMsg(MSG_IRC_401, [user.unicodeName]), e.code);
+    else if (server)
+        this.display(getMsg(MSG_IRC_402, [server]), e.code);
+    else if (channel)
+        channel.display(getMsg(MSG_IRC_403, [channel.unicodeName]), e.code);
+    else
+        dd("on401: unreachable code.");
 }
 
 /* 464; "invalid or missing password", occurs as a reply to both OPER and
@@ -1725,6 +1736,7 @@ CIRCNetwork.prototype.on319 = /* whois channels */
 CIRCNetwork.prototype.on312 = /* whois server */
 CIRCNetwork.prototype.on317 = /* whois idle time */
 CIRCNetwork.prototype.on318 = /* whois end of whois*/
+CIRCNetwork.prototype.on330 = /* ircu's 330 numeric ("X is logged in as Y") */
 CIRCNetwork.prototype.onUnknownWhois = /* misc whois line */
 function my_whoisreply (e)
 {
@@ -1787,6 +1799,10 @@ function my_whoisreply (e)
                 user.updateHeader();
             break;
 
+        case 330:
+            text = getMsg(MSG_FMT_LOGGED_ON, [e.decodeParam(2), e.params[3]]);
+            break;
+
         default:
             text = toUnicode(e.params.splice(2, e.params.length).join(" "),
                              this);
@@ -1796,16 +1812,6 @@ function my_whoisreply (e)
         e.user.display(text, e.code);
     else
         this.display(text, e.code);
-}
-
-CIRCNetwork.prototype.on330 = /* ircu's 330 numeric ("X is logged in as Y") */
-function my_330 (e)
-{
-    var msg = getMsg(MSG_FMT_LOGGED_ON, [e.decodeParam(2), e.params[3]]);
-    if (e.user)
-        e.user.display(msg, "330");
-    else
-        this.display(msg, "330");
 }
 
 CIRCNetwork.prototype.on341 = /* invite reply */
@@ -1936,7 +1942,7 @@ CIRCNetwork.prototype.onError =
 function my_neterror (e)
 {
     var msg;
-    var type = "ERROR";
+    var type = MT_ERROR;
 
     if (typeof e.errorCode != "undefined")
     {
@@ -1960,12 +1966,19 @@ function my_neterror (e)
 
             case JSIRC_ERR_CANCELLED:
                 msg = MSG_ERR_CANCELLED;
-                type = "INFO";
+                type = MT_INFO;
+                break;
+
+            case JSIRC_ERR_PAC_LOADING:
+                msg = MSG_WARN_PAC_LOADING;
+                type = MT_WARN;
                 break;
         }
     }
     else
+    {
         msg = e.params[e.params.length - 1];
+    }
 
     dispatch("sync-header");
     updateTitle();
@@ -1981,11 +1994,13 @@ function my_neterror (e)
     if (msg)
         this.display(msg, type);
 
+    if (e.errorCode == JSIRC_ERR_PAC_LOADING)
+        return;
+
     if (this.deleteWhenDone)
         this.dispatch("delete-view");
 
     delete this.deleteWhenDone;
-
 }
 
 
@@ -1993,7 +2008,7 @@ CIRCNetwork.prototype.onDisconnect =
 function my_netdisconnect (e)
 {
     var msg, msgNetwork;
-    var msgType = "ERROR";
+    var msgType = MT_ERROR;
 
     if (typeof e.disconnectStatus != "undefined")
     {
@@ -3222,8 +3237,10 @@ function my_dccfiledisconnect(e)
 
     if (this.state.dir == DCC_DIR_GETTING)
     {
-        msg = getMsg(MSG_DCCFILE_CLOSED_SAVED,
-                     this._getParams().concat(this.localPath));
+        var cmd = "dcc-file-show " + this.localPath;
+        var msgId = (client.platform == "Mac") ? MSG_DCCFILE_CLOSED_SAVED_MAC :
+                                                 MSG_DCCFILE_CLOSED_SAVED;
+        msg = getMsg(msgId, this._getParams().concat(this.localPath, cmd));
     }
     else
     {

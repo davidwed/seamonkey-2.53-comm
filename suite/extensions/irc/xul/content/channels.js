@@ -131,6 +131,10 @@ function onLoad()
             window[m] = client.mainWindow[m];
     }
 
+    // Set the <dialog>'s class so we can do platform-specific CSS.
+    var dialog = document.getElementById("chatzilla-window");
+    dialog.className = "platform-" + client.platform;
+
     var tree = document.getElementById("channelList");
     channelTreeBoxObject = tree.treeBoxObject;
 
@@ -148,6 +152,18 @@ function onLoad()
     channelMaxUsers = document.getElementById("maxUsers");
     channelJoinBtn = document.getElementById("joinBtn");
     channelRefreshBtn = document.getElementById("refreshNow");
+
+    // If the new "search" binding is not working (i.e. doesn't exist)...
+    if (!("searchButton" in channelFilterText))
+    {
+        // ...restore the text boxes to their former selves.
+        channelFilterText.setAttribute("timeout", "500");
+        channelFilterText.setAttribute("type", "timed");
+        channelMinUsers.setAttribute("timeout", "500");
+        channelMinUsers.setAttribute("type", "timed");
+        channelMaxUsers.setAttribute("timeout", "500");
+        channelMaxUsers.setAttribute("type", "timed");
+    }
 
     // Sort by user count, decending.
     changeSort("chanColUsers");

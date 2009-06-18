@@ -45,8 +45,8 @@ function getAccessKey (str)
     return str[i + 1];
 }
 
-function CommandRecord (name, func, usage, help, label, flags, keystr, tip,
-                        format)
+function CommandRecord(name, func, usage, help, label, accesskey, flags,
+                       keystr, tip, format)
 {
     this.name = name;
     this.func = func;
@@ -54,6 +54,7 @@ function CommandRecord (name, func, usage, help, label, flags, keystr, tip,
     this.scanUsage();
     this.help = help;
     this.label = label ? label : name;
+    this.accesskey = accesskey ? accesskey : "";
     this.format = format;
     this.labelstr = label.replace ("&", "");
     this.tip = tip;
@@ -171,6 +172,7 @@ CommandRecord.prototype.argNames = new Array();
 function CommandManager (defaultBundle)
 {
     this.commands = new Object();
+    this.commandHistory = new Object();
     this.defaultBundle = defaultBundle;
     this.currentDispatchDepth = 0;
     this.maxDispatchDepth = 10;
@@ -237,13 +239,15 @@ function cmdmgr_defcmd (name, func, flags, usage, bundle)
 
     var label = getMsgFrom(bundle, "cmd." + name + ".label", null,
                            labelDefault);
+    var accesskey = getMsgFrom(bundle, "cmd." + name + ".accesskey", null,
+                               getAccessKey(label));
     var help  = getMsgFrom(bundle, "cmd." + name + ".help", null,
                            helpDefault);
     var keystr = getMsgFrom (bundle, "cmd." + name + ".key", null, "");
     var format = getMsgFrom (bundle, "cmd." + name + ".format", null, null);
     var tip = getMsgFrom (bundle, "cmd." + name + ".tip", null, "");
-    var command = new CommandRecord (name, func, usage, help, label, flags,
-                                     keystr, tip, format);
+    var command = new CommandRecord(name, func, usage, help, label, accesskey,
+                                    flags, keystr, tip, format);
     this.addCommand(command);
     if (aliasFor)
         command.aliasFor = aliasFor;
@@ -340,6 +344,15 @@ function cmgr_uninstkey (command)
 CommandManager.prototype.addCommand =
 function cmgr_add (command)
 {
+    if (command.name in this.commands)
+    {
+        /* We've already got a command with this name - invoke the history
+         * storage so that we can undo this back to its original state.
+         */
+        if (!(command.name in this.commandHistory))
+            this.commandHistory[command.name] = new Array();
+        this.commandHistory[command.name].push(this.commands[command.name]);
+    }
     this.commands[command.name] = command;
 }
 
@@ -358,6 +371,15 @@ CommandManager.prototype.removeCommand =
 function cmgr_remove (command)
 {
     delete this.commands[command.name];
+    if (command.name in this.commandHistory)
+    {
+        /* There was a previous command with this name - restore the most
+         * recent from the history, returning the command to its former glory.
+         */
+        this.commands[command.name] = this.commandHistory[command.name].pop();
+        if (this.commandHistory[command.name].length == 0)
+            delete this.commandHistory[command.name];
+    }
 }
 
 /**

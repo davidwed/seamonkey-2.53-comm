@@ -87,6 +87,7 @@ function initCommands()
          ["dcc-decline",       cmdDCCDecline,                      CMD_CONSOLE],
          ["dcc-list",          cmdDCCList,                         CMD_CONSOLE],
          ["dcc-send",          cmdDCCSend,          CMD_NEED_SRV | CMD_CONSOLE],
+         ["dcc-show-file",     cmdDCCShowFile,                     CMD_CONSOLE],
          ["deop",              cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
          ["describe",          cmdDescribe,         CMD_NEED_SRV | CMD_CONSOLE],
          ["hop",               cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
@@ -107,6 +108,7 @@ function initCommands()
          ["echo",              cmdEcho,                            CMD_CONSOLE],
          ["enable-plugin",     cmdAblePlugin,                      CMD_CONSOLE],
          ["eval",              cmdEval,                            CMD_CONSOLE],
+         ["evalsilent",        cmdEval,                            CMD_CONSOLE],
          ["except",            cmdBanOrExcept,     CMD_NEED_CHAN | CMD_CONSOLE],
          ["find",              cmdFind,                                      0],
          ["find-again",        cmdFindAgain,                                 0],
@@ -192,6 +194,7 @@ function initCommands()
          ["toggle-ui",         cmdToggleUI,                        CMD_CONSOLE],
          ["toggle-pref",       cmdTogglePref,                                0],
          ["topic",             cmdTopic,           CMD_NEED_CHAN | CMD_CONSOLE],
+         ["unalias",           cmdAlias,                           CMD_CONSOLE],
          ["unignore",          cmdIgnore,           CMD_NEED_NET | CMD_CONSOLE],
          ["unban",             cmdBanOrExcept,     CMD_NEED_CHAN | CMD_CONSOLE],
          ["unexcept",          cmdBanOrExcept,     CMD_NEED_CHAN | CMD_CONSOLE],
@@ -216,8 +219,8 @@ function initCommands()
          ["part",             "leave",                             CMD_CONSOLE],
          ["raw",              "quote",                             CMD_CONSOLE],
          // Shortcuts to useful URLs:
-         ["faq",              "goto-url faq",                                0],
-         ["homepage",         "goto-url homepage",                           0],
+         ["faq",              "goto-url-newtab faq",                         0],
+         ["homepage",         "goto-url-newtab homepage",                    0],
          // Used to display a nickname in the menu only.
          ["label-user",       "echo",                                        0],
          ["label-user-multi", "echo",                                        0],
@@ -244,7 +247,7 @@ function initCommands()
          ["motif-dark",       "motif dark",                                  0],
          ["motif-light",      "motif light",                                 0],
          ["motif-default",    "motif default",                               0],
-         ["sync-output",      "eval syncOutputFrame(this)",                  0],
+         ["sync-output",      "evalsilent syncOutputFrame(this)",            0],
          ["userlist",         "toggle-ui userlist",                CMD_CONSOLE],
          ["tabstrip",         "toggle-ui tabstrip",                CMD_CONSOLE],
          ["statusbar",        "toggle-ui status",                  CMD_CONSOLE],
@@ -1626,14 +1629,14 @@ function cmdDeleteView(e)
         return;
     }
 
-    if (e.view.TYPE == "IRCChannel" && e.view.active)
+    if (e.view.TYPE == "IRCChannel" && e.view.joined)
     {
         e.view.dispatch("part", { deleteWhenDone: true });
         return;
     }
     if (e.view.TYPE == "IRCDCCChat" && e.view.active)
         e.view.disconnect();
-    if (e.view.TYPE == "IRCNetwork" && (e.view.state == NET_CONNECTING || 
+    if (e.view.TYPE == "IRCNetwork" && (e.view.state == NET_CONNECTING ||
                                         e.view.state == NET_WAITING))
     {
         e.view.dispatch("cancel", { deleteWhenDone: true });
@@ -1745,7 +1748,7 @@ function cmdDesc(e)
     }
     else // no network, change the general pref
     {
-        dispatch("pref", {prefName: "desc", prefValue: e.description, 
+        dispatch("pref", {prefName: "desc", prefValue: e.description,
                           isInteractive: e.isInteractive});
     }
 }
@@ -1928,7 +1931,7 @@ function cmdMatchUsers(e)
 
     if (matches.users.length == 0)
         display(getMsg(MSG_NO_MATCHING_NICKS, msgNotChecked));
-    else 
+    else
         display(getMsg(MSG_MATCHING_NICKS, [nicknameStr, msgNotChecked]));
 }
 
@@ -2274,14 +2277,16 @@ function cmdEval(e)
     try
     {
         sourceObject.doEval = function (__s) { return eval(__s); }
-        sourceObject.display(e.expression, MT_EVALIN);
+        if (e.command.name == "eval")
+            sourceObject.display(e.expression, MT_EVALIN);
         var rv = String(sourceObject.doEval (e.expression));
-        sourceObject.display (rv, MT_EVALOUT);
+        if (e.command.name == "eval")
+            sourceObject.display(rv, MT_EVALOUT);
 
     }
     catch (ex)
     {
-        sourceObject.display (String(ex), MT_ERROR);
+        sourceObject.display(String(ex), MT_ERROR);
     }
 }
 
@@ -2369,7 +2374,7 @@ function cmdGotoURL(e)
         {
             dd(formatException(ex));
         }
-        
+
     }
 
     if (e.command.name == "goto-url-newwin")
@@ -2462,7 +2467,7 @@ function cmdJoin(e)
             display (getMsg(MSG_ERR_INVALID_CHARSET, e.charset), MT_ERROR);
             return null;
         }
-    
+
         if (e.channelName.search(",") != -1)
         {
             // We can join multiple channels! Woo!
@@ -2478,13 +2483,13 @@ function cmdJoin(e)
             }
             return chan;
         }
-    
+
         if ((arrayIndexOf(["#", "&", "+", "!"], e.channelName[0]) == -1) &&
             (arrayIndexOf(e.server.channelTypes, e.channelName[0]) == -1))
         {
             e.channelName = e.server.channelTypes[0] + e.channelName;
         }
-    
+
         var charset = e.charset ? e.charset : e.network.prefs["charset"];
         chan = e.server.addChannel(e.channelName, charset);
         if (e.charset)
@@ -2589,6 +2594,12 @@ function cmdLeave(e)
     }
     else
     {
+        /* We can leave the channel when not active
+         * this will close the view and prevent rejoin after a reconnect
+         */
+        if (e.channel.joined)
+            e.channel.joined = false;
+
         if (e.deleteWhenDone)
             e.channel.dispatch("delete-view");
     }
@@ -2816,7 +2827,7 @@ function cmdAlias(e)
 
     var ary;
 
-    if (e.commandList == "-")
+    if ((e.commandList == "-") || (e.command.name == "unalias"))
     {
         /* remove alias */
         ary = getAlias(e.aliasName);
@@ -2826,25 +2837,34 @@ function cmdAlias(e)
             return;
         }
 
-        delete client.commandManager.commands[e.aliasName];
+        // Command Manager is updated when the preference changes.
         arrayRemoveAt(aliasDefs, ary[0]);
         aliasDefs.update();
 
         feedback(e, getMsg(MSG_ALIAS_REMOVED, e.aliasName));
     }
-    else if (e.aliasName)
+    else if (e.aliasName && e.commandList)
     {
         /* add/change alias */
-        client.commandManager.defineCommand(e.aliasName, e.commandList);
         ary = getAlias(e.aliasName);
         if (ary)
             aliasDefs[ary[0]] = e.aliasName + " = " + e.commandList;
         else
             aliasDefs.push(e.aliasName + " = " + e.commandList);
 
+        // Command Manager is updated when the preference changes.
         aliasDefs.update();
 
         feedback(e, getMsg(MSG_ALIAS_CREATED, [e.aliasName, e.commandList]));
+    }
+    else if (e.aliasName)
+    {
+        /* display alias */
+        ary = getAlias(e.aliasName);
+        if (!ary)
+            display(getMsg(MSG_NOT_AN_ALIAS, e.aliasName), MT_ERROR);
+        else
+            display(getMsg(MSG_FMT_ALIAS, [e.aliasName, ary[1]]));
     }
     else
     {
@@ -3098,7 +3118,7 @@ function cmdOper(e)
     if (!e.password)
         return;
 
-    e.server.sendData("OPER " + fromUnicode(e.opername, e.server) + " " + 
+    e.server.sendData("OPER " + fromUnicode(e.opername, e.server) + " " +
                       fromUnicode(e.password, e.server) + "\n");
 }
 
@@ -4504,6 +4524,22 @@ function cmdDCCDecline(e)
     display(getMsg(MSG_DCC_PENDING_MATCHES, [list.length]));
     display(MSG_DCC_MATCHES_HELP);
     return true;
+}
+
+function cmdDCCShowFile(e)
+{
+    var f = nsLocalFile(e.file);
+    if (f && f.parent && f.parent.exists())
+    {
+        try
+        {
+            f.reveal();
+        }
+        catch (ex)
+        {
+            dd(formatException(ex));
+        }
+    }
 }
 
 function cmdTextDirection(e)
