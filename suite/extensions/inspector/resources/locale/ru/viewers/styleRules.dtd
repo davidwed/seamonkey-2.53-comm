@@ -41,7 +41,8 @@
 <!ENTITY newRules.label "Создать">
 <!ENTITY deleteSelectedRules.label "Удалить">
 <!ENTITY disableSelectedRules.label "Отключить">
-<!ENTITY openSelectedFileInEditor.label "Открыть файл в редакторе">
+<!ENTITY copySelectedFileURI.label "Копировать URI">
+<!ENTITY viewSelectedFileURI.label "Просмотреть файл">
 <!ENTITY toggleSelectedImportant.label "Переключить использование !important">
 <!ENTITY styleRule.label "Правило">
 <!ENTITY styleRuleURI.label "Файл">
