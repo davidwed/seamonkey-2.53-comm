@@ -41,9 +41,10 @@
 *  The viewer for CSS style rules that apply to a DOM element.
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 * REQUIRED IMPORTS:
-*   chrome://inspector/content/util.js
+*   chrome://inspector/content/utils.js
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
 *   chrome://inspector/content/jsutil/rdf/RDFU.js
+*   chrome://global/content/viewSourceUtils.js
 ****************************************************************/
 
 //////////// global variables /////////////////////
@@ -53,9 +54,12 @@ var gPromptService;
 
 //////////// global constants ////////////////////
 
-var kCSSRuleDataSourceIID = "@mozilla.org/rdf/datasource;1?name=Inspector_CSSRules";
-var kCSSDecDataSourceIID  = "@mozilla.org/rdf/datasource;1?name=Inspector_CSSDec";
-var kPromptServiceCID     = "@mozilla.org/embedcomp/prompt-service;1";
+const kCSSRuleDataSourceIID =
+  "@mozilla.org/rdf/datasource;1?name=Inspector_CSSRules";
+const kCSSDecDataSourceIID  = 
+  "@mozilla.org/rdf/datasource;1?name=Inspector_CSSDec";
+const kPromptServiceCID = "@mozilla.org/embedcomp/prompt-service;1";
+const kClipboardHelperCID = "@mozilla.org/widget/clipboardhelper;1";
 
 var nsEventStateUnspecificed = 0;
 var nsEventStateActive = 1;
@@ -89,7 +93,6 @@ function StyleRulesViewer() // implements inIViewer
   this.mPropsBoxObject = this.mPropsTree.treeBoxObject;
 }
 
-//XXX Don't use anonymous functions
 StyleRulesViewer.prototype = 
 {
 
@@ -123,13 +126,13 @@ StyleRulesViewer.prototype =
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
-  initialize: function(aPane)
+  initialize: function SRVr_Initialize(aPane)
   {
     this.mPanel = aPane;
     aPane.notifyViewerReady(this);
   },
 
-  destroy: function()
+  destroy: function SRVr_Destroy()
   {
     // We need to remove the views at this time or else they will attempt to 
     // re-paint while the document is being deconstructed, resulting in
@@ -138,19 +141,19 @@ StyleRulesViewer.prototype =
     this.mPropsBoxObject.view = null;
   },
 
-  isCommandEnabled: function isCommandEnabled(aCommand)
+  isCommandEnabled: function SRVr_IsCommandEnabled(aCommand)
   {
-    var declaration = this.getSelectedDec();
-    // if no declaration is selected, nothing is enabled
-    if (!declaration)
+    var rule = this.getSelectedRule();
+    // if no rule is selected, nothing is enabled
+    if (!rule)
       return false;
 
     //XXX can't edit resource: stylesheets because of bug 343508
-    var rule = declaration.parentRule;
     var isEditable = !(rule && rule.parentStyleSheet &&
                        /^resource:/.test(rule.parentStyleSheet.href));
 
     switch (aCommand) {
+      // ppStylePropsContext
       case "cmdEditCopy":
         return this.mPropsTree.view.selection.count > 0;
       case "cmdEditDelete":
@@ -160,11 +163,15 @@ StyleRulesViewer.prototype =
         return isEditable && this.mRuleTree.view.selection.count == 1;
       case "cmdEditEdit":
         return isEditable && this.mPropsTree.view.selection.count == 1;
+      // ppStyleRulesContext
+      case "cmdCopySelectedFileURI":
+      case "cmdViewSelectedFileURI":
+        return rule.parentStyleSheet && rule.parentStyleSheet.href;
     }
     return false;
   },
   
-  getCommand: function getCommand(aCommand)
+  getCommand: function SRVr_GetCommand(aCommand)
   {
     switch (aCommand) {
       case "cmdEditCopy":
@@ -219,81 +226,74 @@ StyleRulesViewer.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// event dispatching
 
-  addObserver: function(aEvent, aObserver) { this.mObsMan.addObserver(aEvent, aObserver); },
-  removeObserver: function(aEvent, aObserver) { this.mObsMan.removeObserver(aEvent, aObserver); },
+  addObserver: function SRVr_AddObserver(aEvent, aObserver)
+  {
+    this.mObsMan.addObserver(aEvent, aObserver);
+  },
+
+  removeObserver: function SRVr_RemoveObserver(aEvent, aObserver)
+  {
+    this.mObsMan.removeObserver(aEvent, aObserver);
+  },
 
   ////////////////////////////////////////////////////////////////////////////
   //// UI Commands
 
   //////// rule contextual commands
 
-  cmdNewRule: function()
+  cmdCopySelectedFileURI: function SRVr_CmdCopySelectedFileURI()
   {
+    var rule = this.getSelectedRule();
+    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href)
+      return;
+    var selectedURI = rule.parentStyleSheet.href;
+    var helper = XPCU.getService(kClipboardHelperCID, "nsIClipboardHelper");
+
+    helper.copyString(selectedURI);
   },
-  
-  cmdToggleSelectedRule: function()
+
+  cmdViewSelectedFileURI: function SRVr_CmdViewSelectedFileURI()
   {
-  },
+    var rule = this.getSelectedRule();
+    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href)
+      return;
+    var selectedURI = rule.parentStyleSheet.href;
+    var lineNumber =  rule.type == CSSRule.STYLE_RULE ?
+                        this.mRuleView.mDOMUtils.getRuleLine(rule) : null;
 
-  cmdDeleteSelectedRule: function()
-  {
-  },
-
-  cmdOpenSelectedFileInEditor: function()
-  {
-    var item = this.mRuleTree.selectedItems[0];
-    if (item)
-    {
-      var path = null;
-
-      var url = InsUtil.getDSProperty(this.mRuleDS, item.id, "FileURL");
-      if (url.substr(0, 6) == "chrome") {
-        // This is a tricky situation.  Finding the source of a chrome file means knowing where
-        // your build tree is located, and where in the tree the file came from.  Since files
-        // from the build tree get copied into chrome:// from unpredictable places, the best way
-        // to find them is manually.
-        // 
-        // Solution to implement: Have the user pick the file location the first time it is opened.
-        //  After that, keep the result in some sort of registry to look up next time it is opened.
-        //  Allow this registry to be edited via preferences.
-      } else if (url.substr(0, 4) == "file") {
-        path = url;
-      }
-
-      if (path) {
-        try {
-          var exe = XPCU.createInstance("@mozilla.org/file/local;1", "nsILocalFile");
-          exe.initWithPath("c:\\windows\\notepad.exe");
-          exe      = exe.nsIFile;
-          var C    = Components;
-          var proc = C.classes['@mozilla.org/process/util;1'].createInstance
-                       (C.interfaces.nsIProcess);
-          proc.init(exe);
-          proc.run(false, [url], 1);
-        } catch (ex) {
-          alert("Unable to open editor.");
-        }
-      }
-    }
+    // 1.9.0 toolkit doesn't have this method
+    if ("viewSource" in gViewSourceUtils)
+      gViewSourceUtils.viewSource(selectedURI, null, null, lineNumber);
+    else
+      openDialog("chrome://global/content/viewSource.xul",
+                 "_blank",
+                 "all,dialog=no",
+                 selectedURI, null, null, lineNumber, null);
   },
   
   ////////////////////////////////////////////////////////////////////////////
   //// Uncategorized
 
-  getSelectedDec: function()
+  getSelectedDec: function SRVr_GetSelectedDec()
   {
     var idx = this.mRuleTree.currentIndex;
     return this.mRuleView.getDecAt(idx);
   },
 
-  getSelectedProp: function()
+  getSelectedProp: function SRVr_GetSelectedProp()
   {
     var dec = this.getSelectedDec();
     var idx = this.mPropsTree.currentIndex;
     return dec.item(idx);
   },
+
+  getSelectedRule: function SRVr_GetSelectedRule()
+  {
+    var idx = this.mRuleTree.currentIndex;
+    return this.mRuleView.getRuleAt(idx);
+  },
   
-  onRuleSelect: function()
+  onRuleSelect: function SRVr_OnRuleSelect()
   {
     var dec = this.getSelectedDec();
     this.mPropsView = new StylePropsView(dec);
@@ -301,24 +301,23 @@ StyleRulesViewer.prototype =
     viewer.pane.panelset.updateAllCommands();
   },
 
-  onPropSelect: function()
+  onPropSelect: function SRVr_OnPropSelect()
   {
     viewer.pane.panelset.updateAllCommands();
   },
 
-  onCreateRulePopup: function()
+  onCreateRulePopup: function SRVr_OnCreateRulePopup()
   {
   },
 
-  propOnPopupShowing: function propOnPopupShowing()
+  onPopupShowing: function SRVr_OnPopupShowing(aCommandSetId)
   {
-    var commandset = document.getElementById("cmdsProps");
+    var commandset = document.getElementById(aCommandSetId);
     for (var i = 0; i < commandset.childNodes.length; i++) {
       var command = commandset.childNodes[i];
       command.setAttribute("disabled", !viewer.isCommandEnabled(command.id));
     }
   }
-
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -353,8 +352,8 @@ function()
                      : this.mSheetRules ? this.mSheetRules.length : 0;
 });
 
-StyleRuleView.prototype.getRuleAt = 
-function(aRow) 
+StyleRuleView.prototype.getRuleAt =
+function SRV_GetRuleAt(aRow) 
 {
   if (this.mRules) {
     var rule = this.mRules.GetElementAt(aRow);
@@ -367,8 +366,8 @@ function(aRow)
   return this.mSheetRules[aRow];
 }
 
-StyleRuleView.prototype.getDecAt = 
-function(aRow) 
+StyleRuleView.prototype.getDecAt =
+function SRV_GetDecAt(aRow) 
 {
   if (this.mRules) {
     if (this.mStyleAttribute && aRow + 1 == this.rowCount) {
@@ -384,8 +383,8 @@ function(aRow)
   return this.mSheetRules[aRow].style;
 }
 
-StyleRuleView.prototype.getCellText = 
-function(aRow, aCol) 
+StyleRuleView.prototype.getCellText =
+function SRV_GetCellText(aRow, aCol) 
 {
   if (aRow > this.rowCount) return "";
 
@@ -448,8 +447,8 @@ function()
   return this.mDec ? this.mDec.length : 0;
 });
 
-StylePropsView.prototype.getCellProperties = 
-function(aRow, aCol, aProperties) 
+StylePropsView.prototype.getCellProperties =
+function SPV_GetCellProperties(aRow, aCol, aProperties) 
 {
   if (aCol.id == "olcPropPriority") {
     var prop = this.mDec.item(aRow);
@@ -459,8 +458,8 @@ function(aRow, aCol, aProperties)
   }
 }
 
-StylePropsView.prototype.getCellText = 
-function (aRow, aCol) 
+StylePropsView.prototype.getCellText =
+function SPV_GetCellText(aRow, aCol) 
 {
   var prop = this.mDec.item(aRow);
   
@@ -479,8 +478,8 @@ function (aRow, aCol)
  * @param aIndex index of the row in the tree
  * @return a CSSDeclaration
  */
-StylePropsView.prototype.getRowObjectFromIndex = 
-function getRowObjectFromIndex(aIndex)
+StylePropsView.prototype.getRowObjectFromIndex =
+function SPV_GetRowObjectFromIndex(aIndex)
 {
   var prop = this.mDec.item(aIndex);
   return new CSSDeclaration(prop, this.mDec.getPropertyValue(prop),

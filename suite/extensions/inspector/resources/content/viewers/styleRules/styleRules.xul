@@ -15,13 +15,22 @@
   
   <!--============================= SCRIPTS ============================= -->
 
-  <script type="application/x-javascript" src="chrome://inspector/content/utils.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/viewers/styleRules/styleRules.js"/>
-  <script type="application/x-javascript" src="chrome://global/content/XPCNativeWrapper.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/rdf/RDFU.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/viewers/styleRules/styleRules.js"/>
+  <script type="application/javascript"
+          src="chrome://global/content/XPCNativeWrapper.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/rdf/RDFU.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
+  <script type="application/javascript" 
+          src="chrome://global/content/viewSourceUtils.js"/>
 
   <!--============================ COMMANDS ============================= -->
 
@@ -30,20 +39,26 @@
     <command id="cmdTogglePriority"
              oncommand="viewer.pane.panelset.execCommand('cmdTogglePriority')"/>
   </commandset>
+  <commandset id="cmdsRules">
+    <command id="cmdCopySelectedFileURI"
+             oncommand="viewer.cmdCopySelectedFileURI();"/>
+    <command id="cmdViewSelectedFileURI"
+             oncommand="viewer.cmdViewSelectedFileURI();"/>
+  </commandset>
 
   <!--============================= POPUPS ============================== -->
 
   <popupset id="psPopups">
-    <popup id="ppStyleRuleContext" onpopupshowing="return viewer.onpopupshowingRulePopup()">
-      <menuitem label="&newRules.label;" oncommand="viewer.cmdNewRule()"/>
-      <menuitem label="&deleteSelectedRules.label;" oncommand="viewer.cmdDeleteSelectedRule()"/>
-      <menuitem label="&disableSelectedRules.label;" oncommand="viewer.cmdToggleSelectedRule()"/>
-      <menuseparator/>
-      <menuitem label="&openSelectedFileInEditor.label;" oncommand="viewer.cmdOpenSelectedFileInEditor()"/>
+    <popup id="ppStyleRulesContext"
+           onpopupshowing="return viewer.onPopupShowing('cmdsRules')">
+      <menuitem label="&copySelectedFileURI.label;" id="mnCopySelectedFileURI"
+                command="cmdCopySelectedFileURI"/>
+      <menuitem label="&viewSelectedFileURI.label;" id="mnViewSelectedFileURI"
+                command="cmdViewSelectedFileURI"/>
     </popup>
 
     <popup id="ppStylePropsContext"
-           onpopupshowing="viewer.propOnPopupShowing(this)">
+           onpopupshowing="viewer.onPopupShowing('cmdsProps')">
       <menuitem id="mnEditCopy"/>
       <menuseparator/>
       <menuitem id="mnEditInsert"/>
@@ -58,7 +73,8 @@
   <!--============================= CONTENT ============================== -->
 
   <tree id="olStyleRules" class="plain" flex="1" persist="height"
-        seltype="single" onselect="viewer.onRuleSelect()">
+        seltype="single" onselect="viewer.onRuleSelect()"
+        contextmenu="ppStyleRulesContext">
     <treecols>
       <treecol id="olcRule" label="&styleRule.label;" flex="1"/>
       <splitter class="tree-splitter"/>
