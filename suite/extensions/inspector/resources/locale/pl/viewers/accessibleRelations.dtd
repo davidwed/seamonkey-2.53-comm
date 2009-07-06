@@ -35,8 +35,9 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY relationType.label "Rodzaj relacji">
+<!ENTITY relationType.label "Typ relacji">
 <!ENTITY role.label "Rola">
 <!ENTITY nodeName.label "Nazwa węzła">
 <!ENTITY relations.label "Relacje: ">
 <!ENTITY relationTargets.label "Cele relacji: ">
+

@@ -36,7 +36,7 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY eventType.label "Rodzaj zdarzenia">
+<!ENTITY eventType.label "Typ zdarzenia">
 <!ENTITY eventTime.label "Czas">
 <!ENTITY eventNodeName.label "Nazwa węzła">
 <!ENTITY clearEventList.label "Wyczyść listę zdarzeń">

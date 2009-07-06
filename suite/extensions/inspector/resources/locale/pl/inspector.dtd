@@ -1,3 +1,4 @@
+
 <!ENTITY Inspector.title "Inspektor DOM">
 
 <!ENTITY thDOMNodes.label "Węzły DOM">
@@ -12,33 +13,33 @@
 
 <!ENTITY mnFile.label "Plik">
 <!ENTITY mnFile.accesskey "P">
-  <!ENTITY mnInspectContentDocument.label "Zbadaj zwykły dokument">
-  <!ENTITY mnInspectContentDocument.accesskey "b">
-  <!ENTITY mnInspectChromeDocument.label "Zbadaj dokument chrome">
-  <!ENTITY mnInspectChromeDocument.accesskey "a">
-  <!ENTITY cmdShowOpenURLDialog.label "Zbadaj URL...">
-  <!ENTITY cmdShowOpenURLDialog.accesskey "u">
-  <!ENTITY cmdSave.label "Zapisz DOM jako...">
-  <!ENTITY cmdSave.accesskey "s">  
-  <!ENTITY cmdClose.label "Zamknij">
-  <!ENTITY cmdClose.accesskey "Z">
-  <!ENTITY cmdExit.label "Zakończ">
-  <!ENTITY cmdExit.accesskey "k">
+<!ENTITY mnInspectContentDocument.label "Zbadaj zwykły dokument">
+<!ENTITY mnInspectContentDocument.accesskey "b">
+<!ENTITY mnInspectChromeDocument.label "Zbadaj dokument chrome">
+<!ENTITY mnInspectChromeDocument.accesskey "a">
+<!ENTITY cmdShowOpenURLDialog.label "Zbadaj URL…">
+<!ENTITY cmdShowOpenURLDialog.accesskey "U">
+<!ENTITY cmdSave.label "Zapisz DOM jako…">
+<!ENTITY cmdSave.accesskey "s">
+<!ENTITY cmdClose.label "Zamknij">
+<!ENTITY cmdClose.accesskey "Z">
+<!ENTITY cmdExit.label "Zakończ">
+<!ENTITY cmdExit.accesskey "k">
 
 <!ENTITY mnEdit.label "Edycja">
 <!ENTITY mnEdit.accesskey "E">
-  <!ENTITY cmdUndo.label "Cofnij">
-  <!ENTITY cmdUndo.accesskey "C">
-  <!ENTITY cmdRedo.label "Przywróć">
-  <!ENTITY cmdRedo.accesskey "r">
-  <!ENTITY cmdCut.label "Wytnij">
-  <!ENTITY cmdCut.accesskey "t">
-  <!ENTITY cmdCopy.label "Kopiuj">
-  <!ENTITY cmdCopy.accesskey "K">
-  <!ENTITY cmdPaste.label "Wklej">
-  <!ENTITY cmdPaste.accesskey "e">
-  <!ENTITY cmdDelete.label "Usuń">
-  <!ENTITY cmdDelete.accesskey "U">
+<!ENTITY cmdUndo.label "Cofnij">
+<!ENTITY cmdUndo.accesskey "C">
+<!ENTITY cmdRedo.label "Przywróć">
+<!ENTITY cmdRedo.accesskey "r">
+<!ENTITY cmdCut.label "Wytnij">
+<!ENTITY cmdCut.accesskey "t">
+<!ENTITY cmdCopy.label "Kopiuj">
+<!ENTITY cmdCopy.accesskey "K">
+<!ENTITY cmdPaste.label "Wklej">
+<!ENTITY cmdPaste.accesskey "e">
+<!ENTITY cmdDelete.label "Usuń">
+<!ENTITY cmdDelete.accesskey "U">
 
 <!ENTITY mnSearch.label "Szukaj">
 <!ENTITY mnSearch.accesskey "S">

@@ -39,8 +39,9 @@
 <!ENTITY descIsFromUserInput.label "Wprowadzony przez użytkownika: ">
 <!ENTITY descState.label "Stan: ">
 <!ENTITY descIsEnabled.label "Stan włączony: ">
-<!ENTITY descStartOffset.label "Przesunięcie początkowe: ">
+<!ENTITY descStartOffset.label "Offset początkowy: ">
 <!ENTITY descLength.label "Długość: ">
-<!ENTITY descIsInserted.label "Wstawiony tekst: ">
+<!ENTITY descIsInserted.label "Tekst wstawiony: ">
 <!ENTITY descModifiedText.label "Tekst zmodyfikowany: ">
-<!ENTITY descCaretOffset.label "Przesunięcie karetki: ">
+<!ENTITY descCaretOffset.label "Offset kursora: ">
+

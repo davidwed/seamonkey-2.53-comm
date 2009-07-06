@@ -9,9 +9,8 @@
 <!ENTITY mnEditPaste.label "Wklej">
 <!ENTITY mnEditPaste.accesskey "e">
 <!ENTITY mnEditInsert.label "Wstaw">
-<!ENTITY mnEditInsert.accesskey "w">
+<!ENTITY mnEditInsert.accesskey "W">
 <!ENTITY mnEditEdit.label "Edytuj">
 <!ENTITY mnEditEdit.accesskey "d">
 <!ENTITY mnEditDelete.label "Usuń">
 <!ENTITY mnEditDelete.accesskey "s">
-
