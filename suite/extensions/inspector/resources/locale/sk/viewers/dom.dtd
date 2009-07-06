@@ -38,7 +38,7 @@
 #endif
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY cmdShowFindDialog.label "Hľadať uzly...">
+<!ENTITY cmdShowFindDialog.label "Hľadať uzly…">
 <!ENTITY cmdShowFindDialog.accesskey "H">
 <!ENTITY cmdShowFindDialog.accelkey "f">
 
@@ -87,7 +87,7 @@
 
 <!ENTITY pseudoClasses.title "Pseudo-triedy">
 
-<!ENTITY findNodes.title "Hľadať uzly...">
+<!ENTITY findNodes.title "Hľadať uzly…">
 <!ENTITY findNodesById.label "ID">
 <!ENTITY findNodesById.accesskey "I">
 <!ENTITY findNodesById.accesskey2 "d">

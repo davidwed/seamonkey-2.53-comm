@@ -19,7 +19,7 @@
   <!ENTITY mnInspectChromeDocument.accesskey "h">
   <!ENTITY cmdShowOpenURLDialog.label "Preskúmať URL">
   <!ENTITY cmdShowOpenURLDialog.accesskey "U">
-  <!ENTITY cmdSave.label "Uložiť DOM ako...">
+  <!ENTITY cmdSave.label "Uložiť DOM ako…">
   <!ENTITY cmdSave.accesskey "a">
   <!ENTITY cmdClose.label "Zavrieť">
   <!ENTITY cmdClose.accesskey "z">

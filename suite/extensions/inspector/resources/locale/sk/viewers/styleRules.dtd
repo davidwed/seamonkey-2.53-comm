@@ -36,13 +36,14 @@
 #endif
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY miFindCSSRules.label "Hľadať pravidlá CSS...">
+<!ENTITY miFindCSSRules.label "Hľadať pravidlá CSS…">
 <!ENTITY miFindCSSRules.accesskey "H">
 
 <!ENTITY newRules.label "Nové">
 <!ENTITY deleteSelectedRules.label "Odstrániť">
 <!ENTITY disableSelectedRules.label "Zakázať">
-<!ENTITY openSelectedFileInEditor.label "Otvoriť súbor v editore">
+<!ENTITY copySelectedFileURI.label "Kopírovať URI">
+<!ENTITY viewSelectedFileURI.label "Zobraziť súbor">
 
 <!-- LOCALIZATION NOTE: DO NOT LOCALIZE "!important" since it is a CSS API -->
 <!ENTITY toggleSelectedImportant.label "Prepnúť !important">
