@@ -37,7 +37,7 @@
 #endif
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY bindingContent.label      "Inhalt">
+<!ENTITY bindingContent.label      "Inhalte">
 <!ENTITY bindingMethods.label      "Methoden">
 <!ENTITY bindingMethodName.label   "Methodenname">
 <!ENTITY bindingProperties.label   "Eigenschaften">
