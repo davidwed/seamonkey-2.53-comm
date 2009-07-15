@@ -42,7 +42,8 @@
 <!ENTITY newRules.label "Nouvelle">
 <!ENTITY deleteSelectedRules.label "Supprimer">
 <!ENTITY disableSelectedRules.label "Désactiver">
-<!ENTITY openSelectedFileInEditor.label "Ouvrir le fichier dans l'éditeur">
+<!ENTITY copySelectedFileURI.label "Copier l'URI">
+<!ENTITY viewSelectedFileURI.label "Afficher le fichier">
 
 <!-- LOCALIZATION NOTE: DO NOT LOCALIZE "!important" since it is a CSS API -->
 <!ENTITY toggleSelectedImportant.label "Basculer !important">
