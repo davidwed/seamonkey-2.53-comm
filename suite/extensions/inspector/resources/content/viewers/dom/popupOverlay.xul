@@ -7,13 +7,13 @@
   
   <popupset id="ppsViewerPopupset">
     <menupopup id="ppViewerContext-dom">
-      <menuitem id="item:find"
+      <menuitem id="item:findPp"
         label="&cmdShowFindDialog.label;"
         accesskey="&cmdShowFindDialog.accesskey;"
         key="key:find"
         observes="cmd:find"/>
 
-      <menuitem id="item:findNext"
+      <menuitem id="item:findNextPp"
         label="&cmdFindNext.label;"
         accesskey="&cmdFindNext.accesskey;"
         key="key:findNext"
@@ -28,28 +28,28 @@
         accesskey="&cmdToggleAttributes.accesskey;"
         observes="cmd:toggleAttributes"/>
 
-      <menuitem id="item:toggleAnon"
+      <menuitem id="item:toggleAnonPp"
         class="menuitem-iconic"
         type="checkbox"
         label="&cmdToggleAnonContent.label;"
         accesskey="&cmdToggleAnonContent.accesskey;"
         observes="cmd:toggleAnon"/>
 
-      <menuitem id="item:toggleAccessibleNodes"
+      <menuitem id="item:toggleAccessibleNodesPp"
                 class="menuitem-iconic"
                 type="checkbox"
                 label="&cmdToggleAccessibleNodes.label;"
                 accesskey="&cmdToggleAccessibleNodes.accesskey;"
                 observes="cmd:toggleAccessibleNodes"/>
 
-      <menuitem id="item:toggleWhitespaceNodes"
+      <menuitem id="item:toggleWhitespaceNodesPp"
         class="menuitem-iconic"
         type="checkbox"
         label="&cmdToggleWhitespaceNodes.label;"
         accesskey="&cmdToggleWhitespaceNodes.accesskey;"
         observes="cmd:toggleWhitespaceNodes"/>
 
-      <menuitem id="item:toggleProcessingInstructions"
+      <menuitem id="item:toggleProcessingInstructionsPp"
                 class="menuitem-iconic"
                 type="checkbox"
                 label="&cmdToggleProcessingInstructions.label;"
@@ -61,13 +61,13 @@
 
   <menupopup id="mppSearch">
 
-    <menuitem id="item:find" position="1"
+    <menuitem id="item:findMpp" position="1"
       label="&cmdShowFindDialog.label;"
       accesskey="&cmdShowFindDialog.accesskey;"
       key="key:find"
       observes="cmd:find"/>
 
-    <menuitem id="item:findNext" position="2"
+    <menuitem id="item:findNextMpp" position="2"
       label="&cmdFindNext.label;"
       accesskey="&cmdFindNext.accesskey;"
       key="key:findNext"
@@ -89,28 +89,28 @@
               accesskey="&cmdFlashSelected.accesskey;"
               observes="cmd:flashSelected"/>
               
-    <menuitem id="item:toggleAnon"
+    <menuitem id="item:toggleAnonMpp"
               class="menuitem-iconic"
               type="checkbox"
               label="&cmdToggleAnonContent.label;"
               accesskey="&cmdToggleAnonContent.accesskey;"
               observes="cmd:toggleAnon"/>
 
-    <menuitem id="item:toggleAccessibleNodes"
+    <menuitem id="item:toggleAccessibleNodesMpp"
               class="menuitem-iconic"
               type="checkbox"
               label="&cmdToggleAccessibleNodes.label;"
               accesskey="&cmdToggleAccessibleNodes.accesskey;"
               observes="cmd:toggleAccessibleNodes"/>
 
-    <menuitem id="item:toggleWhitespaceNodes"
+    <menuitem id="item:toggleWhitespaceNodesMpp"
               class="menuitem-iconic"
               type="checkbox"
               label="&cmdToggleWhitespaceNodes.label;"
               accesskey="&cmdToggleWhitespaceNodes.accesskey;"
               observes="cmd:toggleWhitespaceNodes"/>
       
-    <menuitem id="item:toggleProcessingInstructions"
+    <menuitem id="item:toggleProcessingInstructionsMpp"
               class="menuitem-iconic"
               type="checkbox"
               label="&cmdToggleProcessingInstructions.label;"
@@ -119,5 +119,3 @@
   </menupopup>
 
 </overlay>
-
-        
