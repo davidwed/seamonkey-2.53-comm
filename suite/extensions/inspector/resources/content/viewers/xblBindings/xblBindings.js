@@ -188,27 +188,25 @@ XBLBindings.prototype =
   
   displayBinding: function(aURL)
   {
+    this.mBindingURL = aURL;
     if (aURL) {
-      var doc = document.implementation.createDocument(null, "", null);
-      doc.addEventListener("load", gDocLoadListener, true);
-      doc.load(aURL, "application/xml");
-    
-      this.mBindingDoc = doc;
-      this.mBindingURL = aURL;
+      var req = new XMLHttpRequest();
+      req.addEventListener("load", gDocLoadListener, true);
+      req.open("GET", aURL);
+      req.overrideMimeType("application/xml");
+      req.send(null);
     } else {
-      this.mBindingDoc = null;
-      this.mBindingURL = null;
-      this.doDisplayBinding();
+      this.doDisplayBinding(null);
     }
   },
   
-  doDisplayBinding: function()
+  doDisplayBinding: function(doc)
   {
-    if (this.mBindingDoc) {
+    if (doc) {
       var url = this.mBindingURL;
       var poundPt = url.indexOf("#");
       var id = url.substr(poundPt+1);
-      var bindings = this.mBindingDoc.getElementsByTagName("binding");
+      var bindings = doc.getElementsByTagName("binding");
       var binding = null;
       for (var i = 0; i < bindings.length; ++i) {
         if (bindings[i].getAttribute("id") == id) {
@@ -508,7 +506,7 @@ function(aRow, aCol)
 ////////////////////////////////////////////////////////////////////////////
 //// event listeners
 
-function gDocLoadListener()
+function gDocLoadListener(event)
 {
-  viewer.doDisplayBinding();
+  viewer.doDisplayBinding(event.target.responseXML);
 }
