@@ -12,7 +12,7 @@
 
 <page id="winStyleRules"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+
   <!--============================= SCRIPTS ============================= -->
 
   <script type="application/javascript"
@@ -29,7 +29,7 @@
           src="chrome://inspector/content/jsutil/rdf/RDFU.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
-  <script type="application/javascript" 
+  <script type="application/javascript"
           src="chrome://global/content/viewSourceUtils.js"/>
 
   <!--============================ COMMANDS ============================= -->
@@ -85,7 +85,7 @@
     <treechildren id="olbStyleRules"
                   alternatingbackground="true"/>
   </tree>
-  
+
   <splitter id="splTrees" collapse="after" persist="state">
     <grippy/>
   </splitter>
@@ -94,7 +94,6 @@
         class="plain"
         flex="1"
         persist="height"
-        contextmenu="ppStylePropsContext"
         onselect="viewer.onPropSelect()">
     <treecols>
       <treecol id="olcPropPriority" label="&styleRulePropPriority.label;" class="treecol-image"/>

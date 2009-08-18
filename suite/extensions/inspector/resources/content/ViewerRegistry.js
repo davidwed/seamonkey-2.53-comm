@@ -38,8 +38,8 @@
 /***************************************************************
 * ViewerRegistry -----------------------------------------------
 *  The central registry where information about all installed
-*  viewers is kept.  
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+*  viewers is kept.
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
 *   chrome://inspector/content/jsutil/rdf/RDFU.js
@@ -60,13 +60,13 @@ function ViewerRegistry() // implements inIViewerRegistry
   this.mViewerHash = {};
 }
 
-ViewerRegistry.prototype = 
+ViewerRegistry.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// interface inIViewerRegistry
 
   // not yet formalized...
-  
+
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
 
@@ -75,7 +75,7 @@ ViewerRegistry.prototype =
   mViewerDS: null,
   mViewerHash: null,
   mFilters: null,
-  
+
   get url() { return this.mURL; },
 
   //// Loading Methods
@@ -184,7 +184,7 @@ ViewerRegistry.prototype =
   // Notifies the registry that a viewer has been instantiated, and that
   // it corresponds to a particular entry in the viewer registry.
   //
-  // @param 
+  // @param
   ///////////////////////////////////////////////////////////////////////////
   cacheViewer: function(aViewer, aIndex)
   {
@@ -196,7 +196,7 @@ ViewerRegistry.prototype =
   {
     delete this.mViewerHash[aViewer.uid];
   },
-  
+
   // for previously loaded viewers only
   getViewerByUID: function(aUID)
   {
@@ -245,7 +245,7 @@ ViewerRegistry.prototype =
 ////////////////////////////////////////////////////////////////////////////
 //// Listener Objects
 
-function ViewerRegistryLoadObserver(aTarget) 
+function ViewerRegistryLoadObserver(aTarget)
 {
   this.mTarget = aTarget;
 }
@@ -253,12 +253,12 @@ function ViewerRegistryLoadObserver(aTarget)
 ViewerRegistryLoadObserver.prototype = {
   mTarget: null,
 
-  onError: function(aStatus, aErrorMsg) 
+  onError: function(aStatus, aErrorMsg)
   {
     this.mTarget.onError(aStatus, aErrorMsg);
   },
 
-  onDataSourceReady: function(aDS) 
+  onDataSourceReady: function(aDS)
   {
     this.mTarget.onLoad(aDS);
   }

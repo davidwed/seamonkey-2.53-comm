@@ -73,7 +73,7 @@
     <rdf:li><rdf:Description
       ins:uid="styleRules"
       ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="CSS Style Rules"
+      ins:description="CSS Rules"
       ins:filter="return object instanceof Components.interfaces.nsIDOMElement || object instanceof Components.interfaces.nsIDOMCSSStyleSheet;"/>
     </rdf:li>
 
