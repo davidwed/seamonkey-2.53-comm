@@ -103,7 +103,7 @@
           if (linkedViewer.uid != "accessibleEvents")
             return false;
 
-          return object.getUserData("accessibleEvent");
+          return object[" accessible event "];
         ]]></ins:filter>
       </rdf:Description>
     </rdf:li>

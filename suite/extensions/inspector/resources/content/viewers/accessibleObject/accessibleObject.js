@@ -84,7 +84,7 @@ function AccessibleObjectViewer_initialize()
     {
       var accObject = null;
       try {
-        accObject = aObject.getUserData("accessible");
+        accObject = aObject[" accessible "];
         if (accObject)
           XPCU.QI(accObject, nsIAccessible);
         else

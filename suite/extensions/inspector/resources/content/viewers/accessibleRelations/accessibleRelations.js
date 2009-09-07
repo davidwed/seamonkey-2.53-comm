@@ -176,7 +176,7 @@ function AccessibleRelationsView(aNode)
 {
   this.mNode = aNode;
 
-  this.mAccessible = aNode.getUserData("accessible");
+  this.mAccessible = aNode[" accessible "];
   if (this.mAccessible)
     XPCU.QI(this.mAccessible, nsIAccessible);
   else
@@ -268,7 +268,7 @@ function getDOMNode(aRow)
     return null;
 
   var DOMNode = accessNode.DOMNode;
-  DOMNode.setUserData("accessible", accessNode, null);
+  DOMNode[" accessible "] = accessNode;
   return DOMNode;
 }
 

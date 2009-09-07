@@ -227,8 +227,8 @@ function getDOMNode(aRow)
   var DOMNode = this.mEvents[aRow].node;
   var accessNode = this.mEvents[aRow].accessnode;
 
-  DOMNode.setUserData("accessible", accessNode, null);
-  DOMNode.setUserData("accessibleEvent", event, null);
+  DOMNode[" accessible "] = accessNode;
+  DOMNode[" accessible event "] = event;
   return DOMNode;
 }
 

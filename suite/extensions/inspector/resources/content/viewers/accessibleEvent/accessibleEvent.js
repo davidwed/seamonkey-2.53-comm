@@ -129,7 +129,7 @@ AccessibleEventViewer.prototype =
   {
     this.clearView();
 
-    this.mAccEventSubject = this.mSubject.getUserData("accessibleEvent");
+    this.mAccEventSubject = this.mSubject[" accessible event "];
     if (!this.mAccEventSubject)
       return;
 

@@ -417,7 +417,7 @@ function getDOMNodeFor(aAccessible)
 {
   var accessNode = XPCU.QI(aAccessible, nsIAccessNode);
   var DOMNode = accessNode.DOMNode;
-  DOMNode.setUserData("accessible", aAccessible, null);
+  DOMNode[" accessible "] = aAccessible;
   return DOMNode;
 }
 
