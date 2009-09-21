@@ -281,7 +281,7 @@ StyleRulesViewer.prototype =
     // API awkwardness
     var min = {}, max = {};
     this.mPropsView.selection.getRangeAt(0, min, max);
-    return dec.item(min);
+    return dec.item(min.value);
   },
 
   getSelectedRule: function SRVr_GetSelectedRule()
@@ -579,6 +579,7 @@ StyleRuleView.prototype.toggleOpenState = function SRV_ToggleOpenState(aRow)
   this.mOpen[aRow] = !this.mOpen[aRow];
   viewer.mRuleTree.treeBoxObject.rowCountChanged(aRow + 1,
     this.mSheetRules.length - oldLength);
+  viewer.mRuleTree.treeBoxObject.invalidateRow(aRow);
 }
 
 ////////////////////////////////////////////////////////////////////////////
