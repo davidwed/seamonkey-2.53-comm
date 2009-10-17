@@ -52,12 +52,29 @@
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript"
+          src="chrome://inspector/content/hooks.js"/>
+  <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
   <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
+
+  <script type="application/javascript"
           src="chrome://inspector/content/viewers/accessibleProps/accessibleProps.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/viewers/accessibleProps/accessiblePropViewerMgr.js"/>
 
   <stringbundle id="accessiblePropsBundle"
                 src="chrome://inspector/locale/viewers/accessibleProps.properties"/>
+
+  <commandset id="cmdsJSObjectViewer">
+    <command id="cmdInspectInNewView"
+             oncommand="viewer.cmdInspectInNewView();"/>
+  </commandset>
+
+  <menupopup id="popupContext">
+    <menuitem label="&inspectNewWindow.label;"
+              observes="cmdInspectInNewView"/>
+  </menupopup>
 
   <grid>
     <columns>
@@ -111,12 +128,83 @@
     </rows>
   </grid>
 
-  <tree flex="1">
-    <treecols>
-      <treecol label="attrKey" flex="1"/>
-      <treecol label="attrValue" flex="2"/>
-    </treecols>
-    <treechildren id="trAttrBody"/>
-  </tree>
+  <tabbox id="tabviewers" flex="1">
+    <tabs>
+      <tab id="tab_attributes" label="&tabAttrs.label;"/>
+      <tab id="tab_tablecell" label="&tabTableCell.label;"/>
+    </tabs>
+    <tabpanels flex="1">
+
+      <!-- Object attributes tab panel -->
+      <tree>
+        <treecols>
+          <treecol label="&colAttrName.label;" flex="1"/>
+          <treecol label="&colAttrValue.label;" flex="2"/>
+        </treecols>
+        <treechildren id="trAttrBody"/>
+      </tree>
+
+      <!-- Table cell properties tab panel -->
+      <vbox>
+        <grid>
+          <columns>
+            <column/>
+            <column flex="1"/>
+            <column/>
+            <column flex="1"/>
+          </columns>
+          <rows>
+            <row>
+              <description>&descColumnIdx.label;</description>
+              <description id="tableCell:columnIndex"/>
+
+              <description>&descRowIdx.label;</description>
+              <description id="tableCell:rowIndex"/>
+            </row>
+            <row>
+              <description>&descColumnExtent.label;</description>
+              <description id="tableCell:columnExtent"/>
+
+              <description>&descRowExtent.label;</description>
+              <description id="tableCell:rowExtent"/>
+            </row>
+            <row>
+              <description>&descIsSelected.label;</description>
+              <description id="tableCell:isSelected"/>
+            </row>
+          </rows>
+        </grid>
+
+        <tree id="tableCell:accObjects"
+              flex="1"
+              context="popupContext">
+
+          <treecols>
+            <treecol id="tableCell:property"
+                     primary="true"
+                     label="&colProp.label;"
+                     persist="width,hidden,ordinal"
+                     flex="1"/>
+            <splitter class="tree-splitter"/>
+            <treecol id="tableCell:role"
+                     label="&colRole.label;"
+                     persist="width,hidden,ordinal"
+                     flex="1"/>
+            <splitter class="tree-splitter"/>
+            <treecol id="tableCell:name"
+                     label="&colName.label;"
+                     persist="width,hidden,ordinal"
+                     flex="1"/>
+            <splitter class="tree-splitter"/>
+            <treecol id="tableCell:nodeName"
+                     label="&colNodeName.label;"
+                     persist="width,hidden,ordinal"
+                     flex="1"/>
+          </treecols>
+          <treechildren/>
+        </tree>
+      </vbox>
+    </tabpanels>
+  </tabbox>
 </page>
 

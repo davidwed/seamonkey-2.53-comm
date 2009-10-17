@@ -42,6 +42,7 @@
 
 var viewer;
 var gBundle;
+var gAccService = null;
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Global Constants
@@ -50,6 +51,7 @@ const kAccessibleRetrievalCID = "@mozilla.org/accessibleRetrieval;1";
 
 const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
 const nsIAccessible = Components.interfaces.nsIAccessible;
+const nsIAccessNode = Components.interfaces.nsIAccessNode;
 
 const nsIPropertyElement = Components.interfaces.nsIPropertyElement;
 
@@ -72,8 +74,9 @@ function AccessiblePropsViewer()
 {
   this.mURL = window.location;
   this.mObsMan = new ObserverManager(this);
-  this.mAccService = XPCU.getService(kAccessibleRetrievalCID,
-                                     nsIAccessibleRetrieval);
+
+  gAccService = XPCU.getService(kAccessibleRetrievalCID,
+                                nsIAccessibleRetrieval);
 }
 
 AccessiblePropsViewer.prototype =
@@ -82,6 +85,7 @@ AccessiblePropsViewer.prototype =
   mPane: null,
   mAccSubject: null,
   mAccService: null,
+  mPropViewerMgr: null,
 
   get uid() { return "accessibleProps" },
   get pane() { return this.mPane },
@@ -96,6 +100,8 @@ AccessiblePropsViewer.prototype =
 
   initialize: function initialize(aPane)
   {
+    this.mPropViewerMgr = new accessiblePropViewerMgr(aPane);
+
     this.mPane = aPane;
     aPane.notifyViewerReady(this);
   },
@@ -112,7 +118,8 @@ AccessiblePropsViewer.prototype =
 
   destroy: function destroy() {},
 
-  // event dispatching
+  /////////////////////////
+  //// event dispatching
 
   addObserver: function addObserver(aEvent, aObserver)
   {
@@ -121,6 +128,14 @@ AccessiblePropsViewer.prototype =
   removeObserver: function removeObserver(aEvent, aObserver)
   {
     this.mObsMan.removeObserver(aEvent, aObserver);
+  },
+
+  /////////////////////////
+  //// utils
+
+  cmdInspectInNewView: function cmdInspectInNewView()
+  {
+    this.mPropViewerMgr.inspectInNewView();
   },
 
   // private
@@ -133,7 +148,7 @@ AccessiblePropsViewer.prototype =
       if (this.mAccSubject)
         XPCU.QI(this.mAccSubject, nsIAccessible);
       else
-        this.mAccSubject = this.mAccService.getAccessibleFor(this.mSubject);
+        this.mAccSubject = gAccService.getAccessibleFor(this.mSubject);
     } catch(e) {
       dump("Failed to get accessible object for node.");
       return;
@@ -172,42 +187,7 @@ AccessiblePropsViewer.prototype =
     document.getElementById("bounds-height").textContent =
       gBundle.getFormattedString("accBoundsHeight", [height.value]);
 
-    // accessible attributes
-    var attrs = this.mAccSubject.attributes;
-    if (attrs) {
-      var enumerate = attrs.enumerate();
-      while (enumerate.hasMoreElements())
-        this.addAccessibleAttribute(enumerate.getNext());
-    }
-  },
-
-  addAccessibleAttribute: function addAccessibleAttribute(aElement)
-  {
-    var prop = XPCU.QI(aElement, nsIPropertyElement);
-
-    var trAttrBody = document.getElementById("trAttrBody");
-
-    var ti = document.createElement("treeitem");
-    var tr = document.createElement("treerow");
-
-    var tc = document.createElement("treecell");
-    tc.setAttribute("label", prop.key);
-    tr.appendChild(tc);
-
-    tc = document.createElement("treecell");
-    tc.setAttribute("label", prop.value);
-    tr.appendChild(tc);
-
-    ti.appendChild(tr);
-
-    trAttrBody.appendChild(ti);
-  },
-
-  removeAccessibleAttributes: function removeAccessibleAttributes()
-  {
-    var trAttrBody = document.getElementById("trAttrBody");
-    while (trAttrBody.hasChildNodes())
-      trAttrBody.removeChild(trAttrBody.lastChild)
+    this.mPropViewerMgr.updateViews(this.mAccSubject);
   },
 
   clearView: function clearView()
@@ -216,7 +196,7 @@ AccessiblePropsViewer.prototype =
     for (var i = 0; i < containers.length; ++i)
       containers[i].textContent = "";
 
-    this.removeAccessibleAttributes();
+    this.mPropViewerMgr.clearViews();
   },
 
   get role()
@@ -224,7 +204,7 @@ AccessiblePropsViewer.prototype =
     // 'finalRole' is replaced by 'role' property in Gecko 1.9.2.
     var role = "finalRole" in this.mAccSubject ?
       this.mAccSubject.finalRole : this.mAccSubject.role;
-    return this.mAccService.getStringRole(role);
+    return gAccService.getStringRole(role);
   },
 
   get name()
@@ -256,7 +236,8 @@ AccessiblePropsViewer.prototype =
 
     var list = [];
 
-    states = this.mAccService.getStringStates(stateObj.value, extStateObj.value);
+    var states = gAccService.getStringStates(stateObj.value,
+                                             extStateObj.value);
 
     for (var i = 0; i < states.length; i++)
       list.push(states.item(i));
