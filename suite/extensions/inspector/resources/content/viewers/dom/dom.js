@@ -754,7 +754,8 @@ DOMViewer.prototype =
     // Keep searching until a pre-created ancestor is
     // found, and then open each ancestor until
     // the found element is created
-    var walker = this.createDOMWalker(aEl);
+    var domutils =
+      XPCU.getService("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
     var line = [];
     var parent = aEl;
     var index = null;
@@ -763,7 +764,8 @@ DOMViewer.prototype =
       line.push(parent);
       if (index < 0) { 
         // row for this node hasn't been created yet
-        parent = walker.parentNode();
+        parent =
+          domutils.getParentForNode(parent, this.mDOMView.showAnonymousContent);
       } else
         break;
     } 
