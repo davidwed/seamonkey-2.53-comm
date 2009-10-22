@@ -36,6 +36,7 @@
    -
 #endif
    - ***** END LICENSE BLOCK ***** -->
+
 <!ENTITY descRole.label "Úloha:">
 <!ENTITY descName.label "Názov:">
 <!ENTITY descDescription.label "Popis:">
@@ -43,4 +44,16 @@
 <!ENTITY descState.label "Stav:">
 <!ENTITY descActionName.label "Názov akcie:">
 <!ENTITY descBounds.label "Okraje:">
-
+<!ENTITY tabAttrs.label "Atribúty objektu">
+<!ENTITY colAttrName.label "Názov">
+<!ENTITY colAttrValue.label "Hodnota">
+<!ENTITY tabTableCell.label "Bunka tabuľky">
+<!ENTITY descColumnIdx.label "Index stĺpca:">
+<!ENTITY descRowIdx.label "Index riadka:">
+<!ENTITY descColumnExtent.label "Rozsah stĺpca:">
+<!ENTITY descRowExtent.label "Rozsah riadka:">
+<!ENTITY descIsSelected.label "Je vybraný:">
+<!ENTITY colProp.label "Vlastnosť">
+<!ENTITY colRole.label "Rola">
+<!ENTITY colName.label "Názov">
+<!ENTITY colNodeName.label "Názov uzla">
