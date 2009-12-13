@@ -25,6 +25,7 @@
  *   Chiaki Koufugata chiaki@mozilla.gr.jp UI i18n
  *   Samuel Sieb, samuel@sieb.net, MIRC color codes, munger menu, and various
  *   James Ross, silver@warwickcompsoc.co.uk
+ *   Gijs Kruitbosch, gijskruitbosch@gmail.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -40,11 +41,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.85";
+const __cz_version   = "0.9.86";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.85";
+const __cz_locale    = "0.9.86";
 
 var warn;
 var ASSERT;
@@ -388,14 +389,49 @@ function initStatic()
     }
     catch (ex)
     {
-        display(getMsg(MSG_ERR_INPUTHISTORY_NOT_WRITABLE,
-                       inputHistoryFile.path),
-                MT_ERROR);
+        msg = getMsg(MSG_ERR_INPUTHISTORY_NOT_WRITABLE, inputHistoryFile.path);
+        setTimeout("client.display(" + msg.quote() + ", MT_ERROR)", 0);
         dd(formatException(ex));
         client.inputHistoryLogger = null;
     }
     if (client.inputHistoryLogger)
         client.inputHistory = client.inputHistoryLogger.read().reverse();
+
+    // Set up URL collector.
+    var urlsFile = new nsLocalFile(client.prefs["profilePath"]);
+    urlsFile.append("urls.txt");
+    try
+    {
+        client.urlLogger = new TextLogger(urlsFile.path,
+                                          client.prefs["urls.store.max"]);
+    }
+    catch (ex)
+    {
+        msg = getMsg(MSG_ERR_URLS_NOT_WRITABLE, urlsFile.path);
+        setTimeout("client.display(" + msg.quote() + ", MT_ERROR)", 0);
+        dd(formatException(ex));
+        client.urlLogger = null;
+    }
+
+    // Migrate old list preference to file.
+    try
+    {
+        // Throws if the preference doesn't exist.
+        if (client.urlLogger)
+            var urls = client.prefManager.prefBranch.getCharPref("urls.list");
+    }
+    catch (ex)
+    {
+    }
+    if (urls)
+    {
+        // Add the old URLs to the new file.
+        urls = client.prefManager.stringToArray(urls);
+        for (var i = 0; i < urls.length; i++)
+            client.urlLogger.append(urls[i]);
+        // Completely purge the old preference.
+        client.prefManager.prefBranch.clearUserPref("urls.list");
+    }
 
     client.defaultCompletion = client.COMMAND_CHAR + "help ";
 
@@ -743,19 +779,22 @@ function processStartupScripts()
 {
     client.plugins = new Array();
     var scripts = client.prefs["initialScripts"];
+    var basePath = getURLSpecFromFile(client.prefs["profilePath"]); 
+    var baseURL = client.iosvc.newURI(basePath, null, null);
     for (var i = 0; i < scripts.length; ++i)
     {
-        if (scripts[i].search(/^file:|chrome:/i) != 0)
+        var url = client.iosvc.newURI(scripts[i], null, baseURL);
+        if (url.scheme != "file" && url.scheme != "chrome")
         {
             display(getMsg(MSG_ERR_INVALID_SCHEME, scripts[i]), MT_ERROR);
             continue;
         }
 
-        var path = getFileFromURLSpec(scripts[i]);
+        var path = getFileFromURLSpec(url.spec);
 
         if (!path.exists())
         {
-            display(getMsg(MSG_ERR_ITEM_NOT_FOUND, scripts[i]), MT_WARN);
+            display(getMsg(MSG_ERR_ITEM_NOT_FOUND, url.spec), MT_WARN);
             continue;
         }
 
@@ -1207,6 +1246,89 @@ function getUserlistContext(cx)
         }
     }
     cx.userCount = cx.userList.length;
+
+    return cx;
+}
+
+function getViewsContext(cx)
+{
+    function addView(view)
+    {
+        // We only need the view to have messages, so we accept hidden views.
+        if (!("messages" in view))
+            return;
+
+        var url = view.getURL();
+        if (url in urls)
+            return;
+
+        var label = view.viewName;
+        if (!getTabForObject(view))
+            label = getMsg(MSG_VIEW_HIDDEN, [label]);
+
+        var types = ["IRCClient", "IRCNetwork", "IRCDCCChat",
+                     "IRCDCCFileTransfer"];
+        var typesNetwork = ["IRCNetwork", "IRCChannel", "IRCUser"];
+        var group = String(arrayIndexOf(types, view.TYPE));
+        if (arrayIndexOf(typesNetwork, view.TYPE) != -1)
+            group = "1-" + getObjectDetails(view).network.viewName;
+
+        var sort = group + "-" + view.viewName;
+        if (view.TYPE == "IRCNetwork")
+            sort = group;
+
+        cx.views.push({url: url, label: label, group: group, sort: sort});
+        urls[url] = true
+    };
+
+    function sortViews(a, b)
+    {
+        if (a.sort < b.sort)
+            return -1;
+        if (a.sort > b.sort)
+            return 1;
+        return 0;
+    };
+
+    if (!cx)
+        cx = new Object();
+    cx.__proto__ = getObjectDetails(client.currentObject);
+
+    cx.views = new Array();
+    var urls = new Object();
+
+    /* XXX The code here works its way through all the open views *and* any
+     * possibly visible objects in the object model. This is necessary because
+     * occasionally objects get removed from the object model while still
+     * having a view open. See bug 459318 for one such case. Note that we
+     * won't be able to correctly switch to the "lost" view but showing it is
+     * less confusing than not.
+     */
+
+    for (var i in client.viewsArray)
+        addView(client.viewsArray[i].source);
+
+    addView(client);
+    for (var n in client.networks)
+    {
+        addView(client.networks[n]);
+        for (var s in client.networks[n].servers) {
+            var server = client.networks[n].servers[s];
+            for (var c in server.channels)
+                addView(server.channels[c]);
+            for (var u in server.users)
+                addView(server.users[u]);
+        }
+    }
+
+    for (var u in client.dcc.users)
+        addView(client.dcc.users[u]);
+    for (var i = 0; i < client.dcc.chats.length; i++)
+        addView(client.dcc.chats[i]);
+    for (var i = 0; i < client.dcc.files.length; i++)
+        addView(client.dcc.files[i]);
+
+    cx.views.sort(sortViews);
 
     return cx;
 }
@@ -1777,104 +1899,96 @@ function gotoIRCURL(url, e)
         return;
     }
 
+    // Convert a request for a server to a network if we know it.
+    if (url.isserver)
+    {
+        for (var n in client.networks)
+        {
+            for (var s in client.networks[n].servers)
+            {
+                if ((client.networks[n].servers[s].hostname == url.host) &&
+                    (client.networks[n].servers[s].port == url.port))
+                {
+                    url.isserver = false;
+                    url.host = n;
+                    break;
+                }
+            }
+        }
+    }
+
     var network;
 
     if (url.isserver)
     {
-        var alreadyThere = false;
-        var gettingThere = false;
-        for (var n in client.networks)
+        var name = url.host.toLowerCase();
+        if (url.port != 6667)
+            name += ":" + url.port;
+        // There is no temporary network for this server:port, make one up.
+        if (!(name in client.networks))
         {
-            if ((client.networks[n].isConnected()) &&
-                (client.networks[n].primServ.hostname == url.host) &&
-                (client.networks[n].primServ.port == url.port))
-            {
-                /* already connected to this server/port */
-                network = client.networks[n];
-                gettingThere = true;
-                // Have we actually had the 001 reply yet?
-                alreadyThere = (client.networks[n].state == NET_ONLINE);
-                break;
-            }
+            var server = {name: url.host, port: url.port,
+                          isSecure: url.scheme == "ircs"};
+            client.addNetwork(name, [server], true);
         }
-
-        if (!alreadyThere)
-        {
-            if (!gettingThere)
-            {
-                /*
-                dd ("gotoIRCURL: not yet had connected to server" + url.host +
-                    " trying to connect...");
-                */
-
-                // Do we have a password, if needed?
-                var pass = "";
-                if (url.needpass)
-                {
-                    if (url.pass)
-                    {
-                        pass = url.pass;
-                    }
-                    else
-                    {
-                        pass = promptPassword(getMsg(MSG_HOST_PASSWORD,
-                                                     url.host));
-                    }
-                }
-
-                client.pendingViewContext = e;
-                var params = {hostname: url.host, port: url.port,
-                              password: pass};
-                var cmd = (url.scheme == "ircs" ? "sslserver" : "server");
-                network = dispatch(cmd, params);
-                delete client.pendingViewContext;
-            }
-
-            if (!url.target)
-                return;
-
-            if (!("pendingURLs" in network))
-                network.pendingURLs = new Array();
-            network.pendingURLs.unshift({ url: url, e: e });
-            return;
-        }
+        network = client.networks[name];
     }
     else
     {
-        /* parsed as a network name */
+        // There is no network called this, sorry.
         if (!(url.host in client.networks))
         {
             display(getMsg(MSG_ERR_UNKNOWN_NETWORK, url.host));
             return;
         }
-
         network = client.networks[url.host];
-        if (network.state != NET_ONLINE)
-        {
-            /*
-            dd ("gotoIRCURL: not already connected to " +
-                "network " + url.host + " trying to connect...");
-            */
-            var secure = (url.scheme == "ircs" ? true : false);
-            if (!network.isConnected())
-            {
-                client.pendingViewContext = e;
-                client.connectToNetwork(network, secure);
-                delete client.pendingViewContext;
-            }
-
-            if (!url.target)
-                return;
-
-            if (!("pendingURLs" in network))
-                network.pendingURLs = new Array();
-            network.pendingURLs.unshift({ url: url, e: e });
-            return;
-        }
     }
 
-    /* already connected, do whatever comes next in the url */
-    //dd ("gotoIRCURL: connected, time to finish parsing ``" + url + "''");
+    // We should only prompt for a password if we're not connected.
+    if ((network.state == NET_OFFLINE) && url.needpass && !url.pass)
+    {
+        url.pass = promptPassword(getMsg(MSG_HOST_PASSWORD,
+                                         network.unicodeName));
+    }
+
+    // Adjust secure setting for temporary networks (so user can override).
+    if (network.temporary)
+        network.serverList[0].isSecure = url.scheme == "ircs";
+
+    // Adjust password for all servers (so user can override).
+    if (url.pass)
+    {
+        for (var s in network.servers)
+            network.servers[s].password = url.pass;
+    }
+
+    // Start the connection and pend anything else if we're not ready.
+    if (network.state != NET_ONLINE)
+    {
+        client.pendingViewContext = e;
+        if (!network.isConnected())
+        {
+            client.connectToNetwork(network, url.scheme == "ircs");
+        }
+        else
+        {
+            if (!network.messages)
+                network.displayHere(getMsg(MSG_NETWORK_OPENED, network.unicodeName));
+            dispatch("set-current-view", { view: network });
+        }
+        delete client.pendingViewContext;
+
+        if (!url.target)
+            return;
+
+        // We're not completely online, so everything else is pending.
+        if (!("pendingURLs" in network))
+            network.pendingURLs = new Array();
+        network.pendingURLs.unshift({ url: url, e: e });
+        return;
+    }
+
+    // We're connected now, process the target.
     if (url.target)
     {
         var targetObject;
@@ -2335,7 +2449,7 @@ function updateNetwork()
     {
         if (o.server.me)
             nick = o.server.me.unicodeName;
-        lag = (o.server.lag != -1) ? o.server.lag : MSG_UNKNOWN;
+        lag = (o.server.lag != -1) ? o.server.lag.toFixed(2) : MSG_UNKNOWN;
     }
     client.statusBar["header-url"].setAttribute("value",
                                                  client.currentObject.getURL());
@@ -2934,7 +3048,9 @@ function replaceColorCodes(msg)
     // Find things that look like URLs and escape the color code inside of those
     // to prevent munging the URLs resulting in broken links. Leave codes at
     // the start of the URL alone.
-    msg = msg.replace(new RegExp(client.linkRE.source, "g"), function(url) {
+    msg = msg.replace(new RegExp(client.linkRE.source, "g"), function(url, _foo, scheme) {
+        if (!client.checkURLScheme(scheme))
+            return url;
         return url.replace(/%[BC][0-9A-Fa-f]/g, function(hex, index) {
             // as JS does not support lookbehind and we don't want to consume the
             // preceding character, we test for an existing %% manually
@@ -3083,6 +3199,273 @@ function client_statuschange (webProgress, request, status, message)
 client.progressListener.onSecurityChange =
 function client_securitychange (webProgress, request, state)
 {
+}
+
+client.installPlugin =
+function cli_installPlugin(name, source)
+{
+    function getZipEntry(reader, entryEnum)
+    {
+        // nsIZipReader was rewritten...
+        var itemName = entryEnum.getNext();
+        if (typeof itemName != "string")
+            name = itemName.QueryInterface(nsIZipEntry).name;
+        return itemName;
+    };
+    function checkZipMore(items)
+    {
+        return (("hasMoreElements" in items) && items.hasMoreElements()) ||
+               (("hasMore" in items) && items.hasMore());
+    };
+
+    const DIRECTORY_TYPE = Components.interfaces.nsIFile.DIRECTORY_TYPE;
+    const CZ_PI_ABORT = "CZ_PI_ABORT";
+    const nsIZipEntry = Components.interfaces.nsIZipEntry;
+
+    var dest;
+    // Find a suitable location if there was none specified.
+    var destList = client.prefs["initialScripts"];
+    if ((destList.length == 0) ||
+        ((destList.length == 1) && /^\s*$/.test(destList[0])))
+    {
+        // Reset to default because it is empty.
+        try
+        {
+            client.prefManager.clearPref("initialScripts");
+        }
+        catch(ex) {/* If this really fails, we're mostly screwed anyway */}
+        destList = client.prefs["initialScripts"];
+    }
+
+    // URLs for initialScripts can be relative (the default is):
+    var profilePath = getURLSpecFromFile(client.prefs["profilePath"]);
+    profilePath = client.iosvc.newURI(profilePath, null, null);
+    for (var i = 0; i < destList.length; i++)
+    {
+        var destURL = client.iosvc.newURI(destList[i], null, profilePath);
+        var file = new nsLocalFile(getFileFromURLSpec(destURL.spec).path);
+        if (file.exists() && file.isDirectory()) {
+            // A directory that exists! We'll take it!
+            dest = file.clone();
+            break;
+        }
+    }
+    if (!dest) {
+        display(MSG_INSTALL_PLUGIN_ERR_INSTALL_TO, MT_ERROR);
+        return;
+    }
+
+    try {
+        if (typeof source == "string")
+            source = getFileFromURLSpec(source);
+    }
+    catch (ex)
+    {
+        display(getMSg(MSG_INSTALL_PLUGIN_ERR_CHECK_SD, ex), MT_ERROR);
+        return;
+    }
+
+    display(getMsg(MSG_INSTALL_PLUGIN_INSTALLING, [source.path, dest.path]),
+            MT_INFO);
+
+    if (source.path.match(/\.(jar|zip)$/i))
+    {
+        try
+        {
+            var zipReader = newObject("@mozilla.org/libjar/zip-reader;1",
+                                      "nsIZipReader");
+            // Gah at changing APIs:
+            if ("init" in zipReader)
+            {   
+                zipReader.init(source);
+                zipReader.open();
+            }
+            else
+            {
+                zipReader.open(source);
+            }
+
+            // This is set to the base path found on ALL items in the zip file.
+            // when we extract, this WILL BE REMOVED from all paths.
+            var zipPathBase = "";
+            // This always points to init.js, even if we're messing with paths.
+            var initPath = "init.js";
+
+            // Look for init.js within a directory...
+            var items = zipReader.findEntries("*/init.js");
+            while (checkZipMore(items))
+            {
+                var itemName = getZipEntry(zipReader, items);
+                // Do we already have one?
+                if (zipPathBase)
+                {
+                    display(MSG_INSTALL_PLUGIN_ERR_MANY_INITJS, MT_WARN);
+                    throw CZ_PI_ABORT;
+                }
+                zipPathBase = itemName.match(/^(.*\/)init.js$/)[1];
+                initPath = itemName;
+            }
+
+            if (zipPathBase)
+            {
+                // We have a base for init.js, assert that all files are inside
+                // it. If not, we drop the path and install exactly as-is
+                // instead (which will probably cause it to not work because the
+                // init.js isn't in the right place).
+                items = zipReader.findEntries("*");
+                while (checkZipMore(items))
+                {
+                    itemName = getZipEntry(zipReader, items);
+                    if (itemName.substr(0, zipPathBase.length) != zipPathBase)
+                    {
+                        display(MSG_INSTALL_PLUGIN_ERR_MIXED_BASE, MT_WARN);
+                        zipPathBase = "";
+                        break;
+                    }
+                }
+            }
+
+            // Test init.js for a plugin ID.
+            var initJSFile = getTempFile(client.prefs["profilePath"],
+                                         "install-plugin.temp");
+            zipReader.extract(initPath, initJSFile);
+            var initJSFileH = fopen(initJSFile, "<");
+            var initJSData = initJSFileH.read();
+            initJSFileH.close();
+            initJSFile.remove(false);
+
+            //XXXgijs: this is fragile. Anyone got a better idea?
+            ary = initJSData.match(/plugin\.id\s*=\s*(['"])(.*?)(\1)/);
+            if (ary && (name != ary[2]))
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_WARN_NAME, [name, ary[2]]),
+                        MT_WARN);
+                name = ary[2];
+            }
+
+            dest.append(name);
+
+            if (dest.exists())
+            {
+                display(MSG_INSTALL_PLUGIN_ERR_ALREADY_INST, MT_ERROR);
+                throw CZ_PI_ABORT;
+            }
+            dest.create(DIRECTORY_TYPE, 0700);
+
+            // Actually extract files...
+            var destInit;
+            items = zipReader.findEntries("*");
+            while (checkZipMore(items))
+            {
+                itemName = getZipEntry(zipReader, items);
+                if (!itemName.match(/\/$/))
+                {
+                    var dirs = itemName;
+                    // Remove common path if there is one.
+                    if (zipPathBase)
+                        dirs = dirs.substring(zipPathBase.length);
+                    dirs = dirs.split("/");
+
+                    // Construct the full path for the extracted file...
+                    var zipFile = dest.clone();
+                    for (var i = 0; i < dirs.length - 1; i++)
+                    {
+                        zipFile.append(dirs[i]);
+                        if (!zipFile.exists())
+                            zipFile.create(DIRECTORY_TYPE, 0700);
+                    }
+                    zipFile.append(dirs[dirs.length - 1]);
+
+                    if (zipFile.leafName == "init.js")
+                        destInit = zipFile;
+
+                    zipReader.extract(itemName, zipFile);
+                }
+            }
+
+            var rv = dispatch("load ", {url: getURLSpecFromFile(destInit)});
+            if (rv)
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_DONE, name));
+            }
+            else
+            {
+                display(MSG_INSTALL_PLUGIN_ERR_REMOVING, MT_ERROR);
+                dest.remove(true);
+            }
+        }
+        catch (ex)
+        {
+            if (ex != CZ_PI_ABORT)
+                display(getMsg(MSG_INSTALL_PLUGIN_ERR_EXTRACT, ex), MT_ERROR);
+            zipReader.close();
+            return;
+        }
+        try
+        {
+            zipReader.close();
+        }
+        catch (ex)
+        {
+            display(getMsg(MSG_INSTALL_PLUGIN_ERR_EXTRACT, ex), MT_ERROR);
+        }
+    }
+    else if (source.path.match(/\.(js)$/i))
+    {
+        try
+        {
+            // Test init.js for a plugin ID.
+            var initJSFileH = fopen(source, "<");
+            var initJSData = initJSFileH.read();
+            initJSFileH.close();
+
+            ary = initJSData.match(/plugin\.id\s*=\s*(['"])(.*?)(\1)/);
+            if (ary && (name != ary[2]))
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_WARN_NAME, [name, ary[2]]),
+                        MT_WARN);
+                name = ary[2];
+            }
+
+            dest.append(name);
+
+            if (dest.exists()) {
+                display(MSG_INSTALL_PLUGIN_ERR_ALREADY_INST, MT_ERROR);
+                throw CZ_PI_ABORT;
+            }
+            dest.create(DIRECTORY_TYPE, 0700);
+
+            dest.append("init.js");
+
+            var destFile = fopen(dest, ">");
+            destFile.write(initJSData);
+            destFile.close();
+
+            var rv = dispatch("load", {url: getURLSpecFromFile(dest)});
+            if (rv)
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_DONE, name));
+            }
+            else
+            {
+                display(MSG_INSTALL_PLUGIN_ERR_REMOVING, MT_ERROR);
+                // We've appended "init.js" before, so go back up one level:
+                dest.parent.remove(true);
+            }
+        }
+        catch(ex)
+        {
+            if (ex != CZ_PI_ABORT)
+            {
+                display(getMSg(MSG_INSTALL_PLUGIN_ERR_INSTALLING, ex),
+                        MT_ERROR);
+            }
+        }
+    }
+    else
+    {
+        display(MSG_INSTALL_PLUGIN_ERR_FORMAT, MT_ERROR);
+    }
 }
 
 function syncOutputFrame(obj, nesting)
@@ -3235,12 +3618,13 @@ function getTabForObject(source, create)
         browser.setAttribute("type", "content");
         browser.setAttribute("flex", "1");
         browser.setAttribute("tooltip", "html-tooltip-node");
-        browser.setAttribute("context", "context:messages");
         //browser.setAttribute("onload", "scrollDown(true);");
         browser.setAttribute("onclick",
                              "return onMessageViewClick(event)");
         browser.setAttribute("onmousedown",
                              "return onMessageViewMouseDown(event)");
+        browser.setAttribute("oncontextmenu",
+                             "return onMessageViewContextMenu(event)");
         browser.setAttribute("ondragover",
                              "nsDragAndDrop.dragOver(event, " +
                              "contentDropObserver);");
@@ -3674,7 +4058,7 @@ function updateTimestamps(view)
     }
 }
 
-function updateTimestampFor(view, displayRow)
+function updateTimestampFor(view, displayRow, forceOldStamp)
 {
     var time = new Date(1 * displayRow.getAttribute("timestamp"));
     var tsCell = displayRow.firstChild;
@@ -3688,9 +4072,12 @@ function updateTimestampFor(view, displayRow)
     while (tsCell.lastChild)
         tsCell.removeChild(tsCell.lastChild);
 
-    if (fmt && (!view.prefs["collapseMsgs"] || (fmt != view._timestampLast)))
+    var needStamp = fmt && (forceOldStamp || !view.prefs["collapseMsgs"] ||
+                            (fmt != view._timestampLast));
+    if (needStamp)
         tsCell.appendChild(document.createTextNode(fmt));
-    view._timestampLast = fmt;
+    if (!forceOldStamp)
+        view._timestampLast = fmt;
 }
 
 client.updateMenus =
@@ -3701,6 +4088,24 @@ function c_updatemenus(menus)
         return null;
 
     return this.menuManager.updateMenus(document, menus);
+}
+
+client.checkURLScheme =
+function c_checkURLScheme(url)
+{
+    if (!("schemes" in client))
+    {
+        var pfx = "@mozilla.org/network/protocol;1?name=";
+        var len = pfx.length;
+
+        client.schemes = new Object();
+        for (var c in Components.classes)
+        {
+            if (c.indexOf(pfx) == 0)
+                client.schemes[c.substr(len)] = true;
+        }
+    }
+    return (url in client.schemes);
 }
 
 client.adoptNode =
@@ -4692,25 +5097,7 @@ function addHistory (source, obj, mergeData)
             source.messageCount++;
 
         if (source.messageCount > source.MAX_MESSAGES)
-        {
-            // Get the top of row 2, and subtract the top of row 1.
-            var height = tbody.firstChild.nextSibling.firstChild.offsetTop -
-                         tbody.firstChild.firstChild.offsetTop;
-            var window = getContentWindow(source.frame);
-            var x = window.pageXOffset;
-            var y = window.pageYOffset;
-            tbody.removeChild (tbody.firstChild);
-            --source.messageCount;
-            while (tbody.firstChild && tbody.firstChild.childNodes[1] &&
-                   tbody.firstChild.childNodes[1].getAttribute("class") ==
-                   "msg-data")
-            {
-                --source.messageCount;
-                tbody.removeChild (tbody.firstChild);
-            }
-            if (!checkScroll(source.frame) && (y > height))
-                window.scrollTo(x, y - height);
-        }
+            removeExcessMessages(source);
     }
 
     if (needScroll)
@@ -4720,6 +5107,56 @@ function addHistory (source, obj, mergeData)
         setTimeout(scrollDown, 1000, source.frame, false);
         setTimeout(scrollDown, 2000, source.frame, false);
     }
+}
+
+function removeExcessMessages(source)
+{
+    var window = getContentWindow(source.frame);
+    var rows = source.messages.rows;
+    var lastItemOffset = rows[rows.length - 1].offsetTop;
+    var tbody = source.messages.firstChild;
+    while (source.messageCount > source.MAX_MESSAGES)
+    {
+        if (tbody.firstChild.className == "msg-nested-tr")
+        {
+            var table = tbody.firstChild.firstChild.firstChild;
+            var toBeRemoved = source.messageCount - source.MAX_MESSAGES;
+            // If we can remove the entire table, do that...
+            if (table.rows.length <= toBeRemoved)
+            {
+                tbody.removeChild(tbody.firstChild);
+                source.messageCount -= table.rows.length;
+                table = null; // Don't hang onto this.
+                continue;
+            }
+            // Otherwise, remove rows from this table instead:
+            tbody = table.firstChild;
+        }
+        var nextLastNode = tbody.firstChild.nextSibling;
+        // If the next node has only 2 childNodes,
+        // assume we're dealing with collapsed msgs,
+        // and move the nickname element:
+        if (nextLastNode.childNodes.length == 2)
+        {
+            var nickElem = tbody.firstChild.childNodes[1];
+            var rowspan = nickElem.getAttribute("rowspan") - 1;
+            tbody.firstChild.removeChild(nickElem);
+            nickElem.setAttribute("rowspan", rowspan);
+            nextLastNode.insertBefore(nickElem, nextLastNode.lastChild);
+        }
+        tbody.removeChild(tbody.firstChild);
+        --source.messageCount;
+    }
+    var oldestItem = rows[0];
+    if (oldestItem.className == "msg-nested-tr")
+        oldestItem = rows[0].firstChild.firstChild.firstChild.firstChild;
+    updateTimestampFor(source, oldestItem, true);
+
+    // Scroll by as much as the lowest item has moved up:
+    lastItemOffset -= rows[rows.length - 1].offsetTop;
+    var y = window.pageYOffset;
+    if (!checkScroll(source.frame) && (y > lastItemOffset))
+        window.scrollBy(0, -lastItemOffset);
 }
 
 function findPreviousColumnInfo(table)

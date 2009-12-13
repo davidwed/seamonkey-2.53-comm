@@ -140,6 +140,8 @@ function initMenus()
         items:
         [
          ["cmd-prefs",  {id: "menu_preferences"}],
+         ["install-plugin"],
+         ["-"],
          ["print"],
          ["save"],
          ["-",           {visibleif: NotMac}],
@@ -159,25 +161,37 @@ function initMenus()
          //["attach"],
          //["-"],
          //["manage-networks"],
-         //["manage-plugins"],
          ["-"],
-         // Planned future menu items, not implemented yet.
-         //["-"]
-         //[">popup:current_networks"]
+         [">popup:views"],
          [">popup:nickname"],
+         ["-"],
+         ["clear-view"],
+         ["hide-view", {enabledif: "client.viewsArray.length > 1"}],
+         ["toggle-oas",
+                 {type: "checkbox",
+                  checkedif: "isStartupURL(cx.sourceObject.getURL())"}],
          ["-"],
          ["leave",       {visibleif: ChannelActive}],
          ["rejoin",      {visibleif: ChannelInactive}],
+         ["delete-view", {visibleif: "!" + ChannelActive}],
          ["disconnect",  {visibleif: NetConnected}],
          ["reconnect",   {visibleif: NetDisconnected}],
-         ["-",           {visibleif: "cx.network"}],
-         ["clear-view"],
-         ["hide-view",   {enabledif: "client.viewsArray.length > 1"}],
-         ["delete-view", {enabledif: "client.viewsArray.length > 1"}],
          ["-"],
-         ["toggle-oas",
-                 {type: "checkbox",
-                  checkedif: "isStartupURL(cx.sourceObject.getURL())"}]
+         ["toggle-text-dir"]
+        ]
+    };
+
+    client.menuSpecs["popup:views"] = {
+        label: MSG_MNU_VIEWS,
+        accesskey: getAccessKeyForMenu('MSG_MNU_VIEWS'),
+        getContext: getViewsContext,
+        items:
+        [
+         ["goto-url", {type: "radio",
+                       checkedif: "cx.url == cx.sourceObject.getURL()",
+                       repeatfor: "cx.views",
+                       repeatgroup: "item.group",
+                       repeatmap: "cx.url = item.url; cx.label = item.label"}]
         ]
     };
 
@@ -212,9 +226,6 @@ function initMenus()
         accesskey: getAccessKeyForMenu('MSG_MNU_MOTIFS'),
         items:
         [
-         ["motif-default",
-                 {type: "checkbox",
-                  checkedif: isMotif("default")}],
          ["motif-dark",
                  {type: "checkbox",
                   checkedif: isMotif("dark")}],
@@ -430,6 +441,21 @@ function initMenus()
          ["toggle-text-dir"]
         ]
     };
+
+    client.menuSpecs["context:edit"] = {
+        getContext: getDefaultContext,
+        items:
+        [
+         ["cmd-undo",      {enabledif: "getCommandEnabled('cmd_undo')"}],
+         ["-"],
+         ["cmd-cut",       {enabledif: "getCommandEnabled('cmd_cut')"}],
+         ["cmd-copy",      {enabledif: "getCommandEnabled('cmd_copy')"}],
+         ["cmd-paste",     {enabledif: "getCommandEnabled('cmd_paste')"}],
+         ["cmd-delete",    {enabledif: "getCommandEnabled('cmd_delete')"}],
+         ["-"],
+         ["cmd-selectall", {enabledif: "getCommandEnabled('cmd_selectAll')"}]
+        ]
+    }
 
     // Gross hacks to figure out if we're away:
     var netAway      = "cx.network.prefs['away']";

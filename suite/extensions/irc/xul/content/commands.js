@@ -24,6 +24,7 @@
  *   Robert Ginda, <rginda@netscape.com>, original author
  *   Chiaki Koufugata, chiaki@mozilla.gr.jp, UI i18n
  *   James Ross, silver@warwickcompsoc.co.uk
+ *   Gijs Kruitbosch, gijskruitbosch@gmail.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -88,6 +89,7 @@ function initCommands()
          ["dcc-list",          cmdDCCList,                         CMD_CONSOLE],
          ["dcc-send",          cmdDCCSend,          CMD_NEED_SRV | CMD_CONSOLE],
          ["dcc-show-file",     cmdDCCShowFile,                     CMD_CONSOLE],
+         ["delayed",           cmdDelayed,                         CMD_CONSOLE],
          ["deop",              cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
          ["describe",          cmdDescribe,         CMD_NEED_SRV | CMD_CONSOLE],
          ["hop",               cmdChanUserMode,    CMD_NEED_CHAN | CMD_CONSOLE],
@@ -127,6 +129,7 @@ function initCommands()
          ["idle-back",         cmdAway,                                      0],
          ["ignore",            cmdIgnore,           CMD_NEED_NET | CMD_CONSOLE],
          ["input-text-direction", cmdInputTextDirection,                     0],
+         ["install-plugin",    cmdInstallPlugin,                   CMD_CONSOLE],
          ["invite",            cmdInvite,           CMD_NEED_SRV | CMD_CONSOLE],
          ["join",              cmdJoin,             CMD_NEED_SRV | CMD_CONSOLE],
          ["join-charset",      cmdJoin,             CMD_NEED_SRV | CMD_CONSOLE],
@@ -179,6 +182,7 @@ function initCommands()
          ["stats",             cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["squery",            cmdSquery,           CMD_NEED_SRV | CMD_CONSOLE],
          ["sslserver",         cmdSSLServer,                       CMD_CONSOLE],
+         ["ssl-exception",     cmdSSLException,                              0],
          ["stalk",             cmdStalk,                           CMD_CONSOLE],
          ["supports",          cmdSupports,         CMD_NEED_SRV | CMD_CONSOLE],
          ["sync-font",         cmdSync,                                      0],
@@ -246,7 +250,6 @@ function initCommands()
          ["toggle-timestamps","timestamps toggle",                           0],
          ["motif-dark",       "motif dark",                                  0],
          ["motif-light",      "motif light",                                 0],
-         ["motif-default",    "motif default",                               0],
          ["sync-output",      "evalsilent syncOutputFrame(this)",            0],
          ["userlist",         "toggle-ui userlist",                CMD_CONSOLE],
          ["tabstrip",         "toggle-ui tabstrip",                CMD_CONSOLE],
@@ -279,7 +282,10 @@ function initCommands()
     var restList = ["reason", "action", "text", "message", "params", "font",
                     "expression", "ircCommand", "prefValue", "newTopic", "file",
                     "password", "commandList", "commands", "description"];
+    var stateList = ["connect"];
+
     client.commandManager.argTypes.__aliasTypes__(restList, "rest");
+    client.commandManager.argTypes.__aliasTypes__(stateList, "state");
     client.commandManager.argTypes["plugin"] = parsePlugin;
 }
 
@@ -368,7 +374,7 @@ function dispatch(text, e, isInteractive, flags)
     var ary = text.match(/(\S+) ?(.*)/);
     if (!ary)
     {
-        display(getMsg(MSG_ERR_NO_COMMAND, ""));
+        display(getMsg(MSG_ERR_UNKNOWN_COMMAND, ""));
         return null;
     }
 
@@ -394,7 +400,7 @@ function dispatch(text, e, isInteractive, flags)
                 return dispatch("quote", e2);
             }
 
-            display(getMsg(MSG_NO_CMDMATCH, e.commandText), MT_ERROR);
+            display(getMsg(MSG_ERR_UNKNOWN_COMMAND, e.commandText), MT_ERROR);
             break;
 
         case 1:
@@ -1052,7 +1058,7 @@ function cmdChanUserMode(e)
     }
     else if (e.nicknameList)
     {
-        for (i = 0; i < e.nicknameList.length; i++)
+        for (var i = 0; i < e.nicknameList.length; i++)
         {
             user = e.channel.getUser(e.nicknameList[i]);
             if (!user)
@@ -1133,6 +1139,15 @@ function cmdCharset(e)
 function cmdCreateTabForView(e)
 {
     return getTabForObject(e.view, true);
+}
+
+function cmdDelayed(e)
+{
+    function _dispatch()
+    {
+        dispatch(e.rest, null, e.isInteractive);
+    }
+    setTimeout(_dispatch, e.delay * 1000);
 }
 
 function cmdSync(e)
@@ -1233,124 +1248,6 @@ function cmdSquery(e)
     e.server.sendData(data);
 }
 
-function cmdStatus(e)
-{
-    function serverStatus (s)
-    {
-        if (!s.connection.isConnected)
-        {
-            display(getMsg(MSG_NOT_CONNECTED, s.parent.name), MT_STATUS);
-            return;
-        }
-
-        var serverType = (s.parent.primServ == s) ? MSG_PRIMARY : MSG_SECONDARY;
-        display(getMsg(MSG_CONNECTION_INFO,
-                       [s.parent.name, s.me.unicodeName, s.connection.host,
-                        s.connection.port, serverType]),
-                MT_STATUS);
-
-        var connectTime = Math.floor((new Date() - s.connection.connectDate) /
-                                     1000);
-        connectTime = formatDateOffset(connectTime);
-
-        var pingTime = ("lastPing" in s) ?
-            formatDateOffset(Math.floor((new Date() - s.lastPing) / 1000)) :
-            MSG_NA;
-        var lag = (s.lag >= 0) ? s.lag : MSG_NA;
-
-        display(getMsg(MSG_SERVER_INFO,
-                       [s.parent.name, connectTime, pingTime, lag]),
-                MT_STATUS);
-    }
-
-    function channelStatus (c)
-    {
-        var cu;
-        var net = c.parent.parent.name;
-
-        if ((cu = c.users[c.parent.me.canonicalName]))
-        {
-            var mtype;
-
-            if (cu.isOp && cu.isVoice)
-                mtype = MSG_VOICEOP;
-            else if (cu.isOp)
-                mtype = MSG_OPERATOR;
-            else if (cu.isVoice)
-                mtype = MSG_VOICED;
-            else
-                mtype = MSG_MEMBER;
-
-            var mode = c.mode.getModeStr();
-            if (!mode)
-                mode = MSG_NO_MODE;
-
-            display(getMsg(MSG_CHANNEL_INFO,
-                           [net, mtype, c.unicodeName, mode,
-                            (c.parent.isSecure ? "irc://" : "ircs://" )
-                             + escape(net) + "/" + escape(c.encodedName) + "/"]),
-                    MT_STATUS);
-            display(getMsg(MSG_CHANNEL_DETAIL,
-                           [net, c.unicodeName, c.getUsersLength(),
-                            c.opCount, c.voiceCount]),
-                    MT_STATUS);
-
-            if (c.topic)
-            {
-                display(getMsg(MSG_TOPIC_INFO, [net, c.unicodeName, c.topic]),
-                         MT_STATUS);
-            }
-            else
-            {
-                display(getMsg(MSG_NOTOPIC_INFO, [net, c.unicodeName]),
-                        MT_STATUS);
-            }
-        }
-        else
-        {
-            display(getMsg(MSG_NONMEMBER, [net, c.unicodeName]), MT_STATUS);
-        }
-    };
-
-    display(client.userAgent, MT_STATUS);
-    display(getMsg(MSG_USER_INFO,
-                   [client.prefs["nickname"], client.prefs["username"],
-                    client.prefs["desc"]]),
-            MT_STATUS);
-
-    var n, s, c;
-
-    if (e.channel)
-    {
-        serverStatus(e.server);
-        channelStatus(e.channel);
-    }
-    else if (e.network)
-    {
-        for (s in e.network.servers)
-        {
-            serverStatus(e.network.servers[s]);
-            for (c in e.network.servers[s].channels)
-                channelStatus (e.network.servers[s].channels[c]);
-        }
-    }
-    else
-    {
-        for (n in client.networks)
-        {
-            for (s in client.networks[n].servers)
-            {
-                var server = client.networks[n].servers[s]
-                    serverStatus(server);
-                for (c in server.channels)
-                    channelStatus(server.channels[c]);
-            }
-        }
-    }
-
-    display(MSG_END_STATUS, MT_STATUS);
-}
-
 function cmdHelp(e)
 {
     if (!e.pattern)
@@ -1366,7 +1263,7 @@ function cmdHelp(e)
 
     if (ary.length == 0)
     {
-        display(getMsg(MSG_ERR_NO_COMMAND, e.pattern), MT_ERROR);
+        display(getMsg(MSG_ERR_UNKNOWN_COMMAND, e.pattern), MT_ERROR);
         return;
     }
 
@@ -1466,7 +1363,7 @@ function cmdNetworks(e)
     var netnames = keys(client.networks).sort();
     var lastname = netnames[netnames.length - 1];
 
-    for (n in netnames)
+    for (var n in netnames)
     {
         var net = client.networks[netnames[n]];
         var a = document.createElementNS(XHTML_NS, "html:a");
@@ -1505,31 +1402,8 @@ function cmdServer(e)
         e.hostname = ary[1];
     }
 
-    var name = e.hostname.toLowerCase();
-
-    if (!e.port)
-        e.port = 6667;
-    else if (e.port != 6667)
-        name += ":" + e.port;
-
-    if (!(name in client.networks))
-    {
-        /* if there wasn't already a network created for this server,
-         * make one. */
-        client.addNetwork(name, [{name: e.hostname, port: e.port,
-                                        password: e.password}], true);
-    }
-    else
-    {
-        // We are trying to connect without SSL, adjust for temporary networks
-        if (client.networks[name].temporary)
-            client.networks[name].serverList[0].isSecure = false;
-        // update password on existing server.
-        if (e.password)
-            client.networks[name].serverList[0].password = e.password;
-    }
-
-    return client.connectToNetwork(name, false);
+    gotoIRCURL({scheme: "irc", host: e.hostname, port: e.port || 6667,
+                pass: e.password, isserver: true});
 }
 
 function cmdSSLServer(e)
@@ -1543,31 +1417,30 @@ function cmdSSLServer(e)
         e.hostname = ary[1];
     }
 
-    var name = e.hostname.toLowerCase();
+    gotoIRCURL({scheme: "ircs", host: e.hostname, port: e.port || 9999,
+                pass: e.password, isserver: true});
+}
 
-    if (!e.port)
-        e.port = 9999;
-    if (e.port != 6667)
-        name += ":" + e.port;
+function cmdSSLException(e)
+{
+    var opts = "chrome,centerscreen,modal";
+    var location = e.hostname ? e.hostname + ':' + e.port : undefined;
+    var args = {location: location, prefetchCert: true};
 
-    if (!(name in client.networks))
+    window.openDialog("chrome://pippki/content/exceptionDialog.xul",
+                      "", opts, args);
+
+    if (!args.exceptionAdded)
+        return;
+
+    if (e.connect)
     {
-        /* if there wasn't already a network created for this server,
-         * make one. */
-        client.addNetwork(name, [{name: e.hostname, port: e.port,
-                                  password: e.password, isSecure: true}], true);
+        // When we come via the inline button, we just want to reconnect
+        if (e.source == "mouse")
+            dispatch("reconnect");
+        else
+            dispatch("sslserver " + e.hostname + " " + e.port);
     }
-    else
-    {
-        // We are trying to connect using SSL, adjust for temporary networks
-        if (client.networks[name].temporary)
-            client.networks[name].serverList[0].isSecure = true;
-        // update password on existing server.
-        if (e.password)
-            client.networks[name].serverList[0].password = e.password;
-    }
-
-    return client.connectToNetwork(name, true);
 }
 
 
@@ -1634,8 +1507,19 @@ function cmdDeleteView(e)
         e.view.dispatch("part", { deleteWhenDone: true });
         return;
     }
-    if (e.view.TYPE == "IRCDCCChat" && e.view.active)
-        e.view.disconnect();
+
+    if (e.view.TYPE == "IRCDCCChat")
+    {
+        if ((e.view.state.state == DCC_STATE_REQUESTED) ||
+            (e.view.state.state == DCC_STATE_ACCEPTED) ||
+            (e.view.state.state == DCC_STATE_CONNECTED))
+        {
+            // abort() calls disconnect() if it is appropriate.
+            e.view.abort();
+            // Fall through: we don't delete on disconnect.
+        }
+    }
+
     if (e.view.TYPE == "IRCNetwork" && (e.view.state == NET_CONNECTING ||
                                         e.view.state == NET_WAITING))
     {
@@ -2307,13 +2191,21 @@ function cmdGotoURL(e)
 {
     const EXT_PROTO_SVC = "@mozilla.org/uriloader/external-protocol-service;1";
 
-    if (e.url.search(/^ircs?:/i) == 0)
+    if (/^ircs?:/.test(e.url))
     {
         gotoIRCURL(e.url);
         return;
     }
 
-    if (e.url.search(/^x-cz-command:/i) == 0)
+    if (/^x-irc-dcc-(chat|file):[0-9a-fA-F]+$/.test(e.url))
+    {
+        var view = client.dcc.findByID(e.url.substr(15));
+        if (view)
+            dispatch("set-current-view", {view: view});
+        return;
+    }
+
+    if (/^x-cz-command:/.test(e.url))
     {
         var ary = e.url.match(/^x-cz-command:(.*)$/i);
         // Do the escaping dance:
@@ -2731,7 +2623,7 @@ function cmdLoad(e)
 
         if ((plugin.API > 0) && plugin.prefs["enabled"])
             dispatch("enable-plugin " + index);
-        return rv;
+        return {rv: rv};
     }
     catch (ex)
     {
@@ -3358,16 +3250,15 @@ function cmdKnock(e)
 
 function cmdClient(e)
 {
-    dispatch("create-tab-for-view", { view: client });
-
-    if (!client.messages)
+    if (!("messages" in client))
     {
-        client.display(MSG_CLIENT_OPENED);
-        dispatch("set-current-view", { view: client });
         client.display(MSG_WELCOME, "HELLO");
+        dispatch("set-current-view", { view: client });
+        dispatch("help", { hello: true });
         dispatch("networks");
-        dispatch("commands");
-    } else {
+    }
+    else
+    {
         dispatch("set-current-view", { view: client });
     }
 }
@@ -3616,7 +3507,7 @@ function cmdSave(e)
                     && wbp.currentState == nsIWBP.PERSIST_STATE_FINISHED)
                 {
                     // Let the user know:
-                    pm = [e.sourceObject.viewName, e.filename];
+                    pm = [e.sourceObject.viewName, getURLSpecFromFile(file)];
                     display(getMsg(MSG_SAVE_SUCCESSFUL, pm), MT_INFO);
                 }
                 /* Check if we've finished. WebBrowserPersist screws up when we
@@ -3627,7 +3518,7 @@ function cmdSave(e)
                 {
                     if (wbp)
                         wbp.progressListener = null;
-                    pm = [e.sourceObject.viewName, e.filename];
+                    pm = [e.sourceObject.viewName, getURLSpecFromFile(file)];
                     display(getMsg(MSG_SAVE_SUCCESSFUL, pm), MT_INFO);
                 }
             }
@@ -3700,7 +3591,7 @@ function cmdSave(e)
         }
         catch (ex)
         {
-            // try to use it as an url
+            // try to use it as a URL
             try
             {
                 file = getFileFromURLSpec(e.filename);
@@ -4528,7 +4419,9 @@ function cmdDCCDecline(e)
 
 function cmdDCCShowFile(e)
 {
-    var f = nsLocalFile(e.file);
+    var f = getFileFromURLSpec(e.file);
+    if (f)
+        f = nsLocalFile(f.path);
     if (f && f.parent && f.parent.exists())
     {
         try
@@ -4588,6 +4481,106 @@ function cmdInputTextDirection(e)
     return true;
 }
 
+function cmdInstallPlugin(e)
+{
+    var ipURL = "chrome://chatzilla/content/install-plugin/install-plugin.xul";
+    var ctx = {};
+    var pluginDownloader =
+    {
+        onStartRequest: function _onStartRequest(request, context)
+        {
+            var tempName = "plugin-install.temp";
+            if (urlMatches)
+                tempName += urlMatches[2];
+
+            ctx.outFile = getTempFile(client.prefs["profilePath"], tempName);
+            ctx.outFileH = fopen(ctx.outFile, ">");
+        }, 
+        onDataAvailable: function _onDataAvailable(request, context, stream,
+                                                   offset, count)
+        {
+            if (!ctx.inputStream)
+                ctx.inputStream = toSInputStream(stream, true);
+
+            ctx.outFileH.write(ctx.inputStream.readBytes(count));
+        },
+        onStopRequest: function _onStopRequest(request, context, statusCode)
+        {
+            ctx.outFileH.close();
+ 
+            if (statusCode == 0)
+            {
+                client.installPlugin(e.name, ctx.outFile);
+            }
+            else
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_ERR_DOWNLOAD, statusCode),
+                        MT_ERROR);
+            }
+
+            try
+            {
+                ctx.outFile.remove(false);
+            }
+            catch (ex)
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_ERR_REMOVE_TEMP, ex),
+                        MT_ERROR);
+            }
+        }
+    };
+
+    if (!e.url)
+    {
+        if ("installPluginDialog" in client)
+            return client.installPluginDialog.focus();
+
+        window.openDialog(ipURL, "", "chrome,dialog", client);
+        return;
+    }
+
+    var urlMatches = e.url.match(/([^\/]+?)((\..{0,3}){0,2})$/);
+    if (!e.name)
+    {
+        if (urlMatches)
+        {
+            e.name = urlMatches[1];
+        }
+        else
+        {
+            display(MSG_INSTALL_PLUGIN_ERR_NO_NAME, MT_ERROR);
+            return;
+        }
+    }
+
+    // Do real install here.
+    switch (e.url.match(/^[^:]+/)[0])
+    {
+        case "file":
+            client.installPlugin(e.name, e.url);
+            break;
+
+        case "http":
+        case "https":
+            try
+            {
+                var channel = client.iosvc.newChannel(e.url, "UTF-8", null);
+                display(getMsg(MSG_INSTALL_PLUGIN_DOWNLOADING, e.url),
+                        MT_INFO);
+                channel.asyncOpen(pluginDownloader, { e: e });
+            }
+            catch (ex)
+            {
+                display(getMsg(MSG_INSTALL_PLUGIN_ERR_DOWNLOAD, ex), MT_ERROR);
+                return;
+            }
+            break;
+
+        default:
+            display(MSG_INSTALL_PLUGIN_ERR_PROTOCOL, MT_ERROR);
+    }
+}
+
 function cmdFind(e)
 {
     if (!e.rest)
@@ -4617,28 +4610,28 @@ function cmdFindAgain(e)
 
 function cmdURLs(e)
 {
-    if (client.prefs["urls.list"].length == 0)
+    var urls = client.urlLogger.read().reverse();
+
+    if (urls.length == 0)
     {
         display(MSG_URLS_NONE);
     }
     else
     {
-        /* Store the current URL list, so we can put it back afterwards. This
-         * is needed because the process of displaying the list changes the
-         * list! (think about it for a second)
+        /* Temporarily remove the URL logger to avoid changing the list when
+         * displaying it.
          */
-        var oldList = client.prefs["urls.list"];
-        client.prefs["urls.list"] = new Array();
+        var logger = client.urlLogger;
+        delete client.urlLogger;
 
         var num = e.number || client.prefs["urls.display"];
-        if (num > oldList.length)
-            num = oldList.length;
+        if (num > urls.length)
+            num = urls.length;
         display(getMsg(MSG_URLS_HEADER, num));
 
         for (var i = 0; i < num; i++)
-            display(getMsg(MSG_URLS_ITEM, [i + 1, oldList[i]]));
+            display(getMsg(MSG_URLS_ITEM, [i + 1, urls[i]]));
 
-        // Restore old URL list so displaying it has no effect.
-        client.prefs["urls.list"] = oldList;
+        client.urlLogger = logger;
     }
 }
