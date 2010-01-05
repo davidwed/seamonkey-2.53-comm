@@ -100,8 +100,6 @@ DOMViewer.prototype =
   mSearchCurrentIdx: null,
   mSearchDirection: null,
   mColumns: null,
-  mFlashSelected: null,
-  mFlashes: 0,
   mFindDir: null,
   mFindParams: null,
   mFindType: null,
@@ -144,7 +142,6 @@ DOMViewer.prototype =
     this.setProcessingInstructions(PrefUtils.getPref("inspector.dom.showProcessingInstructions"));
     this.setAccessibleNodes(PrefUtils.getPref("inspector.dom.showAccessibleNodes"));
     this.setWhitespaceNodes(PrefUtils.getPref("inspector.dom.showWhitespaceNodes"));
-    this.setFlashSelected(PrefUtils.getPref("inspector.blink.on"));
 
     aPane.notifyViewerReady(this);
   },
@@ -406,9 +403,9 @@ DOMViewer.prototype =
     this.mObsMan.dispatchEvent("selectionChange", { selection: this.mSelection } );
   
     if (this.mSelection) {
-      if (this.mFlashSelected)
-        this.flashElement(this.mSelection);
+      this.flashElement(this.mSelection, true);
     }
+
     viewer.pane.panelset.updateAllCommands();
   },
   
@@ -594,17 +591,6 @@ DOMViewer.prototype =
       this.mSelectDocs[i].addEventListener("mouseout", ListenerRemover, true);
     }
     this.mPanel.panelset.setCommandAttribute("cmd:selectByClick", "checked", "true");
-  },
-
-  selectByClickOver: function(aTarget)
-  {
-    if (this.mLastOver)
-      this.flasher.stop();
-
-    this.flasher.element = aTarget;
-    this.flasher.start(-1, 1, true);
-    
-    this.mLastOver = aTarget;
   },
   
   doSelectByClick: function(aTarget)
@@ -847,57 +833,20 @@ DOMViewer.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// Flashing
 
-  get flasher()
-  {
-    if (!("mFlasher" in this)) {
-      this.mFlasher = new Flasher(PrefUtils.getPref("inspector.blink.border-color"), 
-                                  PrefUtils.getPref("inspector.blink.border-width"), 
-                                  PrefUtils.getPref("inspector.blink.duration"), 
-                                  PrefUtils.getPref("inspector.blink.speed"),
-                                  PrefUtils.getPref("inspector.blink.invert"));
-    }
-    
-    return this.mFlasher;
-  },
-
-  flashElement: function(aElement)
+  flashElement: function(aElement, aIsOnSelect)
   {
     // make sure we only try to flash element nodes, and don't 
     // flash the documentElement (it's too darn big!)
     if (aElement.nodeType == nsIDOMNode.ELEMENT_NODE &&
         aElement != aElement.ownerDocument.documentElement) {
-      var flasher = this.flasher;
-      
-      if (flasher.flashing) 
-        flasher.stop();
-        
-      try {
-        flasher.element = aElement;
-        flasher.start();
-      } catch (ex) {
+
+      var flasher = this.mPanel.panelset.flasher;
+      if (aIsOnSelect) {
+        flasher.flashElementOnSelect(aElement);
+      } else {
+        flasher.flashElement(aElement);
       }
     }
-  },
-
-  /**
-   * Toggles the preference for flashing selected elements.
-   */
-  toggleFlashSelected: function toggleFlashSelected()
-  {
-    var value = PrefUtils.getPref("inspector.blink.on");
-    PrefUtils.setPref("inspector.blink.on", !value);
-  },
-
-  /**
-   * Sets the object's value and the command for flashing selected objects.
-   *
-   * @param aValue The value to set it to.
-   */
-  setFlashSelected: function setFlashSelected(aValue)
-  {
-    this.mFlashSelected = aValue;
-    this.mPanel.panelset.setCommandAttribute("cmd:flashSelected", "checked",
-                                             aValue);
   },
 
   ////////////////////////////////////////////////////////////////////////////
@@ -912,34 +861,25 @@ DOMViewer.prototype =
   {
     var value = PrefUtils.getPref(aName);
 
-    if (aName == "inspector.dom.showAnon") {
-      this.setAnonContent(value);
-    } else if (aName == "inspector.dom.showProcessingInstructions") {
-      this.setProcessingInstructions(value);
-    } else if (aName == "inspector.dom.showAccessibleNodes") {
-      this.setAccessibleNodes(value);
-    } else if (aName == "inspector.dom.showWhitespaceNodes") {
-      this.setWhitespaceNodes(value);
-    } else if (aName == "inspector.blink.on") {
-      this.setFlashSelected(value);
+    switch (aName) {
+      case "inspector.dom.showAnon":
+        this.setAnonContent(value);
+        break;
 
-      // don't need to rebuild for this
-      return;
-    } else if (this.mFlasher) {
-      if (aName == "inspector.blink.border-color") {
-        this.mFlasher.color = value;
-      } else if (aName == "inspector.blink.border-width") {
-        this.mFlasher.thickness = value;
-      } else if (aName == "inspector.blink.duration") {
-        this.mFlasher.duration = value;
-      } else if (aName == "inspector.blink.speed") {
-        this.mFlasher.speed = value;
-      } else if (aName == "inspector.blink.invert") {
-        this.mFlasher.invert = value;
-      }
+      case "inspector.dom.showProcessingInstructions":
+        this.setProcessingInstructions(value);
+        break;
 
-      // don't need to rebuild for these
-      return;
+      case "inspector.dom.showAccessibleNodes":
+        this.setAccessibleNodes(value);
+        break;
+
+      case "inspector.dom.showWhitespaceNodes":
+        this.setWhitespaceNodes(value);
+        break;
+
+      default:
+        return;
     }
 
     this.rebuild();
@@ -1455,14 +1395,12 @@ cmdEditInsertLastChild.prototype.insertNode = function insertNode() {
 var MouseDownListener = {
   handleEvent: function(aEvent)
   {
-    var target = viewer.mDOMView.showAnonymousContent ? aEvent.originalTarget : aEvent.target;
-    if (aEvent.type == "mousedown") {
-      aEvent.stopPropagation();
-      aEvent.preventDefault();
-      viewer.doSelectByClick(target);
-    }
-    else if (aEvent.type == "mouseover")
-      viewer.selectByClickOver(target);
+    aEvent.stopPropagation();
+    aEvent.preventDefault();
+
+    var target = viewer.mDOMView.showAnonymousContent ? aEvent.originalTarget :
+                                                        aEvent.target;
+    viewer.doSelectByClick(target);
   }
 };
 

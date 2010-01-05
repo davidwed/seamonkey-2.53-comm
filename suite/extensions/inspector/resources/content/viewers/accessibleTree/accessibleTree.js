@@ -61,6 +61,8 @@ const nsIAccessibleEvent = Components.interfaces.nsIAccessibleEvent;
 const nsIAccessible = Components.interfaces.nsIAccessible;
 const nsIAccessNode = Components.interfaces.nsIAccessNode;
 
+const nsIDOMNode = Components.interfaces.nsIDOMNode;
+
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization
 
@@ -165,13 +167,19 @@ AccessibleTreeViewer.prototype =
     this.mSelection = this.mView.getDOMNode(idx);
     this.mObsMan.dispatchEvent("selectionChange",
                                { selection: this.mSelection } );
+
+    if (this.mSelection &&
+        this.mSelection.nodeType == nsIDOMNode.ELEMENT_NODE) {
+      var flasher = this.mPane.panelset.flasher;
+      flasher.flashElementOnSelect(this.mSelection);
+    }
   },
 
   getSelectedAccessible: function getSelectedAccessible()
   {
     var idx = this.mTree.currentIndex;
     return this.mView.getAccessible(idx);
-}
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

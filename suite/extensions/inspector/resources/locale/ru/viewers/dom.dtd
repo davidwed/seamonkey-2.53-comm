@@ -51,8 +51,6 @@
 <!ENTITY cmdToggleAccessibleNodes.accesskey "д">
 <!ENTITY cmdToggleProcessingInstructions.label "Показывать инструкции обработки">
 <!ENTITY cmdToggleProcessingInstructions.accesskey "о">
-<!ENTITY cmdFlashSelected.label "Подсвечивать выбранный элемент">
-<!ENTITY cmdFlashSelected.accesskey "в">
 <!ENTITY cmdToggleAttributes.label "Показывать атрибуты">
 <!ENTITY cmdToggleAttributes.accesskey "а">
 <!ENTITY cmdSelectByClick.label "Выбирать элемент щелчком">
