@@ -134,11 +134,14 @@ StyleRulesViewer.prototype =
 
   isCommandEnabled: function SRVr_IsCommandEnabled(aCommand)
   {
-    var rule = this.getSelectedRule();
-    // if no rule is selected, nothing is enabled
-    if (!rule)
+    // get the declaration, because selection in the top pane might be the
+    // style attribute, which has no rule
+    var declaration = this.getSelectedDec();
+    // if no declaration is selected, nothing is enabled
+    if (!declaration)
       return false;
 
+    var rule = declaration.parentRule;
     //XXX can't edit resource: stylesheets because of bug 343508
     var isEditable = !(rule && rule.parentStyleSheet &&
                        /^resource:/.test(rule.parentStyleSheet.href));
@@ -157,7 +160,7 @@ StyleRulesViewer.prototype =
       // ppStyleRulesContext
       case "cmdCopySelectedFileURI":
       case "cmdViewSelectedFileURI":
-        return rule.parentStyleSheet && rule.parentStyleSheet.href;
+        return rule && rule.parentStyleSheet && rule.parentStyleSheet.href;
     }
     return false;
   },
