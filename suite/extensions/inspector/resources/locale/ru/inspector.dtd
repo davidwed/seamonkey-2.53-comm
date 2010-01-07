@@ -40,9 +40,9 @@
 <!ENTITY mnView.accesskey "В">
 <!ENTITY cmdToggleBrowser.label "Браузер">
 <!ENTITY cmdToggleBrowser.accesskey "р">
+<!ENTITY cmdToggleSearch.label "Результаты поиска">
 <!ENTITY cmdFlashOnSelect.label "Подсвечивать выбранный элемент">
 <!ENTITY cmdFlashOnSelect.accesskey "в">
-<!ENTITY cmdToggleSearch.label "Результаты поиска">
 <!ENTITY browserPanel.label "Браузер">
 <!ENTITY inspectNewWindow.label "Исследовать в новом окне">
 <!ENTITY saveCmd.key "S">
