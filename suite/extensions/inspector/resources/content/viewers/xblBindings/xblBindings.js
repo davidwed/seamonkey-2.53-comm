@@ -37,7 +37,8 @@
 
 /*****************************************************************************
 * XBLBindingsViewer ----------------------------------------------------------
-*  The viewer for the computed css styles on a DOM element.
+*  Inspects the XBL bindings for a given element, including anonymous content,
+*  methods, properties, event handlers, and resources.
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
@@ -47,7 +48,6 @@
 //// Global Variables
 
 var viewer;
-var gInitContent = false;
 
 //////////////////////////////////////////////////////////////////////////////
 //// Global Constants
@@ -80,11 +80,11 @@ function XBLBindingsViewer()
   this.mPropTree = document.getElementById("olProps");
   this.mHandlerTree = document.getElementById("olHandlers");
   this.mResourceTree = document.getElementById("olResources");
-  this.mFunctionTextbox = document.getElementById("txbFunction");
 
-  if (gInitContent) {
-    this.initContent();
-  }
+  // prepare and attach the content DOM datasource
+  this.mContentView = XPCU.createInstance(kDOMViewContractID, "inIDOMView");
+  this.mContentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
+  this.mContentTree.view = this.mContentView;
 }
 
 XBLBindingsViewer.prototype =
@@ -94,7 +94,6 @@ XBLBindingsViewer.prototype =
 
   mSubject: null,
   mPane: null,
-  mContentInit: false,
 
   ////////////////////////////////////////////////////////////////////////////
   //// Interface inIViewer
@@ -135,17 +134,11 @@ XBLBindingsViewer.prototype =
 
   destroy: function XBLBVr_Destroy()
   {
-    // persist all attributes on the panels
-    var panes = document.getElementsByTagName("multipanel");
-    for (var i = 0; i < panes.length; ++i) {
-      InsUtil.persistAll(panes[i].id);
-    }
-
-    this.mContentTree.treeBoxObject.view = null;
-    this.mMethodTree.treeBoxObject.view = null;
-    this.mPropTree.treeBoxObject.view = null;
-    this.mHandlerTree.treeBoxObject.view = null;
-    this.mResourceTree.treeBoxObject.view = null;
+    this.mContentTree.view = null;
+    this.mMethodTree.view = null;
+    this.mPropTree.view = null;
+    this.mHandlerTree.view = null;
+    this.mResourceTree.view = null;
   },
 
   isCommandEnabled: function XBLBVr_IsCommandEnabled(aCommand)
@@ -173,26 +166,6 @@ XBLBindingsViewer.prototype =
 
   ////////////////////////////////////////////////////////////////////////////
   //// Displaying Binding Info
-
-  initContent: function XBLBVr_InitContent()
-  {
-    if (this.mContentInit) return;
-
-    window.setTimeout(
-      function XBLBVr_InitContentCallback(me)
-      {
-        // prepare and attach the content DOM datasource
-        me.mContentView = XPCU.createInstance(kDOMViewContractID,
-                                              "inIDOMView");
-        me.mContentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
-        me.mContentTree.treeBoxObject.view = me.mContentView;
-
-        me.mContentInit = true;
-        if (me.mBinding) {
-          me.displayContent();
-        }
-      }, 10, this);
-  },
 
   populateBindings: function XBLBVr_PopulateBindings()
   {
@@ -233,7 +206,7 @@ XBLBindingsViewer.prototype =
       var url = this.mBindingURL;
       var poundPt = url.indexOf("#");
       var id = url.substr(poundPt + 1);
-      var bindings = doc.getElementsByTagName("binding");
+      var bindings = doc.getElementsByTagNameNS(kXBLNSURI, "binding");
       var binding = null;
       for (var i = 0; i < bindings.length; ++i) {
         if (bindings[i].getAttribute("id") == id) {
@@ -253,149 +226,139 @@ XBLBindingsViewer.prototype =
     this.displayHandlers();
     this.displayResources();
 
-    var ml = document.getElementById("mlBindings");
-    var mps = document.getElementById("mpsBinding");
-    if (!this.mBinding) {
-      ml.disabled = true;
-      mps.collapsed = true;
+    // switch to the first non-disabled tab if the one that's showing is
+    // disabled, otherwise, you can't use the keyboard to switch tabs
+    var tabbox = document.getElementById("bxBindingAspects");
+    if (tabbox.selectedTab.disabled) {
+      for (let i = 0; i < tabbox.tabs.childNodes.length; ++i) {
+         if (!tabbox.tabs.childNodes[i].disabled) {
+           tabbox.selectedTab = tabbox.tabs.childNodes[i];
+           break;
+         }
+      }
     }
-    else {
-      ml.disabled = false;
-      mps.collapsed = false;
-    }
+
+    document.getElementById("mlBindings").disabled = !this.mBinding;
   },
 
   displayContent: function XBLBVr_DisplayContent()
   {
-    if (this.mContentInit && this.mBinding) {
-      var list = this.mBinding.getElementsByTagName("content");
-      if (list.length) {
-        this.mContentView.rootNode = list[0];
-      }
-      else {
-        this.mContentView.rootNode = null;
-      }
-      document.getElementById("bxContent").setAttribute("disabled",
-                                                        list.length == 0);
+    this.mContentView.rootNode = this.mBinding &&
+      this.mBinding.getElementsByTagNameNS(kXBLNSURI, "content").item(0);
+    this.mContentTree.disabled = !this.mContentView.rootNode;
+    document.getElementById("tbContent").disabled =
+      !this.mContentView.rootNode;
+    if (this.mContentView.rootNode) {
+      this.mContentTree.view.selection.select(0);
     }
   },
 
   displayMethods: function XBLBVr_DisplayMethods()
   {
-    var bx = this.getBoxObject(this.mMethodTree);
-    bx.view = this.mBinding ? new MethodTreeView(this.mBinding) : null;
+    this.mMethodTree.view =
+      this.mBinding ? new MethodTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
-                 this.mBinding.getElementsByTagName("method").length > 0;
-    document.getElementById("bxMethods").setAttribute("disabled", !active);
+      this.mBinding.getElementsByTagNameNS(kXBLNSURI, "method").length > 0;
+    this.mMethodTree.disabled = !active;
+    document.getElementById("tbMethods").disabled = !active;
+    if (active && this.mMethodTree.view.rowCount) {
+      this.mMethodTree.view.selection.select(0);
+    }
   },
 
   displayProperties: function XBLBVr_DisplayProperties()
   {
-    var bx = this.getBoxObject(this.mPropTree);
-    bx.view = this.mBinding ? new PropTreeView(this.mBinding) : null;
+    this.mPropTree.view =
+      this.mBinding ? new PropTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
-                 this.mBinding.getElementsByTagName("property").length > 0;
-    document.getElementById("bxProps").setAttribute("disabled", !active);
-
-    this.displayProperty(null);
+      this.mBinding.getElementsByTagNameNS(kXBLNSURI, "property").length > 0;
+    this.mPropTree.disabled = !active;
+    document.getElementById("tbProps").disabled = !active;
+    if (active && this.mPropTree.view.rowCount) {
+      this.mPropTree.view.selection.select(0);
+    }
   },
 
   displayHandlers: function XBLBVr_DisplayHandlers()
   {
-    var bx = this.getBoxObject(this.mHandlerTree);
-    bx.view = this.mBinding ? new HandlerTreeView(this.mBinding) : null;
+    this.mHandlerTree.view =
+      this.mBinding ? new HandlerTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
-                 this.mBinding.getElementsByTagName("handler").length > 0;
-    document.getElementById("bxHandlers").setAttribute("disabled", !active);
-    this.displayHandler(null);
+      this.mBinding.getElementsByTagNameNS(kXBLNSURI, "handler").length > 0;
+    this.mHandlerTree.disabled = !active;
+    document.getElementById("tbHandlers").disabled = !active;
+    if (active && this.mHandlerTree.view.rowCount) {
+      this.mHandlerTree.view.selection.select(0);
+    }
   },
 
   displayResources: function XBLBVr_DisplayResources()
   {
-    var bx = this.getBoxObject(this.mResourceTree);
-    bx.view = this.mBinding ? new ResourceTreeView(this.mBinding) : null;
+    this.mResourceTree.view =
+      this.mBinding ? new ResourceTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
-                 this.mBinding.getElementsByTagName("resources").length > 0;
-    document.getElementById("bxResources").setAttribute("disabled", !active);
+      this.mBinding.getElementsByTagNameNS(kXBLNSURI, "resources").length > 0;
+    document.getElementById("tbResources").disabled = !active;
+    this.mResourceTree.disabled = !active;
   },
 
   displayMethod: function XBLBVr_DisplayMethod(aMethod)
   {
-    var body = aMethod.getElementsByTagNameNS(kXBLNSURI, "body")[0];
-    if (body) {
-      this.mFunctionTextbox.value = this.readDOMText(body);
-    }
+    var body = aMethod.getElementsByTagNameNS(kXBLNSURI, "body").item(0);
+    document.getElementById("txbMethodCode").value = 
+      this.justifySource(this.readDOMText(body));
   },
 
   displayProperty: function XBLBVr_DisplayProperty(aProp)
   {
+    var rgroup = document.getElementById("rgPropGetterSetter");
     var getradio = document.getElementById("raPropGetter");
     var setradio = document.getElementById("raPropSetter");
 
     // disable/enable radio buttons
-    var hasget = aProp && (aProp.hasAttribute("onget") ||
-                           aProp.getElementsByTagName("getter").length);
-    getradio.disabled = !hasget;
-    if (!hasget && getradio.hasAttribute("selected")) {
-      getradio.removeAttribute("selected");
-    }
-    var hasset = aProp && (aProp.hasAttribute("onset") ||
-                           aProp.getElementsByTagName("setter").length);
-    setradio.disabled = !hasset;
-    if (!hasset && setradio.hasAttribute("selected")) {
-      setradio.removeAttribute("selected");
-    }
+    getradio.disabled =
+      !aProp || !(aProp.hasAttribute("onget") ||
+                  aProp.getElementsByTagName("getter").length);
+    setradio.disabled =
+      !aProp || !(aProp.hasAttribute("onset") ||
+                  aProp.getElementsByTagName("setter").length);
 
-    // make sure at least one is checked
-    if (!setradio.hasAttribute("selected") &&
-        !getradio.hasAttribute("selected")) {
-      if (!getradio.disabled) {
-        getradio.setAttribute("selected", "true");
-      }
-      else if (!setradio.disabled) {
-        setradio.setAttribute("selected", "true");
+    // make sure a valid radio button is selected
+    if (rgroup.selectedIndex < 0) {
+      rgroup.selectedIndex = 0;
+    }
+    if (rgroup.selectedItem.disabled) {
+      var other = rgroup.getItemAtIndex((rgroup.selectedIndex + 1) % 2);
+      if (!other.disabled) {
+        rgroup.selectedItem = other;
       }
     }
 
     // display text
-    var et = null;
-    if (getradio.hasAttribute("selected")) {
-      et = "get";
-    }
-    else if (setradio.hasAttribute("selected")) {
-      et = "set";
-    }
+    var et = rgroup.value;
     var text = "";
-    if (!et || !aProp) {
-      // do nothing
-    }
-    else if (aProp.hasAttribute("on"+et)) {
-      text = aProp.getAttribute("on"+et);
-    }
-    else {
-      var kids = aProp.getElementsByTagName(et+"ter")
-      if (kids && kids.length) {
-        text = this.readDOMText(kids[0]);
+    if (et && aProp) {
+      text = aProp.getAttribute("on" + et);
+      if (!text) {
+        kids = aProp.getElementsByTagNameNS(kXBLNSURI, et + "ter");
+        text = this.readDOMText(kids.item(0));
       }
     }
-    this.mFunctionTextbox.value = text;
+    document.getElementById("txbPropCode").value = this.justifySource(text);
   },
 
   displayHandler: function XBLBVr_DisplayHandler(aHandler)
   {
     var text = "";
     if (aHandler) {
-      text = aHandler.hasAttribute("action") ?
-               aHandler.getAttribute("action") : null;
-      if (!text) {
-        text = this.readDOMText(aHandler);
-      }
+      text = aHandler.getAttribute("action") || this.readDOMText(aHandler);
     }
-    this.mFunctionTextbox.value = text;
+    document.getElementById("txbHandlerCode").value =
+      this.justifySource(text);
   },
 
   ////////////////////////////////////////////////////////////////////////////
@@ -427,30 +390,45 @@ XBLBindingsViewer.prototype =
 
   ////////////////////////////////////////////////////////////////////////////
   //// Misc
-
-  clearChildren: function XBLBVr_ClearChildren(aEl)
-  {
-    while (aEl.hasChildNodes()) {
-      aEl.removeChild(aEl.lastChild);
-    }
-  },
-
   readDOMText: function XBLBVr_ReadDOMText(aEl)
   {
-    var text = aEl.nodeValue;
+    if (!aEl) {
+      return "";
+    }
+
+    var text = aEl.nodeValue || "";
     for (var i = 0; i < aEl.childNodes.length; ++i) {
       text += this.readDOMText(aEl.childNodes[i]);
     }
     return text;
   },
 
-  getBoxObject: function XBLBVr_GetBoxObject(aTree)
+  // Remove newlines at the beginning of the string and the lowest level of
+  // indentation from the beginning of each line, since most XBL getters,
+  // setters, methods, and handlers are handwritten CDATA.
+  justifySource: function XBLBVr_JustifySource(aStr)
   {
-    return aTree.boxObject.QueryInterface(
-             Components.interfaces.nsITreeBoxObject
-           );
+    // convert indentation to use spaces
+    while (/^ *\t/m.test(aStr)) {
+      aStr = aStr.replace(/^((        )*) {0,7}\t/gm, "$1        ");
+    }
+    // remove trailing spaces from all lines
+    aStr = aStr.replace(/ +$/gm, "");
+    // lose the trailing blank lines
+    aStr = aStr.replace(/\n*$/, "");
+    // lose the initial blank lines
+    aStr = aStr.replace(/^\n*/, "");
+    // now check if, for some crazy reason, there are lines in the rest of the
+    // source at a lower indentation level than the first line
+    var indentations = aStr.match(/^ *(?=[^\n])/gm);
+    if (indentations) {
+      indentations.sort();
+      if (indentations[0]) {
+        aStr = aStr.replace(RegExp("^" + indentations[0], "gm"), "");
+      }
+    }
+    return aStr;
   }
-
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -467,13 +445,16 @@ MethodTreeView.prototype = new inBaseTreeView();
 MethodTreeView.prototype.getCellText =
 function MTV_GetCellText(aRow, aCol)
 {
-  var method = this.mMethods[aRow];
   if (aCol.id == "olcMethodName") {
+    var method = this.mMethods[aRow];
     var name = method.getAttribute("name");
-    var params = method.getElementsByTagName("parameter");
+    var params = method.getElementsByTagNameNS(kXBLNSURI, "parameter");
     var pstr = "";
-    for (var i = 0; i < params.length; ++i) {
-      pstr += (i > 0 ? ", " : "") + params[i].getAttribute("name");
+    if (params.length) {
+      pstr += params[0].getAttribute("name");
+    }
+    for (var i = 1; i < params.length; ++i) {
+      pstr += ", " + params[i].getAttribute("name");
     }
     return name + "(" + pstr + ")";
   }
@@ -495,9 +476,8 @@ PropTreeView.prototype = new inBaseTreeView();
 PropTreeView.prototype.getCellText =
 function PTV_GetCellText(aRow, aCol)
 {
-  var prop = this.mProps[aRow];
   if (aCol.id == "olcPropName") {
-    return prop.getAttribute("name");
+    return this.mProps[aRow].getAttribute("name");
   }
 
   return "";
@@ -533,19 +513,18 @@ function HTV_GetCellText(aRow, aCol)
 
 function ResourceTreeView(aBinding)
 {
-  var res = aBinding.getElementsByTagNameNS(kXBLNSURI, "resources");
-  var list = [];
-  if (res && res.length) {
-    var kids = res[0].childNodes;
+  this.mResources = [];
+  var res = aBinding.getElementsByTagNameNS(kXBLNSURI, "resources").item(0);
+  if (res) {
+    var kids = res.childNodes;
     for (var i = 0; i < kids.length; ++i) {
       if (kids[i].nodeType == Node.ELEMENT_NODE) {
-        list.push(kids[i]);
+        this.mResources.push(kids[i]);
       }
     }
   }
 
-  this.mResources = list;
-  this.mRowCount = this.mResources ? this.mResources.length : 0;
+  this.mRowCount = this.mResources.length;
 }
 
 ResourceTreeView.prototype = new inBaseTreeView();
