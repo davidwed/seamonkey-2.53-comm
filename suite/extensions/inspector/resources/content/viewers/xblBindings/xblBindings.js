@@ -35,42 +35,45 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* XBLBindings --------------------------------------------
+/*****************************************************************************
+* XBLBindingsViewer ----------------------------------------------------------
 *  The viewer for the computed css styles on a DOM element.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
-****************************************************************/
+*****************************************************************************/
 
-//////////// global variables /////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Variables
 
 var viewer;
 var gInitContent = false;
 
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
-const kDOMViewCID = "@mozilla.org/inspector/dom-view;1";
+const kDOMViewContractID = "@mozilla.org/inspector/dom-view;1";
+const kDOMUtilsContractID = "@mozilla.org/inspector/dom-utils;1";
 const kXBLNSURI = "http://www.mozilla.org/xbl";
 
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
-window.addEventListener("load", XBLBindings_initialize, false);
+window.addEventListener("load", XBLBindingsViewer_initialize, false);
 
-function XBLBindings_initialize()
+function XBLBindingsViewer_initialize()
 {
-  viewer = new XBLBindings();
+  viewer = new XBLBindingsViewer();
   viewer.initialize(parent.FrameExchange.receiveData(window));
 }
 
-////////////////////////////////////////////////////////////////////////////
-//// class XBLBindings
+//////////////////////////////////////////////////////////////////////////////
+//// Class XBLBindingsViewer
 
-function XBLBindings()
+function XBLBindingsViewer()
 {
   this.mURL = window.location;
   this.mObsMan = new ObserverManager(this);
-  this.mDOMUtils = XPCU.getService("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
+  this.mDOMUtils = XPCU.getService(kDOMUtilsContractID, "inIDOMUtils");
 
   this.mContentTree = document.getElementById("olContent");
   this.mMethodTree = document.getElementById("olMethods");
@@ -78,47 +81,59 @@ function XBLBindings()
   this.mHandlerTree = document.getElementById("olHandlers");
   this.mResourceTree = document.getElementById("olResources");
   this.mFunctionTextbox = document.getElementById("txbFunction");
-  
-  if (gInitContent)
+
+  if (gInitContent) {
     this.initContent();
+  }
 }
 
-XBLBindings.prototype = 
+XBLBindingsViewer.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
-  
+
   mSubject: null,
   mPane: null,
   mContentInit: false,
-  
+
   ////////////////////////////////////////////////////////////////////////////
-  //// interface inIViewer
+  //// Interface inIViewer
 
-  get uid() { return "xblBindings" },
-  get pane() { return this.mPane },
+  get uid()
+  {
+    return "xblBindings";
+  },
 
-  get subject() { return this.mSubject },
-  set subject(aObject) 
+  get pane()
+  {
+    return this.mPane;
+  },
+
+  get subject()
+  {
+    return this.mSubject;
+  },
+
+  set subject(aObject)
   {
     this.mSubject = aObject;
-    
+
     this.populateBindings();
-    
+
     var menulist = document.getElementById("mlBindings");
     this.displayBinding(menulist.value);
-        
+
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
-  initialize: function(aPane)
+  initialize: function XBLBVr_Initialize(aPane)
   {
     this.mPane = aPane;
 
     aPane.notifyViewerReady(this);
   },
 
-  destroy: function()
+  destroy: function XBLBVr_Destroy()
   {
     // persist all attributes on the panels
     var panes = document.getElementsByTagName("multipanel");
@@ -130,45 +145,56 @@ XBLBindings.prototype =
     this.mMethodTree.treeBoxObject.view = null;
     this.mPropTree.treeBoxObject.view = null;
     this.mHandlerTree.treeBoxObject.view = null;
-    this.mResourceTree.treeBoxObject.view = null;    
+    this.mResourceTree.treeBoxObject.view = null;
   },
-  
-  isCommandEnabled: function(aCommand)
+
+  isCommandEnabled: function XBLBVr_IsCommandEnabled(aCommand)
   {
     return false;
   },
-  
-  getCommand: function(aCommand)
+
+  getCommand: function XBLBVr_GetCommand(aCommand)
   {
     return null;
   },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// event dispatching
+  //// Event Dispatching
 
-  addObserver: function(aEvent, aObserver) { this.mObsMan.addObserver(aEvent, aObserver); },
-  removeObserver: function(aEvent, aObserver) { this.mObsMan.removeObserver(aEvent, aObserver); },
+  addObserver: function XBLBVr_AddObserver(aEvent, aObserver)
+  {
+    this.mObsMan.addObserver(aEvent, aObserver);
+  },
+
+  removeObserver: function XBLBVr_RemoveObserver(aEvent, aObserver)
+  {
+    this.mObsMan.removeObserver(aEvent, aObserver);
+  },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// displaying binding info
-  
-  initContent: function()
+  //// Displaying Binding Info
+
+  initContent: function XBLBVr_InitContent()
   {
     if (this.mContentInit) return;
 
-    window.setTimeout(function(me) {
-      // prepare and attach the content DOM datasource
-      me.mContentView = XPCU.createInstance(kDOMViewCID, "inIDOMView");
-      me.mContentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
-      me.mContentTree.treeBoxObject.view = me.mContentView;
+    window.setTimeout(
+      function XBLBVr_InitContentCallback(me)
+      {
+        // prepare and attach the content DOM datasource
+        me.mContentView = XPCU.createInstance(kDOMViewContractID,
+                                              "inIDOMView");
+        me.mContentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
+        me.mContentTree.treeBoxObject.view = me.mContentView;
 
-      me.mContentInit = true;
-      if (me.mBinding)
-        me.displayContent();
-    }, 10, this);
+        me.mContentInit = true;
+        if (me.mBinding) {
+          me.displayContent();
+        }
+      }, 10, this);
   },
 
-  populateBindings: function()
+  populateBindings: function XBLBVr_PopulateBindings()
   {
     var urls = this.mDOMUtils.getBindingURLs(this.mSubject);
     var menulist = document.getElementById("mlBindings");
@@ -182,11 +208,11 @@ XBLBindings.prototype =
       var url = urls.queryElementAt(i, Components.interfaces.nsIURI).spec;
       menulist.appendItem(url, url);
     }
-    
+
     menulist.selectedIndex = 0;
   },
-  
-  displayBinding: function(aURL)
+
+  displayBinding: function XBLBVr_DisplayBinding(aURL)
   {
     this.mBindingURL = aURL;
     if (aURL) {
@@ -195,17 +221,18 @@ XBLBindings.prototype =
       req.open("GET", aURL);
       req.overrideMimeType("application/xml");
       req.send(null);
-    } else {
+    }
+    else {
       this.doDisplayBinding(null);
     }
   },
-  
-  doDisplayBinding: function(doc)
+
+  doDisplayBinding: function XBLBVr_DoDisplayBinding(doc)
   {
     if (doc) {
       var url = this.mBindingURL;
       var poundPt = url.indexOf("#");
-      var id = url.substr(poundPt+1);
+      var id = url.substr(poundPt + 1);
       var bindings = doc.getElementsByTagName("binding");
       var binding = null;
       for (var i = 0; i < bindings.length; ++i) {
@@ -215,79 +242,88 @@ XBLBindings.prototype =
         }
       }
       this.mBinding = binding;
-    } else {
+    }
+    else {
       this.mBinding = null;
     }
-        
+
     this.displayContent();
     this.displayMethods();
     this.displayProperties();
     this.displayHandlers();
     this.displayResources();
 
-    var ml = document.getElementById("mlBindings");    
+    var ml = document.getElementById("mlBindings");
     var mps = document.getElementById("mpsBinding");
     if (!this.mBinding) {
-      ml.setAttribute("disabled", "true");
-      mps.setAttribute("collapsed", "true");
-    } else {
-      ml.removeAttribute("disabled");
-      mps.removeAttribute("collapsed");
+      ml.disabled = true;
+      mps.collapsed = true;
+    }
+    else {
+      ml.disabled = false;
+      mps.collapsed = false;
     }
   },
-  
-  displayContent: function()
+
+  displayContent: function XBLBVr_DisplayContent()
   {
     if (this.mContentInit && this.mBinding) {
       var list = this.mBinding.getElementsByTagName("content");
-      if (list.length)
+      if (list.length) {
         this.mContentView.rootNode = list[0];
-      else
+      }
+      else {
         this.mContentView.rootNode = null;
-      document.getElementById("bxContent").setAttribute("disabled", list.length == 0);
-    } 
+      }
+      document.getElementById("bxContent").setAttribute("disabled",
+                                                        list.length == 0);
+    }
   },
-  
-  displayMethods: function()
+
+  displayMethods: function XBLBVr_DisplayMethods()
   {
     var bx = this.getBoxObject(this.mMethodTree);
     bx.view = this.mBinding ? new MethodTreeView(this.mBinding) : null;
 
-    var active = this.mBinding && this.mBinding.getElementsByTagName("method").length > 0;
+    var active = this.mBinding &&
+                 this.mBinding.getElementsByTagName("method").length > 0;
     document.getElementById("bxMethods").setAttribute("disabled", !active);
   },
-  
-  displayProperties: function()
+
+  displayProperties: function XBLBVr_DisplayProperties()
   {
     var bx = this.getBoxObject(this.mPropTree);
     bx.view = this.mBinding ? new PropTreeView(this.mBinding) : null;
 
-    var active = this.mBinding && this.mBinding.getElementsByTagName("property").length > 0;
+    var active = this.mBinding &&
+                 this.mBinding.getElementsByTagName("property").length > 0;
     document.getElementById("bxProps").setAttribute("disabled", !active);
 
     this.displayProperty(null);
   },
 
-  displayHandlers: function()
+  displayHandlers: function XBLBVr_DisplayHandlers()
   {
     var bx = this.getBoxObject(this.mHandlerTree);
     bx.view = this.mBinding ? new HandlerTreeView(this.mBinding) : null;
 
-    var active = this.mBinding && this.mBinding.getElementsByTagName("handler").length > 0;
+    var active = this.mBinding &&
+                 this.mBinding.getElementsByTagName("handler").length > 0;
     document.getElementById("bxHandlers").setAttribute("disabled", !active);
     this.displayHandler(null);
   },
 
-  displayResources: function()
+  displayResources: function XBLBVr_DisplayResources()
   {
     var bx = this.getBoxObject(this.mResourceTree);
     bx.view = this.mBinding ? new ResourceTreeView(this.mBinding) : null;
 
-    var active = this.mBinding && this.mBinding.getElementsByTagName("resources").length > 0;
+    var active = this.mBinding &&
+                 this.mBinding.getElementsByTagName("resources").length > 0;
     document.getElementById("bxResources").setAttribute("disabled", !active);
   },
 
-  displayMethod: function(aMethod)
+  displayMethod: function XBLBVr_DisplayMethod(aMethod)
   {
     var body = aMethod.getElementsByTagNameNS(kXBLNSURI, "body")[0];
     if (body) {
@@ -295,36 +331,51 @@ XBLBindings.prototype =
     }
   },
 
-  displayProperty: function(aProp)
+  displayProperty: function XBLBVr_DisplayProperty(aProp)
   {
     var getradio = document.getElementById("raPropGetter");
     var setradio = document.getElementById("raPropSetter");
-    
+
     // disable/enable radio buttons
-    var hasget = aProp && (aProp.hasAttribute("onget") || aProp.getElementsByTagName("getter").length);
+    var hasget = aProp && (aProp.hasAttribute("onget") ||
+                           aProp.getElementsByTagName("getter").length);
     getradio.disabled = !hasget;
-    if (!hasget && getradio.hasAttribute("selected"))
+    if (!hasget && getradio.hasAttribute("selected")) {
       getradio.removeAttribute("selected");
-    var hasset = aProp && (aProp.hasAttribute("onset") || aProp.getElementsByTagName("setter").length);
-    setradio.disabled = !hasset;
-    if (!hasset && setradio.hasAttribute("selected"))
-      setradio.removeAttribute("selected");
-    
-    // make sure at least one is checked
-    if (!setradio.hasAttribute("selected") && !getradio.hasAttribute("selected")) {
-      if (!getradio.disabled) 
-        getradio.setAttribute("selected", "true");
-      else if (!setradio.disabled)
-        setradio.setAttribute("selected", "true");
     }
-    
+    var hasset = aProp && (aProp.hasAttribute("onset") ||
+                           aProp.getElementsByTagName("setter").length);
+    setradio.disabled = !hasset;
+    if (!hasset && setradio.hasAttribute("selected")) {
+      setradio.removeAttribute("selected");
+    }
+
+    // make sure at least one is checked
+    if (!setradio.hasAttribute("selected") &&
+        !getradio.hasAttribute("selected")) {
+      if (!getradio.disabled) {
+        getradio.setAttribute("selected", "true");
+      }
+      else if (!setradio.disabled) {
+        setradio.setAttribute("selected", "true");
+      }
+    }
+
     // display text
-    var et = getradio.hasAttribute("selected") ? "get" : setradio.hasAttribute("selected") ? "set" : null;
+    var et = null;
+    if (getradio.hasAttribute("selected")) {
+      et = "get";
+    }
+    else if (setradio.hasAttribute("selected")) {
+      et = "set";
+    }
     var text = "";
     if (!et || !aProp) {
       // do nothing
-    } else if (aProp.hasAttribute("on"+et))
+    }
+    else if (aProp.hasAttribute("on"+et)) {
       text = aProp.getAttribute("on"+et);
+    }
     else {
       var kids = aProp.getElementsByTagName(et+"ter")
       if (kids && kids.length) {
@@ -333,55 +384,58 @@ XBLBindings.prototype =
     }
     this.mFunctionTextbox.value = text;
   },
-  
-  displayHandler: function(aHandler)
+
+  displayHandler: function XBLBVr_DisplayHandler(aHandler)
   {
     var text = "";
     if (aHandler) {
-      text = aHandler.hasAttribute("action") ? aHandler.getAttribute("action") : null;
-      if (!text)
+      text = aHandler.hasAttribute("action") ?
+               aHandler.getAttribute("action") : null;
+      if (!text) {
         text = this.readDOMText(aHandler);
+      }
     }
     this.mFunctionTextbox.value = text;
   },
-  
+
   ////////////////////////////////////////////////////////////////////////////
-  //// selection
-  
-  onMethodSelected: function()
+  //// Selection
+
+  onMethodSelected: function XBLBVr_OnMethodSelected()
   {
     var idx = this.mMethodTree.currentIndex;
     var methods = this.mBinding.getElementsByTagNameNS(kXBLNSURI, "method");
     var method = methods[idx];
     this.displayMethod(method);
   },
-    
-  onPropSelected: function()
+
+  onPropSelected: function XBLBVr_OnPropSelected()
   {
     var idx = this.mPropTree.currentIndex;
     var props = this.mBinding.getElementsByTagNameNS(kXBLNSURI, "property");
     var prop = props[idx];
     this.displayProperty(prop);
   },
-    
-  onHandlerSelected: function()
+
+  onHandlerSelected: function XBLBVr_OnHandlerSelected()
   {
     var idx = this.mHandlerTree.currentIndex;
     var handlers = this.mBinding.getElementsByTagNameNS(kXBLNSURI, "handler");
     var handler = handlers[idx];
     this.displayHandler(handler);
   },
-    
+
   ////////////////////////////////////////////////////////////////////////////
-  //// misc
-  
-  clearChildren: function(aEl)
+  //// Misc
+
+  clearChildren: function XBLBVr_ClearChildren(aEl)
   {
-    while (aEl.hasChildNodes())
+    while (aEl.hasChildNodes()) {
       aEl.removeChild(aEl.lastChild);
+    }
   },
-  
-  readDOMText: function(aEl)
+
+  readDOMText: function XBLBVr_ReadDOMText(aEl)
   {
     var text = aEl.nodeValue;
     for (var i = 0; i < aEl.childNodes.length; ++i) {
@@ -390,14 +444,16 @@ XBLBindings.prototype =
     return text;
   },
 
-  getBoxObject: function(aTree)
+  getBoxObject: function XBLBVr_GetBoxObject(aTree)
   {
-    return aTree.boxObject.QueryInterface(Components.interfaces.nsITreeBoxObject);
+    return aTree.boxObject.QueryInterface(
+             Components.interfaces.nsITreeBoxObject
+           );
   }
-  
+
 };
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// MethodTreeView
 
 function MethodTreeView(aBinding)
@@ -408,23 +464,24 @@ function MethodTreeView(aBinding)
 
 MethodTreeView.prototype = new inBaseTreeView();
 
-MethodTreeView.prototype.getCellText = 
-function(aRow, aCol) 
+MethodTreeView.prototype.getCellText =
+function MTV_GetCellText(aRow, aCol)
 {
   var method = this.mMethods[aRow];
   if (aCol.id == "olcMethodName") {
     var name = method.getAttribute("name");
     var params = method.getElementsByTagName("parameter");
     var pstr = "";
-    for (var i = 0; i < params.length; ++i)
-      pstr += (i>0?", ": "") + params[i].getAttribute("name");
+    for (var i = 0; i < params.length; ++i) {
+      pstr += (i > 0 ? ", " : "") + params[i].getAttribute("name");
+    }
     return name + "(" + pstr + ")";
   }
-  
+
   return "";
 }
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// PropTreeView
 
 function PropTreeView(aBinding)
@@ -435,18 +492,18 @@ function PropTreeView(aBinding)
 
 PropTreeView.prototype = new inBaseTreeView();
 
-PropTreeView.prototype.getCellText = 
-function(aRow, aCol) 
+PropTreeView.prototype.getCellText =
+function PTV_GetCellText(aRow, aCol)
 {
   var prop = this.mProps[aRow];
   if (aCol.id == "olcPropName") {
     return prop.getAttribute("name");
   }
-  
+
   return "";
 }
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// HandlerTreeView
 
 function HandlerTreeView(aBinding)
@@ -457,20 +514,21 @@ function HandlerTreeView(aBinding)
 
 HandlerTreeView.prototype = new inBaseTreeView();
 
-HandlerTreeView.prototype.getCellText = 
-function(aRow, aCol) 
+HandlerTreeView.prototype.getCellText =
+function HTV_GetCellText(aRow, aCol)
 {
   var handler = this.mHandlers[aRow];
   if (aCol.id == "olcHandlerEvent") {
     return handler.getAttribute("event");
-  } else if (aCol.id == "olcHandlerPhase") {
+  }
+  else if (aCol.id == "olcHandlerPhase") {
     return handler.getAttribute("phase");
   }
-  
+
   return "";
 }
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// ResourceTreeView
 
 function ResourceTreeView(aBinding)
@@ -479,32 +537,35 @@ function ResourceTreeView(aBinding)
   var list = [];
   if (res && res.length) {
     var kids = res[0].childNodes;
-    for (var i = 0; i < kids.length; ++i)
-      if (kids[i].nodeType == Node.ELEMENT_NODE)
+    for (var i = 0; i < kids.length; ++i) {
+      if (kids[i].nodeType == Node.ELEMENT_NODE) {
         list.push(kids[i]);
+      }
+    }
   }
-        
+
   this.mResources = list;
   this.mRowCount = this.mResources ? this.mResources.length : 0;
 }
 
 ResourceTreeView.prototype = new inBaseTreeView();
 
-ResourceTreeView.prototype.getCellText = 
-function(aRow, aCol) 
+ResourceTreeView.prototype.getCellText =
+function RTV_GetCellText(aRow, aCol)
 {
   var resource = this.mResources[aRow];
   if (aCol.id == "olcResourceType") {
     return resource.localName;
-  } else if (aCol.id == "olcResourceSrc") {
+  }
+  else if (aCol.id == "olcResourceSrc") {
     return resource.getAttribute("src");
   }
-  
+
   return "";
 }
 
-////////////////////////////////////////////////////////////////////////////
-//// event listeners
+//////////////////////////////////////////////////////////////////////////////
+//// Event Listeners
 
 function gDocLoadListener(event)
 {
