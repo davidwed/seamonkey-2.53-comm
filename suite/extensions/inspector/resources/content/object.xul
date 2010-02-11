@@ -18,6 +18,7 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <script type="application/x-javascript" src="chrome://inspector/content/object.js"/>  
+  <script type="application/javascript" src="chrome://inspector/content/Flasher.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/ViewerRegistry.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/utils.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>

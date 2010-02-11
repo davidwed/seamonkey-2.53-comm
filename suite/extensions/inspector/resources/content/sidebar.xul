@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+about:robots<?xml version="1.0"?>
 
 <!DOCTYPE window [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
@@ -18,6 +18,7 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <script type="application/x-javascript" src="chrome://inspector/content/sidebar.js"/>  
+  <script type="application/javascript" src="chrome://inspector/content/Flasher.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/ViewerRegistry.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/utils.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
