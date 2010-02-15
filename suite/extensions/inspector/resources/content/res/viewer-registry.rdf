@@ -45,7 +45,7 @@
     <rdf:li><rdf:Description 
       ins:uid="stylesheets"
       ins:panels="bxDocPanel"
-      ins:description="Stylesheets"
+      ins:description="Style Sheets"
       ins:filter="return object instanceof Components.interfaces.nsIDOMDocument;"/>
     </rdf:li>
 
