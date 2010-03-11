@@ -18,7 +18,6 @@
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xul/FrameExchange.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/system/PrefUtils.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/system/FilePickerUtils.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/system/file.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
   <vbox id="bxInspectorMain">
 
