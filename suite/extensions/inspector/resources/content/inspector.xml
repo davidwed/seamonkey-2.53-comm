@@ -13,6 +13,7 @@
      *   chrome://inspector/content/Flasher.js
      *   chrome://inspector/content/ViewerRegistry.js
      *   chrome://inspector/content/jsutil/events/ObserverManager.js
+     *   chrome://inspector/content/jsutil/system/PrefUtils.js
      **************************************************************** -->
 
   <binding id="panelset" extends="chrome://inspector/content/inspector.xml#base">

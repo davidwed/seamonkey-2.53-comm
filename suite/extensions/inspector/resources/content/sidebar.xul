@@ -24,6 +24,7 @@ about:robots<?xml version="1.0"?>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/rdf/RDFU.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/rdf/RDFArray.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/system/PrefUtils.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
   <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xul/FrameExchange.js"/>
       
