@@ -124,8 +124,6 @@ inspector.jar:
   skin/classic/inspector/ImageSearchItem.gif                            (resources/skin/classic/ImageSearchItem.gif)
   skin/classic/inspector/iconImportant.gif                              (resources/skin/classic/iconImportant.gif)
   skin/classic/inspector/iconViewerList.gif                             (resources/skin/classic/iconViewerList.gif)
-  skin/classic/inspector/iconViewerMenu-dis.gif                         (resources/skin/classic/iconViewerMenu-dis.gif)
-  skin/classic/inspector/iconViewerMenu.gif                             (resources/skin/classic/iconViewerMenu.gif)
   skin/classic/inspector/inspector.css                                  (resources/skin/classic/inspector.css)
   skin/classic/inspector/inspectorWindow.css                            (resources/skin/classic/inspectorWindow.css)
   skin/classic/inspector/titledSplitter.css                             (resources/skin/classic/titledSplitter.css)
