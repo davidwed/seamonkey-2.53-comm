@@ -111,9 +111,7 @@ DOMViewer.prototype =
   mSubject: null,
   mDOMView: null,
   // searching stuff
-  mSearchResults: null,
-  mSearchCurrentIdx: null,
-  mSearchDirection: null,
+  mFindResult: null,
   mColumns: null,
   mFindDir: null,
   mFindParams: null,
@@ -727,6 +725,7 @@ DOMViewer.prototype =
 
   startFind: function DVr_StartFind(aType, aDir)
   {
+    this.mFindResult = null;
     this.mFindType = aType;
     this.mFindDir = aDir;
     this.mFindParams = [];
@@ -755,30 +754,34 @@ DOMViewer.prototype =
   findNext: function DVr_FindNext()
   {
     var walker = this.mFindWalker;
+    if (!walker) {
+      Components.utils.reportError("deep tree walker unavailable");
+      return;
+    }
     var result = null;
-    if (walker) {
-      while (walker.currentNode) {
-        if (this[this.mFindFn](walker)) {
-          result = walker.currentNode;
-          walker.nextNode();
-          break;
-        }
+    var currentNode = walker.currentNode;
+    while (currentNode) {
+      if (this[this.mFindFn](walker)) {
+        result = walker.currentNode;
         walker.nextNode();
+        break;
       }
+      currentNode = walker.nextNode();
+    }
 
-      if (result) {
-        this.selectElementInTree(result);
-        this.mDOMTree.focus();
-      }
-      else {
-        var bundle = this.mPanel.panelset.stringBundle;
-        var msg = bundle.getString("findNodesDocumentEnd.message");
-        var title = bundle.getString("findNodesDocumentEnd.title");
+    if (result && result != this.mFindResult) {
+      this.selectElementInTree(result);
+      this.mFindResult = result;
+      this.mDOMTree.focus();
+    }
+    else {
+      var bundle = this.mPanel.panelset.stringBundle;
+      var msg = bundle.getString("findNodesDocumentEnd.message");
+      var title = bundle.getString("findNodesDocumentEnd.title");
 
-        var promptService = XPCU.getService(kPromptServiceClassID,
-                                           "nsIPromptService");
-        promptService.alert(window, title, msg);
-      }
+      var promptService = XPCU.getService(kPromptServiceClassID,
+                                         "nsIPromptService");
+      promptService.alert(window, title, msg);
     }
   },
 
