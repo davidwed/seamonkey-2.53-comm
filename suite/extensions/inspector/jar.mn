@@ -5,6 +5,7 @@ inspector.jar:
 % overlay chrome://inspector/content/inspector.xul chrome://communicator/content/tasksOverlay.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 % overlay chrome://communicator/content/tasksOverlay.xul chrome://inspector/content/tasksOverlay.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 % overlay chrome://communicator/content/pref/preferences.xul chrome://inspector/content/prefs/prefsOverlay.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
+% overlay chrome://chatzilla/content/chatzilla.xul chrome://inspector/content/tasksOverlay-cz.xul application={59c81df5-4b7a-477b-912d-4e0fdf64e5f2}
 % overlay chrome://browser/content/browser.xul chrome://inspector/content/tasksOverlay-ff.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 % overlay chrome://browser/content/browser.xul chrome://inspector/content/tasksOverlay-ff.xul application=songbird@songbirdnest.com
 % overlay chrome://browser/content/macBrowserOverlay.xul chrome://inspector/content/tasksOverlay-ff.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
@@ -32,6 +33,7 @@ inspector.jar:
   content/inspector/popupOverlay.xul                                    (resources/content/popupOverlay.xul)
   content/inspector/statusbarOverlay.xul                                (resources/content/statusbarOverlay.xul)
   content/inspector/tasksOverlay.xul                                    (resources/content/tasksOverlay.xul)
+  content/inspector/tasksOverlay-cz.xul                                 (resources/content/tasksOverlay-cz.xul)
   content/inspector/tasksOverlay-ff.xul                                 (resources/content/tasksOverlay-ff.xul)
   content/inspector/tasksOverlay-sb.xul                                 (resources/content/tasksOverlay-sb.xul)
   content/inspector/tasksOverlay-tb.xul                                 (resources/content/tasksOverlay-tb.xul)
