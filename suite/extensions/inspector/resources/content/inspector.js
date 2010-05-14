@@ -51,17 +51,21 @@ var inspector;
 
 //////////// global constants ////////////////////
 
-const kClipboardHelperCID  = "@mozilla.org/widget/clipboardhelper;1";
-const kPromptServiceCID    = "@mozilla.org/embedcomp/prompt-service;1";
-const kFOStreamCID         = "@mozilla.org/network/file-output-stream;1";
-const kEncoderCIDbase      = "@mozilla.org/layout/documentEncoder;1?type=";
-const kSerializerCID       = "@mozilla.org/xmlextras/xmlserializer;1";
-const nsIWebNavigation     = Components.interfaces.nsIWebNavigation;
-const nsIDocShellTreeItem  = Components.interfaces.nsIDocShellTreeItem;
-const nsIDocShell          = Components.interfaces.nsIDocShell;
-const nsIFileOutputStream  = Components.interfaces.nsIFileOutputStream;
-const nsIDocumentEncoder   = Components.interfaces.nsIDocumentEncoder;
-const nsIDOMSerializer     = Components.interfaces.nsIDOMSerializer;
+const kAccessibleRetrievalCID  = "@mozilla.org/accessibleRetrieval;1";
+const kClipboardHelperCID      = "@mozilla.org/widget/clipboardhelper;1";
+const kPromptServiceCID        = "@mozilla.org/embedcomp/prompt-service;1";
+const kFOStreamCID             = "@mozilla.org/network/file-output-stream;1";
+const kEncoderCIDbase          = "@mozilla.org/layout/documentEncoder;1?type=";
+const kSerializerCID           = "@mozilla.org/xmlextras/xmlserializer;1";
+const kXULAppInfoCID           = "@mozilla.org/xre/app-info;1"
+const nsIAccessibleApplication = Components.interfaces.nsIAccessibleApplication;
+const nsIAccessibleRetrieval   = Components.interfaces.nsIAccessibleRetrieval;
+const nsIWebNavigation         = Components.interfaces.nsIWebNavigation;
+const nsIDocShellTreeItem      = Components.interfaces.nsIDocShellTreeItem;
+const nsIDocShell              = Components.interfaces.nsIDocShell;
+const nsIFileOutputStream      = Components.interfaces.nsIFileOutputStream;
+const nsIDocumentEncoder       = Components.interfaces.nsIDocumentEncoder;
+const nsIDOMSerializer         = Components.interfaces.nsIDOMSerializer;
 
 //////////////////////////////////////////////////
 
@@ -134,10 +138,28 @@ InspectorApp.prototype =
     this.mPanelSet.initialize();
 
     // check if accessibility service is available
-    var cmd = document.getElementById("cmd:toggleAccessibleNodes");
-    if (cmd) {
-      if (!("@mozilla.org/accessibleRetrieval;1" in Components.classes))
-        cmd.setAttribute("disabled", "true");
+    if (!(kAccessibleRetrievalCID in Components.classes)) {
+      var elm = document.getElementById("cmd:toggleAccessibleNodes");
+      if (elm) {
+        elm.setAttribute("disabled", "true");
+      }
+
+      elm = document.getElementById("mnInspectApplicationAccessible");
+      if (elm) {
+        elm.setAttribute("disabled", "true");
+      }
+    }
+
+    // hide "inspect application accessible" option if Gecko version is earlier
+    // than 1.9.3.
+    // XXX: remove this when mimimal Gecko supported version will be equal to
+    // 1.9.3.
+    var info = XPCU.getService(kXULAppInfoCID, "nsIXULAppInfo");
+    if (info.platformVersion < "1.9.3") {
+      var elm = document.getElementById("mnInspectApplicationAccessible");
+      if (elm) {
+        elm.setAttribute("hidden", "true");
+      }
     }
 
     if (aURI) {
@@ -178,14 +200,24 @@ InspectorApp.prototype =
         this.initViewerPanels();
         break;
       case "subjectChange":
-        if (aEvent.target == this.mDocPanel.viewer &&
-            aEvent.subject && "location" in aEvent.subject) {
-          this.locationText = aEvent.subject.location; // display document url
+        if (aEvent.target == this.mDocPanel.viewer && aEvent.subject) {
+          if ("location" in aEvent.subject) {
+            this.locationText = aEvent.subject.location; // display document url
 
-          document.title = (aEvent.subject.title || aEvent.subject.location) +
-                           kInspectorTitle;
+            document.title = (aEvent.subject.title || aEvent.subject.location) +
+                             kInspectorTitle;
 
-          this.updateCommand("cmdSave");
+            this.updateCommand("cmdSave");
+          }
+          else if (aEvent.subject instanceof nsIAccessibleApplication) {
+            this.locationText = "";
+
+            var title = this.mPanelSet.
+              stringBundle.getString("applicationAccesible.title");
+            document.title = title + kInspectorTitle;
+
+            this.updateCommand("cmdSave");
+          }
         }
         break;
     }
@@ -443,6 +475,16 @@ InspectorApp.prototype =
       menuItem.setAttribute("label", title);
     }
     parent.appendChild(menuItem);
+  },
+
+  setTargetApplicationAccessible: function setTargetApplicationAccessible()
+  {
+    var accService =
+      XPCU.getService(kAccessibleRetrievalCID, "nsIAccessibleRetrieval");
+
+    if (accService) {
+      this.mDocPanel.subject = accService.getApplicationAccessible();
+    }
   },
 
   setTargetWindow: function(aWindow)

@@ -149,7 +149,9 @@ AccessiblePropsViewer.prototype =
     this.clearView();
 
     try {
-      this.mAccSubject = this.mSubject[" accessible "];
+      this.mAccSubject = this.mSubject instanceof nsIAccessible ?
+        this.mSubject : this.mSubject[" accessible "];
+
       if (this.mAccSubject)
         XPCU.QI(this.mAccSubject, nsIAccessible);
       else

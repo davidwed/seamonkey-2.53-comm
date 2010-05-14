@@ -59,6 +59,7 @@ const nsIObserverService = Components.interfaces.nsIObserverService;
 const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
 const nsIAccessibleEvent = Components.interfaces.nsIAccessibleEvent;
 const nsIAccessNode = Components.interfaces.nsIAccessNode;
+const nsIAccessible = Components.interfaces.nsIAccessible;
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization
@@ -107,6 +108,10 @@ AccessibleEventsViewer.prototype =
   set subject(aObject)
   {
     this.mWatchView = new WatchAccessibleEventsListView();
+
+    if (this.mView) {
+      this.mView.destroy();
+    }
     this.mView = new AccessibleEventsView(aObject, this.mWatchView);
 
     this.mOlBox.view = this.mView;
@@ -189,9 +194,8 @@ AccessibleEventsViewer.prototype =
 ///////////////////////////////////////////////////////////////////////////////
 //// AccessibleEventsView
 
-function AccessibleEventsView(aDocument, aWatchView)
+function AccessibleEventsView(aObject, aWatchView)
 {
-  this.mDocument = aDocument;
   this.mWatchView = aWatchView;
   this.mEvents = [];
   this.mRowCount = 0;
@@ -199,7 +203,13 @@ function AccessibleEventsView(aDocument, aWatchView)
   this.mAccService = XPCU.getService(kAccessibleRetrievalCID,
                                      nsIAccessibleRetrieval);
 
-  this.mAccDocument = this.mAccService.getAccessibleFor(this.mDocument);
+  this.mAccessible = aObject instanceof nsIAccessible ?
+    aObject : this.mAccService.getAccessibleFor(aObject);
+
+  this.mDOMIRootDocumentAccessible =
+    XPCU.QI(this.mAccService.getAccessibleFor(document),
+            nsIAccessNode).rootDocument;
+
   this.mObserverService = XPCU.getService(kObserverServiceCID,
                                           nsIObserverService);
 
@@ -217,10 +227,23 @@ function observe(aSubject, aTopic, aData)
     return;
 
   var accessnode = XPCU.QI(accessible, nsIAccessNode);
-  var accDocument = accessnode.accessibleDocument;
-  if (accDocument != this.mAccDocument)
-    return;
 
+  // Ignore events on this DOM Inspector to avoid a mess.
+  if (accessnode.rootDocument == this.mDOMIRootDocumentAccessible) {
+    return;
+  }
+
+  // Ignore events having target not in subtree of currently inspected
+  // accessible.
+  var parentAccessible = accessible;
+  while (parentAccessible != this.mAccessible) {
+    parentAccessible = parentAccessible.parent;
+    if (!parentAccessible) {
+      return;
+    }
+  }
+
+  // Ignore unwatched events.
   var type = event.eventType;
   if (!this.mWatchView.isEventWatched(type))
     return;
