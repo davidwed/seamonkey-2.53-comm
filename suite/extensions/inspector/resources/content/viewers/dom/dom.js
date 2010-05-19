@@ -899,8 +899,8 @@ DOMViewer.prototype =
 
     var opened = [];
     var i;
-    for (i = 0; i < this.mDOMView.rowCount; ++i) {
-      if (this.mDOMView.isContainerOpen(i)) {
+    for (i = 0; i < this.mDOMTree.view.rowCount; ++i) {
+      if (this.mDOMTree.view.isContainerOpen(i)) {
         opened.push(this.getNodeFromRowIndex(i));
       }
     }
