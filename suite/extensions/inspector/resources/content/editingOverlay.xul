@@ -8,18 +8,25 @@
   <commandset id="cmdsEditing">
     <command id="cmdEditUndo" oncommand="viewer.pane.panelset.undo();"/>
     <command id="cmdEditRedo" oncommand="viewer.pane.panelset.redo();"/>
-    <command id="cmdEditCut" oncommand="viewer.pane.panelset.execCommand('cmdEditCut');"/>
-    <command id="cmdEditCopy" oncommand="viewer.pane.panelset.execCommand('cmdEditCopy');"/>
-    <command id="cmdEditPaste" oncommand="viewer.pane.panelset.execCommand('cmdEditPaste');"/>
-    <command id="cmdEditInsert" oncommand="viewer.pane.panelset.execCommand('cmdEditInsert');"/>
-    <command id="cmdEditEdit" oncommand="viewer.pane.panelset.execCommand('cmdEditEdit');"/>
-    <command id="cmdEditDelete" oncommand="viewer.pane.panelset.execCommand('cmdEditDelete');"/>
+    <command id="cmdEditCut"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditCut');"/>
+    <command id="cmdEditCopy"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditCopy');"/>
+    <command id="cmdEditPaste"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditPaste');"/>
+    <command id="cmdEditInsert"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditInsert');"/>
+    <command id="cmdEditEdit"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditEdit');"/>
+    <command id="cmdEditDelete"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditDelete');"/>
   </commandset>
   
   <keyset id="ksGlobalKeyset">
     <key id="keyEditUndo" key="z" modifiers="accel" command="cmdEditUndo"/>
     <key id="keyEditRedo" key="y" modifiers="accel" command="cmdEditRedo"/>
-    <key id="keyEditRedo2" key="z" modifiers="accel,shift" command="cmdEditRedo"/>
+    <key id="keyEditRedo2" key="z" modifiers="accel,shift"
+         command="cmdEditRedo"/>
     <key id="keyEditCut" key="x" modifiers="accel" command="cmdEditCut"/>
     <key id="keyEditCopy" key="c" modifiers="accel" command="cmdEditCopy"/>
     <key id="keyEditPaste" key="v" modifiers="accel" command="cmdEditPaste"/>
@@ -37,11 +44,12 @@
             accesskey="&mnEditCopy.accesskey;" key="keyEditCopy"/>
   <menuitem id="mnEditPaste" label="&mnEditPaste.label;" command="cmdEditPaste"
             accesskey="&mnEditPaste.accesskey;" key="keyEditPaste"/>
-  <menuitem id="mnEditInsert" label="&mnEditInsert.label;" command="cmdEditInsert"
-            accesskey="&mnEditInsert.accesskey;"/>
+  <menuitem id="mnEditInsert" label="&mnEditInsert.label;"
+            command="cmdEditInsert" accesskey="&mnEditInsert.accesskey;"/>
   <menuitem id="mnEditEdit" label="&mnEditEdit.label;" command="cmdEditEdit"
             accesskey="&mnEditEdit.accesskey;"/>
-  <menuitem id="mnEditDelete" label="&mnEditDelete.label;" command="cmdEditDelete"
-            accesskey="&mnEditDelete.accesskey;" key="keyEditDelete"/>
+  <menuitem id="mnEditDelete" label="&mnEditDelete.label;"
+            command="cmdEditDelete" accesskey="&mnEditDelete.accesskey;"
+            key="keyEditDelete"/>
 
 </overlay>

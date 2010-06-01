@@ -5,18 +5,19 @@
           xmlns:xbl="http://www.mozilla.org/xbl"
           xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<!-- ***************************************************************
-     * Inspector 
-     *  Interface for a set of viewer panels.
-     * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-     * REQUIRED IMPORTS:
-     *   chrome://inspector/content/Flasher.js
-     *   chrome://inspector/content/ViewerRegistry.js
-     *   chrome://inspector/content/jsutil/events/ObserverManager.js
-     *   chrome://inspector/content/jsutil/system/PrefUtils.js
-     **************************************************************** -->
+  <!-- ***********************************************************************
+  * Inspector
+  *   Interface for a set of viewer panels.
+  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  * REQUIRED IMPORTS:
+  *   chrome://inspector/content/Flasher.js
+  *   chrome://inspector/content/ViewerRegistry.js
+  *   chrome://inspector/content/jsutil/events/ObserverManager.js
+  *   chrome://inspector/content/jsutil/system/PrefUtils.js
+  ************************************************************************ -->
 
-  <binding id="panelset" extends="chrome://inspector/content/inspector.xml#base">
+  <binding id="panelset"
+           extends="chrome://inspector/content/inspector.xml#base">
     <content>
       <xul:stringbundle src="chrome://inspector/locale/inspector.properties"/>
       <children/>
@@ -33,7 +34,7 @@
                 onget="return this.mRegistry"/>
       <property name="initialized" readonly="true"
                 onget="return this.mInitialized"/>
-      <property name="focusedPanel" readonly="true" 
+      <property name="focusedPanel" readonly="true"
                 onget="return this.mFocusedPanel;"/>
       <property name="stringBundle" readonly="true"
                 onget="return this.mStringBundle;"/>
@@ -52,8 +53,9 @@
       <method name="onEvent">
         <parameter name="aEvent"/>
         <body><![CDATA[
-          if (aEvent.type == "viewerChange")
+          if (aEvent.type == "viewerChange") {
             this.onViewerChange(aEvent);
+          }
 
           // bubble the event up
           this.mObsMan.dispatchEvent(aEvent.type, aEvent);
@@ -63,7 +65,7 @@
       <method name="onViewerRegistryLoad">
         <body><![CDATA[
           var panels = this.panels;
-          for (var i = 0; i < panels.length; ++i) {
+          for (let i = 0; i < panels.length; ++i) {
             panels[i].initialize();
             panels[i].addObserver("viewerChange", this);
             panels[i].addObserver("subjectChange", this);
@@ -71,7 +73,7 @@
 
           this.updateViewerCommandsFor(null, null);
           this.updateAllCommands();
-          
+
           this.mInitialized = true;
           this.mObsMan.dispatchEvent("panelsetready", {});
         ]]></body>
@@ -86,10 +88,12 @@
       <method name="onViewerChange">
         <parameter name="aEvent"/>
         <body><![CDATA[
-          // Update commands for the new viewer of the primary panel (currently
-          // driven viewers don't have own commands).
+          // Update commands for the new viewer of the primary panel
+          // (currently driven viewers don't have own commands).
           this.updateViewerCommandsFor(aEvent.newViewer.uid,
-                                       aEvent.oldViewer ? aEvent.oldViewer.uid : null);
+                                       aEvent.oldViewer ?
+                                         aEvent.oldViewer.uid :
+                                         null);
         ]]></body>
       </method>
 
@@ -98,30 +102,35 @@
           return this.getElementsByTagName("domi-panel");
         </getter>
       </property>
-      
+
       <property name="panelCount">
         <getter>
           return this.panels.length;
         </getter>
       </property>
-      
+
       <method name="getPanel">
         <parameter name="aIndex"/>
         <body><![CDATA[
           return this.panels[aIndex];
         ]]></body>
       </method>
-      
-      <!-- ////////////// GLOBAL COMMANDS /////////////////// -->
-      
+
+      <!-- ///////////////////////////////////////////////////////////////////
+      //// Global Commands -->
+
       <method name="updateAllCommands">
         <body><![CDATA[
-          var cmds = document.getElementById(this.getAttribute("viewercommandset"));
-          if (!cmds) return;
-          
+          var cmds =
+            document.getElementById(this.getAttribute("viewercommandset"));
+          if (!cmds) {
+            return;
+          }
+
           var els = cmds.getElementsByAttribute("global", "true");
-          for (var i = 0; i < els.length; i++)
+          for (let i = 0; i < els.length; i++) {
             this.updateCommand(els[i].id);
+          }
         ]]></body>
       </method>
 
@@ -129,15 +138,18 @@
         <parameter name="aCommand"/>
         <body><![CDATA[
           var enabled;
-          if (aCommand == "cmdEditUndo")
+          if (aCommand == "cmdEditUndo") {
             enabled = this.mCommandPtr >= 0;
+          }
           else if (aCommand == "cmdEditRedo") {
-            enabled = this.mCommandPtr+1 < this.mCommandStack.length;
+            enabled = this.mCommandPtr + 1 < this.mCommandStack.length;
             if (!enabled && (this.mCommandPtr > -1)) {
               var lastCmd = this.mCommandStack[this.mCommandPtr];
-              enabled = ((lastCmd instanceof nsITransactionManager) && (lastCmd.numberOfRedoItems > 0));
+              enabled = ((lastCmd instanceof nsITransactionManager) &&
+                         (lastCmd.numberOfRedoItems > 0));
             }
-          } else {
+          }
+          else {
             if (this.focusedPanel && this.focusedPanel.viewer) {
               enabled = this.focusedPanel.viewer.isCommandEnabled(aCommand);
             }
@@ -163,38 +175,47 @@
           // set attribute on command in our document
           var cmd = document.getElementById(aCommand);
           if (cmd) {
-            if (aValue == false || aValue == "false")
+            if (aValue == false || aValue == "false") {
               cmd.removeAttribute(aAttribute);
-            else
+            }
+            else {
               cmd.setAttribute(aAttribute, aValue);
+            }
           }
-          
+
           // set attribute on command in each viewer document
           var panels = this.panels;
-          for (var i = 0; i < panels.length; ++i) {
+          for (let i = 0; i < panels.length; ++i) {
             var doc = panels[i].viewerDocument;
             cmd = doc.getElementById(aCommand);
-            if (cmd)
-              if (aValue == false || aValue == "false")
+            if (cmd) {
+              if (aValue == false || aValue == "false") {
                 cmd.removeAttribute(aAttribute);
-              else
+              }
+              else {
                 cmd.setAttribute(aAttribute, aValue);
+              }
+            }
           }
         ]]></body>
       </method>
 
       <method name="createTransactionManager">
         <body><![CDATA[
-          var txmgr = Components.classes["@mozilla.org/transactionmanager;1"].createInstance(nsITransactionManager); 
+          var txmgr = Components.classes["@mozilla.org/transactionmanager;1"]
+                        .createInstance(nsITransactionManager);
           txmgr = txmgr.QueryInterface(nsITransactionManager);
           return txmgr;
         ]]></body>
       </method>
 
-      <!-- ////////////// VIEWER-SPECIFIC COMMANDS /////////////////// -->
+      <!-- ///////////////////////////////////////////////////////////////////
+      //// Viewer-Specific Commands -->
 
-      <!-- Update viewer specific commands states in accordance with the current
-        viewer. -->
+      <!-- ///////////////////////////////////////////////////////////////////
+      // Update viewer-specific commands states in accordance with the current
+      // viewer.
+      //////////////////////////////////////////////////////////////////// -->
       <method name="updateViewerCommandsFor">
         <parameter name="aNewViewerUid"/>
         <parameter name="aOldViewerUid"/>
@@ -220,7 +241,8 @@
             if (aNewViewerUid && viewerUidArray.indexOf(aNewViewerUid) != -1) {
               cmdEl.removeAttribute("disabled");
 
-            } else if (aOldViewerUid &&
+            }
+            else if (aOldViewerUid &&
                      viewerUidArray.indexOf(aOldViewerUid) != -1) {
               cmdEl.setAttribute("disabled", "true");
             }
@@ -228,36 +250,37 @@
         ]]></body>
       </method>
 
-      <!-- ////////////// COMMAND EXECUTION /////////////////// -->
+      <!-- ///////////////////////////////////////////////////////////////////
+      //// Command Execution -->
 
       <method name="execCommand">
         <parameter name="aCommand"/>
         <body><![CDATA[
-          if (aCommand == "cmdEditUndo")
+          if (aCommand == "cmdEditUndo") {
             this.undo();
-          else if (aCommand == "cmdEditRedo")
+          }
+          else if (aCommand == "cmdEditRedo") {
             this.redo();
+          }
           else {
-            if (!this.focusedPanel)
+            if (!this.focusedPanel) {
               return;
-            
+            }
+
             // if the command is enabled, execute it
             var viewer = this.focusedPanel.viewer;
-            if (!viewer.isCommandEnabled(aCommand)) 
+            if (!viewer.isCommandEnabled(aCommand)) {
               return;
+            }
             var command = viewer.getCommand(aCommand);
-            if (!command)
+            if (!command) {
               return;
-              
+            }
+
             if (typeof command.txnType == "undefined") {
               var noPush = false;
-              //try {
               noPush = command.doCommand();
-              //} catch (ex) {
-              //  dump("Unable to successfully complete command " + aCommand + "\n");
-              //  return;
-              //}
-      
+
               if (!noPush) {
                 this.addCommandToStack(command);
               }
@@ -272,7 +295,8 @@
             }
 
             if (command.txnType == "dialog") {
-              // transaction executed from dialog box onAcceptDialog event; open dialog.
+              // transaction executed from dialog box onAcceptDialog event;
+              // open dialog.
               command.openDialog();
               return;
             }
@@ -288,21 +312,18 @@
         <body><![CDATA[
           if (this.mCommandPtr >= 0) {
             var command = this.mCommandStack[this.mCommandPtr];
-            if ((command instanceof nsITransactionManager) && (command.numberOfUndoItems > 0)) {
+            if ((command instanceof nsITransactionManager) &&
+                (command.numberOfUndoItems > 0)) {
               command.undoTransaction();
               if (command.numberOfUndoItems == 0) {
                 --this.mCommandPtr;
               }
-            } else {
-              --this.mCommandPtr;
-              //try {
-                command.undoCommand();
-              /*} catch (ex) {
-                dump("Unable to successfully undo command.\n");
-                return;
-              }*/
             }
-            
+            else {
+              --this.mCommandPtr;
+                command.undoCommand();
+            }
+
             this.updateCommand("cmdEditUndo");
             this.updateCommand("cmdEditRedo");
           }
@@ -313,22 +334,27 @@
         <body><![CDATA[
           if (this.mCommandPtr == -1) {
             var command = null;
-          } else {
+          }
+          else {
             command = this.mCommandStack[this.mCommandPtr];
           }
 
           if (this.mCommandPtr >= -1) {
-            if (!((command instanceof nsITransactionManager)&&(command.numberOfRedoItems > 0))) {
+            if (!((command instanceof nsITransactionManager) &&
+                  (command.numberOfRedoItems > 0))) {
               ++this.mCommandPtr;
               command = this.mCommandStack[this.mCommandPtr];
             }
 
-            if ((command instanceof nsITransactionManager)&&(command.numberOfRedoItems > 0)) {
+            if ((command instanceof nsITransactionManager) && 
+                (command.numberOfRedoItems > 0)) {
               command.redoTransaction();
-            } else {
+            }
+            else {
               try {
                 command.doCommand();
-              } catch (ex) {
+              }
+              catch (ex) {
                 dump("Unable to successfully redo command.\n");
                 return;
               }
@@ -348,8 +374,11 @@
             ++this.mCommandPtr;
             this.mCommandStack[this.mCommandPtr] = command;
 
-            // get rid of stack entries ahead of the command pointer (if there were any);
-            this.mCommandStack.splice(this.mCommandPtr+1, this.mCommandStack.length - (this.mCommandPtr+1));
+            // get rid of stack entries ahead of the command pointer (if there
+            // were any);
+            this.mCommandStack.splice(this.mCommandPtr + 1,
+                                      this.mCommandStack.length -
+                                        (this.mCommandPtr + 1));
 
             this.updateCommand("cmdEditUndo");
             this.updateCommand("cmdEditRedo");
@@ -362,9 +391,10 @@
             if (nextCmd instanceof nsITransactionManager) {
               var mgr = nextCmd;
               mgr.clear();
-              // No two Transaction Manager objects are ever adjacent to each other.
-              // We simply use the Transaction Manager immediately following, and clear all transactions from it.
-              // This gives us a fresh Transaction Manager.
+              // No two Transaction Manager objects are ever adjacent to each
+              // other.  We simply use the Transaction Manager immediately
+              // following, and clear all transactions from it.  This gives us
+              // a fresh Transaction Manager.
             }
           }
 
@@ -375,7 +405,7 @@
           // we need a Transaction Manager, even if we create one.
           if (typeof mgr == "undefined") {
             mgr = this.createTransactionManager();
-          } 
+          }
 
           mgr.doTransaction(command);
 
@@ -385,15 +415,19 @@
             this.mCommandStack[this.mCommandPtr] = mgr;
           }
 
-          // get rid of stack entries ahead of the command pointer (if there were any);
-          this.mCommandStack.splice(this.mCommandPtr + 1, this.mCommandStack.length - (this.mCommandPtr + 1));
+          // get rid of stack entries ahead of the command pointer (if there
+          // were any);
+          this.mCommandStack.splice(this.mCommandPtr + 1,
+                                    this.mCommandStack.length -
+                                      (this.mCommandPtr + 1));
 
           this.updateCommand("cmdEditUndo");
           this.updateCommand("cmdEditRedo");
         ]]></body>
       </method>
 
-      <!-- ////////////// CLIPBOARD /////////////////// -->
+      <!-- ///////////////////////////////////////////////////////////////////
+      //// Clipboard -->
 
       <field name="mClipboard">null</field>
       <field name="mClipboardData">null</field>
@@ -419,27 +453,28 @@
         <getter>
         <![CDATA[
           if (!this.mClipboardHelper) {
-            this.mClipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                                              .getService(Components.interfaces.nsIClipboardHelper);
+            this.mClipboardHelper =
+              Components.classes["@mozilla.org/widget/clipboardhelper;1"]
+                .getService(Components.interfaces.nsIClipboardHelper);
           }
           return this.mClipboardHelper;
         ]]></getter>
       </property>
-      
+
       <method name="setClipboardData">
         <parameter name="aObject"/>
         <parameter name="aFlavor"/>
         <parameter name="aTextRepresentation"/>
         <body><![CDATA[
           // put the text representation on the system clipboard
-          if (aTextRepresentation) {            
+          if (aTextRepresentation) {
             this.clipboardHelper.copyString(aTextRepresentation);
           }
-          
+
           // store the real object internally
           this.mClipboardData = aObject;
           this.mClipboardFlavor = aFlavor;
-          
+
           this.updateCommand("cmdEditPaste");
         ]]></body>
       </method>
@@ -459,22 +494,24 @@
         this.mFlasher = null;
       </destructor>
     </implementation>
-    
+
     <handlers>
       <handler event="focus" phase="capturing">
       <![CDATA[
-        if (!(event.originalTarget instanceof Element))
+        if (!(event.originalTarget instanceof Element)) {
           return;
+        }
 
         var targetDoc = event.originalTarget.ownerDocument;
-        if (targetDoc == this.mFocusedDocument)
+        if (targetDoc == this.mFocusedDocument) {
           return;
-        
+        }
+
         this.mFocusedDocument = targetDoc;
-        
+
         if (targetDoc != this.ownerDocument) {
           var panels = this.panels;
-          for (var i = 0; i < panels.length; ++i) {
+          for (let i = 0; i < panels.length; ++i) {
             if (targetDoc == panels[i].viewerDocument) {
               this.mFocusedPanel = panels[i];
               this.updateAllCommands();
@@ -482,7 +519,7 @@
             }
           }
         }
-        
+
         this.mFocusedPanel = null; // if all else fails
       ]]>
       </handler>
@@ -490,23 +527,27 @@
 
   </binding>
 
-<!-- ***************************************************************
-     * ViewerPane 
-     *  Interface for a panel accepts a node and displays all eligible
-     *  viewers in a list and activates the selected viewer.
-     * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-     * REQUIRED IMPORTS:
-     *   chrome://inspector/content/jsutil/xpcom/XPCU.js
-     *   chrome://inspector/content/jsutil/events/ObserverManager.js
-     **************************************************************** -->
+  <!-- ************************************************************************
+  * ViewerPane
+  *  Interface for a panel accepts a node and displays all eligible
+  *  viewers in a list and activates the selected viewer.
+  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  * REQUIRED IMPORTS:
+  *   chrome://inspector/content/jsutil/xpcom/XPCU.js
+  *   chrome://inspector/content/jsutil/events/ObserverManager.js
+  ************************************************************************ -->
 
   <binding id="panel" extends="chrome://inspector/content/inspector.xml#base">
     <content orient="vertical">
       <xul:toolbox class="viewer-pane-toolbox" xbl:inherits="disabled">
-        <xul:toolbar class="viewer-pane-header" align="center" xbl:inherits="disabled" xpfe="false">
-          <xul:toolbarbutton type="menu" anonid="viewer-list" class="viewer-list" disabled="true"/>
-          <xul:label anonid="viewer-title" class="viewer-title label toolbar" flex="1"/>
-          <xul:toolbarbutton type="menu" anonid="viewer-menu" class="viewer-menu" disabled="true"/>
+        <xul:toolbar class="viewer-pane-header" align="center"
+                     xbl:inherits="disabled" xpfe="false">
+          <xul:toolbarbutton type="menu" anonid="viewer-list"
+                             class="viewer-list" disabled="true"/>
+          <xul:label anonid="viewer-title" class="viewer-title label toolbar"
+                     flex="1"/>
+          <xul:toolbarbutton type="menu" anonid="viewer-menu"
+                             class="viewer-menu" disabled="true"/>
         </xul:toolbar>
       </xul:toolbox>
       <xul:box class="viewer-pane-box-1" flex="1">
@@ -520,31 +561,35 @@
     <resources>
       <stylesheet src="chrome://inspector/skin/panelset.css"/>
     </resources>
-    
+
     <implementation>
       <field name="mCurrentEntry">null</field>
       <field name="mCurrentViewer">null</field>
       <field name="mSubject">null</field>
       <field name="mParams">null</field>
-      
+
       <constructor><![CDATA[
         // look for panelset parent
         var p = this.parentNode;
-        while (p && p.localName != "domi-panelset")
+        while (p && p.localName != "domi-panelset") {
           p = p.parentNode;
-          
+        }
+
         this.mPanelSet = p;
-        
+
         this.setAttribute("disabled", "true");
 
-        this.mIFrameEl = document.getAnonymousElementByAttribute(this, "anonid", "viewer-iframe");
+        this.mIFrameEl =
+          document.getAnonymousElementByAttribute(this, "anonid",
+                                                  "viewer-iframe");
       ]]></constructor>
-    
+
       <destructor><![CDATA[
-        if (this.mCurrentViewer)
+        if (this.mCurrentViewer) {
           this.destroyViewer();
+        }
       ]]></destructor>
-      
+
       <property name="panelset"
                 onget="return this.mPanelSet;"/>
 
@@ -562,40 +607,52 @@
       <property name="title"
                 onget="return this.getAttribute('title');"
                 onset="return this.setAttribute('title', val);"/>
-                            
-      <property name="registry" 
+
+      <property name="registry"
                 onget="return this.panelset.registry;"/>
 
-      <property name="viewerDocument" 
+      <property name="viewerDocument"
                 onget="return this.mIFrameEl.contentDocument;"/>
 
       <property name="linkedPanel">
-        <getter>return this.mLinkedPanel;</getter>
-        <setter>
-          if (this.mLinkedPanel)
+        <getter><![CDATA[
+          return this.mLinkedPanel;
+        ]]></getter>
+        <setter><![CDATA[
+          if (this.mLinkedPanel) {
             this.mLinkedPanel.removeObserver("viewerChange", this);
-            
+          }
+
           this.mLinkedPanel = val;
 
-          if (val)
+          if (val) {
             val.addObserver("viewerChange", this);
-        </setter>
+          }
+        ]]></setter>
       </property>
 
       <field name="mLinkedPanel">null</field>
       <field name="mLinkedViewer">null</field>
       <field name="mCurrentViewer">null</field>
       <field name="mCurrentEntry">null</field>
-      
+
       <method name="initialize">
         <body><![CDATA[
-          this.mListEl = document.getAnonymousElementByAttribute(this, "anonid", "viewer-list");
-          this.mTitleEl = document.getAnonymousElementByAttribute(this, "anonid", "viewer-title");
-          this.mMenuEl = document.getAnonymousElementByAttribute(this, "anonid", "viewer-menu");
-          
-          if (this.hasAttribute("linkedpanel"))
-            this.linkedPanel = document.getElementById(this.getAttribute("linkedpanel"));
-      
+          this.mListEl =
+            document.getAnonymousElementByAttribute(this, "anonid",
+                                                    "viewer-list");
+          this.mTitleEl =
+            document.getAnonymousElementByAttribute(this, "anonid",
+                                                    "viewer-title");
+          this.mMenuEl =
+            document.getAnonymousElementByAttribute(this, "anonid",
+                                                    "viewer-menu");
+
+          if (this.hasAttribute("linkedpanel")) {
+            this.linkedPanel =
+              document.getElementById(this.getAttribute("linkedpanel"));
+          }
+
           this.fillViewerList();
         ]]></body>
       </method>
@@ -610,30 +667,36 @@
 
           if (aViewer) {
             this.registry.cacheViewer(aViewer, this.mCurrentEntry);
-            var title = this.registry.getEntryProperty(this.mCurrentEntry, "description");
+            var title = this.registry.getEntryProperty(this.mCurrentEntry,
+                                                       "description");
             this.setTitle(title);
-          }  else {
+          }
+          else {
             this.setTitle(null);
           }
 
           this.rebuildViewerContextMenu();
-          
-          // listen for subjectChange so we can bubble it
-          if (old)
-            old.removeObserver("subjectChange", this);
-          
-          if (aViewer)
-            aViewer.addObserver("subjectChange", this);
 
-          this.mObsMan.dispatchEvent("viewerChange", 
+          // listen for subjectChange so we can bubble it
+          if (old) {
+            old.removeObserver("subjectChange", this);
+          }
+
+          if (aViewer) {
+            aViewer.addObserver("subjectChange", this);
+          }
+
+          this.mObsMan.dispatchEvent("viewerChange",
             { viewerPane: this, oldViewer: old, newViewer: aViewer });
-              
+
           if (aViewer) {
             aViewer.subject = this.mSubject;
-            // only give initial focus to panes that are not on the right side of a link
+            // only give initial focus to panes that are not on the right side
+            // of a link
             if (!aViewer.pane.hasAttribute("linkedpanel")) {
               var doc = aViewer.pane.viewerDocument;
-              doc.commandDispatcher.advanceFocusIntoSubtree(doc.documentElement);
+              doc.commandDispatcher
+                .advanceFocusIntoSubtree(doc.documentElement);
             }
           }
         ]]></body>
@@ -645,12 +708,13 @@
           this.registry.uncacheViewer(this.mCurrentViewer);
         ]]></body>
       </method>
-      
-      <!-- ////////////// UI Commands /////////////////-->
 
-  <!-- ////////////////////////////////////////////////////////////////////////////
+      <!-- ///////////////////////////////////////////////////////////////////
+      //// UI Commands -->
+
+      <!-- ///////////////////////////////////////////////////////////////////
       // Sets the new view to the item just selected from the "viewer list"
-      //////////////////////////////////////////////////////////////////////// -->
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="onViewerListCommand">
         <parameter name="aItem"/>
@@ -659,19 +723,20 @@
         ]]></body>
       </method>
 
-  <!-- ////////////////////////////////////////////////////////////////////////////
-      // Prepares the list of viewers for a node, rebuilds the menulist to display
-      // them, and load the default viewer for the node.
+      <!-- ///////////////////////////////////////////////////////////////////
+      // Prepares the list of viewers for a node, rebuilds the menulist to
+      // display them, and load the default viewer for the node.
       //
-      // @param Object aObject - the object to begin viewing
-      //////////////////////////////////////////////////////////////////////// -->
+      // @param aObject
+      //        the object to begin viewing
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="setSubject">
         <parameter name="aObject"/>
         <body><![CDATA[
           this.mSubject = aObject;
           this.mParams = null;
-          
+
           // get the list of viewers which match the node
           var entries = this.registry.findViewersForObject(aObject, this.id,
                                                            this.mLinkedViewer);
@@ -680,53 +745,62 @@
           if (entries.length == 0) {
             this.switchViewer(-1);
             this.setAttribute("disabled", "true");
-          } else if (!this.entryInList(this.mCurrentEntry, entries)) {
+          }
+          else if (!this.entryInList(this.mCurrentEntry, entries)) {
             this.switchViewer(entries[0]);
             this.removeAttribute("disabled");
-          } else {
+          }
+          else {
             this.mCurrentViewer.subject = aObject;
             this.removeAttribute("disabled");
           }
-  
+
         ]]></body>
       </method>
 
-  <!-- ////////////////////////////////////////////////////////////////////////////
-      // Clear out and rebuild the menulist full of the available views
-      // for the currently selected node.
+      <!-- ///////////////////////////////////////////////////////////////////
+      // Clear out and rebuild the menulist full of the available views for
+      // the currently selected node.
       //
-      // @param Array aEntries - an array of entries from the viewer registry
-      //////////////////////////////////////////////////////////////////////// -->
+      // @param aEntries
+      //        an array of entries from the viewer registry
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="rebuildViewerList">
         <parameter name="aEntries"/>
         <body><![CDATA[
           var mpp = this.mListElPopup;
-          
-          if (aEntries.length <= 0)
+
+          if (aEntries.length <= 0) {
             this.mListEl.setAttribute("disabled", true);
-          else
+          }
+          else {
             this.mListEl.removeAttribute("disabled");
-      
+          }
+
           // empty the list
-          while (mpp.childNodes.length)
+          while (mpp.childNodes.length) {
             mpp.removeChild(mpp.childNodes[0]);
-          
-          for (var i = 0; i < aEntries.length; i++) {
+          }
+
+          for (let i = 0; i < aEntries.length; i++) {
             var entry = aEntries[i];
             var menuitem = document.createElement("menuitem");
-            menuitem.setAttribute("label", this.registry.getEntryProperty(entry, "description"));
+            menuitem.setAttribute("label",
+                                  this.registry
+                                    .getEntryProperty(entry, "description"));
             menuitem.setAttribute("viewerListEntry", entry);
             mpp.appendChild(menuitem);
           }
         ]]></body>
       </method>
-  
-  <!-- ////////////////////////////////////////////////////////////////////////////
+
+      <!-- ///////////////////////////////////////////////////////////////////
       // Loads the viewer described by an entry in the viewer registry.
       //
-      // @param nsIRDFNode aEntry - entry in the viewer registry
-      //////////////////////////////////////////////////////////////////////// -->
+      // @param aEntry
+      //        entry index in the viewer registry
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="switchViewer">
         <parameter name="aEntry"/>
@@ -744,21 +818,22 @@
             var oldURL = this.registry.getEntryURL(this.mCurrentEntry);
             if (oldURL == url) {
               loadNew = false;
-            } 
+            }
           }
-          
+
           if (loadNew) {
             this.mPendingEntry = aEntry;
             this.loadViewerURL(url);
           }
         ]]></body>
       </method>
-  
-  <!-- ////////////////////////////////////////////////////////////////////////////
-       // Begin loading a new viewer from a given url.
-       //
-       // @param String aURL - the url of the viewer document
-      //////////////////////////////////////////////////////////////////////// -->
+
+      <!-- ///////////////////////////////////////////////////////////////////
+      // Begin loading a new viewer from a given url.
+      //
+      // @param aURL
+      //        the url of the viewer document
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="loadViewerURL">
         <parameter name="aURL"/>
@@ -767,31 +842,32 @@
             // tell the old viewer it's about to go away
             this.destroyViewer();
           }
-          
+
           // load the new document
           FrameExchange.loadURL(this.mIFrameEl, aURL, this);
         ]]></body>
       </method>
-  
-  <!-- ////////////////////////////////////////////////////////////////////////////
-       // Rebuild the viewer context menu
-      //////////////////////////////////////////////////////////////////////// -->
+
+      <!-- ///////////////////////////////////////////////////////////////////
+      // Rebuild the viewer context menu
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="rebuildViewerContextMenu">
         <body><![CDATA[
           if (!this.mSubject) {
             this.mMenuEl.setAttribute("disabled", "true");
             return;
-          } else {
+          }
+          else {
             this.mMenuEl.removeAttribute("disabled");
           }
-          
+
           // remove old context menu
           if (this.mContextMenu) {
             this.mMenuEl.removeChild(this.mContextMenu);
             this.mFormerContextParent.appendChild(this.mContextMenu);
           }
-      
+
           var uid = this.registry.getEntryProperty(this.mCurrentEntry, "uid");
           var ppId = "ppViewerContext-" + uid;
           var pp = document.getElementById(ppId);
@@ -800,89 +876,100 @@
             var parent = pp.parentNode;
             parent.removeChild(pp);
             this.mMenuEl.appendChild(pp);
-      
+
            this.mFormerContextParent = parent;
-          } else {
+          }
+          else {
             this.mMenuEl.setAttribute("disabled", "true");
           }
           this.mContextMenu = pp;
         ]]></body>
       </method>
 
-  <!-- ////////////////////////////////////////////////////////////////////////////
+      <!-- ///////////////////////////////////////////////////////////////////
       // Check to see if an entry exists in an arry of entries
       //
-      // @param nsIRDFResource aEntry - the entry being searched for
-      // @param Array aList - array of entries
-      //////////////////////////////////////////////////////////////////////// -->
+      // @param aEntry
+      //        the entry being searched for
+      // @param aList
+      //        array of entries
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="entryInList">
         <parameter name="aEntry"/>
         <parameter name="aList"/>
         <body><![CDATA[
-          for (var i in aList) {
-            if (aList[i] == aEntry) return true;
+          for (let i in aList) {
+            if (aList[i] == aEntry) {
+              return true;
+            }
           }
-      
+
           return false;
         ]]></body>
       </method>
 
-  <!-- ////////////////////////////////////////////////////////////////////////////
+      <!-- ///////////////////////////////////////////////////////////////////
       // Set the text in the viewer title bar
       //
-      // @param String title - the text to use
-      //////////////////////////////////////////////////////////////////////// -->
+      // @param title
+      //        the text to use
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="setTitle">
         <parameter name="aTitle"/>
         <body><![CDATA[
-          this.mTitleEl.setAttribute("value", this.title && aTitle ? this.title + " - " + aTitle : "");
+          this.mTitleEl.setAttribute("value",
+                                     this.title && aTitle ?
+                                       this.title + " - " + aTitle :
+                                       "");
         ]]></body>
       </method>
-      
-  <!-- ////////////////////////////////////////////////////////////////////////////
+
+      <!-- ///////////////////////////////////////////////////////////////////
       // Fill out the content of the "viewer list" menu
-      //////////////////////////////////////////////////////////////////////// -->
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="fillViewerList">
         <body><![CDATA[
           this.mListEl.pViewer = this;
-          this.mListEl.setAttribute("oncommand", "this.pViewer.onViewerListCommand(event.originalTarget)");
-      
+          this.mListEl.setAttribute("oncommand",
+                                    "this.pViewer.onViewerListCommand(event.originalTarget)");
+
           var mpp = document.createElement("menupopup");
           this.mListEl.appendChild(mpp);
           this.mListElPopup = mpp;
         ]]></body>
       </method>
-      
-  <!-- ////////////////////////////////////////////////////////////////////////////
+
+      <!-- ///////////////////////////////////////////////////////////////////
       // Listen for selection changes on the viewer in the linked pane
-      //////////////////////////////////////////////////////////////////////// -->
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="observerLinkedViewer">
         <body><![CDATA[
-          if (this.mLinkedViewer)
+          if (this.mLinkedViewer) {
             this.mLinkedViewer.removeObserver("selectionChange", this);
-            
+          }
+
           this.mLinkedViewer = this.mLinkedPanel.viewer;
           this.mLinkedViewer.addObserver("selectionChange", this);
         ]]></body>
       </method>
-      
-  <!-- ////////////////////////////////////////////////////////////////////////////
+
+      <!-- ///////////////////////////////////////////////////////////////////
       // Update this pane's subject to be the selection of it's linked pane
-      //////////////////////////////////////////////////////////////////////// -->
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="updateLinkedSubject">
         <body><![CDATA[
           this.subject = this.mLinkedViewer.selection;
         ]]></body>
       </method>
-      
-  <!-- ////////////////////////////////////////////////////////////////////////////
+
+      <!-- ///////////////////////////////////////////////////////////////////
       // global event handler
-      //////////////////////////////////////////////////////////////////////// -->
+      //////////////////////////////////////////////////////////////////// -->
 
       <method name="onEvent">
         <parameter name="aEvent"/>
@@ -901,7 +988,7 @@
       </method>
 
     </implementation>
-    
+
   </binding>
 
   <binding id="base">
@@ -909,8 +996,9 @@
       <constructor><![CDATA[
         this.mObsMan = new ObserverManager(this);
       ]]></constructor>
-      
-      <!-- ////////////// Event Handling /////////////////-->
+
+      <!-- ///////////////////////////////////////////////////////////////////
+      //// Event Handling -->
 
       <method name="addObserver">
         <parameter name="aEvent"/>
@@ -919,7 +1007,7 @@
           this.mObsMan.addObserver(aEvent, aObserver);
         ]]></body>
       </method>
-      
+
       <method name="removeObserver">
         <parameter name="aEvent"/>
         <parameter name="aObserver"/>
@@ -927,9 +1015,9 @@
           this.mObsMan.removeObserver(aEvent, aObserver);
         ]]></body>
       </method>
-      
+
     </implementation>
-    
+
   </binding>
 
 </bindings>

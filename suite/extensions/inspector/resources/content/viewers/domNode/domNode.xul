@@ -115,7 +115,7 @@
 
     <vbox id="bxText">
       <textbox id="txbTextNodeValue" multiline="true" flex="1"
-               onchange="viewer.pane.panelset.execCommand('cmdEditNodeValue');"/>
+               onchange="viewer.pane.panelset.execCommand('cmdEditTextValue');"/>
     </vbox>
   </deck>
 </page>

@@ -37,22 +37,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* DOMNodeViewer --------------------------------------------
+/*****************************************************************************
+* DOMNodeViewer --------------------------------------------------------------
 *  The default viewer for DOM Nodes
-****************************************************************/
+*****************************************************************************/
 
-//////////// global variables /////////////////////
-
-var viewer;
-
-var gPromptService;
-
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
 const kDOMViewCID          = "@mozilla.org/inspector/dom-view;1";
 
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Variables
+
+var viewer;
+var gPromptService;
+
+//////////////////////////////////////////////////////////////////////////////
 
 window.addEventListener("load", DOMNodeViewer_initialize, false);
 
@@ -62,8 +63,8 @@ function DOMNodeViewer_initialize()
   viewer.initialize(parent.FrameExchange.receiveData(window));
 }
 
-////////////////////////////////////////////////////////////////////////////
-//// class DOMNodeViewer 
+//////////////////////////////////////////////////////////////////////////////
+//// DOMNodeViewer Class
 
 function DOMNodeViewer()  // implements inIViewer
 {
@@ -78,11 +79,11 @@ function DOMNodeViewer()  // implements inIViewer
   this.mAttrTree.treeBoxObject.view = this.mDOMView;
 }
 
-DOMNodeViewer.prototype = 
+DOMNodeViewer.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
-  
+
   mDOMView: null,
   mSubject: null,
   mPanel: null,
@@ -94,7 +95,6 @@ DOMNodeViewer.prototype =
 
  /**
   * Returns an array of the selected indices
-  * @return an array of indices
   */
   get selectedIndices()
   {
@@ -113,7 +113,6 @@ DOMNodeViewer.prototype =
 
  /**
   * Returns a DOMAttribute from the selected index
-  * @return a DomAttribute
   */
   get selectedAttribute()
   {
@@ -124,14 +123,14 @@ DOMNodeViewer.prototype =
 
  /**
   * Returns an array of DOMAttributes from the selected indices
-  * @return an array of DOMAttributes
   */
   get selectedAttributes()
   {
     var indices = this.selectedIndices;
     var attrs = [];
     for (var i = 0; i < indices.length; ++i) {
-      attrs.push(new DOMAttribute(this.mDOMView.getNodeFromRowIndex(indices[i])));
+      var idx = this.mDOMView.getNodeFromRowIndex(indices[i]);
+      attrs.push(new DOMAttribute(idx));
     }
     return attrs;
   },
@@ -139,19 +138,35 @@ DOMNodeViewer.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// interface inIViewer
 
-  //// attributes 
+  //// attributes
 
-  get uid() { return "domNode" },
-  get pane() { return this.mPanel },
-
-  get selection() { return null },
-
-  get subject() { return this.mSubject },
-  set subject(aObject) 
+  get uid()
   {
-    // the node value's textbox won't fire onchange when we change subjects, so 
+    return "domNode"
+  },
+
+  get pane()
+  {
+    return this.mPanel
+  },
+
+
+  get selection()
+  {
+    return null
+  },
+
+
+  get subject()
+  {
+    return this.mSubject
+  },
+
+  set subject(aObject)
+  {
+    // the node value's textbox won't fire onchange when we change subjects, so
     // let's fire it. this won't do anything if it wasn't actually changed
-    viewer.pane.panelset.execCommand('cmdEditNodeValue');
+    viewer.pane.panelset.execCommand('cmdEditTextValue');
 
     this.mSubject = aObject;
     var deck = document.getElementById("dkContent");
@@ -163,7 +178,7 @@ DOMNodeViewer.prototype =
       case Node.COMMENT_NODE:
       case Node.PROCESSING_INSTRUCTION_NODE:
         deck.setAttribute("selectedIndex", 1);
-        var txb = document.getElementById("txbTextNodeValue").value = 
+        var txb = document.getElementById("txbTextNodeValue").value =
                   aObject.nodeValue;
         break;
       //XXX this view is designed for elements, write a more useful one for
@@ -171,7 +186,7 @@ DOMNodeViewer.prototype =
       default:
         var bundle = this.pane.panelset.stringBundle;
         deck.setAttribute("selectedIndex", 0);
-        
+
         this.setTextValue("localName", aObject.localName);
         this.setTextValue("nodeType", bundle.getString(aObject.nodeType));
         this.setTextValue("namespace", aObject.namespaceURI);
@@ -181,26 +196,26 @@ DOMNodeViewer.prototype =
           this.mAttrTree.view.selection.select(-1);
         }
     }
-    
+
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
   // methods
 
-  initialize: function(aPane)
+  initialize: function DNVr_Initialize(aPane)
   {
     this.mPanel = aPane;
     aPane.notifyViewerReady(this);
   },
 
-  destroy: function()
+  destroy: function DNVr_Destroy()
   {
-    // the node value's textbox won't fire onchange when we change views, so 
+    // the node value's textbox won't fire onchange when we change views, so
     // let's fire it. this won't do anything if it wasn't actually changed
-    viewer.pane.panelset.execCommand('cmdEditNodeValue');
+    viewer.pane.panelset.execCommand('cmdEditTextValue');
   },
 
-  isCommandEnabled: function(aCommand)
+  isCommandEnabled: function DNVr_IsCommandEnabled(aCommand)
   {
     switch (aCommand) {
       case "cmdEditPaste":
@@ -216,7 +231,7 @@ DOMNodeViewer.prototype =
       case "cmdEditEdit":
         return this.mAttrTree.currentIndex >= 0 &&
                  this.mAttrTree.view.selection.count == 1;
-      case "cmdEditNodeValue":
+      case "cmdEditTextValue":
         // this function can be fired before the subject is set
         if (this.subject) {
           // something with a useful nodeValue
@@ -225,7 +240,7 @@ DOMNodeViewer.prototype =
               this.subject.nodeType == Node.COMMENT_NODE ||
               this.subject.nodeType == Node.PROCESSING_INSTRUCTION_NODE) {
             // did something change?
-            return this.subject.nodeValue != 
+            return this.subject.nodeValue !=
                    document.getElementById("txbTextNodeValue").value;
           }
         }
@@ -233,8 +248,8 @@ DOMNodeViewer.prototype =
     }
     return false;
   },
-  
-  getCommand: function(aCommand)
+
+  getCommand: function DNVr_GetCommand(aCommand)
   {
     switch (aCommand) {
       case "cmdEditCut":
@@ -249,30 +264,38 @@ DOMNodeViewer.prototype =
         return new cmdEditEdit();
       case "cmdEditDelete":
         return new cmdEditDelete();
-      case "cmdEditNodeValue":
-        return new cmdEditNodeValue();
+      case "cmdEditTextValue":
+        return new cmdEditTextValue();
     }
     return null;
   },
-  
-  ////////////////////////////////////////////////////////////////////////////
-  //// event dispatching
 
-  addObserver: function(aEvent, aObserver) { this.mObsMan.addObserver(aEvent, aObserver); },
-  removeObserver: function(aEvent, aObserver) { this.mObsMan.removeObserver(aEvent, aObserver); },
+  ////////////////////////////////////////////////////////////////////////////
+  //// Event Dispatching
+
+  addObserver: function DNVr_AddObserver(aEvent, aObserver)
+  {
+    this.mObsMan.addObserver(aEvent, aObserver);
+  },
+
+  removeObserver: function DNVr_RemoveObserver(aEvent, aObserver)
+  {
+    this.mObsMan.removeObserver(aEvent, aObserver);
+  },
 
   ////////////////////////////////////////////////////////////////////////////
   //// Uncategorized
 
-  setTextValue: function(aName, aText)
+  setTextValue: function DNVr_SetTextValue(aName, aText)
   {
-    var field = document.getElementById("tx_"+aName);
-    if (field)
+    var field = document.getElementById("tx_" + aName);
+    if (field) {
       field.value = aText;
+    }
   }
 };
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// Command Objects
 
 function cmdEditCut() {}
@@ -280,19 +303,19 @@ cmdEditCut.prototype =
 {
   cmdCopy: null,
   cmdDelete: null,
-  doCommand: function()
+  doCommand: function DNVr_Cut_DoCommand()
   {
     if (!this.cmdCopy) {
       this.cmdDelete = new cmdEditDelete();
       this.cmdCopy = new cmdEditCopy(viewer.selectedAttributes);
     }
     this.cmdCopy.doTransaction();
-    this.cmdDelete.doCommand();    
+    this.cmdDelete.doCommand();
   },
 
-  undoCommand: function()
+  undoCommand: function DVVr_Cut_UndoCommand()
   {
-    this.cmdDelete.undoCommand();    
+    this.cmdDelete.undoCommand();
   }
 };
 
@@ -303,15 +326,16 @@ cmdEditPaste.prototype =
   previousAttrValue: null,
   subject: null,
   flavor: null,
-  
-  doCommand: function()
+
+  doCommand: function DNVr_Paste_DoCommand()
   {
     var subject, pastedAttr, flavor;
     if (this.subject) {
       subject = this.subject;
       pastedAttr = this.pastedAttr;
       flavor = this.flavor;
-    } else {
+    }
+    else {
       subject = viewer.subject;
       pastedAttr = viewer.pane.panelset.getClipboardData();
       flavor = viewer.pane.panelset.clipboardFlavor;
@@ -324,42 +348,50 @@ cmdEditPaste.prototype =
           this.previousAttrValue[pastedAttr[i].node.nodeName] =
             viewer.subject.getAttribute(pastedAttr[i].node.nodeName);
         }
-      } else if (flavor == "inspector/dom-attribute") {
+      }
+      else if (flavor == "inspector/dom-attribute") {
         this.previousAttrValue =
           viewer.subject.getAttribute(pastedAttr.node.nodeName);
       }
     }
-    
+
     if (subject && pastedAttr) {
       if (flavor == "inspector/dom-attributes") {
         for (var i = 0; i < pastedAttr.length; ++i) {
           subject.setAttribute(pastedAttr[i].node.nodeName,
                                pastedAttr[i].node.nodeValue);
         }
-      } else if (flavor == "inspector/dom-attribute") {
+      }
+      else if (flavor == "inspector/dom-attribute") {
         subject.setAttribute(pastedAttr.node.nodeName,
                              pastedAttr.node.nodeValue);
       }
     }
   },
-  
-  undoCommand: function()
+
+  undoCommand: function DNVr_Paste_UndoCommand()
   {
     if (this.pastedAttr) {
       if (this.flavor == "inspector/dom-attributes") {
         for (var i = 0; i < this.pastedAttr.length; ++i) {
-          if (this.previousAttrValue[this.pastedAttr[i].node.nodeName])
-            this.subject.setAttribute(this.pastedAttr[i].node.nodeName,
-                      this.previousAttrValue[this.pastedAttr[i].node.nodeName]);
-          else
-            this.subject.removeAttribute(this.pastedAttr[i].node.nodeName);
+          var attrNodeName = this.pastedAttr[i].node.nodeName;
+          if (this.previousAttrValue[attrNodeName]) {
+            this.subject.setAttribute(attrNodeName,
+                                      this.previousAttrValue[attrNodeName]);
+          }
+          else {
+            this.subject.removeAttribute(attrNodeName);
+          }
         }
-      } else if (this.flavor == "inspector/dom-attribute") {
-        if (this.previousAttrValue)
+      }
+      else if (this.flavor == "inspector/dom-attribute") {
+        if (this.previousAttrValue) {
           this.subject.setAttribute(this.pastedAttr.node.nodeName,
                                     this.previousAttrValue);
-        else
+        }
+        else {
           this.subject.removeAttribute(this.pastedAttr.node.nodeName);
+        }
       }
     }
   }
@@ -370,41 +402,45 @@ cmdEditInsert.prototype =
 {
   attr: null,
   subject: null,
-  
-  promptFor: function()
+
+  promptFor: function DNVr_Insert_PromptFor()
   {
     var bundle = viewer.pane.panelset.stringBundle;
     var title = bundle.getString("newAttribute.title");
     var doc = viewer.subject.ownerDocument;
     var out = { name: null, value: null, namespaceURI: null, accepted: false };
 
-    window.openDialog("chrome://inspector/content/viewers/domNode/domNodeDialog.xul",
-                      "insert", "chrome,modal,centerscreen", out, title, doc);
+    window.openDialog("chrome://inspector/content/viewers/domNode/" +
+                      "domNodeDialog.xul", "insert",
+                      "chrome,modal,centerscreen", out, title, doc);
 
     this.subject = viewer.subject;
-    if (out.accepted)
+    if (out.accepted) {
       this.subject.setAttributeNS(out.namespaceURI, out.name, out.value);
-    
+    }
+
     this.attr = this.subject.getAttributeNode(out.name);
     return false;
   },
-  
-  doCommand: function()
+
+  doCommand: function DNVr_Insert_DoCommand()
   {
-    if (!this.attr)
+    if (!this.attr) {
       return this.promptFor();
-    
+    }
+
     this.subject.setAttributeNS(this.attr.namespaceURI,
                                 this.attr.nodeName,
                                 this.attr.nodeValue);
     return false;
   },
-  
-  undoCommand: function()
+
+  undoCommand: function DNVr_Insert_UndoCommand()
   {
-    if (this.attr && this.subject == viewer.subject)
+    if (this.attr && this.subject == viewer.subject) {
       this.subject.removeAttributeNS(this.attr.namespaceURI,
                                      this.attr.localName);
+    }
   }
 };
 
@@ -413,8 +449,8 @@ cmdEditDelete.prototype =
 {
   attrs: null,
   subject: null,
-  
-  doCommand: function()
+
+  doCommand: function DNVr_Delete_DoCommand()
   {
     var attrs = this.attrs ? this.attrs : viewer.selectedAttributes;
     if (attrs) {
@@ -425,8 +461,8 @@ cmdEditDelete.prototype =
       }
     }
   },
-  
-  undoCommand: function()
+
+  undoCommand: function DNVr_Delete_UndoCommand()
   {
     if (this.attrs) {
       for (var i = 0; i < this.attrs.length; ++i) {
@@ -450,8 +486,8 @@ cmdEditEdit.prototype =
   previousNamespaceURI: null,
   newNamespaceURI: null,
   subject: null,
-  
-  promptFor: function()
+
+  promptFor: function DNVr_Edit_PromptFor()
   {
     var attr = viewer.selectedAttribute.node;
     if (attr) {
@@ -465,8 +501,9 @@ cmdEditEdit.prototype =
         accepted: false
       };
 
-      window.openDialog("chrome://inspector/content/viewers/domNode/domNodeDialog.xul",
-                        "edit", "chrome,modal,centerscreen", out, title, doc);
+      window.openDialog("chrome://inspector/content/viewers/domNode/" +
+                        "domNodeDialog.xul", "edit",
+                        "chrome,modal,centerscreen", out, title, doc);
 
       if (out.accepted) {
         this.subject              = viewer.subject;
@@ -478,7 +515,8 @@ cmdEditEdit.prototype =
           this.subject.setAttributeNS(this.previousNamespaceURI,
                                       attr.nodeName,
                                       out.value);
-        } else {
+        }
+        else {
           this.subject.removeAttributeNS(this.previousNamespaceURI,
                                          attr.localName);
           this.subject.setAttributeNS(out.namespaceURI,
@@ -491,11 +529,12 @@ cmdEditEdit.prototype =
     }
     return true;
   },
-  
-  doCommand: function()
+
+  doCommand: function DNVr_Edit_DoCommand()
   {
-    if (!this.attr)
+    if (!this.attr) {
       return this.promptFor();
+    }
 
     this.subject.removeAttributeNS(this.previousNamespaceURI,
                                    this.attr.localName);
@@ -504,15 +543,16 @@ cmdEditEdit.prototype =
                                 this.newValue);
     return false;
   },
-  
-  undoCommand: function()
+
+  undoCommand: function DNVr_Edit_UndoCommand()
   {
     if (this.attr) {
       if (this.previousNamespaceURI == this.newNamespaceURI) {
         this.subject.setAttributeNS(this.previousNamespaceURI,
                                     this.attr.nodeName,
                                     this.previousValue);
-      } else {
+      }
+      else {
         this.subject.removeAttributeNS(this.newNamespaceURI,
                                        this.attr.localName);
         this.subject.setAttributeNS(this.previousNamespaceURI,
@@ -524,41 +564,42 @@ cmdEditEdit.prototype =
 };
 
 /**
- * Handles editing of node values.
+ * Handles editing of text nodes.
  */
-function cmdEditNodeValue() {
+function cmdEditTextValue() {
   this.newValue = document.getElementById("txbTextNodeValue").value;
   this.subject = viewer.subject;
   this.previousValue = this.subject.nodeValue;
 }
-cmdEditNodeValue.prototype =
+
+cmdEditTextValue.prototype =
 {
   // remove this line for bug 179621, Phase Three
   txnType: "standard",
-  
+
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
   isTransient: false,
 
-  doTransaction: function doTransaction()
+  doTransaction: function DNVr_EditText_DoTransaction()
   {
     this.subject.nodeValue = this.newValue;
   },
-  
-  undoTransaction: function undoTransaction()
+
+  undoTransaction: function DNVr_EditText_UndoTransaction()
   {
     this.subject.nodeValue = this.previousValue;
     this.refreshView();
   },
 
-  redoTransaction: function redoTransaction()
+  redoTransaction: function DNVr_EditText_RedoTransaction()
   {
     this.doTransaction();
     this.refreshView();
   },
 
-  refreshView: function refreshView() {
+  refreshView: function DNVr_EditText_RefreshView() {
     // if we're still on the same subject, update the textbox
     if (viewer.subject == this.subject) {
       document.getElementById("txbTextNodeValue").value =
