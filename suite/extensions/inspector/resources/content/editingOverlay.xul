@@ -6,8 +6,10 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <commandset id="cmdsEditing">
-    <command id="cmdEditUndo" oncommand="viewer.pane.panelset.undo();"/>
-    <command id="cmdEditRedo" oncommand="viewer.pane.panelset.redo();"/>
+    <command id="cmdEditUndo"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditUndo');"/>
+    <command id="cmdEditRedo"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditRedo');"/>
     <command id="cmdEditCut"
              oncommand="viewer.pane.panelset.execCommand('cmdEditCut');"/>
     <command id="cmdEditCopy"

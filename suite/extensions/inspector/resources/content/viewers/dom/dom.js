@@ -1075,9 +1075,6 @@ cmdEditDelete.prototype =
   nextSibling: null,
   parentNode: null,
 
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -1119,9 +1116,6 @@ cmdEditCut.prototype =
   cmdCopy: null,
   cmdDelete: null,
 
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -1149,9 +1143,6 @@ function cmdEditCopy() {}
 cmdEditCopy.prototype =
 {
   copiedNode: null,
-
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
@@ -1186,9 +1177,6 @@ cmdEditPaste.prototype =
 {
   pastedNode: null,
   pastedBefore: null,
-
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
@@ -1228,9 +1216,6 @@ cmdEditPasteBefore.prototype =
   pastedNode: null,
   pastedBefore: null,
 
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -1268,9 +1253,6 @@ cmdEditPasteReplace.prototype =
 {
   pastedNode: null,
   originalNode: null,
-
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
@@ -1310,9 +1292,6 @@ cmdEditPasteFirstChild.prototype =
   pastedNode: null,
   pastedBefore: null,
 
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -1349,9 +1328,6 @@ cmdEditPasteLastChild.prototype =
 {
   pastedNode: null,
   selectedNode: null,
-
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
@@ -1391,9 +1367,6 @@ cmdEditPasteAsParent.prototype =
   pastedNode: null,
   originalNode: null,
   originalParentNode: null,
-
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
@@ -1436,9 +1409,6 @@ InsertNode.prototype =
   insertedNode: null,
   originalNode: null,
   attr: null,
-
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,

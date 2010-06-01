@@ -661,9 +661,6 @@ function cmdEditInsert(aRule, aProperty, aValue, aPriority)
 }
 cmdEditInsert.prototype =
 {
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -704,9 +701,6 @@ function cmdEditDelete(aRule, aDeclarations)
 }
 cmdEditDelete.prototype =
 {
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -753,9 +747,6 @@ function cmdEditEdit(aRule, aProperty, aNewValue, aNewPriority)
 }
 cmdEditEdit.prototype =
 {
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
@@ -793,9 +784,6 @@ function cmdTogglePriority(aRule, aDeclarations)
 }
 cmdTogglePriority.prototype =
 {
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
