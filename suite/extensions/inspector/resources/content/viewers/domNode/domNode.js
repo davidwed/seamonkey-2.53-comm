@@ -45,7 +45,7 @@
 //////////////////////////////////////////////////////////////////////////////
 //// Global Constants
 
-const kDOMViewCID          = "@mozilla.org/inspector/dom-view;1";
+const kDOMViewCID = "@mozilla.org/inspector/dom-view;1";
 
 //////////////////////////////////////////////////////////////////////////////
 //// Global Variables
@@ -259,9 +259,11 @@ DOMNodeViewer.prototype =
       case "cmdEditPaste":
         return new cmdEditPaste();
       case "cmdEditInsert":
-        return new cmdEditInsert();
+        var command = new cmdEditInsert();
+        return command.promptFor();
       case "cmdEditEdit":
-        return new cmdEditEdit();
+        var command = new cmdEditEdit();
+        return command.promptFor();
       case "cmdEditDelete":
         return new cmdEditDelete();
       case "cmdEditTextValue":
@@ -301,33 +303,45 @@ DOMNodeViewer.prototype =
 function cmdEditCut() {}
 cmdEditCut.prototype =
 {
+  // required for nsITransaction
+  QueryInterface: txnQueryInterface,
+  merge: txnMerge,
+  isTransient: false,
+
   cmdCopy: null,
   cmdDelete: null,
-  doCommand: function DNVr_Cut_DoCommand()
+  doTransaction: function DNVr_Cut_DoTransaction()
   {
     if (!this.cmdCopy) {
       this.cmdDelete = new cmdEditDelete();
       this.cmdCopy = new cmdEditCopy(viewer.selectedAttributes);
+      this.cmdCopy.doTransaction();
     }
-    this.cmdCopy.doTransaction();
-    this.cmdDelete.doCommand();
+    this.cmdDelete.doTransaction();
   },
 
-  undoCommand: function DVVr_Cut_UndoCommand()
+  undoTransaction: function DVVr_Cut_UndoTransaction()
   {
-    this.cmdDelete.undoCommand();
-  }
+    this.cmdDelete.undoTransaction();
+  },
+
+  redoTransaction: txnRedoTransaction
 };
 
 function cmdEditPaste() {}
 cmdEditPaste.prototype =
 {
+  // required for nsITransaction
+  QueryInterface: txnQueryInterface,
+  merge: txnMerge,
+  isTransient: false,
+
   pastedAttr: null,
   previousAttrValue: null,
   subject: null,
   flavor: null,
 
-  doCommand: function DNVr_Paste_DoCommand()
+  doTransaction: function DNVr_Paste_DoTransaction()
   {
     var subject, pastedAttr, flavor;
     if (this.subject) {
@@ -369,7 +383,7 @@ cmdEditPaste.prototype =
     }
   },
 
-  undoCommand: function DNVr_Paste_UndoCommand()
+  undoTransaction: function DNVr_Paste_UndoTransaction()
   {
     if (this.pastedAttr) {
       if (this.flavor == "inspector/dom-attributes") {
@@ -394,63 +408,71 @@ cmdEditPaste.prototype =
         }
       }
     }
-  }
+  },
+
+  redoTransaction: txnRedoTransaction
 };
 
 function cmdEditInsert() {}
 cmdEditInsert.prototype =
 {
+  // required for nsITransaction
+  QueryInterface: txnQueryInterface,
+  merge: txnMerge,
+  isTransient: false,
+
   attr: null,
   subject: null,
+  name: null,
+  value: null,
+  namespaceURI: null,
+  accepted: false,
 
   promptFor: function DNVr_Insert_PromptFor()
   {
     var bundle = viewer.pane.panelset.stringBundle;
     var title = bundle.getString("newAttribute.title");
     var doc = viewer.subject.ownerDocument;
-    var out = { name: null, value: null, namespaceURI: null, accepted: false };
 
     window.openDialog("chrome://inspector/content/viewers/domNode/" +
                       "domNodeDialog.xul", "insert",
-                      "chrome,modal,centerscreen", out, title, doc);
+                      "chrome,modal,centerscreen", this, title, doc);
 
     this.subject = viewer.subject;
-    if (out.accepted) {
-      this.subject.setAttributeNS(out.namespaceURI, out.name, out.value);
-    }
 
-    this.attr = this.subject.getAttributeNode(out.name);
-    return false;
+    return this.accepted ? this : null;
   },
 
-  doCommand: function DNVr_Insert_DoCommand()
+  doTransaction: function DNVr_Insert_DoTransaction()
   {
-    if (!this.attr) {
-      return this.promptFor();
-    }
-
-    this.subject.setAttributeNS(this.attr.namespaceURI,
-                                this.attr.nodeName,
-                                this.attr.nodeValue);
-    return false;
+    this.subject.setAttributeNS(this.namespaceURI,
+                                this.name,
+                                this.value);
   },
 
-  undoCommand: function DNVr_Insert_UndoCommand()
+  undoTransaction: function DNVr_Insert_UndoTransaction()
   {
-    if (this.attr && this.subject == viewer.subject) {
-      this.subject.removeAttributeNS(this.attr.namespaceURI,
-                                     this.attr.localName);
+    if (this.subject == viewer.subject) {
+      this.subject.removeAttributeNS(this.namespaceURI,
+                                     this.name);
     }
-  }
+  },
+
+  redoTransaction: txnRedoTransaction
 };
 
 function cmdEditDelete() {}
 cmdEditDelete.prototype =
 {
+  // required for nsITransaction
+  QueryInterface: txnQueryInterface,
+  merge: txnMerge,
+  isTransient: false,
+
   attrs: null,
   subject: null,
 
-  doCommand: function DNVr_Delete_DoCommand()
+  doTransaction: function DNVr_Delete_DoTransaction()
   {
     var attrs = this.attrs ? this.attrs : viewer.selectedAttributes;
     if (attrs) {
@@ -462,7 +484,7 @@ cmdEditDelete.prototype =
     }
   },
 
-  undoCommand: function DNVr_Delete_UndoCommand()
+  undoTransaction: function DNVr_Delete_UndoTransaction()
   {
     if (this.attrs) {
       for (var i = 0; i < this.attrs.length; ++i) {
@@ -470,7 +492,9 @@ cmdEditDelete.prototype =
                                   this.attrs[i].node.nodeValue);
       }
     }
-  }
+  },
+
+  redoTransaction: txnRedoTransaction
 };
 
 // XXX when editing the a attribute in this document:
@@ -480,87 +504,76 @@ cmdEditDelete.prototype =
 function cmdEditEdit() {}
 cmdEditEdit.prototype =
 {
-  attr: null,
-  previousValue: null,
-  newValue: null,
-  previousNamespaceURI: null,
-  newNamespaceURI: null,
+  // required for nsITransaction
+  QueryInterface: txnQueryInterface,
+  merge: txnMerge,
+  isTransient: false,
+
   subject: null,
+  name: null,
+  value: null,
+  namespaceURI: null,
+  previousValue: null,
+  previousNamespaceURI: null,
+  accepted: false,
 
   promptFor: function DNVr_Edit_PromptFor()
   {
     var attr = viewer.selectedAttribute.node;
-    if (attr) {
-      var bundle = viewer.pane.panelset.stringBundle;
-      var title = bundle.getString("editAttribute.title");
-      var doc = attr.ownerDocument;
-      var out = {
-        name: attr.nodeName,
-        value: attr.nodeValue,
-        namespaceURI: attr.namespaceURI,
-        accepted: false
-      };
-
-      window.openDialog("chrome://inspector/content/viewers/domNode/" +
-                        "domNodeDialog.xul", "edit",
-                        "chrome,modal,centerscreen", out, title, doc);
-
-      if (out.accepted) {
-        this.subject              = viewer.subject;
-        this.newValue             = out.value;
-        this.newNamespaceURI      = out.namespaceURI || null;
-        this.previousValue        = attr.nodeValue;
-        this.previousNamespaceURI = attr.namespaceURI;
-        if (this.previousNamespaceURI == this.newNamespaceURI) {
-          this.subject.setAttributeNS(this.previousNamespaceURI,
-                                      attr.nodeName,
-                                      out.value);
-        }
-        else {
-          this.subject.removeAttributeNS(this.previousNamespaceURI,
-                                         attr.localName);
-          this.subject.setAttributeNS(out.namespaceURI,
-                                      attr.nodeName,
-                                      out.value);
-        }
-        this.attr = this.subject.getAttributeNode(attr.nodeName);
-        return false;
-      }
+    if (!attr) {
+      return null;
     }
-    return true;
+    var bundle = viewer.pane.panelset.stringBundle;
+    var title = bundle.getString("editAttribute.title");
+    var doc = attr.ownerDocument;
+
+    this.subject              = viewer.subject;
+    this.name                 = attr.nodeName;
+    this.previousValue        = attr.nodeValue;
+    this.previousNamespaceURI = attr.namespaceURI;
+    this.value                = this.previousValue;
+    this.namespaceURI         = this.previousNamespaceURI;
+
+    window.openDialog("chrome://inspector/content/viewers/domNode/" +
+                      "domNodeDialog.xul", "edit",
+                      "chrome,modal,centerscreen", this, title, doc);
+
+    return this.accepted ? this : null;
   },
 
-  doCommand: function DNVr_Edit_DoCommand()
+  doTransaction: function DNVr_Edit_DoTransaction()
   {
-    if (!this.attr) {
-      return this.promptFor();
+    if (this.previousNamespaceURI == this.namespaceURI) {
+      this.subject.setAttributeNS(this.previousNamespaceURI,
+                                  this.name,
+                                  this.value);
     }
-
-    this.subject.removeAttributeNS(this.previousNamespaceURI,
-                                   this.attr.localName);
-    this.subject.setAttributeNS(this.newNamespaceURI,
-                                this.attr.nodeName,
-                                this.newValue);
-    return false;
+    else {
+      this.subject.removeAttributeNS(this.previousNamespaceURI,
+                                     this.name);
+      this.subject.setAttributeNS(this.namespaceURI,
+                                  this.name,
+                                  this.value);
+    }
   },
 
-  undoCommand: function DNVr_Edit_UndoCommand()
+  undoTransaction: function DNVr_Edit_UndoTransaction()
   {
-    if (this.attr) {
-      if (this.previousNamespaceURI == this.newNamespaceURI) {
-        this.subject.setAttributeNS(this.previousNamespaceURI,
-                                    this.attr.nodeName,
-                                    this.previousValue);
-      }
-      else {
-        this.subject.removeAttributeNS(this.newNamespaceURI,
-                                       this.attr.localName);
-        this.subject.setAttributeNS(this.previousNamespaceURI,
-                                    this.attr.nodeName,
-                                    this.previousValue);
-      }
+    if (this.previousNamespaceURI == this.namespaceURI) {
+      this.subject.setAttributeNS(this.previousNamespaceURI,
+                                  this.name,
+                                  this.previousValue);
     }
-  }
+    else {
+      this.subject.removeAttributeNS(this.namespaceURI,
+                                     this.name);
+      this.subject.setAttributeNS(this.previousNamespaceURI,
+                                  this.name,
+                                  this.previousValue);
+    }
+  },
+
+  redoTransaction: txnRedoTransaction
 };
 
 /**
@@ -574,9 +587,6 @@ function cmdEditTextValue() {
 
 cmdEditTextValue.prototype =
 {
-  // remove this line for bug 179621, Phase Three
-  txnType: "standard",
-
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
   merge: txnMerge,
