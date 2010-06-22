@@ -35,25 +35,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* ViewerRegistry -----------------------------------------------
-*  The central registry where information about all installed
-*  viewers is kept.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/*****************************************************************************
+* ViewerRegistry -------------------------------------------------------------
+*   The central registry where information about all installed viewers is
+*   kept.
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
 *   chrome://inspector/content/jsutil/rdf/RDFU.js
-****************************************************************/
+*****************************************************************************/
 
-//////////// global variables /////////////////////
-
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
 const kViewerURLPrefix = "chrome://inspector/content/viewers/";
 const kViewerRegURL  = "chrome://inspector/content/res/viewer-registry.rdf";
 
-////////////////////////////////////////////////////////////////////////////
-//// class ViewerRegistry
+//////////////////////////////////////////////////////////////////////////////
+//// Class ViewerRegistry
 
 function ViewerRegistry() // implements inIViewerRegistry
 {
@@ -63,9 +62,7 @@ function ViewerRegistry() // implements inIViewerRegistry
 ViewerRegistry.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
-  //// interface inIViewerRegistry
-
-  // not yet formalized...
+  //// Interface inIViewerRegistry (not yet formalized...)
 
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
@@ -76,32 +73,37 @@ ViewerRegistry.prototype =
   mViewerHash: null,
   mFilters: null,
 
-  get url() { return this.mURL; },
+  get url()
+  {
+    return this.mURL;
+  },
 
+  ////////////////////////////////////////////////////////////////////////////
   //// Loading Methods
 
-  load: function(aURL, aObserver)
+  load: function VR_Load(aURL, aObserver)
   {
     this.mURL = aURL;
     this.mObserver = aObserver;
     RDFU.loadDataSource(aURL, new ViewerRegistryLoadObserver(this));
   },
 
-  onError: function(aStatus, aErrorMsg)
+  onError: function VR_OnError(aStatus, aErrorMsg)
   {
     this.mObserver.onViewerRegistryLoadError(aStatus, aErrorMsg);
   },
 
-  onLoad: function(aDS)
+  onLoad: function VR_OnLoad(aDS)
   {
     this.mDS = aDS;
     this.prepareRegistry();
     this.mObserver.onViewerRegistryLoad();
   },
 
-  prepareRegistry: function prepareRegistry()
+  prepareRegistry: function VR_PrepareRegistry()
   {
-    this.mViewerDS = RDFArray.fromContainer(this.mDS, "inspector:viewers", kInspectorNSURI);
+    this.mViewerDS = RDFArray.fromContainer(this.mDS, "inspector:viewers",
+                                            kInspectorNSURI);
 
     // create and cache the filter functions
     var js, fn;
@@ -110,40 +112,46 @@ ViewerRegistry.prototype =
       js = this.getEntryProperty(i, "filter");
       try {
         fn = new Function("object", "linkedViewer", js);
-      } catch (ex) {
+      }
+      catch (ex) {
         fn = new Function("return false");
-        debug("### ERROR - Syntax error in filter for viewer \"" + this.getEntryProperty(i, "description") + "\"\n");
+        debug("### ERROR - Syntax error in filter for viewer \"" +
+              this.getEntryProperty(i, "description") + "\"\n");
       }
       this.mFilters.push(fn);
     }
   },
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Returns the absolute url where the xul file for a viewer can be found.
-  //
-  // @param long aIndex - the index of the entry representing the viewer
-  // @return wstring - the fully cannonized url
-  ///////////////////////////////////////////////////////////////////////////
-  getEntryURL: function(aIndex)
+  /**
+   * Returns the absolute url where the xul file for a viewer can be found.
+   *
+   * @param aIndex
+   *        The numerical index of the entry representing the viewer.
+   * @return A string of the fully canonized url.
+   */
+  getEntryURL: function VR_GetEntryURL(aIndex)
   {
     var uid = this.getEntryProperty(aIndex, "uid");
     return kViewerURLPrefix + uid + "/" + uid + ".xul";
   },
 
+  ////////////////////////////////////////////////////////////////////////////
   //// Lookup Methods
 
   /**
    * Searches the viewer registry for all viewers that can view a particular
    * object.
    *
-   * @param Object aObject - the object being searched against
-   * @param String aPanelId - the id of the panel requesting viewers
-   * @param Object aLinkedViewer - the view object of linked panel
-   *
-   * @return nsIRDFResource[] - array of entries in the viewer registry
+   * @param aObject
+   *        The object being searched against.
+   * @param aPanelId
+   *        A string containing the id of the panel requesting viewers.
+   * @param aLinkedViewer
+   *        The view object of linked panel.
+   * @return An array of nsIRDFResource entries in the viewer registry.
    */
-  findViewersForObject: function findViewersForObject(aObject, aPanelId,
-                                                      aLinkedViewer)
+  findViewersForObject:
+    function VR_FindViewersForObject(aObject, aPanelId, aLinkedViewer)
   {
     // check each entry in the registry
     var len = this.mViewerDS.length;
@@ -168,59 +176,64 @@ ViewerRegistry.prototype =
   /**
    * Determines if an object is eligible to be viewed by a particular viewer.
    *
-   * @param Object aObject - the object being checked for eligibility
-   * @param Object aLinkedViewer - the view object of linked panel
-   * @param long aIndex - the index of the entry
-   *
-   * @return boolean - true if object can be viewed
+   * @param aObject
+   *        The object being checked for eligibility.
+   * @param aLinkedViewer
+   *        The view object of linked panel.
+   * @param aIndex
+   *        The numerical index of the entry.
+   * @return true if object can be viewed.
    */
-  objectMatchesEntry: function objectMatchesEntry(aObject, aLinkedViewer,
-                                                  aIndex)
+  objectMatchesEntry:
+    function VR_ObjectMatchesEntry(aObject, aLinkedViewer, aIndex)
   {
     return this.mFilters[aIndex](aObject, aLinkedViewer);
   },
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Notifies the registry that a viewer has been instantiated, and that
-  // it corresponds to a particular entry in the viewer registry.
-  //
-  // @param
-  ///////////////////////////////////////////////////////////////////////////
-  cacheViewer: function(aViewer, aIndex)
+  /**
+   * Notifies the registry that a viewer has been instantiated, and that it
+   * corresponds to a particular entry in the viewer registry.
+   *
+   * @param aViewer
+   *        The inIViewer object to cache.
+   * @param aIndex
+   *        The numerical index of the entry.
+   */
+  cacheViewer: function VR_CacheViewer(aViewer, aIndex)
   {
     var uid = this.getEntryProperty(aIndex, "uid");
     this.mViewerHash[uid] = { viewer: aViewer, entry: aIndex };
   },
 
-  uncacheViewer: function(aViewer)
+  uncacheViewer: function VR_UncacheViewer(aViewer)
   {
     delete this.mViewerHash[aViewer.uid];
   },
 
   // for previously loaded viewers only
-  getViewerByUID: function(aUID)
+  getViewerByUID: function VR_GetViewerByUID(aUID)
   {
     return this.mViewerHash[aUID].viewer;
   },
 
   // for previously loaded viewers only
-  getEntryForViewer: function(aViewer)
+  getEntryForViewer: function VR_GetEntryForViewer(aViewer)
   {
     return this.mViewerHash[aViewer.uid].entry;
   },
 
   // for previously loaded viewers only
-  getEntryByUID: function(aUID)
+  getEntryByUID: function VR_GetEntryByUID(aUID)
   {
     return this.mViewerHash[aUID].aIndex;
   },
 
-  getEntryProperty: function(aIndex, aProp)
+  getEntryProperty: function VR_GetEntryProperty(aIndex, aProp)
   {
     return this.mViewerDS.get(aIndex, aProp);
   },
 
-  getEntryCount: function()
+  getEntryCount: function VR_GetEntryCount()
   {
     return this.mViewerDS.length;
   },
@@ -228,18 +241,17 @@ ViewerRegistry.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// Viewer Registration
 
-  addNewEntry: function(aUID, aDescription, aFilter)
+  addNewEntry: function VR_AddNewEntry(aUID, aDescription, aFilter)
   {
   },
 
-  removeEntry: function(aIndex)
+  removeEntry: function VR_RemoveEntry(aIndex)
   {
   },
 
-  saveRegistry: function()
+  saveRegistry: function VR_SaveRegistry()
   {
   }
-
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -250,15 +262,16 @@ function ViewerRegistryLoadObserver(aTarget)
   this.mTarget = aTarget;
 }
 
-ViewerRegistryLoadObserver.prototype = {
+ViewerRegistryLoadObserver.prototype =
+{
   mTarget: null,
 
-  onError: function(aStatus, aErrorMsg)
+  onError: function VRLO_OnError(aStatus, aErrorMsg)
   {
     this.mTarget.onError(aStatus, aErrorMsg);
   },
 
-  onDataSourceReady: function(aDS)
+  onDataSourceReady: function VRLO_OnDataSourceReady(aDS)
   {
     this.mTarget.onLoad(aDS);
   }

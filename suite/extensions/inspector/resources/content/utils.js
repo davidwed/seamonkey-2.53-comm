@@ -254,8 +254,7 @@ function CSSDeclaration(aProperty, aValue, aImportant)
 
 /**
  * Returns a usable CSS string for the CSSDeclaration.
- * @return
- *        a string in the form "property: value;"
+ * @return a string in the form "property: value;"
  */
 CSSDeclaration.prototype.toString = function CSSD_ToString()
 {
@@ -277,8 +276,7 @@ function DOMAttribute(aNode)
 }
 /**
  * Returns a string representing an attribute name/value pair
- * @return
- *        a string in the form of 'name="value"'
+ * @return a string in the form of 'name="value"'
  */
 DOMAttribute.prototype.toString = function DOMA_ToString()
 {
