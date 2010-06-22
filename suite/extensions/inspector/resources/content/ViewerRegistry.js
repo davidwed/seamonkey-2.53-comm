@@ -187,7 +187,13 @@ ViewerRegistry.prototype =
   objectMatchesEntry:
     function VR_ObjectMatchesEntry(aObject, aLinkedViewer, aIndex)
   {
-    return this.mFilters[aIndex](aObject, aLinkedViewer);
+    try {
+      return this.mFilters[aIndex](aObject, aLinkedViewer);
+    }
+    catch (ex) {
+      Components.utils.reportError(ex);
+    }
+    return false;
   },
 
   /**
