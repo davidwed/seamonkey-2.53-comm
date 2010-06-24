@@ -35,24 +35,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* InspectorSidebar -------------------------------------------------
-*  The primary object that controls the Inspector sidebar.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+/*****************************************************************************
+* InspectorSidebar -----------------------------------------------------------
+*   The primary object that controls the Inspector sidebar.
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
-****************************************************************/
+*****************************************************************************/
 
-//////////// global variables /////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Variables
 
 var inspector;
 
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
-const kObserverServiceIID  = "@mozilla.org/observer-service;1";
+const kObserverServiceContractID  = "@mozilla.org/observer-service;1";
 
-const gNavigator = window._content;
+const gNavigator = window.content;
 
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 function InspectorSidebar_initialize()
 {
@@ -62,21 +64,24 @@ function InspectorSidebar_initialize()
 
 window.addEventListener("load", InspectorSidebar_initialize, false);
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// class InspectorSidebar
 
 function InspectorSidebar()
 {
 }
 
-InspectorSidebar.prototype = 
+InspectorSidebar.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
 
-  get document() { return this.mDocPanel.viewer.subject; },
+  get document()
+  {
+    return this.mDocPanel.viewer.subject;
+  },
 
-  initialize: function()
+  initialize: function IS_Initialize()
   {
     this.installNavObserver();
 
@@ -84,60 +89,61 @@ InspectorSidebar.prototype =
     this.mPanelSet.addObserver("panelsetready", this, false);
     this.mPanelSet.initialize();
   },
-  
-  destroy: function()
+
+  destroy: function IS_Destroy()
   {
   },
 
-  doViewerCommand: function(aCommand)
+  doViewerCommand: function IS_DoViewerCommand(aCommand)
   {
     this.mPanelSet.execCommand(aCommand);
   },
-  
-  getViewer: function(aUID)
+
+  getViewer: function IS_GetViewer(aUID)
   {
     return this.mPanelSet.registry.getViewerByUID(aUID);
   },
 
   ////////////////////////////////////////////////////////////////////////////
   //// Viewer Panels
-  
-  initViewerPanels: function()
+
+  initViewerPanels: function IS_InitViewerPanels()
   {
     this.mDocPanel = this.mPanelSet.getPanel(0);
     this.mDocPanel.addObserver("subjectChange", this, false);
     this.mObjectPanel = this.mPanelSet.getPanel(1);
   },
 
-  onEvent: function(aEvent)
+  onEvent: function IS_OnEvent(aEvent)
   {
     if (aEvent.type == "panelsetready") {
       this.initViewerPanels();
     }
   },
-  
+
   ////////////////////////////////////////////////////////////////////////////
   //// Navigation
-  
-  setTargetWindow: function(aWindow)
+
+  setTargetWindow: function IS_SetTargetWindow(aWindow)
   {
     this.setTargetDocument(aWindow.document);
   },
 
-  setTargetDocument: function(aDoc)
+  setTargetDocument: function IS_SetTargetDocument(aDoc)
   {
     this.mPanelSet.getPanel(0).subject = aDoc;
   },
 
-  installNavObserver: function()
+  installNavObserver: function IS_InstallNavObserver()
   {
-		var observerService = XPCU.getService(kObserverServiceIID, "nsIObserverService");
+    var observerService = XPCU.getService(kObserverServiceContractID,
+                                          "nsIObserverService");
     observerService.addObserver(NavLoadObserver, "EndDocumentLoad", false);
   }
 };
 
 var NavLoadObserver = {
-  observe: function(aWindow)
+  observe: function NLO_Observe(aWindow)
   {
     inspector.setTargetWindow(aWindow);
   }

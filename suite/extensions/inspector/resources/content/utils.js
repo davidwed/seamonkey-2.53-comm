@@ -53,7 +53,6 @@ const kInspectorNSURI = "http://www.mozilla.org/inspector#";
 const kXULNSURI = "http://www.mozilla.org/keymaster/gatekeeper/" +
                   "there.is.only.xul";
 const kHTMLNSURI = "http://www.w3.org/1999/xhtml";
-const nsITransactionManager = Components.interfaces.nsITransactionManager;
 const kCharTable = {
   '&': "&amp;",
   '<': "&lt;",
@@ -142,8 +141,8 @@ var InsUtil = {
     if (!gEntityConverter) {
       try {
         gEntityConverter =
-          Components.classes["@mozilla.org/intl/entityconverter;1"]
-                    .createInstance(Components.interfaces.nsIEntityConverter);
+          XPCU.createInstance("@mozilla.org/intl/entityconverter;1",
+                              "nsIEntityConverter");
       }
       catch (ex) { }
     }
@@ -161,18 +160,12 @@ var InsUtil = {
 //////////////////////////////////////////////////////////////////////////////
 //// Debugging Utilities
 
+// dump text to the Error Console
 function debug(aText)
 {
   // XX comment out to reduce noise
-  consoleDump(aText);
-  //dump(aText);
-}
-
-// dump text to the Error Console
-function consoleDump(aText)
-{
-  var csClass = Components.classes['@mozilla.org/consoleservice;1'];
-  var cs = csClass.getService(Components.interfaces.nsIConsoleService);
+  var cs =
+    XPCU.getService("@mozilla.org/consoleservice;1", "nsIConsoleService");
   cs.logStringMessage(aText);
 }
 

@@ -37,37 +37,48 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* InspectorApp -------------------------------------------------
-*  The primary object that controls the Inspector application.
-****************************************************************/
+/*****************************************************************************
+* InspectorApp ---------------------------------------------------------------
+*   The primary object that controls the Inspector application.
+*****************************************************************************/
 
-//////////// global variables /////////////////////
-
-const kInspectorTitle = /Mac/.test(navigator.platform) ?
-                        "" : " - " + document.title;
+//////////////////////////////////////////////////////////////////////////////
+//// Global Variables
 
 var inspector;
 
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
-const kAccessibleRetrievalCID  = "@mozilla.org/accessibleRetrieval;1";
-const kClipboardHelperCID      = "@mozilla.org/widget/clipboardhelper;1";
-const kPromptServiceCID        = "@mozilla.org/embedcomp/prompt-service;1";
-const kFOStreamCID             = "@mozilla.org/network/file-output-stream;1";
-const kEncoderCIDbase          = "@mozilla.org/layout/documentEncoder;1?type=";
-const kSerializerCID           = "@mozilla.org/xmlextras/xmlserializer;1";
-const kXULAppInfoCID           = "@mozilla.org/xre/app-info;1"
+const kInspectorTitle = /Mac/.test(navigator.platform) ?
+                          "" :
+                          " - " + document.title;
+
+const kAccessibleRetrievalContractID =
+  "@mozilla.org/accessibleRetrieval;1";
+const kClipboardHelperContractID =
+  "@mozilla.org/widget/clipboardhelper;1";
+const kPromptServiceContractID =
+  "@mozilla.org/embedcomp/prompt-service;1";
+const kFOStreamContractID =
+  "@mozilla.org/network/file-output-stream;1";
+const kEncoderContractIDbase =
+  "@mozilla.org/layout/documentEncoder;1?type=";
+const kSerializerContractID =
+  "@mozilla.org/xmlextras/xmlserializer;1";
+const kXULAppInfoContractID =
+  "@mozilla.org/xre/app-info;1"
+const kWindowMediatorContractID =
+  "@mozilla.org/appshell/window-mediator;1";
+const kFilePickerContractID =
+  "@mozilla.org/filepicker;1";
+
 const nsIAccessibleApplication = Components.interfaces.nsIAccessibleApplication;
-const nsIAccessibleRetrieval   = Components.interfaces.nsIAccessibleRetrieval;
 const nsIWebNavigation         = Components.interfaces.nsIWebNavigation;
 const nsIDocShellTreeItem      = Components.interfaces.nsIDocShellTreeItem;
 const nsIDocShell              = Components.interfaces.nsIDocShell;
-const nsIFileOutputStream      = Components.interfaces.nsIFileOutputStream;
-const nsIDocumentEncoder       = Components.interfaces.nsIDocumentEncoder;
-const nsIDOMSerializer         = Components.interfaces.nsIDOMSerializer;
 
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 window.addEventListener("load", InspectorApp_initialize, false);
 window.addEventListener("unload", InspectorApp_destroy, false);
@@ -92,8 +103,8 @@ function InspectorApp_initialize()
 
   // Disables the Mac Specific VK_BACK for delete key for non-mac systems
   if (!/Mac/.test(navigator.platform)) {
-    document.getElementById("keyEditDeleteMac")
-            .setAttribute("disabled", "true");
+    document.getElementById("keyEditDeleteMac").setAttribute("disabled",
+                                                             "true");
   }
 }
 
@@ -102,14 +113,14 @@ function InspectorApp_destroy()
   inspector.destroy();
 }
 
-////////////////////////////////////////////////////////////////////////////
-//// class InspectorApp
+//////////////////////////////////////////////////////////////////////////////
+//// Class InspectorApp
 
 function InspectorApp()
 {
 }
 
-InspectorApp.prototype = 
+InspectorApp.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
@@ -117,28 +128,37 @@ InspectorApp.prototype =
   mShowBrowser: false,
   mClipboardHelper: null,
   mPromptService: null,
-  
-  get document() { return this.mDocPanel.viewer.subject },
-  get panelset() { return this.mPanelSet; },
-  
-  initialize: function(aTarget, aURI)
+
+  get document()
+  {
+    return this.mDocPanel.viewer.subject
+  },
+
+  get panelset()
+  {
+    return this.mPanelSet;
+  },
+
+  initialize: function IA_Initialize(aTarget, aURI)
   {
     this.mInitTarget = aTarget;
-    
+
     var el = document.getElementById("bxBrowser");
     el.addEventListener("pageshow", BrowserPageShowListener, true);
 
     this.setBrowser(false, true);
 
-    this.mClipboardHelper = XPCU.getService(kClipboardHelperCID, "nsIClipboardHelper");
-    this.mPromptService = XPCU.getService(kPromptServiceCID, "nsIPromptService");
+    this.mClipboardHelper = XPCU.getService(kClipboardHelperContractID,
+                                            "nsIClipboardHelper");
+    this.mPromptService = XPCU.getService(kPromptServiceContractID,
+                                          "nsIPromptService");
 
     this.mPanelSet = document.getElementById("bxPanelSet");
     this.mPanelSet.addObserver("panelsetready", this, false);
     this.mPanelSet.initialize();
 
     // check if accessibility service is available
-    if (!(kAccessibleRetrievalCID in Components.classes)) {
+    if (!(kAccessibleRetrievalContractID in Components.classes)) {
       var elm = document.getElementById("cmd:toggleAccessibleNodes");
       if (elm) {
         elm.setAttribute("disabled", "true");
@@ -154,7 +174,7 @@ InspectorApp.prototype =
     // than 1.9.3.
     // XXX: remove this when mimimal Gecko supported version will be equal to
     // 1.9.3.
-    var info = XPCU.getService(kXULAppInfoCID, "nsIXULAppInfo");
+    var info = XPCU.getService(kXULAppInfoContractID, "nsIXULAppInfo");
     if (info.platformVersion < "1.9.3") {
       var elm = document.getElementById("mnInspectApplicationAccessible");
       if (elm) {
@@ -167,24 +187,25 @@ InspectorApp.prototype =
     }
   },
 
-  destroy: function()
+  destroy: function IA_Destroy()
   {
     InsUtil.persistAll("bxDocPanel");
     InsUtil.persistAll("bxObjectPanel");
   },
-  
+
   ////////////////////////////////////////////////////////////////////////////
   //// Viewer Panels
-  
-  initViewerPanels: function()
+
+  initViewerPanels: function IA_InitViewerPanels()
   {
     this.mDocPanel = this.mPanelSet.getPanel(0);
     this.mDocPanel.addObserver("subjectChange", this, false);
     this.mObjectPanel = this.mPanelSet.getPanel(1);
 
     if (this.mInitTarget) {
-      if (this.mInitTarget.nodeType == Node.DOCUMENT_NODE)
+      if (this.mInitTarget.nodeType == Node.DOCUMENT_NODE) {
         this.setTargetDocument(this.mInitTarget);
+      }
       else if (this.mInitTarget.nodeType == Node.ELEMENT_NODE) {
         this.setTargetDocument(this.mInitTarget.ownerDocument);
         this.mDocPanel.params = this.mInitTarget;
@@ -193,7 +214,7 @@ InspectorApp.prototype =
     }
   },
 
-  onEvent: function(aEvent)
+  onEvent: function IA_OnEvent(aEvent)
   {
     switch (aEvent.type) {
       case "panelsetready":
@@ -222,32 +243,33 @@ InspectorApp.prototype =
         break;
     }
   },
-  
+
   ////////////////////////////////////////////////////////////////////////////
   //// UI Commands
 
-  updateCommand: function inspector_updateCommand(aCommand)
+  updateCommand: function IA_UpdateCommand(aCommand)
   {
     var command = document.getElementById(aCommand);
-    
+
     var disabled = false;
     switch (aCommand) {
       case "cmdSave":
         var doc = this.mDocPanel.subject;
-        disabled = !((kEncoderCIDbase + doc.contentType) in Components.classes ||
-                    (kSerializerCID in Components.classes));
+        disabled =
+          !((kEncoderContractIDbase + doc.contentType) in Components.classes ||
+            (kSerializerContractID in Components.classes));
         break;
     }
 
     command.setAttribute("disabled", disabled);
   },
 
-  doViewerCommand: function(aCommand)
+  doViewerCommand: function IA_DoViewerCommand(aCommand)
   {
     this.mPanelSet.execCommand(aCommand);
   },
-  
-  showOpenURLDialog: function()
+
+  showOpenURLDialog: function IA_ShowOpenURLDialog()
   {
     var bundle = this.mPanelSet.stringBundle;
     var msg = bundle.getString("inspectURL.message");
@@ -260,12 +282,12 @@ InspectorApp.prototype =
     }
   },
 
-  showPrefsDialog: function()
+  showPrefsDialog: function IA_ShowPrefsDialog()
   {
     goPreferences("inspector_pane");
   },
-  
-  toggleBrowser: function(aToggleSplitter)
+
+  toggleBrowser: function IA_ToggleBrowser(aToggleSplitter)
   {
     this.setBrowser(!this.mShowBrowser, aToggleSplitter)
   },
@@ -273,75 +295,81 @@ InspectorApp.prototype =
   /**
    * Toggle 'blink on select' command.
    */
-  toggleFlashOnSelect: function inspector_toggleFlashOnSelect()
+  toggleFlashOnSelect: function IA_ToggleFlashOnSelect()
   {
     this.mPanelSet.flasher.flashOnSelect =
       !this.mPanelSet.flasher.flashOnSelect;
   },
 
-  setBrowser: function(aValue, aToggleSplitter)
+  setBrowser: function IA_SetBrowser(aValue, aToggleSplitter)
   {
     this.mShowBrowser = aValue;
-    if (aToggleSplitter)
+    if (aToggleSplitter) {
       this.openSplitter("Browser", aValue);
+    }
     var cmd = document.getElementById("cmdToggleBrowser");
     cmd.setAttribute("checked", aValue);
   },
 
-  openSplitter: function(aName, aTruth)
+  openSplitter: function IA_OpenSplitter(aName, aTruth)
   {
     var splitter = document.getElementById("spl" + aName);
-    if (aTruth)
+    if (aTruth) {
       splitter.open();
-    else
+    }
+    else {
       splitter.close();
+    }
   },
 
  /**
   * Saves the current document state in the inspector.
   */
-  save: function save()
+  save: function IA_Save()
   {
-    var picker = Components.classes["@mozilla.org/filepicker;1"]
-                           .createInstance(nsIFilePicker);
+    var picker = XPCU.createInstance(kFilePickerContractID, "nsIFilePicker");
     var title = document.getElementById("mi-save").label;
     picker.init(window, title, picker.modeSave)
     picker.appendFilters(picker.filterHTML | picker.filterXML |
                          picker.filterXUL);
-    if (picker.show() == picker.returnCancel)
+    if (picker.show() == picker.returnCancel) {
       return;
+    }
 
-    var fos = Components.classes[kFOStreamCID]
-                        .createInstance(nsIFileOutputStream);
+    var fos = XPCU.createInstance(kFOStreamContractID, "nsIFileOutputStream");
     const flags = 0x02 | 0x08 | 0x20; // write, create, truncate
 
     var doc = this.mDocPanel.subject;
-    if ((kEncoderCIDbase + doc.contentType) in Components.classes) {
+    if ((kEncoderContractIDbase + doc.contentType) in Components.classes) {
       // first we try to use the document encoder for that content type.  If
       // that fails, we move on to the xml serializer.
-      var encoder = Components.classes[kEncoderCIDbase + doc.contentType]
-                              .createInstance(nsIDocumentEncoder);
+      var encoder =
+        XPCU.createInstance(kEncoderContractIDbase + doc.contentType,
+                            "nsIDocumentEncoder");
       encoder.init(doc, doc.contentType, encoder.OutputRaw);
       encoder.setCharset(doc.characterSet);
-      fos.init(picker.file, flags, 0666, 0); 
+      fos.init(picker.file, flags, 0666, 0);
       try {
         encoder.encodeToStream(fos);
-      } finally {
+      }
+      finally {
         fos.close();
       }
-    } else {
-      var serializer = Components.classes[kSerializerCID]
-                                 .createInstance(nsIDOMSerializer);
-      fos.init(picker.file, flags, 0666, 0); 
+    }
+    else {
+      var serializer = XPCU.createInstance(kSerializerContractID,
+                                          "nsIDOMSerializer");
+      fos.init(picker.file, flags, 0666, 0);
       try {
         serializer.serializeToStream(doc, fos);
-      } finally {
+      }
+      finally {
         fos.close();
       }
     }
   },
 
-  exit: function()
+  exit: function IA_Exit()
   {
     window.close();
     // Todo: remove observer service here
@@ -349,14 +377,14 @@ InspectorApp.prototype =
 
   ////////////////////////////////////////////////////////////////////////////
   //// Navigation
-  
-  gotoTypedURL: function()
+
+  gotoTypedURL: function IA_GotoTypedURL()
   {
     var url = document.getElementById("tfURLBar").value;
     this.gotoURL(url);
   },
 
-  gotoURL: function(aURL, aNoSaveHistory)
+  gotoURL: function IA_GotoURL(aURL, aNoSaveHistory)
   {
     this.mPendingURL = aURL;
     this.mPendingNoSave = aNoSaveHistory;
@@ -364,10 +392,11 @@ InspectorApp.prototype =
     this.setBrowser(true, true);
   },
 
-  browseToURL: function(aURL)
+  browseToURL: function IA_BrowseToURL(aURL)
   {
     try {
-      this.webNavigation.loadURI(aURL, nsIWebNavigation.LOAD_FLAGS_NONE, null, null, null);
+      this.webNavigation.loadURI(aURL, nsIWebNavigation.LOAD_FLAGS_NONE, null,
+                                 null, null);
     }
     catch(ex) {
       // nsIWebNavigation.loadURI will spit out an appropriate user prompt, so
@@ -375,27 +404,26 @@ InspectorApp.prototype =
     }
   },
 
- /** 
+ /**
   * Creates the submenu for Inspect Content/Chrome Document
   */
-  showInspectDocumentList: function showInspectDocumentList(aEvent, aChrome)
+  showInspectDocumentList:
+    function IA_ShowInspectDocumentList(aEvent, aChrome)
   {
-    const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var menu = aEvent.target;
-    var ww = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                       .getService(Components.interfaces.nsIWindowMediator);
+    var ww = XPCU.getService(kWindowMediatorContractID, "nsIWindowMediator");
     var windows = ww.getXULWindowEnumerator(null);
     var docs = [];
 
     while (windows.hasMoreElements()) {
       try {
         // Get the window's main docshell
-        var windowDocShell = windows.getNext()
-                            .QueryInterface(Components.interfaces.nsIXULWindow)
-                            .docShell;
+        var windowDocShell =
+          XPCU.QI(windows.getNext(), "nsIXULWindow").docShell;
         this.appendContainedDocuments(docs, windowDocShell,
-                                      aChrome ? nsIDocShellTreeItem.typeChrome
-                                              : nsIDocShellTreeItem.typeContent);
+                                      aChrome ?
+                                        nsIDocShellTreeItem.typeChrome :
+                                        nsIDocShellTreeItem.typeContent);
       }
       catch (ex) {
         // We've failed with this window somehow, but we're catching the error
@@ -409,61 +437,71 @@ InspectorApp.prototype =
 
     // Now add what we found to the menu
     if (!docs.length) {
-      var noneMenuItem = document.createElementNS(XULNS, "menuitem");
-      noneMenuItem.setAttribute("label",
-                                this.mPanelSet.stringBundle
-                                    .getString("inspectWindow.noDocuments.message"));
+      var noneMenuItem = document.createElementNS(kXULNSURI, "menuitem");
+      var label = this.mPanelSet.stringBundle.getString(
+        "inspectWindow.noDocuments.message"
+      );
+      noneMenuItem.setAttribute("label", label);
       noneMenuItem.setAttribute("disabled", true);
       menu.appendChild(noneMenuItem);
-    } else {
-      for (var i = 0; i < docs.length; i++)
+    }
+    else {
+      for (var i = 0; i < docs.length; i++) {
         this.addInspectDocumentMenuItem(menu, docs[i], i + 1);
+      }
     }
   },
 
- /** 
-  * Appends to the array the documents contained in docShell (including the passed
-  * docShell itself).
+ /**
+  * Appends to the array the documents contained in docShell (including the
+  * passed docShell itself).
   *
-  * @param array the array to append to
-  * @param docShell the docshell to look for documents in
-  * @param type one of the types defined in nsIDocShellTreeItem
+  * @param array
+  *        The array to append to.
+  * @param docShell
+  *        The docshell to look for documents in.
+  * @param type
+  *        One of the types defined in nsIDocShellTreeItem.
   */
-  appendContainedDocuments: function appendContainedDocuments(array, docShell, type)
+  appendContainedDocuments:
+    function IA_AppendContainedDocuments(array, docShell, type)
   {
     // Load all the window's content docShells
-    var containedDocShells = docShell.getDocShellEnumerator(type, 
+    var containedDocShells = docShell.getDocShellEnumerator(type,
                                       nsIDocShell.ENUMERATE_FORWARDS);
     while (containedDocShells.hasMoreElements()) {
       try {
         // Get the corresponding document for this docshell
-        var childDoc = containedDocShells.getNext().QueryInterface(nsIDocShell)
-                                         .contentViewer.DOMDocument;
+        var childDoc = XPCU.QI(containedDocShells.getNext(), "nsIDocShell")
+                         .contentViewer.DOMDocument;
 
-        // Ignore the DOM Insector's browser docshell if it's not being used
-        if (docShell.contentViewer.DOMDocument.location.href != document.location.href ||
+        // Ignore the DOM Inspector's browser docshell if it's not being used
+        if (docShell.contentViewer.DOMDocument.location.href !=
+              document.location.href ||
             childDoc.location.href != "about:blank") {
           array.push(childDoc);
         }
       }
       catch (ex) {
-        // We've failed with this document somehow, but we're catching the error so
-        // the others will still work
+        // We've failed with this document somehow, but we're catching the
+        // error so the others will still work
         dump(ex + "\n");
       }
     }
   },
 
- /** 
+ /**
   * Creates a menu item for Inspect Document.
   *
-  * @param doc document related to this menu item
-  * @param docNumber the position of the document
+  * @param doc
+  *        Document related to this menu item.
+  * @param docNumber
+  *        The position of the document.
   */
-  addInspectDocumentMenuItem: function addInspectDocumentMenuItem(parent, doc, docNumber)
+  addInspectDocumentMenuItem:
+    function IA_AddInspectDocumentMenuItem(parent, doc, docNumber)
   {
-    const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    var menuItem = document.createElementNS(XULNS, "menuitem");
+    var menuItem = document.createElementNS(kXULNSURI, "menuitem");
     menuItem.doc = doc;
     // Use the URL if there's no title
     var title = doc.title || doc.location.href;
@@ -471,28 +509,30 @@ InspectorApp.prototype =
     if (docNumber < 10) {
       menuItem.setAttribute("label", docNumber + " " + title);
       menuItem.setAttribute("accesskey", docNumber);
-    } else {
+    }
+    else {
       menuItem.setAttribute("label", title);
     }
     parent.appendChild(menuItem);
   },
 
-  setTargetApplicationAccessible: function setTargetApplicationAccessible()
+  setTargetApplicationAccessible: function IA_SetTargetApplicationAccessible()
   {
     var accService =
-      XPCU.getService(kAccessibleRetrievalCID, "nsIAccessibleRetrieval");
+      XPCU.getService(kAccessibleRetrievalContractID,
+                      "nsIAccessibleRetrieval");
 
     if (accService) {
       this.mDocPanel.subject = accService.getApplicationAccessible();
     }
   },
 
-  setTargetWindow: function(aWindow)
+  setTargetWindow: function IA_SetTargetWindow(aWindow)
   {
     this.setTargetDocument(aWindow.document);
   },
 
-  setTargetDocument: function(aDoc)
+  setTargetDocument: function IA_SetTargetDocument(aDoc)
   {
     this.mDocPanel.subject = aDoc;
   },
@@ -504,55 +544,80 @@ InspectorApp.prototype =
   },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// UI Labels getters and setters
+  //// UI Labels Getters and Setters
 
-  get locationText() { return document.getElementById("tfURLBar").value; },
-  set locationText(aText) { document.getElementById("tfURLBar").value = aText; },
+  get locationText()
+  {
+    return document.getElementById("tfURLBar").value;
+  },
 
-  get statusText() { return document.getElementById("txStatus").value; },
-  set statusText(aText) { document.getElementById("txStatus").value = aText; },
+  set locationText(aText)
+  {
+    document.getElementById("tfURLBar").value = aText;
+  },
 
-  get progress() { return document.getElementById("pmStatus").value; },
-  set progress(aPct) { document.getElementById("pmStatus").value = aPct; },
+  get statusText()
+  {
+    return document.getElementById("txStatus").value;
+  },
+
+  set statusText(aText)
+  {
+    document.getElementById("txStatus").value = aText;
+  },
+
+  get progress()
+  {
+    return document.getElementById("pmStatus").value;
+  },
+
+  set progress(aPct)
+  {
+    document.getElementById("pmStatus").value = aPct;
+  },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// Document Loading 
+  //// Document Loading
 
-  documentLoaded: function()
+  documentLoaded: function IA_DocumentLoaded()
   {
-    this.setTargetWindow(_content);
+    this.setTargetWindow(content);
 
     var url = this.webNavigation.currentURI.spec;
-    
+
     // put the url into the urlbar
     this.locationText = url;
 
     // add url to the history, unless explicity told not to
-    if (!this.mPendingNoSave)
+    if (!this.mPendingNoSave) {
       this.addToHistory(url);
+    }
 
     this.mPendingURL = null;
     this.mPendingNoSave = null;
   },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// History 
+  //// History
 
-  addToHistory: function(aURL)
+  addToHistory: function IA_AddToHistory(aURL)
   {
   },
 
   ////////////////////////////////////////////////////////////////////////////
   //// Uncategorized
-  
-  get isViewingContent() { return this.mPanelSet.getPanel(0).subject != null; },
-  
-  fillInTooltip: function(tipElement)
+
+  get isViewingContent()
+  {
+    return this.mPanelSet.getPanel(0).subject != null;
+  },
+
+  fillInTooltip: function IA_FillInTooltip(tipElement)
   {
     var retVal = false;
     var textNode = document.getElementById("txTooltip");
     if (textNode) {
-      try {  
+      try {
         var tipText = tipElement.getAttribute("tooltiptext");
         if (tipText != "") {
           textNode.setAttribute("value", tipText);
@@ -561,11 +626,11 @@ InspectorApp.prototype =
       }
       catch (e) { }
     }
-    
+
     return retVal;
   },
 
-  initPopup: function(aPopup)
+  initPopup: function IA_InitPopup(aPopup)
   {
     var items = aPopup.getElementsByTagName("menuitem");
     var js, fn, item;
@@ -577,53 +642,57 @@ InspectorApp.prototype =
         if (js) {
           fn = new Function(js);
           item.isDisabled = fn;
-        } else {
-          item.isDisabled = null; // to prevent annoying "strict" warning messages
         }
-      } 
+        else {
+          // to prevent annoying "strict" warning messages
+          item.isDisabled = null;
+        }
+      }
       if (fn) {
-        if (item.isDisabled())
+        if (item.isDisabled()) {
           item.setAttribute("disabled", "true");
-        else
+        }
+        else {
           item.removeAttribute("disabled");
+        }
       }
 
       fn = null;
     }
   },
 
-  emptyChildren: function(aNode)
+  emptyChildren: function IA_EmptyChildren(aNode)
   {
     while (aNode.hasChildNodes()) {
       aNode.removeChild(aNode.lastChild);
     }
   },
 
-  onSplitterOpen: function(aSplitter)
+  onSplitterOpen: function IA_OnSplitterOpen(aSplitter)
   {
     if (aSplitter.id == "splBrowser") {
       this.setBrowser(aSplitter.isOpened, false);
     }
   },
-  
+
   // needed by overlayed commands from viewer to get references to a specific
   // viewer object by name
-  getViewer: function(aUID)
+  getViewer: function IA_GetViewer(aUID)
   {
     return this.mPanelSet.registry.getViewerByUID(aUID);
   }
-  
 };
 
 ////////////////////////////////////////////////////////////////////////////
-//// event listeners
+//// Event Listeners
 
-function BrowserPageShowListener(aEvent) 
+function BrowserPageShowListener(aEvent)
 {
   // since we will also get pageshow events for frame documents,
   // make sure we respond to the top-level document load
-  if (aEvent.target.defaultView == _content)
+  if (aEvent.target.defaultView == content) {
     inspector.documentLoaded();
+  }
 }
 
 function UtilWindowOpenListener(aWindow)
