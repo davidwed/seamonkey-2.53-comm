@@ -24,10 +24,6 @@
       <menupopup id="list-chrome-documents-popup"
                  onpopupshowing="inspector.showInspectDocumentList(event, true);"/>
     </menu>
-    <menuitem oncommand="inspector.setTargetApplicationAccessible();"
-              id="mnInspectApplicationAccessible"
-              label="&mnInspectApplicationAccessible.label;"
-              accesskey="&mnInspectApplicationAccessible.accesskey;"/>
     <menuitem label="&cmdShowOpenURLDialog.label;" accesskey="&cmdShowOpenURLDialog.accesskey;"
               observes="cmdShowOpenURLDialog"/>
     <menuseparator/>

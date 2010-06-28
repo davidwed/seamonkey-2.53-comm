@@ -127,10 +127,6 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="Accessible Object">
         <ins:filter><![CDATA[
-          if (object instanceof Components.interfaces.nsIAccessible) {
-            return true;
-          }
-
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
             return false;
@@ -158,10 +154,6 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="Accessible Properties">
         <ins:filter><![CDATA[
-          if (object instanceof Components.interfaces.nsIAccessible) {
-            return true;
-          }
-
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
             return false;
@@ -189,10 +181,6 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="Accessible Relations">
         <ins:filter><![CDATA[
-          if (object instanceof Components.interfaces.nsIAccessible) {
-            return true;
-          }
-
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
             return false;
@@ -220,9 +208,7 @@
                        ins:panels="bxDocPanel"
                        ins:description="Accessible Events">
         <ins:filter><![CDATA[
-          const Ci = Components.interfaces;
-          return (object instanceof Ci.nsIDOMDocument ||
-                  object instanceof Ci.nsIAccessibleApplication) &&
+          return object instanceof Components.interfaces.nsIDOMDocument &&
             "@mozilla.org/accessibleRetrieval;1" in Components.classes;
         ]]></ins:filter>
       </rdf:Description>
@@ -233,9 +219,7 @@
                        ins:panels="bxDocPanel"
                        ins:description="Accessible Tree">
         <ins:filter><![CDATA[
-          const Ci = Components.interfaces;
-          return (object instanceof Ci.nsIDOMDocument ||
-                  object instanceof Ci.nsIAccessibleApplication) &&
+          return object instanceof Components.interfaces.nsIDOMDocument &&
             "@mozilla.org/accessibleRetrieval;1" in Components.classes;
         ]]></ins:filter>
       </rdf:Description>

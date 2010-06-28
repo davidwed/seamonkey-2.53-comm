@@ -164,11 +164,11 @@ AccessibleTreeViewer.prototype =
   onItemSelected: function onItemSelected()
   {
     var idx = this.mTree.currentIndex;
-    this.mSelection = this.mView.getObject(idx);
+    this.mSelection = this.mView.getDOMNode(idx);
     this.mObsMan.dispatchEvent("selectionChange",
                                { selection: this.mSelection } );
 
-    if (this.mSelection && this.mSelection instanceof nsIDOMNode &&
+    if (this.mSelection &&
         this.mSelection.nodeType == nsIDOMNode.ELEMENT_NODE) {
       var flasher = this.mPane.panelset.flasher;
       flasher.flashElementOnSelect(this.mSelection);
@@ -185,22 +185,22 @@ AccessibleTreeViewer.prototype =
 ///////////////////////////////////////////////////////////////////////////////
 //// inAccTreeView
 
-function inAccTreeView(aObject)
+function inAccTreeView(aDocument)
 {
   this.mNodes = [];
 
   this.mAccService = XPCU.getService(kAccessibleRetrievalCID,
                                      nsIAccessibleRetrieval);
 
-  this.mAccessible = aObject instanceof nsIAccessible ?
-    aObject : this.mAccService.getAccessibleFor(aObject);
+  this.mDocument = aDocument;
+  this.mAccDocument = this.mAccService.getAccessibleFor(aDocument);
 
   this.mObserverService = XPCU.getService(kObserverServiceCID,
                                           nsIObserverService);
 
   this.mObserverService.addObserver(this, "accessible-event", false);
 
-  var node = this.createNode(this.mAccessible);
+  var node = this.createNode(this.mAccDocument);
   this.mNodes.push(node);
 }
 
@@ -446,29 +446,24 @@ function getDOMNodeFor(aAccessible)
 {
   var accessNode = XPCU.QI(aAccessible, nsIAccessNode);
   var DOMNode = accessNode.DOMNode;
-  if (!DOMNode) {
-    return null;
-  }
-
   DOMNode[" accessible "] = aAccessible;
   return DOMNode;
 }
 
 /**
- * Return DOM node for an accessible or accessible if there is no associated
- * DOM node by the tree node pointed by the given row index.
+ * Return DOM node for an accessible of the tree node pointed by the given
+ * row index.
  *
  * @param aRow - row index.
  */
-inAccTreeView.prototype.getObject =
-function getObject(aRow)
+inAccTreeView.prototype.getDOMNode =
+function getDOMNode(aRow)
 {
   var node = this.mNodes[aRow];
   if (!node)
     return null;
 
-  var DOMNode = this.getDOMNodeFor(node.accessible);
-  return DOMNode || node.accessible;
+  return this.getDOMNodeFor(node.accessible);
 }
 
 /**
@@ -497,18 +492,15 @@ function inAccTreeView_observe(aSubject, aTopic, aData)
   if (event.eventType != nsIAccessibleEvent.EVENT_REORDER)
     return;
 
-  var accessible = event.accessible;
+  let accessible = event.accessible;
   if (!accessible)
     return;
 
   // Ignore the event if its target is from anther document.
-  var parentAccessible = accessible;
-  while (parentAccessible != this.mAccessible) {
-    parentAccessible = parentAccessible.parent;
-    if (!parentAccessible) {
-      return;
-    }
-  }
+  let accessnode = XPCU.QI(accessible, nsIAccessNode);
+  let accDocument = accessnode.accessibleDocument;
+  if (accDocument != this.mAccDocument)
+    return;
 
   for (let idx = 0; idx < this.mNodes.length; idx++) {
     let node = this.mNodes[idx];

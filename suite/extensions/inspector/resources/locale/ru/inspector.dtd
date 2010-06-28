@@ -12,8 +12,6 @@
 <!ENTITY mnInspectContentDocument.accesskey "о">
 <!ENTITY mnInspectChromeDocument.label "Исследовать документ Chrome">
 <!ENTITY mnInspectChromeDocument.accesskey "к">
-<!ENTITY mnInspectApplicationAccessible.label "Исследовать доступность приложения">
-<!ENTITY mnInspectApplicationAccessible.accesskey "п">
 <!ENTITY cmdShowOpenURLDialog.label "Исследовать URL…">
 <!ENTITY cmdShowOpenURLDialog.accesskey "с">
 <!ENTITY cmdSave.label "Сохранить DOM как…">

@@ -83,21 +83,14 @@ function AccessibleObjectViewer_initialize()
     function subjectSetter(aObject)
     {
       var accObject = null;
-
-      if (aObject instanceof nsIAccessible) {
-        accObject = aObject;
-      }
-      else {
+      try {
         accObject = aObject[" accessible "];
-        try {
-          if (accObject)
-            XPCU.QI(accObject, nsIAccessible);
-          else
-            accObject = accService.getAccessibleFor(aObject);
-        }
-        catch(e) {
-          dump("Failed to get accessible object for node.");
-        }
+        if (accObject)
+          XPCU.QI(accObject, nsIAccessible);
+        else
+          accObject = accService.getAccessibleFor(aObject);
+      } catch(e) {
+        dump("Failed to get accessible object for node.");
       }
 
       this.mSubject = accObject;

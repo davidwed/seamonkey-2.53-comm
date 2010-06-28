@@ -176,9 +176,7 @@ function AccessibleRelationsView(aNode)
 {
   this.mNode = aNode;
 
-  this.mAccessible = aNode instanceof nsIAccessible ?
-    aNode : aNode[" accessible "];
-
+  this.mAccessible = aNode[" accessible "];
   if (this.mAccessible)
     XPCU.QI(this.mAccessible, nsIAccessible);
   else
