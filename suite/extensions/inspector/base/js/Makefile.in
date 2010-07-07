@@ -43,6 +43,7 @@ VPATH=@srcdir@
 include $(DEPTH)/config/autoconf.mk
 
 XPI_NAME = inspector
+NO_JS_MANIFEST = 1
 
 EXTRA_COMPONENTS=inspector-cmdline.js
 
