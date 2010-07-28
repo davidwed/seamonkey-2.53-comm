@@ -45,16 +45,16 @@
   <!--============================= POPUPS ============================== -->
 
   <popupset id="psPopups">
-    <popup id="ppStyleRulesContext"
-           onpopupshowing="return viewer.onPopupShowing('cmdsRules')">
+    <menupopup id="ppStyleRulesContext"
+               onpopupshowing="return viewer.onPopupShowing('cmdsRules')">
       <menuitem label="&copySelectedFileURI.label;" id="mnCopySelectedFileURI"
                 command="cmdCopySelectedFileURI"/>
       <menuitem label="&viewSelectedFileURI.label;" id="mnViewSelectedFileURI"
                 command="cmdViewSelectedFileURI"/>
-    </popup>
+    </menupopup>
 
-    <popup id="ppStylePropsContext"
-           onpopupshowing="viewer.onPopupShowing('cmdsProps')">
+    <menupopup id="ppStylePropsContext"
+               onpopupshowing="viewer.onPopupShowing('cmdsProps')">
       <menuitem id="mnEditCopy"/>
       <menuseparator/>
       <menuitem id="mnEditInsert"/>
@@ -63,7 +63,7 @@
       <menuseparator/>
       <menuitem label="&toggleSelectedImportant.label;"
                 command="cmdTogglePriority"/>
-    </popup>
+    </menupopup>
   </popupset>
 
   <!--============================= CONTENT ============================== -->

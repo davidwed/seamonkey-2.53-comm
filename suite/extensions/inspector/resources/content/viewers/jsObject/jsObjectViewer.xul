@@ -68,12 +68,13 @@
              oncommand="viewer.cmdInspectInNewView();"/>
   </commandset>
 
-  <popup id="popupContext">
-    <menuitem label="&inspectNewWindow.label;" observes="cmdInspectInNewView"/>
+  <menupopup id="popupContext">
+    <menuitem label="&inspectNewWindow.label;"
+              observes="cmdInspectInNewView"/>
     <menuseparator/>
     <menuitem label="&jsCopyValue.label;" observes="cmdCopyValue"/>
     <menuitem label="&jsEval.label;" observes="cmdEvalExpr"/>
-  </popup>
+  </menupopup>
 
   <tree id="treeJSObject" flex="1" context="popupContext">
     <treecols>

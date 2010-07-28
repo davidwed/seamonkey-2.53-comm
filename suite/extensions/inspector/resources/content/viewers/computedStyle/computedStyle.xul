@@ -59,9 +59,9 @@
   <commandset id="cmdsEditing"/>
 
   <popupset id="psPopups">
-    <popup id="ppComputedStyleContext">
+    <menupopup id="ppComputedStyleContext">
       <menuitem id="mnEditCopy"/>
-    </popup>
+    </menupopup>
   </popupset>
   
   <tree id="olStyles" flex="1" onselect="viewer.onItemSelected()" class="plain" contextmenu="ppComputedStyleContext">

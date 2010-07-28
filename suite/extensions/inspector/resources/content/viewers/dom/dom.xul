@@ -76,7 +76,8 @@
   <!--============================= POPUPS ============================== -->
 
   <popupset id="psPopups">
-    <popup id="ppDOMContext" onpopupshowing="viewer.onContextCreate(this)">
+    <menupopup id="ppDOMContext"
+               onpopupshowing="viewer.onContextCreate(this)">
       <menuitem label="&cmdInspectInNewWindow.label;"
                 accesskey="&cmdInspectInNewWindow.accesskey;"
                 observes="cmdInspectInNewWindow"/>
@@ -155,7 +156,7 @@
       <menuitem label="&cmdShowPseudoClasses.label;"
                 accesskey="&cmdShowPseudoClasses.accesskey;"
                 observes="cmdShowPseudoClasses"/>
-    </popup>
+    </menupopup>
   </popupset>
 
   <tree id="trDOMTree" class="plain" treelines="true" flex="1"

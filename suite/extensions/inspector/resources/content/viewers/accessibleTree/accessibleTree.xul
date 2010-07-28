@@ -63,11 +63,14 @@
              oncommand="viewer.cmdInspectInNewView();"/>
   </commandset>
 
-  <popup id="popupContext">
-    <menuitem label="&inspectNewWindow.label;" observes="cmdInspectInNewView"/>
-    <menuseparator/>
-    <menuitem label="&evaluateJS.label;" observes="cmdEvalJS"/>
-  </popup>
+  <popupset>
+    <menupopup id="popupContext">
+      <menuitem label="&inspectNewWindow.label;"
+                observes="cmdInspectInNewView"/>
+      <menuseparator/>
+      <menuitem label="&evaluateJS.label;" observes="cmdEvalJS"/>
+    </menupopup>
+  </popupset>
 
   <tree id="olAccessibleTree" class="plain" treelines="true" flex="1"
         onselect="viewer.onItemSelected()"

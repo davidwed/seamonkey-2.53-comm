@@ -29,7 +29,7 @@
   <commandset id="cmdsEditing"/>  
   
   <popupset id="psPopups">
-    <popup id="ppAttrContext">
+    <menupopup id="ppAttrContext">
       <menuitem id="mnEditCut"/>
       <menuitem id="mnEditCopy"/>
       <menuitem id="mnEditPaste"/>
@@ -37,7 +37,7 @@
       <menuitem id="mnEditEdit"/>
       <menuitem id="mnEditInsert"/>
       <menuitem id="mnEditDelete"/>
-    </popup>
+    </menupopup>
   </popupset>
  
   <deck id="dkContent" flex="1">

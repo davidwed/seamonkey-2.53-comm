@@ -71,10 +71,12 @@
              oncommand="viewer.cmdInspectInNewView();"/>
   </commandset>
 
-  <menupopup id="popupContext">
-    <menuitem label="&inspectNewWindow.label;"
-              observes="cmdInspectInNewView"/>
-  </menupopup>
+  <popupset>
+    <menupopup id="popupContext">
+      <menuitem label="&inspectNewWindow.label;"
+                observes="cmdInspectInNewView"/>
+    </menupopup>
+  </popupset>
 
   <grid id="mainPropContainer">
     <columns>

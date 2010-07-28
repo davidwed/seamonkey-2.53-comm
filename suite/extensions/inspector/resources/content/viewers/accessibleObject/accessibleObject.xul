@@ -48,6 +48,8 @@
   <stringbundle id="inspector-bundle"/>
   <commandset id="cmdsJSObjectViewer"/>
 
-  <popup id="popupContext"/>
+  <popupset>
+    <menupopup id="popupContext"/>
+  </popupset>
   <tree id="treeJSObject" treelines="true"/>
 </page>
