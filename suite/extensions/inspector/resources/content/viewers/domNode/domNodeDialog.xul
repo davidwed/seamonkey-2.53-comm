@@ -64,7 +64,7 @@
         <label value="&namespaceURI.label;" control="ml_namespace"/>
         <menulist id="ml_namespace" oncommand="dialog.toggleNamespace();">
           <menupopup id="mp_namespaces">
-            <!-- This must be first, and must have a the value attribute set to
+            <!-- This must be first, and must have the value attribute set to
                  "" in order for it to work properly -->
             <menuitem label="&namespaceTitle.null.label;"
                       id="mi_NullNS"
