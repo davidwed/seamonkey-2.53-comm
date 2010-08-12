@@ -106,6 +106,18 @@ function InspectorApp_initialize()
     document.getElementById("keyEditDeleteMac").setAttribute("disabled",
                                                              "true");
   }
+
+  // Get rid of any menus that we expose as overlay points for integration
+  // with several applications but aren't of use with the one hosting us here.
+  var menubar = document.getElementById("mbrInspectorMain");
+  var kid = menubar.firstChild;
+  while (kid) {
+    let nextSibling = kid.nextSibling;
+    if (!kid.hasChildNodes()) {
+      menubar.removeChild(kid);
+    }
+    kid = nextSibling;
+  }
 }
 
 function InspectorApp_destroy()
