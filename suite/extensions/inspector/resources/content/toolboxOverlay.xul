@@ -1,8 +1,7 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <!DOCTYPE overlay [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
-  <!ENTITY % dtd2 SYSTEM "chrome://inspector/content/util.dtd"> %dtd2;
 ]>
 
 <overlay id="ovToolbox"
@@ -20,7 +19,8 @@
       <menupopup id="mppEdit"/>
     </menu>
 
-    <menu id="mnSearch" label="&mnSearch.label;" accesskey="&mnSearch.accesskey;">
+    <menu id="mnSearch" label="&mnSearch.label;"
+          accesskey="&mnSearch.accesskey;">
       <menupopup id="mppSearch"/>
     </menu>
 
@@ -39,11 +39,12 @@
   <toolbar id="tbInspectorPrimary" class="chromeclass-toolbar">
 
     <hbox id="bxURLBar" flex="1">
-      <toolbarbutton id="btnSelecting" type="checkbox" observes="cmd:selectByClick" 
-              tooltiptext="&btnSelecting.tooltip;"/>
+      <toolbarbutton id="btnSelecting" type="checkbox"
+                     observes="cmd:selectByClick"
+                     tooltiptext="&btnSelecting.tooltip;"/>
 
-      <toolbarbutton id="btnFind" observes="cmd:find" 
-              tooltiptext="&btnFind.tooltip;"/>
+      <toolbarbutton id="btnFind" observes="cmd:find"
+                     tooltiptext="&btnFind.tooltip;"/>
 
       <hbox id="bxURLBarContainer" flex="1">
         <hbox align="center" flex="1">
@@ -52,13 +53,15 @@
             searchSessions="history" timeout="50" maxrows="6"
             autocompletesearch="history file" observes="cmdGotoURL">
             <image id="imgURLBarIcon"/>
-            
+
           </textbox>
         </hbox>
 
       </hbox>
 
-      <toolbarbutton label="&btnInspect.label;" accesskey="&btnInspect.accesskey;" observes="cmdGotoURL"/>
+      <toolbarbutton label="&btnInspect.label;"
+                     accesskey="&btnInspect.accesskey;"
+                     observes="cmdGotoURL"/>
     </hbox>
 
   </toolbar>
