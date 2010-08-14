@@ -75,6 +75,8 @@ function XBLBindingsViewer()
   this.mObsMan = new ObserverManager(this);
   this.mDOMUtils = XPCU.getService(kDOMUtilsContractID, "inIDOMUtils");
 
+  this.mBindingsList = document.getElementById("mlBindings");
+
   this.mContentTree = document.getElementById("olContent");
   this.mMethodTree = document.getElementById("olMethods");
   this.mPropTree = document.getElementById("olProps");
@@ -119,8 +121,7 @@ XBLBindingsViewer.prototype =
 
     this.populateBindings();
 
-    var menulist = document.getElementById("mlBindings");
-    this.displayBinding(menulist.value);
+    this.displayBinding(this.mBindingsList.value);
 
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
@@ -170,23 +171,22 @@ XBLBindingsViewer.prototype =
   populateBindings: function XBLBVr_PopulateBindings()
   {
     var urls = this.mDOMUtils.getBindingURLs(this.mSubject);
-    var menulist = document.getElementById("mlBindings");
 
-    menulist.removeAllItems();
+    this.mBindingsList.removeAllItems();
 
-    var urlCount = urls.length;
-    var i;
-
-    for (i = 0; i < urlCount; ++i) {
+    for (let i = 0, n = urls.length; i < n; ++i) {
       var url = urls.queryElementAt(i, Components.interfaces.nsIURI).spec;
-      menulist.appendItem(url, url);
+      var currentItem = this.mBindingsList.appendItem(url, url);
+      currentItem.crop = "center";
+      currentItem.tooltipText = url;
     }
 
-    menulist.selectedIndex = 0;
+    this.mBindingsList.selectedIndex = 0;
   },
 
   displayBinding: function XBLBVr_DisplayBinding(aURL)
   {
+    this.mBindingsList.tooltipText = aURL;
     this.mBindingURL = aURL;
     if (aURL) {
       var req = new XMLHttpRequest();
@@ -238,7 +238,7 @@ XBLBindingsViewer.prototype =
       }
     }
 
-    document.getElementById("mlBindings").disabled = !this.mBinding;
+    this.mBindingsList.disabled = !this.mBinding;
   },
 
   displayContent: function XBLBVr_DisplayContent()
@@ -344,7 +344,7 @@ XBLBindingsViewer.prototype =
     if (et && aProp) {
       text = aProp.getAttribute("on" + et);
       if (!text) {
-        kids = aProp.getElementsByTagNameNS(kXBLNSURI, et + "ter");
+        let kids = aProp.getElementsByTagNameNS(kXBLNSURI, et + "ter");
         text = this.readDOMText(kids.item(0));
       }
     }
