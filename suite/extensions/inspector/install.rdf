@@ -13,7 +13,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0a1</em:minVersion>
-        <em:maxVersion>4.0b3pre</em:maxVersion>
+        <em:maxVersion>4.0b4pre</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -40,7 +40,7 @@
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.0a1pre</em:minVersion>
-        <em:maxVersion>2.1a3</em:maxVersion>
+        <em:maxVersion>2.1b1</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -58,7 +58,7 @@
       <Description>
         <em:id>toolkit@mozilla.org</em:id>
         <em:minVersion>1.9a1</em:minVersion>
-        <em:maxVersion>1.9.3.*</em:maxVersion>
+        <em:maxVersion>2.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
