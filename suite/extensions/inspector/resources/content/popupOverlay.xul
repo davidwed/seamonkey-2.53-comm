@@ -24,9 +24,9 @@
       <menupopup id="list-chrome-documents-popup"
                  onpopupshowing="inspector.showInspectDocumentList(event, true);"/>
     </menu>
-    <menuitem label="&cmdShowOpenURLDialog.label;"
-              accesskey="&cmdShowOpenURLDialog.accesskey;"
-              observes="cmdShowOpenURLDialog"/>
+    <menuitem label="&cmdEnterLocation.label;"
+              accesskey="&cmdEnterLocation.accesskey;"
+              observes="cmdEnterLocation"/>
     <menuseparator/>
     <menuitem label="&cmdSave.label;" accesskey="&cmdSave.accesskey;"
               observes="cmdSave" key="key_saveInspector" id="mi-save"/>

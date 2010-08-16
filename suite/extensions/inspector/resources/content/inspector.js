@@ -50,9 +50,8 @@ var inspector;
 //////////////////////////////////////////////////////////////////////////////
 //// Global Constants
 
-const kInspectorTitle = /Mac/.test(navigator.platform) ?
-                          "" :
-                          " - " + document.title;
+const kIsMac = /Mac/.test(navigator.platform);
+const kInspectorTitle =  kIsMac ?  "" : " - " + document.title;
 
 const kAccessibleRetrievalContractID =
   "@mozilla.org/accessibleRetrieval;1";
@@ -101,8 +100,12 @@ function InspectorApp_initialize()
   }
   inspector.initialize(initNode, initURI);
 
-  // Disables the Mac Specific VK_BACK for delete key for non-mac systems
-  if (!/Mac/.test(navigator.platform)) {
+  // Enable/disable Mac outlier keys.
+  if (kIsMac) {
+    document.getElementById("keyEnterLocation2").setAttribute("disabled",
+                                                              "true");
+  }
+  else {
     document.getElementById("keyEditDeleteMac").setAttribute("disabled",
                                                              "true");
   }
@@ -253,17 +256,10 @@ InspectorApp.prototype =
     this.mPanelSet.execCommand(aCommand);
   },
 
-  showOpenURLDialog: function IA_ShowOpenURLDialog()
+  enterLocation: function IA_EnterLocation()
   {
-    var bundle = this.mPanelSet.stringBundle;
-    var msg = bundle.getString("inspectURL.message");
-    var title = bundle.getString("inspectURL.title");
-    var url = { value: "http://" };
-    var dummy = { value: false };
-    var go = this.mPromptService.prompt(window, title, msg, url, null, dummy);
-    if (go) {
-      this.gotoURL(url.value);
-    }
+    this.locationBar.focus();
+    this.locationBar.select();
   },
 
   showPrefsDialog: function IA_ShowPrefsDialog()
@@ -516,17 +512,22 @@ InspectorApp.prototype =
     return browser.webNavigation;
   },
 
+  get locationBar()
+  {
+    return document.getElementById("tfURLBar");
+  },
+
   ////////////////////////////////////////////////////////////////////////////
   //// UI Labels Getters and Setters
 
   get locationText()
   {
-    return document.getElementById("tfURLBar").value;
+    return this.locationBar.value;
   },
 
   set locationText(aText)
   {
-    document.getElementById("tfURLBar").value = aText;
+    this.locationBar.value = aText;
   },
 
   get statusText()

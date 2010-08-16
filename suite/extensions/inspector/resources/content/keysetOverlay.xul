@@ -7,6 +7,11 @@
 <overlay id="ovKeyset"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <keyset id="ksGlobalKeyset"/>
+  <keyset id="ksGlobalKeyset">
+    <key id="keyEnterLocation" command="cmdEnterLocation"
+         key="&cmdEnterLocation.key;" modifiers="accel"/>
+    <key id="keyEnterLocation2" command="cmdEnterLocation"
+         key="&cmdEnterLocation.key2;" modifiers="alt"/>
+  </keyset>
 
 </overlay>
