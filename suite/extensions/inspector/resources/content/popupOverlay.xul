@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <!DOCTYPE overlay [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
@@ -24,13 +24,14 @@
       <menupopup id="list-chrome-documents-popup"
                  onpopupshowing="inspector.showInspectDocumentList(event, true);"/>
     </menu>
-    <menuitem label="&cmdShowOpenURLDialog.label;" accesskey="&cmdShowOpenURLDialog.accesskey;"
+    <menuitem label="&cmdShowOpenURLDialog.label;"
+              accesskey="&cmdShowOpenURLDialog.accesskey;"
               observes="cmdShowOpenURLDialog"/>
     <menuseparator/>
-    <menuitem label="&cmdSave.label;" accesskey="&cmdSave.accesskey;" 
+    <menuitem label="&cmdSave.label;" accesskey="&cmdSave.accesskey;"
               observes="cmdSave" key="key_saveInspector" id="mi-save"/>
     <menuseparator/>
-    <menuitem label="&cmdClose.label;" accesskey="&cmdClose.accesskey;" 
+    <menuitem label="&cmdClose.label;" accesskey="&cmdClose.accesskey;"
               observes="cmdClose" key="key_closeInspector"/>
   </menupopup>
 
@@ -47,8 +48,10 @@
   </menupopup>
 
   <menupopup id="mppView">
-    <menuitem class="menuitem-iconic" type="checkbox" label="&cmdToggleBrowser.label;"
-              accesskey="&cmdToggleBrowser.accesskey;" observes="cmdToggleBrowser"/>
+    <menuitem class="menuitem-iconic" type="checkbox"
+              label="&cmdToggleBrowser.label;"
+              accesskey="&cmdToggleBrowser.accesskey;"
+              observes="cmdToggleBrowser"/>
     <menuseparator/>
     <menuitem id="item:flashOnSelect"
               class="menuitem-iconic"
@@ -59,5 +62,5 @@
   </menupopup>
 
   <popupset id="ppsViewerPopupset"/>
-  
+
 </overlay>
