@@ -13,11 +13,11 @@
                 key="key:find"
                 observes="cmd:find"/>
 
-      <menuitem id="item:findNextPp"
-                label="&cmdFindNext.label;"
-                accesskey="&cmdFindNext.accesskey;"
-                key="key:findNext"
-                observes="cmd:findNext"/>
+      <menuitem id="item:findAgainPp"
+                label="&cmdFindAgain.label;"
+                accesskey="&cmdFindAgain.accesskey;"
+                key="key:findAgain"
+                observes="cmd:findAgain"/>
 
       <menuseparator/>
 
@@ -59,26 +59,30 @@
     </menupopup>
   </popupset>
 
-  <menupopup id="mppSearch">
+  <menupopup id="mppEdit">
 
-    <menuitem id="item:findMpp" position="1"
+    <menuseparator/>
+
+    <menuitem id="item:findMpp"
               label="&cmdShowFindDialog.label;"
               accesskey="&cmdShowFindDialog.accesskey;"
               key="key:find"
               observes="cmd:find"/>
 
-    <menuitem id="item:findNextMpp" position="2"
-              label="&cmdFindNext.label;"
-              accesskey="&cmdFindNext.accesskey;"
-              key="key:findNext"
-              observes="cmd:findNext"/>
+    <menuitem id="item:findAgainMpp"
+              label="&cmdFindAgain.label;"
+              accesskey="&cmdFindAgain.accesskey;"
+              key="key:findAgain"
+              observes="cmd:findAgain"/>
 
-    <menuseparator position="3"/>
+    <menuseparator/>
 
-    <menuitem id="item:selectByClick" position="4"
+    <menuitem id="item:selectByClick"
               label="&cmdSelectByClick.label;"
               accesskey="&cmdSelectByClick.accesskey;"
-              observes="cmd:selectByClick"/>
+              observes="cmd:selectByClick"
+              type="checkbox"/>
+
   </menupopup>
 
   <menupopup id="mppView">

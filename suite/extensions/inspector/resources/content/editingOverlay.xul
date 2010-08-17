@@ -26,9 +26,9 @@
 
   <keyset id="ksGlobalKeyset">
     <key id="keyEditUndo" key="z" modifiers="accel" command="cmdEditUndo"/>
-    <key id="keyEditRedo" key="y" modifiers="accel" command="cmdEditRedo"/>
-    <key id="keyEditRedo2" key="z" modifiers="accel,shift"
+    <key id="keyEditRedo" key="z" modifiers="accel,shift"
          command="cmdEditRedo"/>
+    <key id="keyEditRedo2" key="y" modifiers="accel" command="cmdEditRedo"/>
     <key id="keyEditCut" key="x" modifiers="accel" command="cmdEditCut"/>
     <key id="keyEditCopy" key="c" modifiers="accel" command="cmdEditCopy"/>
     <key id="keyEditPaste" key="v" modifiers="accel" command="cmdEditPaste"/>

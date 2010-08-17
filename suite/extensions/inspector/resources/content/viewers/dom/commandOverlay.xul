@@ -14,7 +14,7 @@
     <command id="cmd:find" viewer="dom"
              oncommand="inspector.getViewer('dom').showFindDialog()"/>
 
-    <command id="cmd:findNext" viewer="dom"
+    <command id="cmd:findAgain" viewer="dom"
              oncommand="inspector.getViewer('dom').findNext()"/>
 
     <command id="cmd:toggleAnon" viewer="dom"

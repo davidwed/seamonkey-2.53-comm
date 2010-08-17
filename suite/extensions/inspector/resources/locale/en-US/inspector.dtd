@@ -43,9 +43,6 @@
   <!ENTITY cmdDelete.label "Delete">
   <!ENTITY cmdDelete.accesskey "D">
 
-<!ENTITY mnSearch.label "Search">
-<!ENTITY mnSearch.accesskey "S">
-
 <!ENTITY mnView.label "View">
 <!ENTITY mnView.accesskey "v">
   <!ENTITY cmdToggleBrowser.label "Browser">

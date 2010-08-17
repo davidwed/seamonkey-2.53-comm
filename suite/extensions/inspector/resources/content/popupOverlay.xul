@@ -27,12 +27,11 @@
     <menuitem label="&cmdEnterLocation.label;"
               accesskey="&cmdEnterLocation.accesskey;"
               observes="cmdEnterLocation"/>
+    <menuitem label="&cmdClose.label;" accesskey="&cmdClose.accesskey;"
+              observes="cmdClose" key="key_closeInspector"/>
     <menuseparator/>
     <menuitem label="&cmdSave.label;" accesskey="&cmdSave.accesskey;"
               observes="cmdSave" key="key_saveInspector" id="mi-save"/>
-    <menuseparator/>
-    <menuitem label="&cmdClose.label;" accesskey="&cmdClose.accesskey;"
-              observes="cmdClose" key="key_closeInspector"/>
   </menupopup>
 
   <menupopup id="mppEdit">
@@ -42,9 +41,8 @@
     <menuitem id="mnEditCut"/>
     <menuitem id="mnEditCopy"/>
     <menuitem id="mnEditPaste"/>
-    <menuseparator/>
-    <menuitem id="mnEditInsert"/>
     <menuitem id="mnEditDelete"/>
+    <menuitem id="mnEditInsert"/>
   </menupopup>
 
   <menupopup id="mppView">

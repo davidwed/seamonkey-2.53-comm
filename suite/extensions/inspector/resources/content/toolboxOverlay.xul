@@ -19,11 +19,6 @@
       <menupopup id="mppEdit"/>
     </menu>
 
-    <menu id="mnSearch" label="&mnSearch.label;"
-          accesskey="&mnSearch.accesskey;">
-      <menupopup id="mppSearch"/>
-    </menu>
-
     <menu id="mnView" label="&mnView.label;" accesskey="&mnView.accesskey;">
       <menupopup id="mppView"/>
     </menu>

@@ -40,10 +40,11 @@
 
   <!ENTITY cmdShowFindDialog.label "Find Nodes…">
   <!ENTITY cmdShowFindDialog.accesskey "f">
-  <!ENTITY cmdShowFindDialog.accelkey "f">
+  <!ENTITY cmdShowFindDialog.key "f">
 
-  <!ENTITY cmdFindNext.label "Find Next">
-  <!ENTITY cmdFindNext.accesskey "N">
+  <!ENTITY cmdFindAgain.label "Find Again">
+  <!ENTITY cmdFindAgain.accesskey "g">
+  <!ENTITY cmdFindAgain.key "G">
 
   <!ENTITY cmdToggleAnonContent.label "Show Anonymous Content">
   <!ENTITY cmdToggleAnonContent.accesskey "a">

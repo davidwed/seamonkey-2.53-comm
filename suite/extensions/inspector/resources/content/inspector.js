@@ -110,6 +110,10 @@ function InspectorApp_initialize()
                                                              "true");
   }
 
+  if (/Win/.test(navigator.platform)) {
+    document.getElementById("mnEditRedo").setAttribute("key", "keyEditRedo2");
+  }
+
   // Get rid of any menus that we expose as overlay points for integration
   // with several applications but aren't of use with the one hosting us here.
   var menubar = document.getElementById("mbrInspectorMain");
