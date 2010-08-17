@@ -22,12 +22,8 @@
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
 
-  <popupset>
-    <tooltip id="ttBindings"/>
-  </popupset>
-
   <menulist id="mlBindings" oncommand="viewer.displayBinding(this.value)"
-            crop="center" tooltip="ttBindings">
+            crop="center">
     <menupopup id="mpBindings"/>
   </menulist>
 
