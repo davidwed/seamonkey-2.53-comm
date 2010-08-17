@@ -33,6 +33,9 @@
   <keyset id="mainKeyset">
     <key id="key_inspectPage" key="&inspectorTaskCmd.commandkey;" modifiers="accel,shift" command="Tasks:InspectPage"/>
   </keyset>
+
+  <!-- remove the conflicting Firefox 4 built-in Inspect key -->
+  <key id="key_inspect" removeelement="true"/>
   
   <menupopup id="menu_ToolsPopup">
     <menuitem id="menu_inspector" label="&inspectorTaskCmd.label;"
