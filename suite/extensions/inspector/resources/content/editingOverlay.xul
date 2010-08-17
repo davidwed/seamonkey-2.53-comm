@@ -23,7 +23,7 @@
     <command id="cmdEditDelete"
              oncommand="viewer.pane.panelset.execCommand('cmdEditDelete');"/>
   </commandset>
-  
+
   <keyset id="ksGlobalKeyset">
     <key id="keyEditUndo" key="z" modifiers="accel" command="cmdEditUndo"/>
     <key id="keyEditRedo" key="y" modifiers="accel" command="cmdEditRedo"/>

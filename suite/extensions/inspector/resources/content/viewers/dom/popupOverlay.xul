@@ -3,37 +3,37 @@
 <!DOCTYPE overlay SYSTEM "chrome://inspector/locale/viewers/dom.dtd">
 
 <overlay id="ovDOMViewerPopup"
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
   <popupset id="ppsViewerPopupset">
     <menupopup id="ppViewerContext-dom">
       <menuitem id="item:findPp"
-        label="&cmdShowFindDialog.label;"
-        accesskey="&cmdShowFindDialog.accesskey;"
-        key="key:find"
-        observes="cmd:find"/>
+                label="&cmdShowFindDialog.label;"
+                accesskey="&cmdShowFindDialog.accesskey;"
+                key="key:find"
+                observes="cmd:find"/>
 
       <menuitem id="item:findNextPp"
-        label="&cmdFindNext.label;"
-        accesskey="&cmdFindNext.accesskey;"
-        key="key:findNext"
-        observes="cmd:findNext"/>
+                label="&cmdFindNext.label;"
+                accesskey="&cmdFindNext.accesskey;"
+                key="key:findNext"
+                observes="cmd:findNext"/>
 
       <menuseparator/>
 
       <menuitem id="item:toggleAttributes" hidden="true"
-        class="menuitem-iconic"
-        type="checkbox"
-        label="&cmdToggleAttributes.label;"
-        accesskey="&cmdToggleAttributes.accesskey;"
-        observes="cmd:toggleAttributes"/>
+                class="menuitem-iconic"
+                type="checkbox"
+                label="&cmdToggleAttributes.label;"
+                accesskey="&cmdToggleAttributes.accesskey;"
+                observes="cmd:toggleAttributes"/>
 
       <menuitem id="item:toggleAnonPp"
-        class="menuitem-iconic"
-        type="checkbox"
-        label="&cmdToggleAnonContent.label;"
-        accesskey="&cmdToggleAnonContent.accesskey;"
-        observes="cmd:toggleAnon"/>
+                class="menuitem-iconic"
+                type="checkbox"
+                label="&cmdToggleAnonContent.label;"
+                accesskey="&cmdToggleAnonContent.accesskey;"
+                observes="cmd:toggleAnon"/>
 
       <menuitem id="item:toggleAccessibleNodesPp"
                 class="menuitem-iconic"
@@ -43,11 +43,11 @@
                 observes="cmd:toggleAccessibleNodes"/>
 
       <menuitem id="item:toggleWhitespaceNodesPp"
-        class="menuitem-iconic"
-        type="checkbox"
-        label="&cmdToggleWhitespaceNodes.label;"
-        accesskey="&cmdToggleWhitespaceNodes.accesskey;"
-        observes="cmd:toggleWhitespaceNodes"/>
+                class="menuitem-iconic"
+                type="checkbox"
+                label="&cmdToggleWhitespaceNodes.label;"
+                accesskey="&cmdToggleWhitespaceNodes.accesskey;"
+                observes="cmd:toggleWhitespaceNodes"/>
 
       <menuitem id="item:toggleProcessingInstructionsPp"
                 class="menuitem-iconic"
@@ -62,17 +62,17 @@
   <menupopup id="mppSearch">
 
     <menuitem id="item:findMpp" position="1"
-      label="&cmdShowFindDialog.label;"
-      accesskey="&cmdShowFindDialog.accesskey;"
-      key="key:find"
-      observes="cmd:find"/>
+              label="&cmdShowFindDialog.label;"
+              accesskey="&cmdShowFindDialog.accesskey;"
+              key="key:find"
+              observes="cmd:find"/>
 
     <menuitem id="item:findNextMpp" position="2"
-      label="&cmdFindNext.label;"
-      accesskey="&cmdFindNext.accesskey;"
-      key="key:findNext"
-      observes="cmd:findNext"/>
-    
+              label="&cmdFindNext.label;"
+              accesskey="&cmdFindNext.accesskey;"
+              key="key:findNext"
+              observes="cmd:findNext"/>
+
     <menuseparator position="3"/>
 
     <menuitem id="item:selectByClick" position="4"
@@ -102,7 +102,7 @@
               label="&cmdToggleWhitespaceNodes.label;"
               accesskey="&cmdToggleWhitespaceNodes.accesskey;"
               observes="cmd:toggleWhitespaceNodes"/>
-      
+
     <menuitem id="item:toggleProcessingInstructionsMpp"
               class="menuitem-iconic"
               type="checkbox"
