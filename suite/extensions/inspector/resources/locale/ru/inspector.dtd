@@ -12,8 +12,10 @@
 <!ENTITY mnInspectContentDocument.accesskey "о">
 <!ENTITY mnInspectChromeDocument.label "Исследовать документ Chrome">
 <!ENTITY mnInspectChromeDocument.accesskey "к">
-<!ENTITY cmdShowOpenURLDialog.label "Исследовать URL…">
-<!ENTITY cmdShowOpenURLDialog.accesskey "с">
+<!ENTITY cmdEnterLocation.label "Исследовать URL">
+<!ENTITY cmdEnterLocation.accesskey "л">
+<!ENTITY cmdEnterLocation.key "L">
+<!ENTITY cmdEnterLocation.key2 "D">
 <!ENTITY cmdSave.label "Сохранить DOM как…">
 <!ENTITY cmdSave.accesskey "х">
 <!ENTITY cmdClose.label "Закрыть">
@@ -34,8 +36,6 @@
 <!ENTITY cmdPaste.accesskey "с">
 <!ENTITY cmdDelete.label "Удалить">
 <!ENTITY cmdDelete.accesskey "У">
-<!ENTITY mnSearch.label "Поиск">
-<!ENTITY mnSearch.accesskey "П">
 <!ENTITY mnView.label "Вид">
 <!ENTITY mnView.accesskey "В">
 <!ENTITY cmdToggleBrowser.label "Браузер">

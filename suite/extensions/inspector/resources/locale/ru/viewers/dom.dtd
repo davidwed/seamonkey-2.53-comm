@@ -40,9 +40,10 @@
    - ***** END LICENSE BLOCK ***** -->
 <!ENTITY cmdShowFindDialog.label "Найти узлы…">
 <!ENTITY cmdShowFindDialog.accesskey "Н">
-<!ENTITY cmdShowFindDialog.accelkey "f">
-<!ENTITY cmdFindNext.label "Найти далее">
-<!ENTITY cmdFindNext.accesskey "д">
+<!ENTITY cmdShowFindDialog.key "f">
+<!ENTITY cmdFindAgain.label "Найти ещё раз">
+<!ENTITY cmdFindAgain.accesskey "й">
+<!ENTITY cmdFindAgain.key "G">
 <!ENTITY cmdToggleAnonContent.label "Показывать неизвестное содержимое">
 <!ENTITY cmdToggleAnonContent.accesskey "н">
 <!ENTITY cmdToggleWhitespaceNodes.label "Показывать пробельные узлы">
