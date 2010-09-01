@@ -17,8 +17,10 @@
   <!ENTITY mnInspectContentDocument.accesskey "h">
   <!ENTITY mnInspectChromeDocument.label "Chrome-Dokument inspizieren">
   <!ENTITY mnInspectChromeDocument.accesskey "C">
-  <!ENTITY cmdShowOpenURLDialog.label "URL inspizieren…">
-  <!ENTITY cmdShowOpenURLDialog.accesskey "U">
+  <!ENTITY cmdEnterLocation.label "Eine URL inspizieren">
+  <!ENTITY cmdEnterLocation.accesskey "U">
+  <!ENTITY cmdEnterLocation.key "L">
+  <!ENTITY cmdEnterLocation.key2 "D">
   <!ENTITY cmdSave.label "DOM speichern unter…">
   <!ENTITY cmdSave.accesskey "D">
   <!ENTITY cmdClose.label "Schließen">
@@ -40,9 +42,6 @@
   <!ENTITY cmdPaste.accesskey "E">
   <!ENTITY cmdDelete.label "Löschen">
   <!ENTITY cmdDelete.accesskey "L">
-
-<!ENTITY mnSearch.label "Suchen">
-<!ENTITY mnSearch.accesskey "S">
 
 <!ENTITY mnView.label "Ansicht">
 <!ENTITY mnView.accesskey "A">
