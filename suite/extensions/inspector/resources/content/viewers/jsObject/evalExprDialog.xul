@@ -15,9 +15,9 @@
         buttonlabelaccept="&jsExecute.label;"
         style="width: 30em;">
 
-  <script type="application/x-javascript"
+  <script type="application/javascript"
           src="chrome://inspector/content/viewers/jsObject/evalExprDialog.js"/>
-  <script type="application/x-javascript"
+  <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
 
   <stringbundle id="strings"

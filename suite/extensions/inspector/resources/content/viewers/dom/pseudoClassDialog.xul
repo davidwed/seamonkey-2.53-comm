@@ -16,8 +16,8 @@
   
   <!--============================= SCRIPTS ============================= -->
 
-  <script type="application/x-javascript" src="chrome://inspector/content/viewers/dom/pseudoClassDialog.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/viewers/dom/pseudoClassDialog.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
 
   <keyset id="dialogKeys"/>
 

@@ -9,12 +9,12 @@
         persist="screenX screenY"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
-  <script type="application/x-javascript" src="chrome://inspector/content/viewers/dom/columnsDialog.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/utils.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/rdf/RDFU.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xul/inTreeBuilder.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xul/DNDUtils.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/viewers/dom/columnsDialog.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/rdf/RDFU.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xul/inTreeBuilder.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xul/DNDUtils.js"/>
 
   <vbox id="bxColumns" flex="1"
     ondragdrop="dialog.onDragDropIn(event);"

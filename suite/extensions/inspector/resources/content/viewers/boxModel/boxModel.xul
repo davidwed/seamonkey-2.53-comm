@@ -14,10 +14,10 @@
       xmlns:html="http://www.w3.org/1999/xhtml"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
-  <script type="application/x-javascript" src="chrome://inspector/content/viewers/boxModel/boxModel.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/utils.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>  
+  <script type="application/javascript" src="chrome://inspector/content/viewers/boxModel/boxModel.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>  
 
   <groupbox>
     <caption>

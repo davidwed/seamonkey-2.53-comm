@@ -3,9 +3,9 @@
 <overlay id="ovVenkman"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script type="application/x-javascript" src="chrome://inspector/content/hooks.js"/>
+<script type="application/javascript" src="chrome://inspector/content/hooks.js"/>
 
-<script type="application/x-javascript"><![CDATA[
+<script type="application/javascript"><![CDATA[
 
 window.addEventListener("load", InspectorVenkmanOnLoad, false);
 

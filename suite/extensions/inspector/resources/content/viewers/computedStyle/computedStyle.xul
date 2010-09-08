@@ -50,11 +50,11 @@
       orient="vertical"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
-  <script type="application/x-javascript" src="chrome://inspector/content/utils.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/viewers/computedStyle/computedStyle.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
-  <script type="application/x-javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/viewers/computedStyle/computedStyle.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
+  <script type="application/javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
 
   <commandset id="cmdsEditing"/>
 
