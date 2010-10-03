@@ -48,7 +48,7 @@
               command="Tasks:InspectPage"/>
   </menupopup>
 
-  <menupopup id="appmenu_developer_popup">
+  <menupopup id="appmenu_webDeveloper_popup">
     <menuitem id="appmenu_inspector" label="&inspectorTaskCmd.label;"
               insertbefore="appmenu_pageInspect" command="Tasks:InspectPage"/>
   </menupopup>
