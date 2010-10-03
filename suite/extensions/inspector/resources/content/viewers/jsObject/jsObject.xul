@@ -5,7 +5,8 @@
 <page id="winJSObject"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript" src="chrome://inspector/content/viewers/jsObject/jsObject.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/viewers/jsObject/jsObject.js"/>
 
   <stringbundle id="inspector-bundle"/>
   <commandset id="cmdsJSObjectViewer"/>
@@ -13,5 +14,5 @@
   <popupset>
     <menupopup id="popupContext"/>
   </popupset>
-  <tree id="treeJSObject" treelines="true"/>
+  <tree id="treeJSObject" treelines="true" class="plain"/>
 </page>

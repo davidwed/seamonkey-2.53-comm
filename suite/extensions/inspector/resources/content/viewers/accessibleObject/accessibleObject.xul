@@ -51,5 +51,5 @@
   <popupset>
     <menupopup id="popupContext"/>
   </popupset>
-  <tree id="treeJSObject" treelines="true"/>
+  <tree id="treeJSObject" treelines="true" class="plain"/>
 </page>
