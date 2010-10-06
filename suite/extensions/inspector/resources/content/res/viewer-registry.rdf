@@ -141,7 +141,9 @@
               Components.classes["@mozilla.org/accessibleRetrieval;1"]
                         .getService(Components.interfaces.nsIAccessibleRetrieval);
 
-            return accService.getAttachedAccessibleFor(object);
+            if ("getAttachedAccessibleFor" in accService)
+              return accService.getAttachedAccessibleFor(object);
+            return accService.getAccessibleFor(object);
           } catch(e) {
             return false;
           }
@@ -168,7 +170,9 @@
               Components.classes["@mozilla.org/accessibleRetrieval;1"]
                         .getService(Components.interfaces.nsIAccessibleRetrieval);
 
-            return accService.getAttachedAccessibleFor(object);
+            if ("getAttachedAccessibleFor" in accService)
+              return accService.getAttachedAccessibleFor(object);
+            return accService.getAccessibleFor(object);
           } catch(e) {
             return false;
           }
@@ -195,7 +199,9 @@
               Components.classes["@mozilla.org/accessibleRetrieval;1"]
                         .getService(Components.interfaces.nsIAccessibleRetrieval);
 
-            return accService.getAttachedAccessibleFor(object);
+            if ("getAttachedAccessibleFor" in accService)
+              return accService.getAttachedAccessibleFor(object);
+            return accService.getAccessibleFor(object);
           } catch(e) {
             return false;
           }
