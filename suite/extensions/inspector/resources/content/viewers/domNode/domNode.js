@@ -190,11 +190,13 @@ DOMNodeViewer.prototype =
         this.setTextValue("localName", aObject.localName);
         this.setTextValue("nodeType", bundle.getString(aObject.nodeType));
         this.setTextValue("namespace", aObject.namespaceURI);
+    }
 
-        if (aObject != this.mDOMView.rootNode) {
-          this.mDOMView.rootNode = aObject;
-          this.mAttrTree.view.selection.select(-1);
-        }
+    var hideAttributes = aObject.nodeType != Node.ELEMENT_NODE;
+    this.mAttrTree.hidden = hideAttributes;
+    if (!hideAttributes && aObject != this.mDOMView.rootNode) {
+      this.mDOMView.rootNode = aObject;
+      this.mAttrTree.view.selection.select(-1);
     }
 
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
@@ -217,13 +219,14 @@ DOMNodeViewer.prototype =
 
   isCommandEnabled: function DNVr_IsCommandEnabled(aCommand)
   {
+    // NB: This function can be fired before the subject is set.
     switch (aCommand) {
       case "cmdEditPaste":
         var flavor = this.mPanel.panelset.clipboardFlavor;
         return (flavor == "inspector/dom-attribute" ||
                 flavor == "inspector/dom-attributes");
       case "cmdEditInsert":
-        return true;
+        return this.subject && this.subject.nodeType == Node.ELEMENT_NODE;
       case "cmdEditCut":
       case "cmdEditCopy":
       case "cmdEditDelete":
@@ -232,7 +235,6 @@ DOMNodeViewer.prototype =
         return this.mAttrTree.currentIndex >= 0 &&
                  this.mAttrTree.view.selection.count == 1;
       case "cmdEditTextValue":
-        // this function can be fired before the subject is set
         if (this.subject) {
           // something with a useful nodeValue
           if (this.subject.nodeType == Node.TEXT_NODE ||
