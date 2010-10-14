@@ -17,6 +17,8 @@
   <!ENTITY mnInspectContentDocument.accesskey "O">
   <!ENTITY mnInspectChromeDocument.label "Inspect Chrome Document">
   <!ENTITY mnInspectChromeDocument.accesskey "H">
+  <!ENTITY mnInspectApplicationAccessible.label "Inspect Application Accessible">
+  <!ENTITY mnInspectApplicationAccessible.accesskey "A">
   <!ENTITY cmdEnterLocation.label "Inspect a URL">
   <!ENTITY cmdEnterLocation.accesskey "U">
   <!ENTITY cmdEnterLocation.key "L">

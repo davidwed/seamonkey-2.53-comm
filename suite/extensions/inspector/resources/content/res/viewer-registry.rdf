@@ -127,6 +127,11 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="Accessible Object">
         <ins:filter><![CDATA[
+          if (("@mozilla.org/accessibleRetrieval;1" in Components.classes) &&
+              object instanceof Components.interfaces.nsIAccessible) {
+            return true;
+          }
+
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
             return false;
@@ -156,6 +161,11 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="Accessible Properties">
         <ins:filter><![CDATA[
+          if (("@mozilla.org/accessibleRetrieval;1" in Components.classes) &&
+              object instanceof Components.interfaces.nsIAccessible) {
+            return true;
+          }
+
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
             return false;
@@ -185,6 +195,11 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="Accessible Relations">
         <ins:filter><![CDATA[
+          if (("@mozilla.org/accessibleRetrieval;1" in Components.classes) &&
+              object instanceof Components.interfaces.nsIAccessible) {
+            return true;
+          }
+
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
             return false;
@@ -214,8 +229,22 @@
                        ins:panels="bxDocPanel"
                        ins:description="Accessible Events">
         <ins:filter><![CDATA[
-          return object instanceof Components.interfaces.nsIDOMDocument &&
-            "@mozilla.org/accessibleRetrieval;1" in Components.classes;
+          if (!("@mozilla.org/accessibleRetrieval;1" in Components.classes)) {
+            return false;
+          }
+
+          // Allow for DOM document and application accessible (compatible
+          // with Gecko 2.0 and 1.9.2).
+          const Ci = Components.interfaces;
+          if (object instanceof Ci.nsIDOMDocument) {
+            return true;
+          }
+
+          if ("nsIAccessibleApplication" in Ci) {
+            return object instanceof Ci.nsIAccessibleApplication;
+          }
+
+          return object instanceof Ci.nsIAccessible && !object.parent;
         ]]></ins:filter>
       </rdf:Description>
     </rdf:li>
@@ -225,8 +254,22 @@
                        ins:panels="bxDocPanel"
                        ins:description="Accessible Tree">
         <ins:filter><![CDATA[
-          return object instanceof Components.interfaces.nsIDOMDocument &&
-            "@mozilla.org/accessibleRetrieval;1" in Components.classes;
+          if (!("@mozilla.org/accessibleRetrieval;1" in Components.classes)) {
+            return false;
+          }
+
+          // Allow for DOM document and application accessible (compatible
+          // with Gecko 2.0 and 1.9.2).
+          const Ci = Components.interfaces;
+          if (object instanceof Ci.nsIDOMDocument) {
+            return true;
+          }
+
+          if ("nsIAccessibleApplication" in Ci) {
+            return object instanceof Ci.nsIAccessibleApplication;
+          }
+
+          return object instanceof Ci.nsIAccessible && !object.parent;
         ]]></ins:filter>
       </rdf:Description>
     </rdf:li>

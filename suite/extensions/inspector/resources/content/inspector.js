@@ -65,14 +65,12 @@ const kEncoderContractIDbase =
   "@mozilla.org/layout/documentEncoder;1?type=";
 const kSerializerContractID =
   "@mozilla.org/xmlextras/xmlserializer;1";
-const kXULAppInfoContractID =
-  "@mozilla.org/xre/app-info;1"
 const kWindowMediatorContractID =
   "@mozilla.org/appshell/window-mediator;1";
 const kFilePickerContractID =
   "@mozilla.org/filepicker;1";
 
-const nsIAccessibleApplication = Components.interfaces.nsIAccessibleApplication;
+const nsIAccessible            = Components.interfaces.nsIAccessible;
 const nsIWebNavigation         = Components.interfaces.nsIWebNavigation;
 const nsIDocShellTreeItem      = Components.interfaces.nsIDocShellTreeItem;
 const nsIDocShell              = Components.interfaces.nsIDocShell;
@@ -177,10 +175,16 @@ InspectorApp.prototype =
     this.mPanelSet.initialize();
 
     // check if accessibility service is available
-    var cmd = document.getElementById("cmd:toggleAccessibleNodes");
-    if (cmd) {
-      if (!("@mozilla.org/accessibleRetrieval;1" in Components.classes))
-        cmd.setAttribute("disabled", "true");
+    if (!(kAccessibleRetrievalContractID in Components.classes)) {
+      var elm = document.getElementById("cmd:toggleAccessibleNodes");
+      if (elm) {
+        elm.setAttribute("disabled", "true");
+      }
+
+      elm = document.getElementById("mnInspectApplicationAccessible");
+      if (elm) {
+        elm.setAttribute("disabled", "true");
+      }
     }
 
     if (aURI) {
@@ -222,14 +226,29 @@ InspectorApp.prototype =
         this.initViewerPanels();
         break;
       case "subjectChange":
-        if (aEvent.target == this.mDocPanel.viewer &&
-            aEvent.subject && "location" in aEvent.subject) {
-          this.locationText = aEvent.subject.location; // display document url
+        if (aEvent.target == this.mDocPanel.viewer && aEvent.subject) {
+          if ("location" in aEvent.subject) {
+            this.locationText = aEvent.subject.location; // display document url
 
-          document.title = (aEvent.subject.title || aEvent.subject.location) +
-                           kInspectorTitle;
+            document.title = (aEvent.subject.title || aEvent.subject.location) +
+                             kInspectorTitle;
 
-          this.updateCommand("cmdSave");
+            this.updateCommand("cmdSave");
+          }
+          else if (("nsIAccessibleApplication" in Components.interfaces &&
+                    aEvent.subject instanceof Components.interfaces.nsIAccessibleApplication) ||
+                   (aEvent.subject instanceof nsIAccessible &&
+                    !aEvent.subject.parent)) {
+            // Update title for application accessible in compatible way for
+            // Gecko 2.0 and 1.9.2.
+            this.locationText = "";
+
+            var title = this.mPanelSet.
+              stringBundle.getString("applicationAccesible.title");
+            document.title = title + kInspectorTitle;
+
+            this.updateCommand("cmdSave");
+          }
         }
         break;
     }
@@ -498,6 +517,26 @@ InspectorApp.prototype =
       menuItem.setAttribute("label", title);
     }
     parent.appendChild(menuItem);
+  },
+
+  setTargetApplicationAccessible: function setTargetApplicationAccessible()
+  {
+    var accService =
+      XPCU.getService(kAccessibleRetrievalContractID, "nsIAccessibleRetrieval");
+
+    if (accService) {
+      if ("getApplicationAccessible" in accService) {
+        this.mDocPanel.subject = accService.getApplicationAccessible();
+      }
+      else {
+        // Gecko 1.9.2 support.
+        var accessible = accService.getAccessibleFor(document);
+        while (accessible.parent) {
+          accessible = accessible.parent;
+        }
+        this.mDocPanel.subject = accessible;
+      }
+    }
   },
 
   setTargetWindow: function IA_SetTargetWindow(aWindow)

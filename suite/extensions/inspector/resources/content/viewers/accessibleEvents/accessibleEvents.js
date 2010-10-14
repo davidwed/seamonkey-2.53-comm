@@ -59,6 +59,7 @@ const nsIObserverService = Components.interfaces.nsIObserverService;
 const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
 const nsIAccessibleEvent = Components.interfaces.nsIAccessibleEvent;
 const nsIAccessNode = Components.interfaces.nsIAccessNode;
+const nsIAccessible = Components.interfaces.nsIAccessible;
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization
@@ -107,6 +108,10 @@ AccessibleEventsViewer.prototype =
   set subject(aObject)
   {
     this.mWatchView = new WatchAccessibleEventsListView();
+
+    if (this.mView) {
+      this.mView.destroy();
+    }
     this.mView = new AccessibleEventsView(aObject, this.mWatchView);
 
     this.mOlBox.view = this.mView;
@@ -189,9 +194,8 @@ AccessibleEventsViewer.prototype =
 ///////////////////////////////////////////////////////////////////////////////
 //// AccessibleEventsView
 
-function AccessibleEventsView(aDocument, aWatchView)
+function AccessibleEventsView(aObject, aWatchView)
 {
-  this.mDocument = aDocument;
   this.mWatchView = aWatchView;
   this.mEvents = [];
   this.mRowCount = 0;
@@ -199,7 +203,30 @@ function AccessibleEventsView(aDocument, aWatchView)
   this.mAccService = XPCU.getService(kAccessibleRetrievalCID,
                                      nsIAccessibleRetrieval);
 
-  this.mAccDocument = this.mAccService.getAccessibleFor(this.mDocument);
+  this.mAccessible = aObject instanceof nsIAccessible ?
+    aObject : this.mAccService.getAccessibleFor(aObject);
+
+  this.canSkipTreeTraversal = false;
+  this.mDOMIRootDocumentAccessible = null;
+  var acc = XPCU.QI(this.mAccService.getAccessibleFor(document), nsIAccessNode);
+  if ("rootDocument" in acc) {
+    this.mDOMIRootDocumentAccessible = acc.rootDocument;
+    this.mApplicationAccessible = this.mDOMIRootDocumentAccessible.parent;
+
+    // We can skip accessible tree traversal for perf on Gecko 2.0 if the
+    // inspected accessible is application accessible.
+    this.canSkipTreeTraversal =
+      (this.mAccessible == this.mApplicationAccessible);
+  }
+  else {
+    // Gecko 1.9.2 compatibility.
+    while (acc.parent) {
+      this.mDOMIRootDocumentAccessible = acc;
+      acc = acc.parent;
+    }
+    this.mApplicationAccessible = acc;
+  }
+
   this.mObserverService = XPCU.getService(kObserverServiceCID,
                                           nsIObserverService);
 
@@ -217,10 +244,45 @@ function observe(aSubject, aTopic, aData)
     return;
 
   var accessnode = XPCU.QI(accessible, nsIAccessNode);
-  var accDocument = accessnode.accessibleDocument;
-  if (accDocument != this.mAccDocument)
-    return;
 
+  // Ignore events on this DOM Inspector to avoid a mess (Gecko 2.0).
+  if (accessnode.rootDocument &&
+      accessnode.rootDocument == this.mDOMIRootDocumentAccessible) {
+    return;
+  }
+
+  // Ignore events having target not in subtree of currently inspected
+  // accessible.
+  if (!this.canSkipTreeTraversal) {
+    var parentAccessible = accessible;
+    while (parentAccessible) {
+      // The target accessible is inspected accessible or its child.
+      if (parentAccessible == this.mAccessible) {
+        break;
+      }
+
+      // Ignore events on this DOM inspector to avoid a mess.
+      if (parentAccessible == this.mDOMIRootDocumentAccessible) {
+        return;
+      }
+
+      try {
+        parentAccessible = parentAccessible.parent;
+
+        // Ignore events that aren't in subtree of inspected accessible.
+        if (!parentAccessible) {
+          return;
+        }
+      } catch (e) {
+        // Accessibles on hide events are unattached from tree and parent throws
+        // an exception, we should dump all of them not depending on document they
+        // used to be until we have better approach.
+        break;
+      }
+    }
+  }
+
+  // Ignore unwatched events.
   var type = event.eventType;
   if (!this.mWatchView.isEventWatched(type))
     return;
