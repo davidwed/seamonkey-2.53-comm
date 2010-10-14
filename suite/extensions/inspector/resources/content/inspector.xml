@@ -597,7 +597,7 @@
             this.switchViewer(-1);
             this.setAttribute("disabled", "true");
           }
-          else if (!this.entryInList(this.mCurrentEntry, entries)) {
+          else if (entries.indexOf(this.mCurrentEntry) < 0) {
             this.switchViewer(entries[0]);
             this.removeAttribute("disabled");
           }
@@ -734,29 +734,6 @@
             this.mMenuEl.setAttribute("disabled", "true");
           }
           this.mContextMenu = pp;
-        ]]></body>
-      </method>
-
-      <!-- ///////////////////////////////////////////////////////////////////
-      // Check to see if an entry exists in an arry of entries
-      //
-      // @param aEntry
-      //        the entry being searched for
-      // @param aList
-      //        array of entries
-      //////////////////////////////////////////////////////////////////// -->
-
-      <method name="entryInList">
-        <parameter name="aEntry"/>
-        <parameter name="aList"/>
-        <body><![CDATA[
-          for (let i in aList) {
-            if (aList[i] == aEntry) {
-              return true;
-            }
-          }
-
-          return false;
         ]]></body>
       </method>
 
