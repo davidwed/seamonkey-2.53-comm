@@ -13,7 +13,7 @@
 <page id="winDOMViewer"
       orient="vertical"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+
   <script type="application/javascript"
           src="chrome://inspector/content/utils.js"/>
   <script type="application/javascript"
@@ -31,25 +31,25 @@
 
   <!-- ============================ COMMANDS ============================= -->
 
-  <commandset id="cmdsEditing"/>  
+  <commandset id="cmdsEditing"/>
 
   <commandset>
-    <command id="cmdInspectInNewWindow" 
-      oncommand="viewer.cmdInspectInNewWindow()"/>
+    <command id="cmdInspectInNewWindow"
+             oncommand="viewer.cmdInspectInNewWindow()"/>
 
-    <command id="cmdInspectBrowser" 
-      isvalid="return viewer.cmdInspectBrowserIsValid()"
-      oncommand="viewer.cmdInspectBrowser()"/>
+    <command id="cmdInspectBrowser"
+             isvalid="return viewer.cmdInspectBrowserIsValid()"
+             oncommand="viewer.cmdInspectBrowser()"/>
 
     <command id="cmdCopyXML"
-      oncommand="viewer.cmdCopySelectedXML()"/>
+             oncommand="viewer.cmdCopySelectedXML()"/>
 
-    <command id="cmdBlink" 
-      isvalid="return viewer.cmdBlinkIsValid();"
-      oncommand="viewer.cmdBlink()"/>
+    <command id="cmdBlink"
+             isvalid="return viewer.cmdBlinkIsValid();"
+             oncommand="viewer.cmdBlink()"/>
 
     <command id="cmdShowPseudoClasses"
-      oncommand="viewer.cmdShowPseudoClasses()"/>
+             oncommand="viewer.cmdShowPseudoClasses()"/>
 
     <command id="cmdEditPasteBefore"
              oncommand="viewer.pane.panelset.execCommand('cmdEditPasteBefore');"/>
@@ -72,7 +72,7 @@
              oncommand="viewer.pane.panelset.execCommand('cmdEditInsertLastChild');"/>
 
   </commandset>
-  
+
   <!--============================= POPUPS ============================== -->
 
   <popupset id="psPopups">
@@ -98,7 +98,7 @@
                     accesskey="&mnEditPasteAfter.accesskey;"
                     command="cmdEditPaste"
                     key="keyEditPaste"/>
-          <!-- other paste commands -->            
+          <!-- other paste commands -->
           <menuitem id="mnEditPasteBefore"
                     label="&mnEditPasteBefore.label;"
                     accesskey="&mnEditPasteBefore.accesskey;"
@@ -178,7 +178,7 @@
       <treecol id="colNamespaceURI" label="namespaceURI" hidden="true"
                persist="width,hidden,ordinal" flex="1"/>
       <splitter class="tree-splitter"/>
-      <treecol id="colNodeType" label="nodeType" hidden="true" 
+      <treecol id="colNodeType" label="nodeType" hidden="true"
                persist="width,hidden,ordinal" flex="1"/>
       <splitter class="tree-splitter"/>
       <treecol id="colNodeValue" label="nodeValue" hidden="true"

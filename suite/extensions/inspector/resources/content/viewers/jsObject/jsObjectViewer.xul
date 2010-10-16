@@ -39,8 +39,7 @@
 
 <!DOCTYPE page [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
-  <!ENTITY % dtd2 SYSTEM "chrome://inspector/content/util.dtd"> %dtd2;
-  <!ENTITY % dtd3 SYSTEM "chrome://inspector/locale/viewers/jsObject.dtd"> %dtd3;
+  <!ENTITY % dtd2 SYSTEM "chrome://inspector/locale/viewers/jsObject.dtd"> %dtd2;
 ]>
 
 <?xml-stylesheet href="chrome://inspector/skin/inspector.css"?>
@@ -78,7 +77,8 @@
 
   <tree id="treeJSObject" flex="1" context="popupContext">
     <treecols>
-      <treecol id="colProp" flex="1" primary="true" label="&jsProperty.label;"/>
+      <treecol id="colProp" flex="1" primary="true"
+               label="&jsProperty.label;"/>
       <splitter class="tree-splitter"/>
       <treecol id="colVal" flex="1" label="&jsValue.label;"/>
     </treecols>

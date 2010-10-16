@@ -40,8 +40,7 @@
 
 <!DOCTYPE page [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
-  <!ENTITY % dtd2 SYSTEM "chrome://inspector/content/util.dtd"> %dtd2;
-  <!ENTITY % dtd3 SYSTEM "chrome://inspector/locale/viewers/accessibleProps.dtd"> %dtd3;
+  <!ENTITY % dtd2 SYSTEM "chrome://inspector/locale/viewers/accessibleProps.dtd"> %dtd2;
 ]>
 
 <?xml-stylesheet href="chrome://inspector/skin"?>
