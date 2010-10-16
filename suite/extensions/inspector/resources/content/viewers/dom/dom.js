@@ -67,6 +67,8 @@ const kDOMUtilsClassID            = "@mozilla.org/inspector/dom-utils;1";
 const kDeepTreeWalkerClassID      = "@mozilla.org/inspector/deep-tree-walker;1";
 const nsIDOMNode                  = Components.interfaces.nsIDOMNode;
 const nsIDOMElement               = Components.interfaces.nsIDOMElement;
+const nsIDOMDocument              = Components.interfaces.nsIDOMDocument;
+const nsIDOMCharacterData         = Components.interfaces.nsIDOMCharacterData;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -93,6 +95,8 @@ function DOMViewer() // implements inIViewer
 {
   this.mObsMan = new ObserverManager(this);
 
+  this.mDOMUtils = XPCU.getService(kDOMUtilsClassID, "inIDOMUtils");
+
   this.mDOMTree = document.getElementById("trDOMTree");
   this.mDOMTreeBody = document.getElementById("trDOMTreeBody");
 
@@ -118,6 +122,36 @@ DOMViewer.prototype =
   mFindType: null,
   mFindWalker: null,
   mSelecting: false,
+
+  mSelectionBatchNest: 0,
+  mPendingSelection: null,
+
+  /**
+   * Prevent the viewer from dispatching selectionChange events while batches
+   * are underway.  The last change in selection while disabled is remembered,
+   * however, and when all batches have ended, an event is dispatched for it.
+   * To prevent this pending selectionChange from being dispatched, set
+   * mPendingSelection to null before calling endSelectionBatch.
+   *
+   * Nested batches are permitted.
+   */
+  beginSelectionBatch: function DVr_BeginSelectionBatch()
+  {
+    ++this.mSelectionBatchNest;
+  },
+
+  endSelectionBatch: function DVr_EndSelectionBatch()
+  {
+    --this.mSelectionBatchNest;
+    if (this.mSelectionBatchNest < 0) {
+      Components.utils.reportError("Attempted to end a selection batch " +
+                                   "that doesn't exist");
+    }
+    else if (!this.mSelectionBatchNest && this.mPendingSelection) {
+      this.changeSelection(this.mPendingSelection);
+      this.mPendingSelection = null;
+    }
+  },
 
   ////////////////////////////////////////////////////////////////////////////
   //// interface inIViewer
@@ -184,9 +218,16 @@ DOMViewer.prototype =
 
   isCommandEnabled: function DVr_IsCommandEnabled(aCommand)
   {
+    // NB: Don't confuse selected nodes and currentNode.  currentNode derives
+    // from currentIndex.  Think of currentIndex like the position of the
+    // cursor in a textbox.  Commands like Copy need text to be selected,
+    // while Paste and Insert need no selection, only that the cursor be in
+    // the area we're interested in.
+    // XXX Bring all commands around to handling multiple selection.
     var clipboardNode = null;
-    var selectedNode = null;
+    var currentNode = null;
     var parentNode = null;
+    var selectedNode = this.selectedNode;
     if (/^cmdEditPaste/.test(aCommand)) {
       if (this.mPanel.panelset.clipboardFlavor != "inspector/dom-node") {
         return false;
@@ -194,37 +235,36 @@ DOMViewer.prototype =
       clipboardNode = this.mPanel.panelset.getClipboardData();
     }
     if (/^cmdEdit(Paste|Insert)/.test(aCommand)) {
-      selectedNode = new XPCNativeWrapper(viewer.selectedNode, "nodeType",
-                                          "parentNode", "childNodes");
-      if (selectedNode.parentNode) {
-        parentNode = new XPCNativeWrapper(selectedNode.parentNode,
-                                          "nodeType");
-      }
+      currentNode =
+        viewer.currentNode && new XPCNativeWrapper(viewer.currentNode);
+      parentNode = currentNode && currentNode.parentNode;
     }
     switch (aCommand) {
       case "cmdEditPaste":
       case "cmdEditPasteBefore":
+        // Paste before and after, like Insert, don't operate on a selection,
+        // but the other paste commands do.
         return this.isValidChild(parentNode, clipboardNode);
       case "cmdEditPasteReplace":
-        return this.isValidChild(parentNode, clipboardNode, selectedNode);
+        return !!selectedNode &&
+               this.isValidChild(parentNode, clipboardNode, selectedNode);
       case "cmdEditPasteFirstChild":
       case "cmdEditPasteLastChild":
         return this.isValidChild(selectedNode, clipboardNode);
       case "cmdEditPasteAsParent":
-        return this.isValidChild(clipboardNode, selectedNode) &&
+        return !!selectedNode &&
+               this.isValidChild(clipboardNode, selectedNode) &&
                this.isValidChild(parentNode, clipboardNode, selectedNode);
       case "cmdEditInsertAfter":
-      	return parentNode instanceof nsIDOMElement;
       case "cmdEditInsertBefore":
       	return parentNode instanceof nsIDOMElement;
       case "cmdEditInsertFirstChild":
-      	return selectedNode instanceof nsIDOMElement;
       case "cmdEditInsertLastChild":
       	return selectedNode instanceof nsIDOMElement;
       case "cmdEditCut":
       case "cmdEditCopy":
       case "cmdEditDelete":
-        return this.selectedNode != null;
+        return !!selectedNode;
     }
     return false;
   },
@@ -235,8 +275,7 @@ DOMViewer.prototype =
   * @param child
   * @param replaced
   *        the node the child is replacing (optional)
-  * @return
-  *        whether the passed parent can have the passed child as a child,
+  * @return whether the passed parent can have the passed child as a child,
   */
   isValidChild: function DVr_IsValidChild(parent, child, replaced)
   {
@@ -404,7 +443,7 @@ DOMViewer.prototype =
     this.mDOMView.showAccessibleNodes = aValue;
     this.mPanel.panelset.setCommandAttribute("cmd:toggleAccessibleNodes",
                                              "checked", aValue);
-    this.onItemSelected();
+    this.onTreeSelectionChange();
   },
 
   /**
@@ -446,8 +485,7 @@ DOMViewer.prototype =
 
   cmdShowPseudoClasses: function DVr_CmdShowPseudoClasses()
   {
-    var idx = this.mDOMTree.currentIndex;
-    var node = this.getNodeFromRowIndex(idx);
+    var node = this.selectedNode;
 
     if (node) {
       openDialog("chrome://inspector/content/viewers/dom/" +
@@ -467,18 +505,109 @@ DOMViewer.prototype =
            this.selectedNode.nodeType == nsIDOMNode.ELEMENT_NODE;
   },
 
-  onItemSelected: function DVr_OnItemSelected()
+  onTreeSelectionChange: function DVr_OnTreeSelectionChange()
   {
-    var idx = this.mDOMTree.currentIndex;
-    this.mSelection = this.getNodeFromRowIndex(idx);
-    this.mObsMan.dispatchEvent("selectionChange",
-                               { selection: this.mSelection } );
+    // NB: We're called on deselection, too.
+    var currentIndex = this.mDOMTree.currentIndex;
+    var currentNode = this.currentNode;
 
-    if (this.mSelection) {
-      this.flashElement(this.mSelection, true);
+    if (this.mDOMTree.view.selection.isSelected(currentIndex)) {
+      this.changeSelection(currentNode);
+    }
+    // Otherwise, we were deselected.  We only care, though, if we're the
+    // object viewer's subject, and there are other nodes selected.  (If no
+    // nodes are selected, we'll leave mSelection alone and won't fire any
+    // events, because nobody wants to inspect null.)
+    else if (this.mSelection == currentNode &&
+             this.mDOMTree.view.selection.count) {
+      // Find closest nearby selected node and use that.
+      var nearestSelectedIndex =
+        this.getNearestIndex(currentIndex, this.getSelectedIndexes());
+      this.changeSelection(this.getNodeFromRowIndex(nearestSelectedIndex));
     }
 
     viewer.pane.panelset.updateAllCommands();
+  },
+
+  /**
+   * Change the viewer selection.  Note that "selection" here refers to the
+   * (not formalized) inIViewer::selection, *not* the tree selection.  See
+   * bug 570879.
+   * @param aNode
+   *        The new viewer selection.  If there is an object panel linked to
+   *        ours, this will be used for its subject.
+   */
+  changeSelection: function DVr_ChangeSelection(aNode)
+  {
+    if (this.mSelectionBatchNest) {
+      this.mPendingSelection = aNode;
+    }
+    else {
+      this.mSelection = aNode;
+      this.mObsMan.dispatchEvent("selectionChange", { selection: aNode } );
+      if (this.mSelection) {
+        this.flashElement(this.mSelection, true);
+      }
+    }
+  },
+
+  /**
+   * Determine which from a list of indexes is nearest to the given index.
+   * @param aIndex
+   *        The index to search for.
+   * @param aIndexList
+   *        A sorted list of indexes to be searched.
+   * @return The index in the list closest to aIndex.  This will be aIndex
+   *         itself if it appears in the list, or -1 if the list is empty.
+   * @note
+   */
+  getNearestIndex: function DVr_GetNearestIndex(aIndex, aIndexList)
+  {
+    // Four easy cases:
+    //  - empty list
+    //  - single element list
+    //  - given index comes before the first element
+    //  - given index comes after the last element
+    if (aIndexList.length == 0) {
+      return -1;
+    }
+    var first = aIndexList[0];
+    if (aIndexList.length == 1 || aIndex <= first) {
+      return first;
+    }
+    var high = aIndexList.length - 1;
+    var last = aIndexList[high];
+    if (aIndex >= last) {
+      return last;
+    }
+  
+    var mid, low = 0;
+    while (low <= high) {
+      mid = low + Math.floor((high - low) / 2);
+      let current = aIndexList[mid];
+      if (aIndex > current) {
+        low = mid + 1;
+      }
+      else if (aIndex < current) {
+        high = mid - 1;
+      }
+      else {
+        return aIndex;
+      }
+    }
+  
+    // By handling the four easy cases above, we eliminated the possibility
+    // that low or high will be out of bounds at this point.  If aIndex had
+    // been present, it would have been sandwiched between these two values:
+    var previous = aIndexList[high];
+    var next = aIndexList[low];
+  
+    if ((aIndex - previous) < (next - aIndex)) {
+      return previous;
+    }
+    // Even if previous and next are equidistant to aIndex's position, we'll
+    // go with the one that's greater.
+    return next;
   },
 
   setInitialSelection: function DVr_SetInitialSelection(aObject)
@@ -486,14 +615,14 @@ DOMViewer.prototype =
     var fireSelected = this.mDOMTree.currentIndex == 0;
 
     if (this.mPanel.params) {
-      this.selectElementInTree(this.mPanel.params);
+      this.showNodeInTree(this.mPanel.params);
     }
     else {
-      this.selectElementInTree(aObject, true);
+      this.showNodeInTree(aObject, false, true);
     }
 
     if (fireSelected) {
-      this.onItemSelected();
+      this.onTreeSelectionChange();
     }
   },
 
@@ -694,7 +823,7 @@ DOMViewer.prototype =
     }
 
     this.stopSelectByClick();
-    this.selectElementInTree(aTarget);
+    this.showNodeInTree(aTarget);
   },
 
   stopSelectByClick: function DVr_StopSelectByClick()
@@ -770,7 +899,7 @@ DOMViewer.prototype =
     }
 
     if (result && result != this.mFindResult) {
-      this.selectElementInTree(result);
+      this.showNodeInTree(result);
       this.mFindResult = result;
       this.mDOMTree.focus();
     }
@@ -829,49 +958,70 @@ DOMViewer.prototype =
   },
 
   /**
-   * Takes an element from the document being inspected, finds the treeitem
-   * which represents it in the DOM tree and selects that treeitem.
+   * Makes sure each ancestor in the given node's ancestor chain is open, so
+   * so that there exists a row in the tree that represents the node.  That
+   * row will be selected and scrolled into view.  If that node doesn't have a
+   * row in the tree, the nearest ancestor is used as a fallback.  Further
+   * parameters allow finer control over what it means to "show" a node,
+   * including overriding the default behavior.
    *
-   * @param aEl
-   *        element from the document being inspected
+   * @param aNode
+   *        Node to show.
+   * @param aAugment [optional]
+   *        true if selection should add to the current selection, false if it
+   *        should clear it and be the only row selected.  This has no effect
+   *        if aNoSelect is true.
+   * @param aExpand [optional]
+   *        true if the node's open state should be changed to open.
+   * @param aNoVisible [optional]
+   *        true if you don't care whether the given node is scrolled into
+   *        sight.
+   * @param aNoSelect [optional]
+   *        true if you don't want the given element to be selected.
+   * @return The current index of the given node in the tree.
    */
-  selectElementInTree: function DVr_SelectElementInTree(aEl, aExpand, aQuickie)
+  showNodeInTree:
+    function DVr_ShowNodeInTree(aNode, aAugment, aExpand, aNoVisible,
+                                aNoSelect)
   {
     var bx = this.mDOMTree.treeBoxObject;
 
-    if (!aEl) {
-      bx.view.selection.select(null);
-      return false;
+    if (!aNode) {
+      if (!aAugment && !aNoSelect) {
+        bx.view.selection.select(-1);
+      }
+      return;
     }
 
-    // Keep searching until a pre-created ancestor is
-    // found, and then open each ancestor until
-    // the found element is created
-    var domutils = XPCU.getService(kDOMUtilsClassID, "inIDOMUtils");
+    // Keep searching until a pre-created ancestor is found, and then open
+    // each ancestor until the row for the given node is created.
     var line = [];
-    var parent = aEl;
+    var parent = aNode;
     var index = null;
     while (parent) {
       index = this.getRowIndexFromNode(parent);
       line.push(parent);
       if (index < 0) {
-        // row for this node hasn't been created yet
-        parent = domutils.getParentForNode(parent,
-                                           this.mDOMView.showAnonymousContent);
+        // The row for this node hasn't been created yet.
+        parent =
+          this.mDOMUtils.getParentForNode(parent,
+                                          this.mDOMView.showAnonymousContent);
       }
       else {
+        // The ancestor chain is already open above this point.
         break;
       }
     }
 
-    // we've got all the ancestors, now open them
-    // one-by-one from the top on down
+    // We've got all the ancestors, now open them one-by-one from the top
+    // down.
     var view = bx.view;
     var lastIndex;
-    for (var i = line.length-1; i >= 0; i--) {
+    for (let i = line.length - 1; i >= 0; --i) {
       index = this.getRowIndexFromNode(line[i]);
       if (index < 0)  {
-        break; // can't find row, so stop trying to descend
+        index = -1;
+        break; // We can't find the row, so stop trying to descend.
       }
       if ((aExpand || i > 0) && !view.isContainerOpen(index)) {
         view.toggleOpenState(index);
@@ -879,39 +1029,198 @@ DOMViewer.prototype =
       lastIndex = index;
     }
 
-    if (!aQuickie && lastIndex >= 0) {
-      view.selection.select(lastIndex);
-      bx.ensureRowIsVisible(lastIndex);
-    }
-
-    return aQuickie;
-  },
-
-  /**
-   * Remember which rows are open and which row is selected. Then rebuild the
-   * tree, re-open previously opened rows, and re-select previously selected
-   * row.
-   */
-  rebuild: function DVr_Rebuild()
-  {
-    var selNode = this.getNodeFromRowIndex(this.mDOMTree.currentIndex);
-    this.mDOMTree.view.selection.select(null);
-
-    var opened = [];
-    var i;
-    for (i = 0; i < this.mDOMTree.view.rowCount; ++i) {
-      if (this.mDOMTree.view.isContainerOpen(i)) {
-        opened.push(this.getNodeFromRowIndex(i));
+    if (lastIndex >= 0) {
+      if (!aNoVisible) {
+        bx.ensureRowIsVisible(lastIndex);
+      }
+      if (!aNoSelect) {
+        view.selection.rangedSelect(lastIndex, lastIndex, aAugment);
       }
     }
 
-    this.mDOMView.rebuild();
+    return index;
+  },
 
-    for (i = 0; i < opened.length; ++i) {
-      this.selectElementInTree(opened[i], true, true);
+  /**
+   * Rebuild the tree by re-opening previously opened rows, re-selecting
+   * previously selected rows, and restoring the viewer selection and the
+   * node previously at currentNode, if possible.
+   */
+  rebuild: function DVr_Rebuild(aHint)
+  {
+    var selection = this.mDOMTree.view.selection;
+
+    // Remember all non-ignorable nodes of open rows.  Re-opening them will be
+    // the first step to recreating the tree's state.
+    var opened = [];
+    for (let i = 0, n = this.mDOMTree.view.rowCount; i < n; ++i) {
+      if (this.mDOMTree.view.isContainerOpen(i)) {
+        let node = this.getNodeFromRowIndex(i);
+        if (!this.isIgnorableNode(node)) {
+          opened.push(node);
+        }
+      }
     }
 
-    this.selectElementInTree(selNode);
+    // Remember all nodes of selected rows.  Also save the indexes of rows of
+    // non-ignorable nodes so we can determine the best viewer selection
+    // candidate below.
+    var ignorableSelectedNodes = [];
+    var nonIgnorableSelectedNodes = [];
+    var nonIgnorableSelectedIndexes = [];
+    let (selectedIndexes = this.getSelectedIndexes()) {
+      for (let i = 0, n = selectedIndexes.length; i < n; ++i) {
+        let idx = selectedIndexes[i];
+        let node = this.getNodeFromRowIndex(idx);
+        if (this.isIgnorableNode(node)) {
+          ignorableSelectedNodes.push(node);
+        }
+        else {
+          nonIgnorableSelectedNodes.push(node);
+          nonIgnorableSelectedIndexes.push(idx);
+        }
+      }
+    }
+
+    // Remember the node showing in the object pane.  If the current node
+    // there is going to be filtered out, pick another one by using the same
+    // algorithm used when a row is deselected.
+    var viewerSelection = this.selection;
+    if (this.isIgnorableNode(viewerSelection)) {
+      let idx = this.getRowIndexFromNode(viewerSelection);
+      let nearestNonIgnorableSelectedIndex =
+        this.getNearestIndex(idx, nonIgnorableSelectedIndexes);
+      viewerSelection =
+        this.getNodeFromRowIndex(nearestNonIgnorableSelectedIndex);
+    }
+    // XXX What happens if viewerSelection (and currentNode, for that matter)
+    // is ignorable?
+
+    // Remember currentNode.
+    var currentNode = this.currentNode;
+
+    selection.clearSelection();
+    this.mDOMView.rebuild();
+
+    // We're now operating under the new inIDOMView parameters.  Restore the
+    // previously opened rows.  This won't, however, ensure that all non-
+    // ignorable nodes which were previously exposed will be re-exposed.
+    // Consider the case of going from not showing anons to showing them, and
+    // where the ancestor of a previously exposed, non-ignorable node (or the
+    // node itself) is inserted as a "child" of an anonymous node.  See the
+    // comments below about re-selecting nodes for how we deal with this.
+    this.mDOMTree.treeBoxObject.beginUpdateBatch();
+    for (let i = 0, n = opened.length; i < n; ++i) {
+      let idx = 
+        this.showNodeInTree(opened[i], false, // Don't augment the selection.
+                                       true,  // Expand to show children.
+                                       true,  // The node need not be visible.
+                                       true); // Don't select it.
+      if (idx < 0) {
+        debug("previously opened node expected to be in tree but isn't");
+      }
+    }
+
+    // Re-select all rows for non-ignorable nodes which had been previously
+    // selected.
+    this.beginSelectionBatch();
+    for (let i = 0, n = nonIgnorableSelectedNodes.length; i < n; ++i) {
+      let idx = this.showNodeInTree(nonIgnorableSelectedNodes[i], true);
+      if (idx < 0) {
+        debug("previously selected node expected to have row in tree but " +
+              "doesn't");
+      }
+    }
+
+    // For rows of previously selected nodes which are ignorable, we call
+    // showNodeInTree on them without selecting them, in order to make sure as
+    // much of their ancestor chain is exposed as possible.  This two-phase
+    // system is necessary because it's not guaranteed that all non-ignorable
+    // rows which were exposed before are now exposed again.  See the above
+    // comments about re-opening nodes for why this is true.
+    for (let i = 0, n = ignorableSelectedNodes.length; i < n; ++i) {
+      let idx = this.showNodeInTree(ignorableSelectedNodes[i], false, false,
+                                    true, true);
+      if (idx >= 0) {
+        debug("previously selected node expected to be ignorable but still " +
+              "has a row in the tree");
+        // Well, I guess we'll go ahead and select it then...
+        selection.toggleSelect(idx);
+      }
+    }
+
+    // Restore the viewer selection.
+    if (this.mPendingSelection != viewerSelection &&
+        this.getRowIndexFromNode(viewerSelection) >= 0) {
+      // The previous viewer selection should now be one of the selected
+      // nodes, but it's not the one that was selected last.
+      this.changeSelection(viewerSelection);
+    }
+
+    // Attempt to restore currentIndex to the previous currentNode.
+    var currentIndex = this.showNodeInTree(currentNode, false, false, true,
+                                           true);
+    this.mDOMTree.currentIndex = currentIndex;
+
+    this.mDOMTree.treeBoxObject.endUpdateBatch();
+    this.endSelectionBatch();
+  },
+
+  /**
+   * Determine whether the given node will be displayed in the tree, based on
+   * the tree's current show parameters and node filters.
+   * @param aNode
+   *        A node contained within the subtree of the tree's root (including
+   *        any subdocuments and their children).
+   * @return A boolean indicating whether the node is ignorable
+   */
+  isIgnorableNode: function DVr_IsIgnorableNode(aNode)
+  {
+    if (!(aNode instanceof nsIDOMNode)) {
+      return true;
+    }
+
+    // The node filter doesn't actually get checked for documents in
+    // inDOMView.
+    if (!(aNode instanceof nsIDOMDocument)) {
+      let nodeTypeFilter = 1 << (aNode.nodeType - 1);
+      if (!(this.mDOMView.whatToShow & nodeTypeFilter)) {
+        return true;
+      }
+    }
+
+    if (aNode instanceof nsIDOMCharacterData &&
+        this.mDOMUtils.isIgnorableWhitespace(aNode) &&
+        !this.mDOMView.showWhitespaceNodes) {
+      return true;
+    }
+
+    if (!this.mDOMView.showSubDocuments &&
+        aNode.ownerDocument != this.mDOMView.rootNode) {
+      return true;
+    }
+
+    if (!this.mDOMView.showAnonymousContent) {
+      // Anonymous nodes are obviously ignorable,  but so are non-anonymous
+      // nodes in the contentDocument of an anonymous element (as is the
+      // contentDocument itself).
+      let current = aNode;
+      if (current instanceof nsIDOMDocument) {
+        current = this.mDOMUtils.getParentForNode(current, true);
+      }
+      while (current && current.ownerDocument) {
+        if (current.ownerDocument.getBindingParent(current)) {
+          return true;
+        }
+        if (current.ownerDocument == this.mDOMView.rootNode) {
+          break;
+        }
+        current = this.mDOMUtils.getParentForNode(current.ownerDocument, 
+                                                  true);
+      }
+    }
+
+    return false;
   },
 
   createDOMWalker: function DVr_CreateDOMWalker(aRoot)
@@ -1037,10 +1346,65 @@ DOMViewer.prototype =
     }
   },
 
-  get selectedNode()
+  /**
+   * Get the node corresponding to the tree's currentIndex (the row with the
+   * focus rect).  NB: This is *not* a method to get the tree's selection.
+   * Use selectedNode or getSelectedNodes for that.
+   * @return the node corresponding to the tree's currentIndex, which may or
+   *         may not be a part of the tree's selection
+   */
+  get currentNode()
   {
     var index = this.mDOMTree.currentIndex;
     return this.getNodeFromRowIndex(index);
+  },
+
+  /**
+   * Get the node represented by the tree's selection.
+   * @return The currently selected node, or null if zero or two or more nodes
+   *         are selected.
+   */
+  get selectedNode()
+  {
+    if (this.mDOMTree.view.selection.count == 1) {
+      var minAndMax = {};
+      this.mDOMTree.view.selection.getRangeAt(0, minAndMax, minAndMax);
+      return this.getNodeFromRowIndex(minAndMax.value);
+    }
+    return null;
+  },
+
+  /**
+   * Get the nodes corresponding to the tree's selected rows.
+   * @return An array of nodes.
+   */
+  getSelectedNodes: function DVr_GetSelectedNodes()
+  {
+    var nodes = [];
+    var indexes = this.getSelectedIndexes();
+    for (let i = 0, n = indexes.length; i < n; ++i) {
+      nodes.push(this.getNodeFromRowIndex(indexes[i]));
+    }
+    return nodes;
+  },
+
+  /**
+   * Determine the tree's selected rows.
+   * @return An array of row indexes.
+   */
+  getSelectedIndexes: function DVr_GetSelectedIndexes()
+  {
+    var indexes = [];
+    var selection = this.mDOMTree.view.selection;
+    for (let i = 0, n = selection.getRangeCount(); i < n; ++i) {
+      var min = {};
+      var max = {};
+      selection.getRangeAt(i, min, max);
+      for (let j = min.value, max = max.value; j <= max; ++j) {
+        indexes.push(j);
+      }
+    }
+    return indexes;
   },
 
   getNodeFromRowIndex: function DVr_GetNodeFromRowIndex(aIndex)
@@ -1095,7 +1459,7 @@ cmdEditDelete.prototype =
       if (!selectNode) {
         selectNode = this.parentNode;
       }
-      viewer.selectElementInTree(selectNode);
+      viewer.showNodeInTree(selectNode);
       node.parentNode.removeChild(node);
     }
   },
@@ -1105,7 +1469,7 @@ cmdEditDelete.prototype =
     if (this.node) {
       this.parentNode.insertBefore(this.node, this.nextSibling);
     }
-    viewer.selectElementInTree(this.node);
+    viewer.showNodeInTree(this.node);
   }
 };
 
@@ -1138,11 +1502,13 @@ cmdEditCut.prototype =
   }
 };
 
-function cmdEditCopy() {}
+function cmdEditCopy() {
+  this.mNode = viewer.selectedNode;
+}
 
 cmdEditCopy.prototype =
 {
-  copiedNode: null,
+  mNode: null,
 
   // required for nsITransaction
   QueryInterface: txnQueryInterface,
@@ -1152,19 +1518,10 @@ cmdEditCopy.prototype =
 
   doTransaction: function Copy_DoTransaction()
   {
-    var copiedNode = null;
-    if (!this.copiedNode) {
-      copiedNode = viewer.selectedNode.cloneNode(true);
-      if (copiedNode) {
-        this.copiedNode = copiedNode;
-      }
+    if (this.mNode) {
+      viewer.pane.panelset.setClipboardData(this.mNode.cloneNode(true),
+                                            "inspector/dom-node", null);
     }
-    else {
-      copiedNode = this.copiedNode;
-    }
-
-    viewer.pane.panelset.setClipboardData(copiedNode, "inspector/dom-node",
-                                          null);
   }
 };
 
@@ -1187,11 +1544,11 @@ cmdEditPaste.prototype =
   doTransaction: function Paste_DoTransaction()
   {
     var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var selected = this.pastedBefore || viewer.selectedNode;
-    if (selected) {
+    var ref = this.pastedBefore || viewer.currentNode;
+    if (ref) {
       this.pastedNode = node.cloneNode(true);
-      this.pastedBefore = selected;
-      selected.parentNode.insertBefore(this.pastedNode, selected.nextSibling);
+      this.pastedBefore = ref;
+      ref.parentNode.insertBefore(this.pastedNode, ref.nextSibling);
       return false;
     }
     return true;
@@ -1225,11 +1582,11 @@ cmdEditPasteBefore.prototype =
   doTransaction: function PasteBefore_DoTransaction()
   {
     var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var selected = this.pastedBefore || viewer.selectedNode;
-    if (selected) {
+    var ref = this.pastedBefore || viewer.currentNode;
+    if (ref) {
       this.pastedNode = node.cloneNode(true);
-      this.pastedBefore = selected;
-      selected.parentNode.insertBefore(this.pastedNode, selected);
+      this.pastedBefore = ref;
+      ref.parentNode.insertBefore(this.pastedNode, ref);
       return false;
     }
     return true;
@@ -1456,9 +1813,7 @@ InsertNode.prototype =
 
   doTransaction: function Insert_DoTransaction()
   {
-    var selected = this.originalNode || viewer.selectedNode;
-    if (selected) {
-      this.originalNode = selected;
+    if (this.originalNode) {
       if (this.createNode()) {
         this.insertNode();
         return false;
@@ -1478,7 +1833,10 @@ InsertNode.prototype =
 /**
  * Inserts a node after the selected node.
  */
-function cmdEditInsertAfter() {}
+function cmdEditInsertAfter()
+{
+  this.originalNode = viewer.currentNode;
+}
 
 cmdEditInsertAfter.prototype = new InsertNode();
 
@@ -1491,7 +1849,10 @@ cmdEditInsertAfter.prototype.insertNode = function InsertAfter_InsertNode()
 /**
  * Inserts a node before the selected node.
  */
-function cmdEditInsertBefore() {}
+function cmdEditInsertBefore()
+{
+  this.originalNode = viewer.currentNode;
+}
 
 cmdEditInsertBefore.prototype = new InsertNode();
 
@@ -1504,7 +1865,10 @@ cmdEditInsertBefore.prototype.insertNode = function InsertBefore_InsertNode()
 /**
  * Inserts a node as the first child of the selected node.
  */
-function cmdEditInsertFirstChild() {}
+function cmdEditInsertFirstChild()
+{
+  this.originalNode = viewer.selectedNode;
+}
 
 cmdEditInsertFirstChild.prototype = new InsertNode();
 
@@ -1518,7 +1882,10 @@ cmdEditInsertFirstChild.prototype.insertNode =
 /**
  * Inserts a node as the last child of the selected node.
  */
-function cmdEditInsertLastChild() {}
+function cmdEditInsertLastChild()
+{
+  this.originalNode = viewer.selectedNode;
+}
 
 cmdEditInsertLastChild.prototype = new InsertNode();
 
