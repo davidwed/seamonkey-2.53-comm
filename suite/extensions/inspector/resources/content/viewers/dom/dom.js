@@ -1045,8 +1045,11 @@ DOMViewer.prototype =
    * Rebuild the tree by re-opening previously opened rows, re-selecting
    * previously selected rows, and restoring the viewer selection and the
    * node previously at currentNode, if possible.
+   * @param aIncludeAnons [optional]
+   *        If a rebuild was triggered in response to a pref change for
+   *        showing anonymous content, this must be former pref value.
    */
-  rebuild: function DVr_Rebuild(aHint)
+  rebuild: function DVr_Rebuild(aIncludeAnons)
   {
     var selection = this.mDOMTree.view.selection;
 
@@ -1093,11 +1096,23 @@ DOMViewer.prototype =
       viewerSelection =
         this.getNodeFromRowIndex(nearestNonIgnorableSelectedIndex);
     }
-    // XXX What happens if viewerSelection (and currentNode, for that matter)
-    // is ignorable?
+    if (!viewerSelection) {
+      // There was no nearest non-ignorable selected node (ostensibly, because
+      // there are no non-ignorable selected nodes), so find a fallback from
+      // the next-best chain.
+      if (nonIgnorableSelectedNodes.length) {
+        debug("some nodes are non-ignorable, but no suitable viewer " +
+              "selection was found");
+      }
+      viewerSelection =
+        this.getNextInNextBestChain(this.selection, aIncludeAnons);
+    }
 
     // Remember currentNode.
     var currentNode = this.currentNode;
+    if (this.isIgnorableNode(currentNode)) {
+      currentNode = this.getNextInNextBestChain(currentNode, aIncludeAnons);
+    }
 
     selection.clearSelection();
     this.mDOMView.rebuild();
@@ -1150,17 +1165,32 @@ DOMViewer.prototype =
     }
 
     // Restore the viewer selection.
-    if (this.mPendingSelection != viewerSelection &&
-        this.getRowIndexFromNode(viewerSelection) >= 0) {
+    if (!selection.count) {
+      // All previously selected nodes have been filtered out.  Select the
+      // fallback we found from the next-best chain.
+      this.showNodeInTree(viewerSelection);
+    }
+    else if (this.mPendingSelection != viewerSelection) {
       // The previous viewer selection should now be one of the selected
       // nodes, but it's not the one that was selected last.
-      this.changeSelection(viewerSelection);
+      if (this.getRowIndexFromNode(viewerSelection) >= 0) {
+        this.changeSelection(viewerSelection);
+      }
+      else {
+        debug("new viewer selection expected to have row in tree but " +
+              "doesn't");
+      }
     }
 
     // Attempt to restore currentIndex to the previous currentNode.
     var currentIndex = this.showNodeInTree(currentNode, false, false, true,
                                            true);
-    this.mDOMTree.currentIndex = currentIndex;
+    if (currentIndex >= 0) {
+      this.mDOMTree.currentIndex = currentIndex;
+    }
+    else if (currentNode) {
+      debug("currentNode expected to have row in tree but doesn't");
+    }
 
     this.mDOMTree.treeBoxObject.endUpdateBatch();
     this.endSelectionBatch();
@@ -1195,41 +1225,179 @@ DOMViewer.prototype =
       return true;
     }
 
-    if (!this.mDOMView.showSubDocuments &&
-        aNode.ownerDocument != this.mDOMView.rootNode) {
-      return true;
-    }
-
-    if (!this.mDOMView.showAnonymousContent) {
-      // Anonymous nodes are obviously ignorable,  but so are non-anonymous
-      // nodes in the contentDocument of an anonymous element (as is the
-      // contentDocument itself).
-      let current = aNode;
-      if (current instanceof nsIDOMDocument) {
-        current = this.mDOMUtils.getParentForNode(current, true);
+    if (aNode != this.mDOMView.rootNode) {
+      if (!this.mDOMView.showSubDocuments &&
+          aNode.ownerDocument != this.mDOMView.rootNode) {
+        return true;
       }
-      while (current && current.ownerDocument) {
-        if (current.ownerDocument.getBindingParent(current)) {
-          return true;
+  
+      if (!this.mDOMView.showAnonymousContent) {
+        // Anonymous nodes are obviously ignorable,  but so are non-anonymous
+        // nodes in the contentDocument of an anonymous element (as is the
+        // contentDocument itself).
+        let current = aNode;
+        if (current instanceof nsIDOMDocument) {
+          current = this.mDOMUtils.getParentForNode(current, true);
         }
-        if (current.ownerDocument == this.mDOMView.rootNode) {
-          break;
+        while (current && current.ownerDocument) {
+          if (current.ownerDocument.getBindingParent(current)) {
+            return true;
+          }
+          if (current.ownerDocument == this.mDOMView.rootNode) {
+            break;
+          }
+          current = this.mDOMUtils.getParentForNode(current.ownerDocument, 
+                                                    true);
         }
-        current = this.mDOMUtils.getParentForNode(current.ownerDocument, 
-                                                  true);
       }
     }
 
     return false;
   },
 
-  createDOMWalker: function DVr_CreateDOMWalker(aRoot)
+  /**
+   * The next-best chain extending from a given node is defined as the next
+   * non-ignorable siblings in document order, followed the preceding non-
+   * ignorable siblings in reverse document order, followed by the parent node
+   * (if it's non-ignorable) and its non-ignorable siblings ordered similarly,
+   * continuing all the way up the ancestor chain.
+   * @param aNode
+   *        The node for which we'll traverse its next-best chain.
+   * @param aIncludeAnons [optional]
+   *        Whether to consider the effects of anonymous content on the chain
+   *        structure.  Note that this is not necessarily the same as the DOM
+   *        view's showAnonymousContent attribute, and even if true, won't
+   *        affect whether anonymous nodes can be returned.  However, the
+   *        default is whatever the showAnonymousContent attribute's value is.
+   * @return The next node in the next-best chain.
+   */
+  getNextInNextBestChain:
+    function DVr_GetNextInNextBestChain(aNode, aIncludeAnons)
+  {
+    if (!aNode) {
+      return null;
+    }
+
+    // The approach is broken down as follows:
+    // 1. Locating the topmost ignorable node in the ancestor chain (including
+    //    the given node).
+    // 2. Locating the next non-ignorable sibling of that ancestor, beginning
+    //    by searching forward in the sibling group starting at that node then
+    //    backwards if we exhaust the list of all siblings that follow.
+    var showAnons = this.mDOMView.showAnonymousContent;
+    var ancestorChain = [];
+    var ancestor = aNode;
+    while (ancestor != this.mDOMView.rootNode) {
+      ancestor = this.mDOMUtils.getParentForNode(ancestor, showAnons);
+      if (!ancestor) {
+        break;
+      }
+      ancestorChain.push(ancestor);
+    }
+    var topmost = aNode;
+    for (let i = ancestorChain.length - 1; i >= 0; --i) {
+      // XXX This is O(h*d), where h is the node depth from the root, and d is
+      // the document nesting level of aNode's ownerDocument.  If the document
+      // consists entirely of nested iframes/browsers/what-have-you, that
+      // means it will technically be O(h^2).  There's room for optimization
+      // here, but d is expected to be much smaller than h in practice, i.e.,
+      // anywhere between 1 and something like 3, and I can't think of a good
+      // way to get around this right now without creating API awkwardness.
+      if (this.isIgnorableNode(ancestorChain[i])) {
+        topmost = ancestorChain[i];
+        break;
+      }
+    }
+    // Short circuit for rootNode; it won't have any siblings.
+    if (topmost == this.mDOMView.rootNode) {
+      // Just in case for some crazy reason the root node is ignorable...
+      return this.isIgnorableNode(topmost) ? null : topmost;
+    }
+
+    // Follow through on step 2.
+
+    // The nature of anonymous content means that the nodes around aNode can
+    // get completely rearranged, depending on whether we're showing anonymous
+    // content or not.  If we're getting called from a rebuild due to a pref
+    // change for showing anonymous content, showAnons is going to reflect the
+    // new value.  If that's why we are getting called, we want to select from
+    // the next-best chain based on the order nodes were visually presented
+    // when the user toggled the pref, which is is why we need the
+    // aIncludeAnons override, since showAnons is untrustworthy here.
+    var includeAnons =
+      aIncludeAnons === undefined ? showAnons : aIncludeAnons;
+    // NB: By allowing includeAnons to deviate from showAnons above, we can't
+    // guarantee that ancestor will be non-ignorable (it might be anonymous,
+    // and we're not showing anons), so we'll need to check for it later.
+    ancestor = this.mDOMUtils.getParentForNode(topmost, includeAnons);
+    // As a side-effect of special-casing the rootNode-as-topmost check
+    // earlier, we're guaranteed ancestor is non-null here.
+    var walker = this.createDOMWalker(ancestor, includeAnons);
+    var current = walker.firstChild();
+
+    // We have to relocate the walker over topmost by iterating over nodes
+    // until we get there.  We'll save the ones we pass up along the way so we
+    // can immediately begin looking at those preceding nodes in reverse order
+    // if we find that we've exhausted all of the nodes that follow.
+    var preceding = [];
+    while (current != topmost) {
+      preceding.push(current);
+      current = walker.nextSibling();
+      if (!current) {
+        debug("unexpected end of nodes");
+        return null;
+      }
+    }
+
+    // Look for the next non-ignorable in the nodes that follow topmost.
+    do {
+      current = walker.nextSibling();
+      if (!this.isIgnorableNode(current)) {
+        return current;
+      }
+    } while (current);
+
+    // Look for the next non-ignorable in the nodes that precede topmost.
+    for (let i = preceding.length - 1; i >= 0; --i) {
+      current = preceding[i];
+      if (!this.isIgnorableNode(current)) {
+        return current;
+      }
+    }
+
+    // All of the adjacent nodes are ignorable, too.  Use topmost's parent,
+    // which we know to be non-ignorable (by virtue of it being an ancestor of
+    // topmost).  Recall from before that we can't be sure that the ancestor
+    // we've got in |ancestor| is non-ignorable, though...
+    if (includeAnons != showAnons) {
+      ancestor = this.mDOMUtils.getParentForNode(topmost, showAnons);
+    }
+
+    return ancestor;
+  },
+
+  /**
+   * Convenience method for instantiating a deep tree walker, using much of
+   * the same preferences as the DOM view.
+   * @param aRoot
+   *        The root node to begin traversal.  See the W3 Traversal spec for
+   *        more information.
+   * @param aShowAnons [optional]
+   *        Whether to include anonymous content in the walk.  This is the
+   *        same as setting showAnonymousContent on an instantiated deep tree
+   *        walker.  The default is the value of the showAnonymousContent
+   *        attribute on the DOM view.
+   */
+  createDOMWalker:
+    function DVr_CreateDOMWalker(aRoot, aShowAnons)
   {
     var walker = XPCU.createInstance(kDeepTreeWalkerClassID,
                                      "inIDeepTreeWalker");
-    walker.showAnonymousContent = this.mDOMView.showAnonymousContent;
+    walker.showAnonymousContent = aShowAnons === undefined ?
+                                    this.mDOMView.showAnonymousContent :
+                                    aShowAnons;
     walker.showSubDocuments = this.mDOMView.showSubDocuments;
-    walker.init(aRoot, Components.interfaces.nsIDOMNodeFilter.SHOW_ALL);
+    walker.init(aRoot, this.mDOMView.whatToShow);
     return walker;
   },
 
@@ -1284,9 +1452,11 @@ DOMViewer.prototype =
   onPrefChanged: function DVr_OnPrefChanged(aName)
   {
     var value = PrefUtils.getPref(aName);
+    var includeAnons = undefined;
 
     switch (aName) {
       case "inspector.dom.showAnon":
+        includeAnons = this.mDOMView.showAnonymousContent;
         this.setAnonContent(value);
         break;
 
@@ -1306,7 +1476,7 @@ DOMViewer.prototype =
         return;
     }
 
-    this.rebuild();
+    this.rebuild(includeAnons);
   },
 
   ////////////////////////////////////////////////////////////////////////////
