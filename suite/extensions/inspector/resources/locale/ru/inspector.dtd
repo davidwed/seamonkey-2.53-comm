@@ -1,48 +1,50 @@
 <!ENTITY Inspector.title "Инспектор DOM">
 <!ENTITY thDOMNodes.label "Узлы DOM">
 <!ENTITY btnInspect.label "Исследовать">
-<!ENTITY btnInspect.accesskey "с">
+<!ENTITY btnInspect.accesskey "л">
 <!ENTITY bxDocPanel.title "Документ">
 <!ENTITY bxObjectPanel.title "Объект">
 <!ENTITY btnSelecting.tooltip "Найти узел для исследования, щёлкнув по нему">
 <!ENTITY btnFind.tooltip "Найти узел для исследования по идентификатору, тегу или атрибуту">
 <!ENTITY mnFile.label "Файл">
-<!ENTITY mnFile.accesskey "Ф">
+<!ENTITY mnFile.accesskey "й">
 <!ENTITY mnInspectContentDocument.label "Исследовать документ Content">
 <!ENTITY mnInspectContentDocument.accesskey "о">
 <!ENTITY mnInspectChromeDocument.label "Исследовать документ Chrome">
 <!ENTITY mnInspectChromeDocument.accesskey "к">
+<!ENTITY mnInspectApplicationAccessible.label "Исследовать доступность приложения">
+<!ENTITY mnInspectApplicationAccessible.accesskey "у">
 <!ENTITY cmdEnterLocation.label "Исследовать URL">
-<!ENTITY cmdEnterLocation.accesskey "л">
+<!ENTITY cmdEnterLocation.accesskey "с">
 <!ENTITY cmdEnterLocation.key "L">
 <!ENTITY cmdEnterLocation.key2 "D">
 <!ENTITY cmdSave.label "Сохранить DOM как…">
 <!ENTITY cmdSave.accesskey "х">
 <!ENTITY cmdClose.label "Закрыть">
-<!ENTITY cmdClose.accesskey "З">
+<!ENTITY cmdClose.accesskey "р">
 <!ENTITY cmdExit.label "Выход">
-<!ENTITY cmdExit.accesskey "В">
+<!ENTITY cmdExit.accesskey "ы">
 <!ENTITY mnEdit.label "Правка">
-<!ENTITY mnEdit.accesskey "П">
+<!ENTITY mnEdit.accesskey "в">
 <!ENTITY cmdUndo.label "Отменить">
-<!ENTITY cmdUndo.accesskey "О">
+<!ENTITY cmdUndo.accesskey "е">
 <!ENTITY cmdRedo.label "Повторить">
-<!ENTITY cmdRedo.accesskey "П">
+<!ENTITY cmdRedo.accesskey "т">
 <!ENTITY cmdCut.label "Вырезать">
-<!ENTITY cmdCut.accesskey "В">
+<!ENTITY cmdCut.accesskey "з">
 <!ENTITY cmdCopy.label "Копировать">
-<!ENTITY cmdCopy.accesskey "К">
+<!ENTITY cmdCopy.accesskey "р">
 <!ENTITY cmdPaste.label "Вставить">
-<!ENTITY cmdPaste.accesskey "с">
+<!ENTITY cmdPaste.accesskey "а">
 <!ENTITY cmdDelete.label "Удалить">
-<!ENTITY cmdDelete.accesskey "У">
+<!ENTITY cmdDelete.accesskey "д">
 <!ENTITY mnView.label "Вид">
-<!ENTITY mnView.accesskey "В">
+<!ENTITY mnView.accesskey "и">
 <!ENTITY cmdToggleBrowser.label "Браузер">
-<!ENTITY cmdToggleBrowser.accesskey "р">
+<!ENTITY cmdToggleBrowser.accesskey "б">
 <!ENTITY cmdToggleSearch.label "Результаты поиска">
 <!ENTITY cmdFlashOnSelect.label "Подсвечивать выбранный элемент">
-<!ENTITY cmdFlashOnSelect.accesskey "в">
+<!ENTITY cmdFlashOnSelect.accesskey "ч">
 <!ENTITY browserPanel.label "Браузер">
 <!ENTITY inspectNewWindow.label "Исследовать в новом окне">
 <!ENTITY saveCmd.key "S">
