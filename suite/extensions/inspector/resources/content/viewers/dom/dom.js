@@ -265,6 +265,8 @@ DOMViewer.prototype =
       case "cmdEditCopy":
       case "cmdEditDelete":
         return !!selectedNode;
+      case "cmdEditInspectInNewWindow":
+        return this.mDOMTree.view.selection.count == 1;
     }
     return false;
   },
@@ -683,14 +685,6 @@ DOMViewer.prototype =
                                             n == "tabbrowser" ||
                                             n == "editor"))) {
       this.subject = node.contentDocument;
-    }
-  },
-
-  cmdInspectInNewWindow: function DVr_CmdInspectInNewWindow()
-  {
-    var node = this.selectedNode;
-    if (node) {
-      inspectObject(node);
     }
   },
 
@@ -2065,6 +2059,23 @@ cmdEditInsertLastChild.prototype.insertNode =
   this.originalNode.appendChild(this.insertedNode);
 };
 
+function cmdEditInspectInNewWindow()
+{
+  this.mNode = viewer.selectedNode;
+}
+
+cmdEditInspectInNewWindow.prototype = {
+  isTransient: true,
+  merge: txnMerge,
+  QueryInterface: txnQueryInterface,
+
+  doTransaction: function InspectInNewWindow_DoTransaction()
+  {
+    if (this.mNode) {
+      inspectObject(this.mNode);
+    }
+  }
+};
 
 //////////////////////////////////////////////////////////////////////////////
 //// Listener Objects
