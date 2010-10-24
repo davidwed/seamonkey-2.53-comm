@@ -48,6 +48,8 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <script type="application/javascript"
+          src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript"
           src="chrome://inspector/content/viewers/jsObject/jsObjectViewer.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
@@ -55,8 +57,6 @@
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/hooks.js"/>
-  <script type="application/javascript"
-          src="chrome://inspector/content/utils.js"/>
 
   <stringbundle id="inspector-bundle"
                 src="chrome://inspector/locale/inspector.properties"/>
@@ -65,18 +65,18 @@
   <commandset id="cmdsJSObjectViewer">
     <command id="cmdCopyValue" oncommand="viewer.cmdCopyValue();"/>
     <command id="cmdEvalExpr" oncommand="viewer.cmdEvalExpr();"/>
-    <command id="cmdInspectInNewView"
-             oncommand="viewer.cmdInspectInNewView();"/>
   </commandset>
 
   <menupopup id="popupContext">
+    <!-- mnEditInspectInNewWindow is overlaid by editingOverlay.xul -->
     <menuitem id="mnEditInspectInNewWindow"/>
     <menuseparator/>
-    <menuitem label="&jsCopyValue.label;" observes="cmdCopyValue"/>
-    <menuitem label="&jsEval.label;" observes="cmdEvalExpr"/>
+    <menuitem label="&jsCopyValue.label;" command="cmdCopyValue"/>
+    <menuitem label="&jsEval.label;" command="cmdEvalExpr"/>
   </menupopup>
 
-  <tree id="treeJSObject" flex="1" context="popupContext">
+  <tree id="treeJSObject" flex="1" context="popupContext"
+        onselect="viewer.onTreeSelectionChange();">
     <treecols>
       <treecol id="colProp" flex="1" primary="true"
                label="&jsProperty.label;"/>

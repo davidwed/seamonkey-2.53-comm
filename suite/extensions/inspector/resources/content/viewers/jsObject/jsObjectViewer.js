@@ -117,11 +117,20 @@ JSObjectViewer.prototype =
 
   isCommandEnabled: function JSOVr_IsCommandEnabled(aCommand)
   {
+    switch (aCommand) {
+      case "cmdEditInspectInNewWindow":
+      case "cmdCopyValue":
+      case "cmdEvalExpr":
+        return this.mTree.view.selection.count == 1;
+    }
     return false;
   },
 
   getCommand: function JSOVr_GetCommand(aCommand)
   {
+    if (aCommand in window) {
+      return new window[aCommand]();
+    }
     return null;
   },
 
@@ -188,11 +197,21 @@ JSObjectViewer.prototype =
     }
   },
 
-  cmdInspectInNewView: function JSOVr_CmdInspectInNewView()
+  onTreeSelectionChange: function JSOVr_OnTreeSelectionChange()
   {
-    var sel = getSelectedItem();
-    if (sel) {
-      inspectObject(sel.__JSValue__);
+    this.pane.panelset.updateAllCommands();
+
+    // There's no need to worry about any other commands outside this
+    // commandset; cmdInspectInNewWindow is global, so it just got updated.
+    var commands = document.getElementById("cmdsJSObjectViewer").childNodes;
+    for (let i = 0, n = commands.length; i < n; ++i) {
+      let command = commands[i];
+      if (this.isCommandEnabled(command.id)) {
+        command.removeAttribute("disabled");
+      }
+      else {
+        command.setAttribute("disabled", true);
+      }
     }
   },
 
@@ -376,12 +395,12 @@ function onTreeItemAttrModified(aEvent)
 function getSelectedItem()
 {
   var tree = document.getElementById("treeJSObject");
-  if (tree.view.selection.count) {
-    return tree.contentView.getItemAtIndex(tree.currentIndex);
+  if (tree.view.selection.count == 1) {
+    let minAndMax = {};
+    tree.view.selection.getRangeAt(0, minAndMax, minAndMax);
+    return tree.contentView.getItemAtIndex(minAndMax.value);
   }
-  else {
-    return null;
-  }
+  return null;    
 }
 
 function toggleItem(aItem)
@@ -392,3 +411,24 @@ function toggleItem(aItem)
     tree.view.toggleOpenState(row);
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//// Transactions
+
+function cmdEditInspectInNewWindow()
+{
+  this.mSelectedItem = getSelectedItem();
+}
+
+cmdEditInspectInNewWindow.prototype = {
+  isTransient: true,
+  merge: txnMerge,
+  QueryInterface: txnQueryInterface,
+
+  doTransaction: function InspectInNewWindow_DoTransaction()
+  {
+    if (this.mSelectedItem) {
+      inspectObject(this.mSelectedItem.__JSValue__);
+    }
+  }
+};
