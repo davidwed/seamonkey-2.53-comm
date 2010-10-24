@@ -7,20 +7,35 @@
 
 <?xml-stylesheet href="chrome://inspector/skin/"?>
 
+<?xul-overlay href="chrome://inspector/content/editingOverlay.xul"?>
+
 <page id="winStylesheets"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
   <script type="application/javascript"
-          src="chrome://inspector/content/viewers/stylesheets/stylesheets.js"/>
-  <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/hooks.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/viewers/stylesheets/stylesheets.js"/>
+
+  <commandset id="cmdsEditingExtras"/>
+
+  <popupset id="psPopups">
+    <menupopup id="ppStyleSheetsContext">
+      <menuitem id="mnEditInspectInNewWindow"/>
+    </menupopup>
+  </popupset>
 
   <tree id="olStyleSheets" class="plain" treelines="true" flex="1"
-        onselect="viewer.onItemSelected()">
+        seltype="single" onselect="viewer.onItemSelected()"
+        context="ppStyleSheetsContext">
     <treecols>
       <treecol id="olcHref" label="&sheetLocation.label;" primary="true"
                persist="width,hidden,ordinal" flex="1"/>
