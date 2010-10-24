@@ -3,7 +3,6 @@
 <!DOCTYPE page [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
   <!ENTITY % dtd2 SYSTEM "chrome://inspector/locale/viewers/dom.dtd"> %dtd2;
-  <!ENTITY % dtd3 SYSTEM "chrome://inspector/locale/editing.dtd"> %dtd3;
 ]>
 
 <?xul-overlay href="chrome://inspector/content/editingOverlay.xul"?>
@@ -32,11 +31,9 @@
   <!-- ============================ COMMANDS ============================= -->
 
   <commandset id="cmdsEditing"/>
+  <commandset id="cmdsEditingExtras"/>
 
   <commandset>
-    <command id="cmdInspectInNewWindow"
-             oncommand="viewer.cmdInspectInNewWindow()"/>
-
     <command id="cmdInspectBrowser"
              isvalid="return viewer.cmdInspectBrowserIsValid()"
              oncommand="viewer.cmdInspectBrowser()"/>
@@ -78,9 +75,7 @@
   <popupset id="psPopups">
     <menupopup id="ppDOMContext"
                onpopupshowing="viewer.onContextCreate(this)">
-      <menuitem label="&cmdInspectInNewWindow.label;"
-                accesskey="&cmdInspectInNewWindow.accesskey;"
-                observes="cmdInspectInNewWindow"/>
+      <menuitem id="mnEditInspectInNewWindow"/>
       <menuitem label="&cmdInspectBrowser.label;"
                 accesskey="&cmdInspectBrowser.accesskey;"
                 observes="cmdInspectBrowser"/>

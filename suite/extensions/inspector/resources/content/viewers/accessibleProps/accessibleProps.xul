@@ -44,6 +44,7 @@
 ]>
 
 <?xml-stylesheet href="chrome://inspector/skin"?>
+<?xul-overlay href="chrome://inspector/content/editingOverlay.xul"?>
 
 <page id="winAccessibleProps"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -65,15 +66,11 @@
   <stringbundle id="accessiblePropsBundle"
                 src="chrome://inspector/locale/viewers/accessibleProps.properties"/>
 
-  <commandset id="cmdsAccPropsViewer">
-    <command id="cmdInspectInNewView"
-             oncommand="viewer.cmdInspectInNewView();"/>
-  </commandset>
+  <commandset id="cmdsEditingExtras"/>
 
   <popupset>
     <menupopup id="popupContext">
-      <menuitem label="&inspectNewWindow.label;"
-                observes="cmdInspectInNewView"/>
+      <menuitem id="mnEditInspectInNewWindow"/>
     </menupopup>
   </popupset>
 

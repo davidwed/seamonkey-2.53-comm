@@ -43,6 +43,7 @@
 ]>
 
 <?xml-stylesheet href="chrome://inspector/skin/"?>
+<?xul-overlay href="chrome://inspector/content/editingOverlay.xul"?>
 
 <page id="winAccessibleTree"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -58,14 +59,12 @@
 
   <commandset id="cmdsAccTreeViewer">
     <command id="cmdEvalJS" oncommand="viewer.cmdEvalJS();"/>
-    <command id="cmdInspectInNewView"
-             oncommand="viewer.cmdInspectInNewView();"/>
   </commandset>
+  <commandset id="cmdsEditingExtras"/>
 
   <popupset>
     <menupopup id="popupContext">
-      <menuitem label="&inspectNewWindow.label;"
-                observes="cmdInspectInNewView"/>
+      <menuitem id="mnEditInspectInNewWindow"/>
       <menuseparator/>
       <menuitem label="&evaluateJS.label;" observes="cmdEvalJS"/>
     </menupopup>

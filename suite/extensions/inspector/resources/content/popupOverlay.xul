@@ -47,6 +47,8 @@
     <menuitem id="mnEditPaste"/>
     <menuitem id="mnEditDelete"/>
     <menuitem id="mnEditInsert"/>
+    <menuseparator/>
+    <menuitem id="mnEditInspectInNewWindow"/>
   </menupopup>
 
   <menupopup id="mppView">

@@ -28,6 +28,8 @@
              viewer="dom accessibleTree"
              oncommand="inspector.toggleFlashOnSelect();"/>
 
+    <!-- These implement the editing commands needed by the top-level
+         inspectors.  See editingOverlay.xul for more information. -->
     <command id="cmdEditUndo" global="true"
              oncommand="inspector.doViewerCommand('cmdEditUndo');"/>
     <command id="cmdEditRedo" global="true"
@@ -44,6 +46,8 @@
              oncommand="inspector.doViewerCommand('cmdEditEdit');"/>
     <command id="cmdEditDelete" global="true"
              oncommand="inspector.doViewerCommand('cmdEditDelete');"/>
+    <command id="cmdEditInspectInNewWindow" global="true"
+             oncommand="inspector.doViewerCommand('cmdEditInspectInNewWindow');"/>
 
   </commandset>
 

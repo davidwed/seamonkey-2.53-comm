@@ -9,6 +9,7 @@
           src="chrome://inspector/content/viewers/jsObject/jsObject.js"/>
 
   <stringbundle id="inspector-bundle"/>
+  <commandset id="cmdsEditingExtras"/>
   <commandset id="cmdsJSObjectViewer"/>
 
   <popupset>

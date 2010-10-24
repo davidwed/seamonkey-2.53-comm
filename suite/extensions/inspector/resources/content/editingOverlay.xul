@@ -5,6 +5,14 @@
 <overlay id="ovEditing"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
+<!-- This overlay is pulled in by popupOverlay.xul, which is itself pulled in
+     by the top-level inspectors (inspector.xul, object.xul, and sidebar.xul),
+     to add these items to its menus.  Additionally, this overlay is suitable
+     for use by viewers which want to offer any of these items (e.g., for
+     their context menus).  Note that the cmdsEditing commandset is used only
+     by viewers due to scoping differences; the implementation of the commands
+     used in the top-level inspectors can be found in commandOverlay.xul. -->
+
   <commandset id="cmdsEditing">
     <command id="cmdEditUndo"
              oncommand="viewer.pane.panelset.execCommand('cmdEditUndo');"/>
@@ -23,6 +31,10 @@
     <command id="cmdEditDelete"
              oncommand="viewer.pane.panelset.execCommand('cmdEditDelete');"/>
   </commandset>
+  <commandset id="cmdsEditingExtras">
+    <command id="cmdEditInspectInNewWindow"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditInspectInNewWindow');"/>
+  </commandset>
 
   <keyset id="ksGlobalKeyset">
     <key id="keyEditUndo" key="z" modifiers="accel" command="cmdEditUndo"/>
@@ -34,6 +46,8 @@
     <key id="keyEditPaste" key="v" modifiers="accel" command="cmdEditPaste"/>
     <key id="keyEditDelete" keycode="VK_DELETE" command="cmdEditDelete"/>
     <key id="keyEditDeleteMac" keycode="VK_BACK" command="cmdEditDelete"/>
+    <key id="keyEditInspectInNewWindow" key="&mnEditInspectInNewWindow.key;"
+         modifiers="accel" command="cmdEditInspectInNewWindow"/>
   </keyset>
 
   <menuitem id="mnEditUndo" label="&mnEditUndo.label;" command="cmdEditUndo"
@@ -53,5 +67,10 @@
   <menuitem id="mnEditDelete" label="&mnEditDelete.label;"
             command="cmdEditDelete" accesskey="&mnEditDelete.accesskey;"
             key="keyEditDelete"/>
+  <menuitem id="mnEditInspectInNewWindow"
+            label="&mnEditInspectInNewWindow.label;"
+            command="cmdEditInspectInNewWindow"
+            accesskey="&mnEditInspectInNewWindow.accesskey;"
+            key="keyEditInspectInNewWindow"/>
 
 </overlay>
