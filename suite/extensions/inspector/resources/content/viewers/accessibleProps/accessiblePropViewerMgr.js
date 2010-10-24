@@ -83,6 +83,18 @@ function accessiblePropViewerMgr(aPaneElm)
     }
   }
 
+  this.isCommandEnabled =
+    function accessiblePropViewerMgr_isCommandEnabled(aCommand)
+  {
+    var tab = this.tabboxElm.selectedTab;
+    var viewerid = tab.id.replace("tab_", "");
+    var viewer = this.viewers[viewerid];
+    if ("isCommandEnabled" in viewer) {
+      return viewer.isCommandEnabled(aCommand);
+    }
+    return false;
+  },
+
   /**
    * Process 'inspectInNewView' command for selected property view.
    */
@@ -110,6 +122,7 @@ function accessiblePropViewerMgr(aPaneElm)
   this.handleEvent = function accessiblePropViewerMgr_handleEvent(aEvent)
   {
     this.setCurrentViewerIdx(this.tabboxElm.selectedIndex);
+    viewer.pane.panelset.updateAllCommands();
   }
 
   this.setCurrentViewerIdx = function accessiblePropViewerMgr_setCurrentViewerIdx(aIdx)
@@ -367,16 +380,26 @@ function tableCellViewer()
     this.isSelectedElm.textContent = "";
   }
 
+  this.isCommandEnabled = function tableCellViewer_isCommandEnable(aCommand)
+  {
+    if (aCommand == "cmdEditInspectInNewWindow") {
+      return this.mTreeView.selection.count == 1;
+    }
+    return false;
+  },
+
   /**
    * Prepares 'inspectInNewView' command.
    */
   this.inspectInNewView = function tableCellViewer_inspectInNewView()
   {
-    var idx = this.mTree.currentIndex;
-    if (idx >= 0) {
-      var node = this.mTreeView.getDOMNode(idx);
-      if (node)
+    if (this.mTreeView.selection.count == 1) {
+      var minAndMax = {};
+      this.mTreeView.selection.getRangeAt(0, minAndMax, minAndMax);
+      var node = this.mTreeView.getDOMNode(minAndMax.value);
+      if (node) {
         inspectObject(node);
+      }
     }
   }
 

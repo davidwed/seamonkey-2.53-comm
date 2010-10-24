@@ -35,7 +35,17 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
+/*****************************************************************************
+* AccessiblePropsViewer ------------------------------------------------------
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* REQUIRED IMPORTS:
+*   chrome://inspector/content/utils.js
+*   chrome://inspector/content/jsutil/events/ObserverManager.js
+*   chrome://inspector/content/jsutil/system/PrefUtils.js
+*   chrome://inspector/content/jsutil/xpcom/XPCU.js
+*   chrome://inspector/content/jsutil/xul/FrameExchange.js
+*****************************************************************************/
  
 ///////////////////////////////////////////////////////////////////////////////
 //// Global Variables
@@ -108,11 +118,15 @@ AccessiblePropsViewer.prototype =
 
   isCommandEnabled: function isCommandEnabled(aCommand)
   {
-    return false;
+    return this.mPropViewerMgr.isCommandEnabled(aCommand);
   },
   
   getCommand: function getCommand(aCommand)
   {
+    switch (aCommand) {
+      case "cmdEditInspectInNewWindow":
+        return new cmdEditInspectInNewWindow(this.mPropViewerMgr);
+    }
     return null;
   },
 
@@ -132,11 +146,6 @@ AccessiblePropsViewer.prototype =
 
   /////////////////////////
   //// utils
-
-  cmdInspectInNewView: function cmdInspectInNewView()
-  {
-    this.mPropViewerMgr.inspectInNewView();
-  },
 
   doCommand: function doCommand(aCommandId)
   {
@@ -251,5 +260,23 @@ AccessiblePropsViewer.prototype =
     for (var i = 0; i < states.length; i++)
       list.push(states.item(i));
     return list;
+  }
+};
+
+function cmdEditInspectInNewWindow(aMgr)
+{
+  this.mPropViewerMgr = aMgr;
+}
+
+cmdEditInspectInNewWindow.prototype = {
+  isTransient: true,
+  merge: txnMerge,
+  QueryInterface: txnQueryInterface,
+
+  doTransaction: function InspectInNewWindow_DoTransaction()
+  {
+    if (this.mPropViewerMgr) {
+      this.mPropViewerMgr.inspectInNewView();
+    }
   }
 };

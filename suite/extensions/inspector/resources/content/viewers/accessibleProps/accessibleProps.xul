@@ -50,6 +50,8 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <script type="application/javascript"
+          src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/hooks.js"/>
@@ -203,7 +205,8 @@
 
         <tree id="tableCell:accObjects"
               flex="1"
-              context="popupContext">
+              context="popupContext"
+              onselect="viewer.pane.panelset.updateAllCommands();">
 
           <treecols>
             <treecol id="tableCell:property"
