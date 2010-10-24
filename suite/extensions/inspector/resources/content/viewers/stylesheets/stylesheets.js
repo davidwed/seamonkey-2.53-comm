@@ -123,11 +123,18 @@ StyleSheetsViewer.prototype =
 
   isCommandEnabled: function SSVr_IsCommandEnabled(aCommand)
   {
+    switch (aCommand) {
+      case "cmdEditInspectInNewWindow":
+        return !!this.getSelectedSheet();
+    }
     return false;
   },
 
   getCommand: function SSVr_GetCommand(aCommand)
   {
+    if (aCommand in window) {
+      return new window[aCommand]();
+    }
     return null;
   },
 
@@ -153,8 +160,17 @@ StyleSheetsViewer.prototype =
     this.mSelection = this.mView.getSheet(idx);
     this.mObsMan.dispatchEvent("selectionChange",
                                { selection: this.mSelection });
-  }
+  },
 
+  getSelectedSheet: function SSVr_GetSelectedSheet()
+  {
+    if (this.mView.selection.count == 1) {
+      let minAndMax = {};
+      this.mView.selection.getRangeAt(0, minAndMax, minAndMax);
+      return this.mView.getSheet(minAndMax.value);
+    }
+    return null;
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -326,3 +342,23 @@ function SSV_ToggleOpenState(aRow)
   this.mTree.invalidateRow(aRow);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//// Transactions
+
+function cmdEditInspectInNewWindow()
+{
+  this.mSheet = viewer.getSelectedSheet();
+}
+
+cmdEditInspectInNewWindow.prototype = {
+  isTransient: true,
+  merge: txnMerge,
+  QueryInterface: txnQueryInterface,
+
+  doTransaction: function InspectInNewWindow_DoTransaction()
+  {
+    if (this.mSheet) {
+      inspectObject(this.mSheet);
+    }
+  }
+};
