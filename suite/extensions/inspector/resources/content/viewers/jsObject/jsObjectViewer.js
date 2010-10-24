@@ -35,161 +35,182 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* JSObjectViewer --------------------------------------------
+/*****************************************************************************
+* JSObjectViewer -------------------------------------------------------------
 *  The viewer for all facets of a javascript object.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
+*   chrome://inspector/content/utils.js
+*   chrome://inspector/content/hooks.js
+*   chrome://inspector/content/jsutil/events/ObserverManager.js
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
-****************************************************************/
+*****************************************************************************/
 
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
 const kClipboardHelperCID  = "@mozilla.org/widget/clipboardhelper;1";
 
-////////////////////////////////////////////////////////////////////////////
-//// class JSObjectViewer
+//////////////////////////////////////////////////////////////////////////////
+//// Class JSObjectViewer
 
 function JSObjectViewer()
 {
   this.mObsMan = new ObserverManager(this);
 }
 
-JSObjectViewer.prototype = 
+JSObjectViewer.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
-  
+
   mSubject: null,
   mPane: null,
 
   ////////////////////////////////////////////////////////////////////////////
   //// interface inIViewer
 
-  get uid() { return "jsObject" },
-  get pane() { return this.mPane },
+  get uid()
+  {
+    return "jsObject";
+  },
 
-  get selection() { return this.mSelection },
-  
-  get subject() { return this.mSubject },
-  set subject(aObject) 
+  get pane()
+  {
+    return this.mPane;
+  },
+
+  get selection()
+  {
+    return this.mSelection;
+  },
+
+  get subject()
+  {
+    return this.mSubject;
+  },
+
+  set subject(aObject)
   {
     aObject = this.unwrapObject(aObject);
     this.mSubject = aObject;
     this.emptyTree(this.mTreeKids);
-    var ti = this.addTreeItem(this.mTreeKids, bundle.getString("root.title"), aObject, aObject);
+    var ti = this.addTreeItem(this.mTreeKids, bundle.getString("root.title"),
+                              aObject, aObject);
     ti.setAttribute("open", "true");
 
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
-  initialize: function(aPane)
+  initialize: function JSOVr_Initialize(aPane)
   {
     this.mPane = aPane;
     this.mTree = document.getElementById("treeJSObject");
     this.mTreeKids = document.getElementById("trchJSObject");
-    
+
     aPane.notifyViewerReady(this);
   },
 
-  destroy: function()
+  destroy: function JSOVr_Destroy()
   {
   },
-  
-  isCommandEnabled: function(aCommand)
+
+  isCommandEnabled: function JSOVr_IsCommandEnabled(aCommand)
   {
     return false;
   },
-  
-  getCommand: function(aCommand)
+
+  getCommand: function JSOVr_GetCommand(aCommand)
   {
     return null;
   },
 
-  unwrapObject: function(aObject)
-  {
-    /* unwrap() throws for primitive values, so don't call it for those */
-    if (typeof(aObject) === "object" && aObject &&
-        "unwrap" in XPCNativeWrapper) {
-        aObject = XPCNativeWrapper.unwrap(aObject);
-    }
-    return aObject;
-  },
-  
   ////////////////////////////////////////////////////////////////////////////
-  //// event dispatching
+  //// Event Dispatching
 
-  addObserver: function(aEvent, aObserver) { this.mObsMan.addObserver(aEvent, aObserver); },
-  removeObserver: function(aEvent, aObserver) { this.mObsMan.removeObserver(aEvent, aObserver); },
+  addObserver: function JSOVr_AddObserver(aEvent, aObserver)
+  {
+    this.mObsMan.addObserver(aEvent, aObserver);
+  },
+
+  removeObserver: function JSOVr_RemoveObserver(aEvent, aObserver)
+  {
+    this.mObsMan.removeObserver(aEvent, aObserver);
+  },
 
   ////////////////////////////////////////////////////////////////////////////
   //// UI Commands
 
-  cmdCopyValue: function()
+  cmdCopyValue: function JSOVr_CmdCopyValue()
   {
     var sel = getSelectedItem();
     if (sel) {
       var val = sel.__JSValue__;
       if (val) {
-        var helper = XPCU.getService(kClipboardHelperCID, "nsIClipboardHelper");
+        var helper = XPCU.getService(kClipboardHelperCID,
+                                     "nsIClipboardHelper");
         helper.copyString(val);
       }
     }
   },
-  
-  cmdEvalExpr: function()
+
+  cmdEvalExpr: function JSOVr_CmdEvalExpr()
   {
     var sel = getSelectedItem();
     if (sel) {
-      var win = openDialog("chrome://inspector/content/viewers/jsObject/evalExprDialog.xul", 
+      var win = openDialog("chrome://inspector/content/viewers/jsObject/" +
+                           "evalExprDialog.xul",
                            "_blank", "chrome", this, sel);
     }
-  },  
-  
-  doEvalExpr: function(aExpr, aItem, aNewView)
+  },
+
+  doEvalExpr: function JSOVr_DoEvalExpr(aExpr, aItem, aNewView)
   {
-    // TODO: I should really write some C++ code to execute the 
-    // js code in the js context of the inspected window
-    
+    // TODO: I should really write some C++ code to execute the js code in the
+    // js context of the inspected window
+
     try {
       var f = Function("target", aExpr);
       var result = f(aItem.__JSValue__);
-      
+
       if (result) {
         if (aNewView) {
           inspectObject(result);
-        } else {
+        }
+        else {
           this.subject = result;
         }
       }
-    } catch (ex) {
+    }
+    catch (ex) {
       dump("Error in expression.\n");
       throw (ex);
     }
-  },  
-  
-  cmdInspectInNewView: function()
+  },
+
+  cmdInspectInNewView: function JSOVr_CmdInspectInNewView()
   {
     var sel = getSelectedItem();
-    if (sel)
+    if (sel) {
       inspectObject(sel.__JSValue__);
+    }
   },
-  
-  ////////////////////////////////////////////////////////////////////////////
-  //// tree construction
 
-  emptyTree: function(aTreeKids)
+  ////////////////////////////////////////////////////////////////////////////
+  //// Tree Construction
+
+  emptyTree: function JSOVr_EmptyTree(aTreeKids)
   {
     while (aTreeKids.hasChildNodes()) {
       aTreeKids.removeChild(aTreeKids.lastChild);
     }
   },
-  
-  buildPropertyTree: function(aTreeChildren, aObject)
+
+  buildPropertyTree: function JSOVr_BuildPropertyTree(aTreeChildren, aObject)
   {
     // sort the properties
     var propertyNames = [];
-    for (var prop in aObject) {
+    for (let prop in aObject) {
       propertyNames.push(prop);
     }
 
@@ -198,30 +219,36 @@ JSObjectViewer.prototype =
     * A sorter for numeric values. Numerics come before non-numerics. If both
     * parameters are non-numeric, returns 0.
     *
-    * @param one object to compare
-    * @param another object to compare
-    * @return -1 if a should come before b, 1 if b should come before a, 0 if
-    *   they are equal
+    * @param a
+    *        One value to compare.
+    * @param b
+    *        The other value to compare against a.
+    * @return -1 if a should come before b, 1 if b should come before a, or 0
+    *         if they are equal
     */
     function sortNumeric(a, b) {
-      if (isNaN(a))
+      if (isNaN(a)) {
         return isNaN(b) ? 0 : 1;
-      if (isNaN(b))
+      }
+      if (isNaN(b)) {
         return -1;
+      }
       return a - b;
     }
 
    /**
-    * A sorter for the JavaScript object properties. Sort order: constants with
-    * numeric values sorted numerically by value then alphanumerically by name,
-    * all other constants sorted alphanumerically by name, non-constants with
-    * numeric names sorted numerically by name (ex: array indices), all other
-    * non-constants sorted alphanumerically by name.
+    * A sorter for the JavaScript object property names. Sort order: constants
+    * with numeric values sorted numerically by value then alphanumerically
+    * by name, all other constants sorted alphanumerically by name, non-
+    * constants with numeric names sorted numerically by name (ex: array
+    * indices), all other non-constants sorted alphanumerically by name.
     *
-    * @param one object to compare
-    * @param another object to compare
+    * @param a
+    *        One name to compare.
+    * @param b
+    *        The other name to compare against a.
     * @return -1 if a should come before b, 1 if b should come before a, 0 if
-    *   they are equal
+    *         they are equal
     */
     function sortFunction(a, b) {
       // assume capitalized non-numeric property names are constants
@@ -233,12 +260,13 @@ JSObjectViewer.prototype =
           // both are constants. sort by numeric value, then non-numeric name
           return sortNumeric(aObject[a], aObject[b]) || a.localeCompare(b);
         }
-        //a is constant, b is not
+        // a is constant, b is not
         return -1;
       }
-      if (bIsConstant)
-        //b is constant, a is not
+      if (bIsConstant) {
+        // b is constant, a is not
         return 1;
+      }
       // neither are constants. go by numeric property name, then non-numeric
       // property name
       return sortNumeric(a, b) || a.localeCompare(b);
@@ -246,46 +274,55 @@ JSObjectViewer.prototype =
     propertyNames.sort(sortFunction);
 
     // load them into the tree
-    for (var i = 0; i < propertyNames.length; i++) {
+    for (let i = 0; i < propertyNames.length; i++) {
       try {
         this.addTreeItem(aTreeChildren, propertyNames[i],
-                         this.unwrapObject(aObject[propertyNames[i]]), aObject);
-      } catch (ex) {
-        // hide unsightly NOT YET IMPLEMENTED errors when accessing certain properties
+                         this.unwrapObject(aObject[propertyNames[i]]),
+                         aObject);
+      }
+      catch (ex) {
+        // hide unsightly NOT YET IMPLEMENTED errors when accessing certain
+        // properties
       }
     }
   },
-  
-  addTreeItem: function(aTreeChildren, aName, aValue, aObject)
+
+  addTreeItem:
+    function JSOVr_AddTreeItem(aTreeChildren, aName, aValue, aObject)
   {
     var ti = document.createElement("treeitem");
     ti.__JSObject__ = aObject;
     ti.__JSValue__ = aValue;
-    
+
     var value;
     if (aValue === null) {
       value = "(null)";
-    } else if (aValue === undefined) {
+    }
+    else if (aValue === undefined) {
       value = "(undefined)";
-    } else {
+    }
+    else {
       try {
         value = aValue.toString();
         value = value.replace(/\n|\r|\t|\v/g, " ");
-      } catch (ex) {
+      }
+      catch (ex) {
         value = "";
       }
     }
-    
+
     ti.setAttribute("typeOf", typeof(aValue));
 
     if (typeof(aValue) == "object" && aValue !== null) {
       ti.setAttribute("container", "true");
-    } else if (typeof(aValue) == "string")
+    }
+    else if (typeof(aValue) == "string") {
       value = "\"" + value + "\"";
-    
+    }
+
     var tr = document.createElement("treerow");
     ti.appendChild(tr);
-    
+
     var tc = document.createElement("treecell");
     tc.setAttribute("label", aName);
     tr.appendChild(tc);
@@ -295,16 +332,17 @@ JSObjectViewer.prototype =
       tc.setAttribute("class", "inspector-null-value-treecell");
     }
     tr.appendChild(tc);
-    
+
     aTreeChildren.appendChild(ti);
 
     // listen for changes to open attribute
-    this.mTreeKids.addEventListener("DOMAttrModified", onTreeItemAttrModified, false);
-    
+    this.mTreeKids.addEventListener("DOMAttrModified", onTreeItemAttrModified,
+                                    false);
+
     return ti;
   },
-  
-  openTreeItem: function(aItem)
+
+  openTreeItem: function JSOVr_OpenTreeItem(aItem)
   {
     var treechildren = aItem.getElementsByTagName("treechildren").item(0);
     if (!treechildren) {
@@ -313,26 +351,37 @@ JSObjectViewer.prototype =
       aItem.appendChild(treechildren);
     }
   },
-  
-  onCreateContext: function(aPopup)
+
+  ////////////////////////////////////////////////////////////////////////////
+  //// Miscellaneous Utility Methods
+
+  unwrapObject: function JSOVr_UnwrapObject(aObject)
   {
+    /* unwrap() throws for primitive values, so don't call it for those */
+    if (typeof(aObject) === "object" && aObject &&
+        "unwrap" in XPCNativeWrapper) {
+      aObject = XPCNativeWrapper.unwrap(aObject);
+    }
+    return aObject;
   }
-  
 };
 
 function onTreeItemAttrModified(aEvent)
 {
-  if (aEvent.attrName == "open")
+  if (aEvent.attrName == "open") {
     viewer.openTreeItem(aEvent.target);
+  }
 }
 
 function getSelectedItem()
 {
   var tree = document.getElementById("treeJSObject");
-  if (tree.view.selection.count)
+  if (tree.view.selection.count) {
     return tree.contentView.getItemAtIndex(tree.currentIndex);
-  else 
-    return null;    
+  }
+  else {
+    return null;
+  }
 }
 
 function toggleItem(aItem)
