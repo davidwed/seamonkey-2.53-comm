@@ -46,5 +46,4 @@
 <!ENTITY cmdClearSearch.label "Bánaigh">
 <!ENTITY cmdHideSearchItems.label "Folaigh">
 <!ENTITY browserPanel.label "Brabhsálaí">
-<!ENTITY inspectNewWindow.label "Scrúdaigh i bhFuinneog Nua">
 <!ENTITY closeCmd.key "D">

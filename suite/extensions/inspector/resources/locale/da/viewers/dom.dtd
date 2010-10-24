@@ -70,7 +70,6 @@
   <!ENTITY cmdCopyXML.label "Kopier XML">
   <!ENTITY cmdBlink.label "Blink element">
   <!ENTITY cmdInspectBrowser.label "Inspicer indholdt dokument">
-  <!ENTITY cmdInspectInNewWindow.label "Inspicer i nyt vindue">
   
   <!ENTITY cmdShowPseudoClasses.label "Sæt Pseudo-klasser...">
   <!ENTITY cmdShowPseudoClasses.accesskey "p">

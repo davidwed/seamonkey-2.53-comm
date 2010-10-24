@@ -53,8 +53,6 @@
   <!ENTITY cmdToggleSearch.label "Výsledky hľadania">
 <!ENTITY browserPanel.label "Prehliadač">
   
-<!ENTITY inspectNewWindow.label "Preskúmať v novom okne">
-
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">
 

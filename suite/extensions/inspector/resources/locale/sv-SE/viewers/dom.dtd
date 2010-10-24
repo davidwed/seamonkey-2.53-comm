@@ -81,8 +81,6 @@
   <!ENTITY cmdBlink.accesskey "B">
   <!ENTITY cmdInspectBrowser.label "Inspektera dokumentet">
   <!ENTITY cmdInspectBrowser.accesskey "d">
-  <!ENTITY cmdInspectInNewWindow.label "Inspektera i nytt fönster">
-  <!ENTITY cmdInspectInNewWindow.accesskey "n">  
 
   <!ENTITY cmdShowPseudoClasses.label "Ange pseudoklasser…">
   <!ENTITY cmdShowPseudoClasses.accesskey "p">

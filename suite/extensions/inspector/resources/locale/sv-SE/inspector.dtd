@@ -52,7 +52,5 @@
 
 <!ENTITY browserPanel.label "Webbläsare">
 
-<!ENTITY inspectNewWindow.label "Inspektera i ett nytt fönster">
-
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

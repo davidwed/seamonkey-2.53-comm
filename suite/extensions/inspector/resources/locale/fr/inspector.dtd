@@ -54,7 +54,5 @@
 
 <!ENTITY browserPanel.label "Navigateur">
 
-<!ENTITY inspectNewWindow.label "Inspecter dans une nouvelle fenêtre">
-
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

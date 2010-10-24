@@ -78,8 +78,6 @@
 <!ENTITY cmdBlink.accesskey "e">
 <!ENTITY cmdInspectBrowser.label "Zbadaj wewnętrzny dokument">
 <!ENTITY cmdInspectBrowser.accesskey "Z">
-<!ENTITY cmdInspectInNewWindow.label "Zbadaj w nowym oknie">
-<!ENTITY cmdInspectInNewWindow.accesskey "b">
 
 <!ENTITY cmdShowPseudoClasses.label "Ustaw pseudoklasy…">
 <!ENTITY cmdShowPseudoClasses.accesskey "p">

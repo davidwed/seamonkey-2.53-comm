@@ -52,7 +52,5 @@
 
 <!ENTITY browserPanel.label "Prohlížeč">
 
-<!ENTITY inspectNewWindow.label "Prozkoumat v novém okně">
-
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

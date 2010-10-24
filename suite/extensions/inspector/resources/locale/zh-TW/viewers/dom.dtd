@@ -23,7 +23,6 @@
 <!ENTITY cmdCopyXML.label "複製 XML">
 <!ENTITY cmdBlink.label "閃爍項目">
 <!ENTITY cmdInspectBrowser.label "觀察內含文件">
-<!ENTITY cmdInspectInNewWindow.label "以新視窗檢視">
 <!ENTITY cmdShowPseudoClasses.label "設定虛擬類別...">
 <!ENTITY cmdShowPseudoClasses.accesskey "p">
 <!ENTITY pseudoClasses.title "虛擬類別">

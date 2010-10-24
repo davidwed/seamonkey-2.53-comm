@@ -14,3 +14,4 @@
 <!ENTITY mnEditRedo.label "重做">
 <!ENTITY mnEditUndo.accesskey "u">
 <!ENTITY mnEditUndo.label "撤销">
+<!ENTITY mnEditInspectInNewWindow.label "在新窗口中查看">

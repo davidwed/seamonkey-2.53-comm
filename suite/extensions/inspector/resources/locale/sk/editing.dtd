@@ -14,3 +14,5 @@
 <!ENTITY mnEditEdit.accesskey "U">
 <!ENTITY mnEditDelete.label "Odstrániť">
 <!ENTITY mnEditDelete.accesskey "O">
+<!ENTITY mnEditInspectInNewWindow.label "Preskúmať v novom okne">
+<!ENTITY mnEditInspectInNewWindow.accesskey "e">

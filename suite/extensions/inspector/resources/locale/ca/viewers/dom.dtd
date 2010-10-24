@@ -73,7 +73,6 @@
 <!ENTITY cmdCopyXML.label "Copia l'XML">
 <!ENTITY cmdBlink.label "Marca l'element">
 <!ENTITY cmdInspectBrowser.label "Inspeciona el document contingut">
-<!ENTITY cmdInspectInNewWindow.label "Inspecciona en una nova finestra">
   
 <!ENTITY cmdShowPseudoClasses.label "Defineix pseudo-classes...">
 <!ENTITY cmdShowPseudoClasses.accesskey "P">

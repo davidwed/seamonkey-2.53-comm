@@ -14,3 +14,4 @@
 <!ENTITY mnEditEdit.accesskey "E">
 <!ENTITY mnEditDelete.label "Suprimeix">
 <!ENTITY mnEditDelete.accesskey "S">
+<!ENTITY mnEditInspectInNewWindow.label "Inspecciona en una nova finestra">

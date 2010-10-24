@@ -52,7 +52,5 @@
 
 <!ENTITY browserPanel.label "Przeglądarka">
 
-<!ENTITY inspectNewWindow.label "Zbadaj w nowym oknie">
-
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

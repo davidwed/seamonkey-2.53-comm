@@ -76,8 +76,6 @@
 <!ENTITY cmdBlink.accesskey "Z">
 <!ENTITY cmdInspectBrowser.label "Preskúmať">
 <!ENTITY cmdInspectBrowser.accesskey "r">
-<!ENTITY cmdInspectInNewWindow.label "Preskúmať v novom okne">
-<!ENTITY cmdInspectInNewWindow.accesskey "e">
 
 <!ENTITY cmdShowPseudoClasses.label "Nastaviť pseudo-triedy">
 <!ENTITY cmdShowPseudoClasses.accesskey "N">

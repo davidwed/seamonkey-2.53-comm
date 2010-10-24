@@ -56,6 +56,4 @@
 
 <!ENTITY browserPanel.label "Browser">
 
-<!ENTITY inspectNewWindow.label "Inspecionar em nova janela">
-
 <!ENTITY closeCmd.key "W">

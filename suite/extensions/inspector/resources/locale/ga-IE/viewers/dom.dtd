@@ -59,7 +59,6 @@
 <!ENTITY cmdCopyXML.label "Cóipeáil XML">
 <!ENTITY cmdBlink.label "Cuir Eilimint ag Caochadh">
 <!ENTITY cmdInspectBrowser.label "Scrúdaigh an Cháipéis Chuimsithe">
-<!ENTITY cmdInspectInNewWindow.label "Scrúdaigh i bhFuinneog Nua">
 <!ENTITY cmdShowPseudoClasses.label "Socraigh Súdaicmí...">
 <!ENTITY cmdShowPseudoClasses.accesskey "S">
 <!ENTITY pseudoClasses.title "Súdaicmí">

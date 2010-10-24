@@ -70,7 +70,6 @@
   <!ENTITY cmdCopyXML.label "XML másolása">
   <!ENTITY cmdBlink.label "Elem villogtatása">
   <!ENTITY cmdInspectBrowser.label "Tartalmazott dokumentum vizsgálata">
-  <!ENTITY cmdInspectInNewWindow.label "Vizsgálat új ablakban">
   
   <!ENTITY cmdShowPseudoClasses.label "Látszólagos osztályok beállítása...">
   <!ENTITY cmdShowPseudoClasses.accesskey "L">

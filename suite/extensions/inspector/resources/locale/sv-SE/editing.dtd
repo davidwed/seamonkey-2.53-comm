@@ -14,3 +14,5 @@
 <!ENTITY mnEditEdit.accesskey "R">
 <!ENTITY mnEditDelete.label "Ta bort">
 <!ENTITY mnEditDelete.accesskey "T">
+<!ENTITY mnEditInspectInNewWindow.label "Inspektera i nytt fönster">
+<!ENTITY mnEditInspectInNewWindow.accesskey "n">  

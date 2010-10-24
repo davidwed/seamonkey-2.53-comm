@@ -15,3 +15,4 @@
 <!ENTITY mnEditEdit.accesskey "e">
 <!ENTITY mnEditDelete.label "刪除">
 <!ENTITY mnEditDelete.accesskey "d">
+<!ENTITY mnEditInspectInNewWindow.label "以新視窗檢視">

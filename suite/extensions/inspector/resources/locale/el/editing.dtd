@@ -14,3 +14,4 @@
 <!ENTITY mnEditEdit.accesskey "Ε">
 <!ENTITY mnEditDelete.label "Διαγραφή">
 <!ENTITY mnEditDelete.accesskey "δ">
+<!ENTITY mnEditInspectInNewWindow.label "Επιθεώρηση σε νέο παράθυρο">

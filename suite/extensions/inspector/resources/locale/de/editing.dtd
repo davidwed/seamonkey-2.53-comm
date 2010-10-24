@@ -14,3 +14,5 @@
 <!ENTITY mnEditEdit.accesskey "B">
 <!ENTITY mnEditDelete.label "Löschen">
 <!ENTITY mnEditDelete.accesskey "L">
+<!ENTITY mnEditInspectInNewWindow.label "In neuem Fenster inspizieren">
+<!ENTITY mnEditInspectInNewWindow.accesskey "F">

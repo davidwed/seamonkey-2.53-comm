@@ -67,8 +67,6 @@
 <!ENTITY cmdBlink.accesskey "с">
 <!ENTITY cmdInspectBrowser.label "Исследовать открытый документ">
 <!ENTITY cmdInspectBrowser.accesskey "т">
-<!ENTITY cmdInspectInNewWindow.label "Исследовать в новом окне">
-<!ENTITY cmdInspectInNewWindow.accesskey "н">
 <!ENTITY cmdShowPseudoClasses.label "Указать псевдоклассы…">
 <!ENTITY cmdShowPseudoClasses.accesskey "У">
 <!ENTITY pseudoClasses.title "Псевдоклассы">

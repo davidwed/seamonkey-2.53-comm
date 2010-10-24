@@ -35,7 +35,6 @@
 <!ENTITY cmdUndo.accesskey "U">
 <!ENTITY cmdUndo.label "撤销">
 <!ENTITY cmdViewSearchItem.label "查看...">
-<!ENTITY inspectNewWindow.label "在新窗口中查看">
 <!ENTITY mnEdit.accesskey "E">
 <!ENTITY mnEdit.label "编辑">
 <!ENTITY mnFile.accesskey "F">

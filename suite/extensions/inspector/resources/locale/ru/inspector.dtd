@@ -46,6 +46,5 @@
 <!ENTITY cmdFlashOnSelect.label "Подсвечивать выбранный элемент">
 <!ENTITY cmdFlashOnSelect.accesskey "ч">
 <!ENTITY browserPanel.label "Браузер">
-<!ENTITY inspectNewWindow.label "Исследовать в новом окне">
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

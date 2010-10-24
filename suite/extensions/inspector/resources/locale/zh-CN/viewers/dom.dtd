@@ -7,7 +7,6 @@
 <!ENTITY cmdFlashSelected.label "加亮所选元素">
 <!ENTITY cmdInsertNode.label "插入...">
 <!ENTITY cmdInspectBrowser.label "查看包含的文档">
-<!ENTITY cmdInspectInNewWindow.label "在新窗口中查看">
 <!ENTITY cmdSelectByClick.accesskey "s">
 <!ENTITY cmdSelectByClick.label "点击选择元素">
 <!ENTITY cmdShowColumnsDialog.accesskey "c">

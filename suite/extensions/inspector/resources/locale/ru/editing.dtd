@@ -14,3 +14,5 @@
 <!ENTITY mnEditEdit.accesskey "И">
 <!ENTITY mnEditDelete.label "Удалить">
 <!ENTITY mnEditDelete.accesskey "У">
+<!ENTITY mnEditInspectInNewWindow.label "Исследовать в новом окне">
+<!ENTITY mnEditInspectInNewWindow.accesskey "н">

@@ -77,8 +77,6 @@
   <!ENTITY cmdBlink.accesskey "b">
   <!ENTITY cmdInspectBrowser.label "Enthaltenes Dokument inspizieren">
   <!ENTITY cmdInspectBrowser.accesskey "E">
-  <!ENTITY cmdInspectInNewWindow.label "In neuem Fenster inspizieren">
-  <!ENTITY cmdInspectInNewWindow.accesskey "F">
 
   <!ENTITY cmdShowPseudoClasses.label "Pseudo-Klassen setzen…">
   <!ENTITY cmdShowPseudoClasses.accesskey "P">

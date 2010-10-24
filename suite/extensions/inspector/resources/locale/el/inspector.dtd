@@ -55,8 +55,6 @@
 
 <!ENTITY browserPanel.label "Φυλλομετρητής">
 
-<!ENTITY inspectNewWindow.label "Επιθεώρηση σε νέο παράθυρο">
-
 <!ENTITY closeCmd.key "W">
 
 <!ENTITY  mnInspectDocument.label "Επιθεώρηση εγγράφου">

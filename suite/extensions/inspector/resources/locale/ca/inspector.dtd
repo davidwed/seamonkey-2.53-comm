@@ -46,6 +46,5 @@
 <!ENTITY cmdClearSearch.label "Neteja">
 <!ENTITY cmdHideSearchItems.label "Amaga">
 <!ENTITY browserPanel.label "Navegador">
-<!ENTITY inspectNewWindow.label "Inspecciona en una nova finestra">
 
 <!ENTITY closeCmd.key "W">

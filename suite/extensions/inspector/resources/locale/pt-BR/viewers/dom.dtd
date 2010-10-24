@@ -71,7 +71,6 @@
   <!ENTITY cmdCopyXML.label "Copiar XML">
   <!ENTITY cmdBlink.label "Piscar elemento">
   <!ENTITY cmdInspectBrowser.label "Inspect Contained Document">
-  <!ENTITY cmdInspectInNewWindow.label "Inspecionar em nova janela">
   
   <!ENTITY cmdShowPseudoClasses.label "Definir pseudoclasses...">
   <!ENTITY cmdShowPseudoClasses.accesskey "D">

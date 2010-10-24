@@ -50,7 +50,5 @@
 
 <!ENTITY browserPanel.label "Nettleser">
 
-<!ENTITY inspectNewWindow.label "Inspiser i nytt vindu">
-
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

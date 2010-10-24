@@ -68,7 +68,6 @@
   <!ENTITY cmdCopyXML.label "Αντιγραφή XML">
   <!ENTITY cmdBlink.label "Αναβόσβημα στοιχείου">
   <!ENTITY cmdInspectBrowser.label "Επιθεώρηση συμπεριλαμβανόμενου εγγραφου">
-  <!ENTITY cmdInspectInNewWindow.label "Επιθεώρηση σε νέο παράθυρο">
   
   <!ENTITY cmdShowPseudoClasses.label "Ορισμός Pseudo-classes...">
   <!ENTITY cmdShowPseudoClasses.accesskey "p">
