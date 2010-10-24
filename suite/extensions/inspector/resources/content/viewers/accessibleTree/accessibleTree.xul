@@ -49,6 +49,10 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <script type="application/javascript"
+          src="chrome://inspector/content/hooks.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>

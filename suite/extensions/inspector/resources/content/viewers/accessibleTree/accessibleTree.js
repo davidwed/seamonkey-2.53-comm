@@ -40,7 +40,11 @@
 *  The viewer for the accessible tree of a document.
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 * REQUIRED IMPORTS:
+*   chrome://inspector/content/hooks.js
+*   chrome://inspector/content/utils.js
+*   chrome://inspector/content/jsutil/events/ObserverManager.js
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
+*   chrome://inspector/content/jsutil/xul/FrameExchange.js
 ****************************************************************/
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,11 +127,18 @@ AccessibleTreeViewer.prototype =
 
   isCommandEnabled: function isCommandEnabled(aCommand)
   {
+    switch (aCommand) {
+      case "cmdEditInspectInNewWindow":
+        return this.mTree.view.selection.count == 1;
+    }
     return false;
   },
 
   getCommand: function getCommand(aCommand)
   {
+    if (aCommand in window) {
+      return new window[aCommand]();
+    }
     return null;
   },
 
@@ -152,13 +163,6 @@ AccessibleTreeViewer.prototype =
     }
   },
 
-  cmdInspectInNewView: function cmdInspectInNewView()
-  {
-    var sel = this.getSelectedAccessible();
-    if (sel)
-      inspectObject(sel);
-  },
-
   // stuff
 
   onItemSelected: function onItemSelected()
@@ -173,12 +177,18 @@ AccessibleTreeViewer.prototype =
       var flasher = this.mPane.panelset.flasher;
       flasher.flashElementOnSelect(this.mSelection);
     }
+
+    viewer.pane.panelset.updateAllCommands();
   },
 
   getSelectedAccessible: function getSelectedAccessible()
   {
-    var idx = this.mTree.currentIndex;
-    return this.mView.getAccessible(idx);
+    if (this.mTree.view.selection.count == 1) {
+      var rangeMinAndMax = {};
+      this.mTree.view.selection.getRangeAt(0, rangeMinAndMax, rangeMinAndMax);
+      return this.mView.getAccessible(rangeMinAndMax.value);
+    }
+    return null;
   }
 };
 
@@ -538,3 +548,23 @@ function inAccTreeViewNode(aAccessible)
   this.isContainer = false;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//// Transactions
+
+function cmdEditInspectInNewWindow()
+{
+  this.mNode = viewer.getSelectedAccessible();
+}
+
+cmdEditInspectInNewWindow.prototype = {
+  isTransient: true,
+  merge: txnMerge,
+  QueryInterface: txnQueryInterface,
+
+  doTransaction: function InspectInNewWindow_DoTransaction()
+  {
+    if (this.mNode) {
+      inspectObject(this.mNode);
+    }
+  }
+};
