@@ -49,13 +49,15 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <script type="application/javascript"
+          src="chrome://inspector/content/utils.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/hooks.js"/>
+  <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
-  <script type="application/javascript"
-          src="chrome://inspector/content/hooks.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/viewers/accessibleRelations/accessibleRelations.js"/>
 
@@ -92,7 +94,8 @@
   <tree id="olAccessibleTargets"
         class="plain"
         flex="1"
-        context="popupContext">
+        context="popupContext"
+        onselect="viewer.pane.panelset.updateAllCommands();">
 
     <treecols>
       <treecol id="olcRole"

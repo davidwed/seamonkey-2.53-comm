@@ -127,11 +127,18 @@ AccessibleRelationsViewer.prototype =
 
   isCommandEnabled: function isCommandEnabled(aCommand)
   {
+    switch (aCommand) {
+      case "cmdEditInspectInNewWindow":
+        return !!this.getSelectedTargetDOMNode();
+    }
     return false;
   },
 
   getCommand: function getCommand(aCommand)
   {
+    if (aCommand in window) {
+      return new window[aCommand]();
+    }
     return null;
   },
 
@@ -158,14 +165,9 @@ AccessibleRelationsViewer.prototype =
     this.mTargetsTreeBox.view = this.mTargetsView;
   },
 
-  cmdInspectInNewView: function cmdInspectInNewView()
+  getSelectedTargetDOMNode: function getSelectedTargetDOMNode()
   {
-    var idx = this.mTargetsTree.currentIndex;
-    if (idx >= 0) {
-      var node = this.mTargetsView.getDOMNode(idx);
-      if (node)
-        inspectObject(node);
-    }
+    return this.mTargetsView.getSelectedDOMNode();
   }
 };
 
@@ -274,3 +276,33 @@ function getDOMNode(aRow)
   return DOMNode;
 }
 
+AccessibleTargetsView.prototype.getSelectedDOMNode =
+  function getSelectedDOMNode()
+{
+  if (this.selection.count == 1) {
+    var rangeMinAndMax = {};
+    this.selection.getRangeAt(0, rangeMinAndMax, rangeMinAndMax);
+    return this.getDOMNode(rangeMinAndMax.value);
+  }
+  return null;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Transactions
+
+function cmdEditInspectInNewWindow() {
+  this.mNode = viewer.getSelectedTargetDOMNode();
+}
+
+cmdEditInspectInNewWindow.prototype = {
+  isTransient: true,
+  merge: txnMerge,
+  QueryInterface: txnQueryInterface,
+
+  doTransaction: function ARVr_InspectInNewWindow_DoTransaction()
+  {
+    if (this.mNode) {
+      inspectObject(this.mNode);
+    }
+  }
+}
