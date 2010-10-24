@@ -167,8 +167,7 @@ JSObjectViewer.prototype =
   {
     var sel = getSelectedItem();
     if (sel) {
-      var win = openDialog("chrome://inspector/content/viewers/jsObject/" +
-                           "evalExprDialog.xul",
+      var win = openDialog("chrome://inspector/content/viewers/jsObject/evalExprDialog.xul",
                            "_blank", "chrome", this, sel);
     }
   },
