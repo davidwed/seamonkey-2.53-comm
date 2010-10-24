@@ -82,26 +82,11 @@ StyleSheetsViewer.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// Interface inIViewer
 
-  get uid()
-  {
-    return "stylesheets";
-  },
+  get uid() { return "stylesheets"; },
+  get pane() { return this.mPane; },
+  get selection() { return this.mSelection; },
 
-  get pane()
-  {
-    return this.mPane;
-  },
-
-  get selection()
-  {
-    return this.mSelection;
-  },
-
-  get subject()
-  {
-    return this.mSubject;
-  },
-
+  get subject() { return this.mSubject; },
   set subject(aObject)
   {
     this.mView = new StyleSheetsView(aObject);
@@ -170,9 +155,8 @@ function StyleSheetsView(aDocument)
   this.mRowCount = 0;
 
   var ss = aDocument.styleSheets;
-  for (let i = 0; i < ss.length; ++i) {
+  for (let i = 0; i < ss.length; ++i)
     this.insertSheet(ss[i], 0, -1);
-  }
 }
 
 StyleSheetsView.prototype = new inBaseTreeView();
@@ -195,9 +179,8 @@ function SSV_InsertSheet(aSheet, aLevel, aRow)
   var count = 0;
   var rules = aSheet.cssRules;
   for (let i = 0; i < rules.length; ++i) {
-    if (rules[i].type == CSSRule.IMPORT_RULE) {
+    if (rules[i].type == CSSRule.IMPORT_RULE)
       ++count;
-    }
   }
   this.mChildCount[row] = count;
   ++this.mRowCount;
@@ -211,13 +194,11 @@ function SSV_GetCellText(aRow, aCol)
 {
   var rule = this.mSheets[aRow];
   if (aCol.id == "olcHref") {
-    if (rule.href) {
+    if (rule.href)
       return rule.href;
-    }
     // fall back for style elements
-    if (rule.ownerNode && rule.ownerNode.ownerDocument) {
+    if (rule.ownerNode && rule.ownerNode.ownerDocument)
       return rule.ownerNode.ownerDocument.documentURI;
-    }
   }
   else if (aCol.id == "olcRules") {
     return this.mSheets[aRow].cssRules.length;
@@ -248,9 +229,8 @@ function SSV_GetParentIndex(aRow)
 {
   var baseLevel = this.mLevels[aRow];
   for (let i = aRow - 1; i >= 0; --i) {
-    if (this.mLevels[i] < baseLevel) {
+    if (this.mLevels[i] < baseLevel)
       return i;
-    }
   }
   return -1;
 }
@@ -260,12 +240,10 @@ function SSV_HasNextSibling(aRow, aAfter)
 {
   var baseLevel = this.mLevels[aRow];
   for (let i = aAfter + 1; i < this.mRowCount; ++i) {
-    if (this.mLevels[i] < baseLevel) {
+    if (this.mLevels[i] < baseLevel)
       break;
-    }
-    if (this.mLevels[i] == baseLevel) {
+    if (this.mLevels[i] == baseLevel)
       return true;
-    }
   }
   return false;
 }
@@ -283,9 +261,8 @@ function SSV_ToggleOpenState(aRow)
   if (this.mOpen[aRow]) {
     var baseLevel = this.mLevels[aRow];
     for (let i = aRow + 1; i < this.mRowCount; ++i) {
-      if (this.mLevels[i] <= baseLevel) {
+      if (this.mLevels[i] <= baseLevel)
         break;
-      }
       ++changeCount;
     }
     // shift data up
@@ -295,8 +272,7 @@ function SSV_ToggleOpenState(aRow)
     this.mChildCount.splice(aRow + 1, changeCount);
     changeCount = -changeCount;
     this.mRowCount += changeCount;
-  }
-  else {
+  } else {
     // for quick access
     var rules = this.mSheets[aRow].cssRules;
     var level = this.mLevels[aRow] + 1;

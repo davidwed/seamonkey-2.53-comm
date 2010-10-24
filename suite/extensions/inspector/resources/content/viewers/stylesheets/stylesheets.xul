@@ -20,7 +20,7 @@
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
 
   <tree id="olStyleSheets" class="plain" treelines="true" flex="1"
-        seltype="single" onselect="viewer.onItemSelected()">
+            onselect="viewer.onItemSelected()">
     <treecols>
       <treecol id="olcHref" label="&sheetLocation.label;" primary="true"
                persist="width,hidden,ordinal" flex="1"/>
