@@ -1,18 +1,19 @@
 <!ENTITY mnEditUndo.label "Отменить">
-<!ENTITY mnEditUndo.accesskey "О">
+<!ENTITY mnEditUndo.accesskey "м">
 <!ENTITY mnEditRedo.label "Повторить">
-<!ENTITY mnEditRedo.accesskey "П">
+<!ENTITY mnEditRedo.accesskey "в">
 <!ENTITY mnEditCut.label "Вырезать">
-<!ENTITY mnEditCut.accesskey "В">
+<!ENTITY mnEditCut.accesskey "ы">
 <!ENTITY mnEditCopy.label "Копировать">
-<!ENTITY mnEditCopy.accesskey "К">
+<!ENTITY mnEditCopy.accesskey "п">
 <!ENTITY mnEditPaste.label "Вставить">
 <!ENTITY mnEditPaste.accesskey "с">
 <!ENTITY mnEditInsert.label "Вставка">
 <!ENTITY mnEditInsert.accesskey "т">
 <!ENTITY mnEditEdit.label "Изменить">
-<!ENTITY mnEditEdit.accesskey "И">
+<!ENTITY mnEditEdit.accesskey "з">
 <!ENTITY mnEditDelete.label "Удалить">
-<!ENTITY mnEditDelete.accesskey "У">
+<!ENTITY mnEditDelete.accesskey "д">
 <!ENTITY mnEditInspectInNewWindow.label "Исследовать в новом окне">
-<!ENTITY mnEditInspectInNewWindow.accesskey "н">
+<!ENTITY mnEditInspectInNewWindow.accesskey "о">
+<!ENTITY mnEditInspectInNewWindow.key "I">
