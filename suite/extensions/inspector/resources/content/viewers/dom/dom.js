@@ -265,6 +265,19 @@ DOMViewer.prototype =
       case "cmdEditCopy":
       case "cmdEditDelete":
         return !!selectedNode;
+      case "cmdInspectBrowser":
+        if (!(selectedNode instanceof nsIDOMElement)) {
+          return false;
+        }
+
+        let n = selectedNode.localName.toLowerCase();
+        return n == "tabbrowser" || n == "browser" || n == "iframe" ||
+               n == "frame" || n == "editor";
+      case "cmdBlink":
+        return selectedNode instanceof nsIDOMElement;
+      case "cmdCopyXML":
+      case "cmdShowPseudoClasses":
+        return true;
       case "cmdEditInspectInNewWindow":
         return this.mDOMTree.view.selection.count == 1;
     }
@@ -501,12 +514,6 @@ DOMViewer.prototype =
     this.flashElement(this.selectedNode);
   },
 
-  cmdBlinkIsValid: function DVr_CmdBlinkIsValid()
-  {
-    return this.selectedNode &&
-           this.selectedNode.nodeType == nsIDOMNode.ELEMENT_NODE;
-  },
-
   onTreeSelectionChange: function DVr_OnTreeSelectionChange()
   {
     // NB: We're called on deselection, too.
@@ -628,52 +635,81 @@ DOMViewer.prototype =
     }
   },
 
-  onContextCreate: function DVr_OnContextCreate(aPP)
+  onPopupShowing: function DVr_OnPopupShowing(aPopup)
   {
-    var mi, cmd;
-    for (var i = 0; i < aPP.childNodes.length; ++i) {
-      mi = aPP.childNodes[i];
-      if (mi.hasAttribute("observes")) {
-        cmd = document.getElementById(mi.getAttribute("observes"));
-        if (cmd && cmd.hasAttribute("isvalid")) {
-          try {
-            var isValid = new Function(cmd.getAttribute("isvalid"));
-          }
-          catch (ex) { /* die quietly on syntax error in handler */ }
-          if (!isValid()) {
-            mi.setAttribute("hidden", "true");
-          }
-          else {
-            mi.removeAttribute("hidden");
-          }
+    if (aPopup.id != "ppDOMContext") {
+      // This is a nested menupopup, and it should have been already taken
+      // care of.
+      return;
+    }
+    this.checkMenu(aPopup);
+  },
+
+  /**
+   * Recursively enable/disable descendants of a given popup, based on whether
+   * their commands are enabled or disabled.  If the descendant has a
+   * checkvalid attribute, the descendant will be hidden as well as disabled.
+   * Recursively checked menus will be enabled or disabled depending on
+   * whether there are one or more enabled children in their respective
+   * menupopups.
+   * @param aPopup
+   *        The menupopup at which to start checking.
+   * @return true if the popup contains any enabled items
+   */
+  checkMenu: function DVr_CheckMenu(aPopup) {
+    // We can't use XBL getters/setters here, because we're using recursion,
+    // and items in nested menus won't have CSS frames since they're not
+    // visible.
+    var hasEnabledItems = false;
+    for (let i = 0; i < aPopup.childNodes.length; ++i) {
+      let el = aPopup.childNodes[i];
+      if (el.localName == "menuseparator") {
+        continue;
+      }
+      let subject = el;
+      let isEnabled = false;
+      let checkValid = false;
+      if (el.hasAttribute("command")) {
+        let cmd = document.getElementById(el.getAttribute("command"));
+        if (cmd) {
+          checkValid = el.hasAttribute("checkvalid");
+          isEnabled = this.isCommandEnabled(cmd.id);
+          subject = cmd;
         }
       }
-    }
-  },
+      else if (el.localName == "menu") {
+        let kid = el.firstChild;
+        while (kid) {
+          if (kid.localName == "menupopup") {
+            // Disable this menu if none of the descendants are enabled.
+            isEnabled = this.checkMenu(kid);
+            break;
+          }
+          kid = kid.nextSibling;
+        }
+      }
+      else if (el.getAttribute("disabled") != "true") {
+        // There is no command here.  (Maybe we're being extended?)  We'll
+        // leave it up to third parties to manage enabling/disabling their own
+        // menuitems, and assume that they already reflect the correct state
+        // by the time we're called.
+        isEnabled = true;
+      }
 
-  onCommandPopupShowing: function DVr_OnCommandPopupShowing(aMenuPopup)
-  {
-    for (var i = 0; i < aMenuPopup.childNodes.length; i++) {
-      var commandId = aMenuPopup.childNodes[i].getAttribute("command");
-      if (viewer.isCommandEnabled(commandId)) {
-        document.getElementById(commandId).setAttribute("disabled", "false");
+      if (isEnabled) {
+        hasEnabledItems = true;
+        subject.removeAttribute("disabled");
       }
       else {
-        document.getElementById(commandId).setAttribute("disabled", "true");
+        subject.setAttribute("disabled", "true");
+      }
+
+      if (checkValid) {
+        el.hidden = !isEnabled;
       }
     }
-  },
 
-  cmdInspectBrowserIsValid: function DVr_CmdInspectBrowserIsValid()
-  {
-    var node = viewer.selectedNode;
-    if (!node || node.nodeType != nsIDOMNode.ELEMENT_NODE) {
-      return false;
-    }
-
-    var n = node.localName.toLowerCase();
-    return n == "tabbrowser" || n == "browser" || n == "iframe" ||
-           n == "frame" || n == "editor";
+    return hasEnabledItems;
   },
 
   cmdInspectBrowser: function DVr_CmdInspectBrowser()

@@ -35,14 +35,12 @@
 
   <commandset>
     <command id="cmdInspectBrowser"
-             isvalid="return viewer.cmdInspectBrowserIsValid()"
              oncommand="viewer.cmdInspectBrowser()"/>
 
     <command id="cmdCopyXML"
              oncommand="viewer.cmdCopySelectedXML()"/>
 
     <command id="cmdBlink"
-             isvalid="return viewer.cmdBlinkIsValid();"
              oncommand="viewer.cmdBlink()"/>
 
     <command id="cmdShowPseudoClasses"
@@ -74,18 +72,19 @@
 
   <popupset id="psPopups">
     <menupopup id="ppDOMContext"
-               onpopupshowing="viewer.onContextCreate(this)">
+               onpopupshowing="viewer.onPopupShowing(event.target)">
       <menuitem id="mnEditInspectInNewWindow"/>
       <menuitem label="&cmdInspectBrowser.label;"
                 accesskey="&cmdInspectBrowser.accesskey;"
-                observes="cmdInspectBrowser"/>
+                checkvalid="true"
+                command="cmdInspectBrowser"/>
       <menuseparator/>
       <menuitem id="mnEditCut"/>
       <menuitem id="mnEditCopy"/>
       <menu id="mnEditPasteMenu"
             label="&mnEditPasteMenu.label;"
             accesskey="&mnEditPasteMenu.accesskey;">
-        <menupopup onpopupshowing="viewer.onCommandPopupShowing(this)">
+        <menupopup>
           <!-- keep older functionality of paste command for paste menu in DOM
                Nodes viewer -->
           <menuitem id="mnEditPasteAfter"
@@ -120,7 +119,7 @@
       <menu id="mnEditInsertMenu"
             label="&mnEditInsertMenu.label;"
             accesskey="&mnEditInsertMenu.accesskey;">
-        <menupopup onpopupshowing="viewer.onCommandPopupShowing(this)">
+        <menupopup>
           <menuitem id="mnEditInsertAfter"
                     label="&mnEditInsertAfter.label;"
                     accesskey="&mnEditInsertAfter.accesskey;"
@@ -143,14 +142,15 @@
       <menuseparator/>
       <menuitem label="&cmdCopyXML.label;"
                 accesskey="&cmdCopyXML.accesskey;"
-                observes="cmdCopyXML"/>
+                command="cmdCopyXML"/>
       <menuseparator/>
       <menuitem label="&cmdBlink.label;"
                 accesskey="&cmdBlink.accesskey;"
-                observes="cmdBlink"/>
+                checkvalid="true"
+                command="cmdBlink"/>
       <menuitem label="&cmdShowPseudoClasses.label;"
                 accesskey="&cmdShowPseudoClasses.accesskey;"
-                observes="cmdShowPseudoClasses"/>
+                command="cmdShowPseudoClasses"/>
     </menupopup>
   </popupset>
 
