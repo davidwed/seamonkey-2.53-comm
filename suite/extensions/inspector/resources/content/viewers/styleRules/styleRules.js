@@ -36,29 +36,31 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* StyleRulesViewer --------------------------------------------
+/*****************************************************************************
+* StyleRulesViewer -----------------------------------------------------------
 *  The viewer for CSS style rules that apply to a DOM element.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   chrome://inspector/content/utils.js
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
 *   chrome://inspector/content/jsutil/rdf/RDFU.js
 *   chrome://global/content/viewSourceUtils.js
-****************************************************************/
+*****************************************************************************/
 
-//////////// global variables /////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Variables
 
 var viewer;
 var gPromptService;
 
-//////////// global constants ////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Constants
 
 const kDOMUtilsCID = "@mozilla.org/inspector/dom-utils;1";
 const kPromptServiceCID = "@mozilla.org/embedcomp/prompt-service;1";
 const kClipboardHelperCID = "@mozilla.org/widget/clipboardhelper;1";
 
-/////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 window.addEventListener("load", StyleRulesViewer_initialize, false);
 
@@ -70,8 +72,8 @@ function StyleRulesViewer_initialize()
   gPromptService = XPCU.getService(kPromptServiceCID, "nsIPromptService");
 }
 
-////////////////////////////////////////////////////////////////////////////
-//// class StyleRulesViewer
+//////////////////////////////////////////////////////////////////////////////
+//// Class StyleRulesViewer
 
 function StyleRulesViewer() // implements inIViewer
 {
@@ -95,14 +97,28 @@ StyleRulesViewer.prototype =
   mPanel: null,
 
   ////////////////////////////////////////////////////////////////////////////
-  //// interface inIViewer
+  //// Interface inIViewer
 
-  get uid() { return "styleRules" },
-  get pane() { return this.mPanel },
+  get uid()
+  {
+    return "styleRules"
+  },
 
-  get selection() { return null },
+  get pane()
+  {
+    return this.mPanel
+  },
 
-  get subject() { return this.mSubject },
+  get selection()
+  {
+    return null
+  },
+
+  get subject()
+  {
+    return this.mSubject
+  },
+
   set subject(aObject)
   {
     this.mSubject = aObject;
@@ -184,7 +200,8 @@ StyleRulesViewer.prototype =
         var value = { value: "" };
         var dummy = { value: false };
 
-        if (!gPromptService.prompt(window, title, msg, property, null, dummy)) {
+        if (!gPromptService.prompt(window, title, msg, property, null,
+                                   dummy)) {
           return null;
         }
 
@@ -220,7 +237,7 @@ StyleRulesViewer.prototype =
   },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// event dispatching
+  //// Event Dispatching
 
   addObserver: function SRVr_AddObserver(aEvent, aObserver)
   {
@@ -240,8 +257,9 @@ StyleRulesViewer.prototype =
   cmdCopySelectedFileURI: function SRVr_CmdCopySelectedFileURI()
   {
     var rule = this.getSelectedRule();
-    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href)
+    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href) {
       return;
+    }
     var selectedURI = rule.parentStyleSheet.href;
     var helper = XPCU.getService(kClipboardHelperCID, "nsIClipboardHelper");
 
@@ -251,20 +269,23 @@ StyleRulesViewer.prototype =
   cmdViewSelectedFileURI: function SRVr_CmdViewSelectedFileURI()
   {
     var rule = this.getSelectedRule();
-    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href)
+    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href) {
       return;
+    }
     var selectedURI = rule.parentStyleSheet.href;
     var lineNumber =  rule.type == CSSRule.STYLE_RULE ?
                         this.mRuleView.mDOMUtils.getRuleLine(rule) : null;
 
     // 1.9.0 toolkit doesn't have this method
-    if ("viewSource" in gViewSourceUtils)
+    if ("viewSource" in gViewSourceUtils) {
       gViewSourceUtils.viewSource(selectedURI, null, null, lineNumber);
-    else
+    }
+    else {
       openDialog("chrome://global/content/viewSource.xul",
                  "_blank",
                  "all,dialog=no",
                  selectedURI, null, null, lineNumber, null);
+    }
   },
 
   ////////////////////////////////////////////////////////////////////////////
@@ -280,8 +301,9 @@ StyleRulesViewer.prototype =
 
   getSelectedProp: function SRVr_GetSelectedProp()
   {
-    if (this.mPropsView.selection.count != 1)
+    if (this.mPropsView.selection.count != 1) {
       return null;
+    }
     var dec = this.getSelectedDec();
     // API awkwardness
     var min = {}, max = {};
@@ -322,14 +344,14 @@ StyleRulesViewer.prototype =
   onPopupShowing: function SRVr_OnPopupShowing(aCommandSetId)
   {
     var commandset = document.getElementById(aCommandSetId);
-    for (var i = 0; i < commandset.childNodes.length; i++) {
+    for (let i = 0; i < commandset.childNodes.length; i++) {
       var command = commandset.childNodes[i];
       command.setAttribute("disabled", !viewer.isCommandEnabled(command.id));
     }
   }
 };
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// StyleRuleView
 
 function StyleRuleView(aObject)
@@ -368,8 +390,7 @@ StyleRuleView.prototype.mOpen = null;
 StyleRuleView.prototype.mRules = null;
 StyleRuleView.prototype.mStyleAttribute = null;
 
-StyleRuleView.prototype.getRuleAt =
-function SRV_GetRuleAt(aRow)
+StyleRuleView.prototype.getRuleAt = function SRV_GetRuleAt(aRow)
 {
   if (aRow >= 0) {
     if (this.mRules) {
@@ -387,8 +408,7 @@ function SRV_GetRuleAt(aRow)
   return null;
 }
 
-StyleRuleView.prototype.getDecAt =
-function SRV_GetDecAt(aRow)
+StyleRuleView.prototype.getDecAt = function SRV_GetDecAt(aRow)
 {
   if (aRow >= 0) {
     if (this.mRules) {
@@ -402,7 +422,8 @@ function SRV_GetDecAt(aRow)
       catch (ex) {
       }
     }
-    // for CSSStyleRule, CSSFontFaceRule, CSSPageRule, and ElementCSSInlineStyle
+    // for CSSStyleRule, CSSFontFaceRule, CSSPageRule, and
+    // ElementCSSInlineStyle
     else if ("style" in this.mSheetRules[aRow]) {
       return this.mSheetRules[aRow].style;
     }
@@ -414,32 +435,36 @@ StyleRuleView.prototype.getChildCount = function SRV_GetChildCount(aRow)
 {
   if (aRow >= 0) {
     var rule = this.mSheetRules[aRow];
-    if (rule instanceof CSSImportRule)
+    if (rule instanceof CSSImportRule) {
       return rule.styleSheet ? rule.styleSheet.cssRules.length : 0;
+    }
     if (rule instanceof CSSMediaRule ||
-        rule instanceof CSSMozDocumentRule)
+        rule instanceof CSSMozDocumentRule) {
       return rule.cssRules.length;
+    }
   }
   return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//// interface nsITreeView (override inBaseTreeView)
+//////////////////////////////////////////////////////////////////////////////
+//// Interface nsITreeView (Override inBaseTreeView)
 
-StyleRuleView.prototype.__defineGetter__("rowCount",
-function()
+StyleRuleView.prototype.__defineGetter__("rowCount", function()
 {
-  if (this.mRules)
+  if (this.mRules) {
     return this.mRules.Count() + (this.mStyleAttribute ? 1 : 0);
-  if (this.mSheetRules)
+  }
+  if (this.mSheetRules) {
     return this.mSheetRules.length;
+  }
   return 0;
 });
 
-StyleRuleView.prototype.getCellText =
-function SRV_GetCellText(aRow, aCol)
+StyleRuleView.prototype.getCellText = function SRV_GetCellText(aRow, aCol)
 {
-  if (aRow > this.rowCount) return "";
+  if (aRow > this.rowCount) {
+    return "";
+  }
 
   // special case for the style attribute
   if (this.mStyleAttribute && aRow == this.mRules.Count()) {
@@ -459,7 +484,9 @@ function SRV_GetCellText(aRow, aCol)
   }
 
   var rule = this.getRuleAt(aRow);
-  if (!rule) return "";
+  if (!rule) {
+    return "";
+  }
 
   if (aCol.id == "olcRule") {
     if (rule instanceof CSSStyleRule) {
@@ -491,31 +518,35 @@ function SRV_GetCellText(aRow, aCol)
 
 StyleRuleView.prototype.getLevel = function SRV_GetLevel(aRow)
 {
-  if (aRow in this.mLevel)
+  if (aRow in this.mLevel) {
     return this.mLevel[aRow];
+  }
   return 0;
 }
 
 StyleRuleView.prototype.getParentIndex = function SRV_GetParentIndex(aRow)
 {
   var level = this.getLevel(aRow);
-  for (var i = aRow - 1; i >= 0; --i) {
-    if (this.getLevel(i) < level)
+  for (let i = aRow - 1; i >= 0; --i) {
+    if (this.getLevel(i) < level) {
       return i;
+    }
   }
   return -1;
 }
 
 StyleRuleView.prototype.hasNextSibling =
-function SRV_HasNextSibling(aRow, aAfter)
+  function SRV_HasNextSibling(aRow, aAfter)
 {
   var baseLevel = this.getLevel(aRow);
   var rowCount = this.rowCount; // quick access since this property is dynamic
-  for (var i = aAfter + 1; i < rowCount; ++i) {
-    if (this.getLevel(i) < baseLevel)
+  for (let i = aAfter + 1; i < rowCount; ++i) {
+    if (this.getLevel(i) < baseLevel) {
       break;
-    if (this.getLevel(i) == baseLevel)
+    }
+    if (this.getLevel(i) == baseLevel) {
       return true;
+    }
   }
   return false;
 }
@@ -548,11 +579,13 @@ StyleRuleView.prototype.toggleOpenState = function SRV_ToggleOpenState(aRow)
   var childLevel = this.mLevel[aRow] + 1;
   if (this.mOpen[aRow]) {
     // find the number of children and other descendants
-    for (var i = aRow + 1; i < this.mSheetRules.length; ++i) {
-      if (this.mLevel[i] < childLevel)
+    let count = this.mSheetRules.length - aRow - 1;
+    for (let i = aRow + 1, n = this.mSheetRules.length; i < n; ++i) {
+      if (this.mLevel[i] < childLevel) {
+        count = i - aRow - 1;
         break;
+      }
     }
-    var count = i - aRow - 1;
     this.mSheetRules.splice(aRow + 1, count);
     this.mLevel.splice(aRow + 1, count);
     this.mOpen.splice(aRow + 1, count);
@@ -562,7 +595,8 @@ StyleRuleView.prototype.toggleOpenState = function SRV_ToggleOpenState(aRow)
     var rule = this.mSheetRules[aRow];
     if (rule instanceof CSSImportRule) {
       // @import is tricky, because its styleSheet property is allowed to be
-      // null if its media-type qualifier isn't supported, among other reasons.
+      // null if its media-type qualifier isn't supported, among other
+      // reasons.
       inserts = rule.styleSheet ? rule.styleSheet.cssRules : [];
     }
     else if (rule instanceof CSSMediaRule ||
@@ -571,13 +605,13 @@ StyleRuleView.prototype.toggleOpenState = function SRV_ToggleOpenState(aRow)
     }
     // make space for children
     var count = this.getChildCount(aRow);
-    for (var i = this.rowCount - 1; i > aRow; --i) {
+    for (let i = this.rowCount - 1; i > aRow; --i) {
       this.mSheetRules[i + count] = this.mSheetRules[i];
       this.mLevel[i + count] = this.mLevel[i];
       this.mOpen[i + count] = this.mOpen[i];
     }
     // fill in children
-    for (var i = 0; i < inserts.length; ++i) {
+    for (let i = 0; i < inserts.length; ++i) {
       this.mSheetRules[aRow + 1 + i] = inserts[i];
       this.mLevel[aRow + 1 + i] = childLevel;
       this.mOpen[aRow + 1 + i] = false;
@@ -589,7 +623,7 @@ StyleRuleView.prototype.toggleOpenState = function SRV_ToggleOpenState(aRow)
   viewer.mRuleTree.treeBoxObject.invalidateRow(aRow);
 }
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// StylePropsView
 
 function StylePropsView(aDec)
@@ -599,14 +633,13 @@ function StylePropsView(aDec)
 
 StylePropsView.prototype = new inBaseTreeView();
 
-StylePropsView.prototype.__defineGetter__("rowCount",
-function()
+StylePropsView.prototype.__defineGetter__("rowCount", function()
 {
   return this.mDec ? this.mDec.length : 0;
 });
 
 StylePropsView.prototype.getCellProperties =
-function SPV_GetCellProperties(aRow, aCol, aProperties)
+  function SPV_GetCellProperties(aRow, aCol, aProperties)
 {
   if (aCol.id == "olcPropPriority") {
     var prop = this.mDec.item(aRow);
@@ -616,8 +649,7 @@ function SPV_GetCellProperties(aRow, aCol, aProperties)
   }
 }
 
-StylePropsView.prototype.getCellText =
-function SPV_GetCellText(aRow, aCol)
+StylePropsView.prototype.getCellText = function SPV_GetCellText(aRow, aCol)
 {
   var prop = this.mDec.item(aRow);
 
@@ -634,11 +666,12 @@ function SPV_GetCellText(aRow, aCol)
 /**
  * Returns a CSSDeclaration for the row in the tree corresponding to the
  * passed index.
- * @param aIndex index of the row in the tree
+ * @param aIndex
+ *        index of the row in the tree
  * @return a CSSDeclaration
  */
 StylePropsView.prototype.getRowObjectFromIndex =
-function SPV_GetRowObjectFromIndex(aIndex)
+  function SPV_GetRowObjectFromIndex(aIndex)
 {
   var prop = this.mDec.item(aIndex);
   return new CSSDeclaration(prop, this.mDec.getPropertyValue(prop),
@@ -647,10 +680,14 @@ function SPV_GetRowObjectFromIndex(aIndex)
 
 /**
  * Handles inserting a CSS declaration
- * @param aRule the rule that will contain the new declaration
- * @param aProperty the property of the new declaration
- * @param aValue the value of the new declaration
- * @param aPriority the priority of the new declaration ("important" or "")
+ * @param aRule
+ *        the rule that will contain the new declaration
+ * @param aProperty
+ *        the property of the new declaration
+ * @param aValue
+ *        the value of the new declaration
+ * @param aPriority
+ *        the priority of the new declaration ("important" or "")
  */
 function cmdEditInsert(aRule, aProperty, aValue, aPriority)
 {
@@ -659,6 +696,7 @@ function cmdEditInsert(aRule, aProperty, aValue, aPriority)
   this.value = aValue;
   this.priority = aPriority;
 }
+
 cmdEditInsert.prototype =
 {
   // required for nsITransaction
@@ -666,7 +704,7 @@ cmdEditInsert.prototype =
   merge: txnMerge,
   isTransient: false,
 
-  doTransaction: function doTransaction()
+  doTransaction: function Insert_DoTransaction()
   {
     viewer.mPropsBoxObject.beginUpdateBatch();
     try {
@@ -677,13 +715,13 @@ cmdEditInsert.prototype =
     }
   },
 
-  undoTransaction: function undoTransaction()
+  undoTransaction: function Insert_UndoTransaction()
   {
     this.rule.removeProperty(this.property);
     viewer.mPropsBoxObject.invalidate();
   },
 
-  redoTransaction: function redoTransaction()
+  redoTransaction: function Insert_RedoTransaction()
   {
     this.doTransaction();
   }
@@ -691,14 +729,17 @@ cmdEditInsert.prototype =
 
 /**
  * Handles deleting CSS declarations
- * @param aRule the rule containing the declarations
- * @param aDeclarations an array of CSSDeclarations to delete
+ * @param aRule
+ *        the rule containing the declarations
+ * @param aDeclarations
+ *        an array of CSSDeclarations to delete
  */
 function cmdEditDelete(aRule, aDeclarations)
 {
   this.rule = aRule;
   this.declarations = aDeclarations;
 }
+
 cmdEditDelete.prototype =
 {
   // required for nsITransaction
@@ -706,24 +747,28 @@ cmdEditDelete.prototype =
   merge: txnMerge,
   isTransient: false,
 
-  doTransaction: function doTransaction()
+  doTransaction: function Delete_DoTransaction()
   {
     viewer.mPropsBoxObject.beginUpdateBatch();
-    for (var i = 0; i < this.declarations.length; i++)
+    for (let i = 0; i < this.declarations.length; i++) {
       this.rule.removeProperty(this.declarations[i].property);
+    }
     viewer.mPropsBoxObject.endUpdateBatch();
   },
 
-  undoTransaction: function undoTransaction()
+  undoTransaction: function Delete_UndoTransaction()
   {
     viewer.mPropsBoxObject.beginUpdateBatch();
-    for (var i = 0; i < this.declarations.length; i++)
+    for (let i = 0; i < this.declarations.length; i++) {
       this.rule.setProperty(this.declarations[i].property,
                             this.declarations[i].value,
-                            this.declarations[i].important ? "important" : "");
+                            this.declarations[i].important ?
+                              "important" :
+                              "");
+    }
   },
 
-  redoTransaction: function redoTransaction()
+  redoTransaction: function Delete_RedoTransaction()
   {
     this.doTransaction();
   }
@@ -731,10 +776,14 @@ cmdEditDelete.prototype =
 
 /**
  * Handles editing CSS declarations
- * @param aRule the rule containing the declaration
- * @param aProperty the property to change
- * @param aNewValue the new value for the property
- * @param aNewValue the new priority for the property ("important" or "")
+ * @param aRule
+ *        the rule containing the declaration
+ * @param aProperty
+ *        the property to change
+ * @param aNewValue
+ *        the new value for the property
+ * @param aNewPriority
+ *        the new priority for the property ("important" or "")
  */
 function cmdEditEdit(aRule, aProperty, aNewValue, aNewPriority)
 {
@@ -745,6 +794,7 @@ function cmdEditEdit(aRule, aProperty, aNewValue, aNewPriority)
   this.oldPriority = aRule.getPropertyPriority(aProperty);
   this.newPriority = aNewPriority;
 }
+
 cmdEditEdit.prototype =
 {
   // required for nsITransaction
@@ -752,21 +802,21 @@ cmdEditEdit.prototype =
   merge: txnMerge,
   isTransient: false,
 
-  doTransaction: function doTransaction()
+  doTransaction: function Edit_DoTransaction()
   {
     this.rule.setProperty(this.property, this.newValue,
                           this.newPriority);
     viewer.mPropsBoxObject.invalidate();
   },
 
-  undoTransaction: function undoTransaction()
+  undoTransaction: function Edit_UndoTransaction()
   {
     this.rule.setProperty(this.property, this.oldValue,
                           this.oldPriority);
     viewer.mPropsBoxObject.invalidate();
   },
 
-  redoTransaction: function redoTransaction()
+  redoTransaction: function Edit_RedoTransaction()
   {
     this.doTransaction();
   }
@@ -774,14 +824,17 @@ cmdEditEdit.prototype =
 
 /**
  * Handles toggling CSS !important.
- * @param aRule the rule containing the declarations
- * @param aDeclarations an array of CSSDeclarations to toggle
+ * @param aRule
+ *        the rule containing the declarations
+ * @param aDeclarations
+ *        an array of CSSDeclarations to toggle
  */
 function cmdTogglePriority(aRule, aDeclarations)
 {
   this.rule = aRule;
   this.declarations = aDeclarations;
 }
+
 cmdTogglePriority.prototype =
 {
   // required for nsITransaction
@@ -789,12 +842,13 @@ cmdTogglePriority.prototype =
   merge: txnMerge,
   isTransient: false,
 
-  doTransaction: function doTransaction()
+  doTransaction: function TogglePriority_DoTransaction()
   {
-    for (var i = 0; i < this.declarations.length; i++) {
-      //XXX bug 305761 means we can't make something not important, so instead
-      // we'll delete this property and make a new one at the proper priority.
-      // this method also sucks because the property gets moved to the bottom.
+    for (let i = 0; i < this.declarations.length; i++) {
+      // XXX bug 305761 means we can't make something not important, so
+      // instead we'll delete this property and make a new one at the proper
+      // priority.  This method also sucks because the property gets moved to
+      // the bottom.
       var property = this.declarations[i].property;
       var value = this.declarations[i].value;
       var newPriority = this.rule.getPropertyPriority(property) == "" ?
@@ -805,12 +859,12 @@ cmdTogglePriority.prototype =
     viewer.mPropsBoxObject.invalidate();
   },
 
-  undoTransaction: function undoTransaction()
+  undoTransaction: function TogglePriority_UndoTransaction()
   {
     this.doTransaction();
   },
 
-  redoTransaction: function redoTransaction()
+  redoTransaction: function TogglePriority_RedoTransaction()
   {
     this.doTransaction();
   }
