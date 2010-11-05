@@ -42,8 +42,6 @@
 <!ENTITY newRules.label "Nové">
 <!ENTITY deleteSelectedRules.label "Odstrániť">
 <!ENTITY disableSelectedRules.label "Zakázať">
-<!ENTITY copySelectedFileURI.label "Kopírovať URI">
-<!ENTITY viewSelectedFileURI.label "Zobraziť súbor">
 
 <!-- LOCALIZATION NOTE: DO NOT LOCALIZE "!important" since it is a CSS API -->
 <!ENTITY toggleSelectedImportant.label "Prepnúť !important">

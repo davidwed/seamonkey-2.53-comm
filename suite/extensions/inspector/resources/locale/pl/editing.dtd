@@ -16,3 +16,5 @@
 <!ENTITY mnEditDelete.accesskey "s">
 <!ENTITY mnEditInspectInNewWindow.label "Zbadaj w nowym oknie">
 <!ENTITY mnEditInspectInNewWindow.accesskey "b">
+<!ENTITY mnEditCopyFileURI.label "Kopiuj URI">
+<!ENTITY mnEditViewFileURI.label "Wyświetl plik">

@@ -17,3 +17,5 @@
 <!ENTITY mnEditInspectInNewWindow.label "Исследовать в новом окне">
 <!ENTITY mnEditInspectInNewWindow.accesskey "о">
 <!ENTITY mnEditInspectInNewWindow.key "I">
+<!ENTITY mnEditCopyFileURI.label "Копировать URI">
+<!ENTITY mnEditViewFileURI.label "Просмотреть файл">
