@@ -34,6 +34,10 @@
   <commandset id="cmdsEditingExtras">
     <command id="cmdEditInspectInNewWindow"
              oncommand="viewer.pane.panelset.execCommand('cmdEditInspectInNewWindow');"/>
+    <command id="cmdEditCopyFileURI"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditCopyFileURI');"/>
+    <command id="cmdEditViewFileURI"
+             oncommand="viewer.pane.panelset.execCommand('cmdEditViewFileURI');"/>
   </commandset>
 
   <keyset id="ksGlobalKeyset">
@@ -72,5 +76,11 @@
             command="cmdEditInspectInNewWindow"
             accesskey="&mnEditInspectInNewWindow.accesskey;"
             key="keyEditInspectInNewWindow"/>
+  <menuitem id="mnEditCopyFileURI" label="&mnEditCopyFileURI.label;"
+            command="cmdEditCopyFileURI"
+            accesskey="&mnEditCopyFileURI.accesskey;"/>
+  <menuitem id="mnEditViewFileURI" label="&mnEditViewFileURI.label;"
+            command="cmdEditViewFileURI"
+            accesskey="&mnEditViewFileURI.accesskey;"/>
 
 </overlay>

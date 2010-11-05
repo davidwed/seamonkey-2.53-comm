@@ -31,26 +31,19 @@
   <!--============================ COMMANDS ============================= -->
 
   <commandset id="cmdsEditing"/>
+  <commandset id="cmdsEditingExtras"/>
   <commandset id="cmdsProps">
     <command id="cmdTogglePriority"
              oncommand="viewer.pane.panelset.execCommand('cmdTogglePriority')"/>
-  </commandset>
-  <commandset id="cmdsRules">
-    <command id="cmdCopySelectedFileURI"
-             oncommand="viewer.cmdCopySelectedFileURI();"/>
-    <command id="cmdViewSelectedFileURI"
-             oncommand="viewer.cmdViewSelectedFileURI();"/>
   </commandset>
 
   <!--============================= POPUPS ============================== -->
 
   <popupset id="psPopups">
     <menupopup id="ppStyleRulesContext"
-               onpopupshowing="return viewer.onPopupShowing('cmdsRules')">
-      <menuitem label="&copySelectedFileURI.label;" id="mnCopySelectedFileURI"
-                command="cmdCopySelectedFileURI"/>
-      <menuitem label="&viewSelectedFileURI.label;" id="mnViewSelectedFileURI"
-                command="cmdViewSelectedFileURI"/>
+               onpopupshowing="return viewer.onPopupShowing('cmdsEditingExtras')">
+      <menuitem id="mnEditCopyFileURI"/>
+      <menuitem id="mnEditViewFileURI"/>
     </menupopup>
 
     <menupopup id="ppStylePropsContext"

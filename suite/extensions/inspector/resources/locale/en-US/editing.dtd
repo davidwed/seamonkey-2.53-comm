@@ -17,3 +17,7 @@
 <!ENTITY mnEditInspectInNewWindow.label "Inspect in New Window">
 <!ENTITY mnEditInspectInNewWindow.accesskey "N">
 <!ENTITY mnEditInspectInNewWindow.key "I">
+<!ENTITY mnEditCopyFileURI.label "Copy URI">
+<!ENTITY mnEditCopyFileURI.accesskey "U">
+<!ENTITY mnEditViewFileURI.label "View File">
+<!ENTITY mnEditViewFileURI.accesskey "V">

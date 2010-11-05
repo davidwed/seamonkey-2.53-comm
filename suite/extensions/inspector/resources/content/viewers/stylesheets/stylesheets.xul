@@ -30,6 +30,9 @@
   <popupset id="psPopups">
     <menupopup id="ppStyleSheetsContext">
       <menuitem id="mnEditInspectInNewWindow"/>
+      <menuseparator/>
+      <menuitem id="mnEditCopyFileURI"/>
+      <menuitem id="mnEditViewFileURI"/>
     </menupopup>
   </popupset>
 
