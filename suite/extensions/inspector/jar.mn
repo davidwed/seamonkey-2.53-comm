@@ -65,6 +65,7 @@ inspector.jar:
   content/inspector/jsutil/xul/inTreeBuilder.js                         (resources/content/jsutil/xul/inTreeBuilder.js)
   content/inspector/jsutil/xul/inBaseTreeView.js                        (resources/content/jsutil/xul/inBaseTreeView.js)
   content/inspector/jsutil/events/ObserverManager.js                    (resources/content/jsutil/events/ObserverManager.js)
+  content/inspector/jsutil/commands/baseCommands.js                     (resources/content/jsutil/commands/baseCommands.js)
   content/inspector/prefs/pref-inspector.xul                            (resources/content/prefs/pref-inspector.xul)
   content/inspector/prefs/pref-inspector.js                             (resources/content/prefs/pref-inspector.js)
   content/inspector/prefs/prefsOverlay.xul                              (resources/content/prefs/prefsOverlay.xul)

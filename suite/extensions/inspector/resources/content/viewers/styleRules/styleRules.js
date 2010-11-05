@@ -45,6 +45,7 @@
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
 *   chrome://inspector/content/jsutil/rdf/RDFU.js
 *   chrome://global/content/viewSourceUtils.js
+*   chrome://inspector/content/jsutil/commands/baseCommands.js
 *****************************************************************************/
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,7 +59,6 @@ var gPromptService;
 
 const kDOMUtilsCID = "@mozilla.org/inspector/dom-utils;1";
 const kPromptServiceCID = "@mozilla.org/embedcomp/prompt-service;1";
-const kClipboardHelperCID = "@mozilla.org/widget/clipboardhelper;1";
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -85,6 +85,7 @@ function StyleRulesViewer() // implements inIViewer
   this.mPropsTree = document.getElementById("olStyleProps");
   this.mPropsBoxObject = this.mPropsTree.treeBoxObject;
   this.mFocusedTree = null;
+  this.mDOMUtils = XPCU.getService(kDOMUtilsCID, "inIDOMUtils");
 }
 
 StyleRulesViewer.prototype =
@@ -176,9 +177,9 @@ StyleRulesViewer.prototype =
       case "cmdEditEdit":
         return isEditable && propCount == 1;
       // ppStyleRulesContext
-      case "cmdCopySelectedFileURI":
-      case "cmdViewSelectedFileURI":
-        return fileURI;
+      case "cmdEditCopyFileURI":
+      case "cmdEditViewFileURI":
+        return !!fileURI;
     }
     return false;
   },
@@ -232,6 +233,10 @@ StyleRulesViewer.prototype =
       case "cmdTogglePriority":
         return new cmdTogglePriority(this.getSelectedDec(),
                                      this.mPropsView.getSelectedRowObjects());
+      case "cmdEditCopyFileURI":
+        return new cmdEditCopyFileURI(this.getSelectedRule());
+      case "cmdEditViewFileURI":
+        return new cmdEditViewFileURI(this.getSelectedRule());
     }
     return null;
   },
@@ -250,46 +255,11 @@ StyleRulesViewer.prototype =
   },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// UI Commands
-
-  //////// rule contextual commands
-
-  cmdCopySelectedFileURI: function SRVr_CmdCopySelectedFileURI()
-  {
-    var rule = this.getSelectedRule();
-    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href) {
-      return;
-    }
-    var selectedURI = rule.parentStyleSheet.href;
-    var helper = XPCU.getService(kClipboardHelperCID, "nsIClipboardHelper");
-
-    helper.copyString(selectedURI);
-  },
-
-  cmdViewSelectedFileURI: function SRVr_CmdViewSelectedFileURI()
-  {
-    var rule = this.getSelectedRule();
-    if (!rule || !rule.parentStyleSheet || !rule.parentStyleSheet.href) {
-      return;
-    }
-    var selectedURI = rule.parentStyleSheet.href;
-    var lineNumber =  rule.type == CSSRule.STYLE_RULE ?
-                        this.mRuleView.mDOMUtils.getRuleLine(rule) : null;
-
-    // 1.9.0 toolkit doesn't have this method
-    if ("viewSource" in gViewSourceUtils) {
-      gViewSourceUtils.viewSource(selectedURI, null, null, lineNumber);
-    }
-    else {
-      openDialog("chrome://global/content/viewSource.xul",
-                 "_blank",
-                 "all,dialog=no",
-                 selectedURI, null, null, lineNumber, null);
-    }
-  },
-
-  ////////////////////////////////////////////////////////////////////////////
   //// Uncategorized
+
+  get DOMUtils() {
+    return this.mDOMUtils;
+  },
 
   getSelectedDec: function SRVr_GetSelectedDec()
   {
@@ -356,7 +326,6 @@ StyleRulesViewer.prototype =
 
 function StyleRuleView(aObject)
 {
-  this.mDOMUtils = XPCU.getService(kDOMUtilsCID, "inIDOMUtils");
   this.mLevel = [];
   this.mOpen = [];
   if (aObject instanceof Components.interfaces.nsIDOMCSSStyleSheet) {
@@ -370,7 +339,7 @@ function StyleRuleView(aObject)
   }
   else {
     document.getElementById("olcRule").removeAttribute("primary");
-    this.mRules = this.mDOMUtils.getCSSStyleRules(aObject);
+    this.mRules = viewer.DOMUtils.getCSSStyleRules(aObject);
     if (aObject.hasAttribute("style")) {
       try {
         this.mStyleAttribute =
@@ -509,7 +478,7 @@ StyleRuleView.prototype.getCellText = function SRV_GetCellText(aRow, aCol)
 
   if (aCol.id == "olcLine") {
     return rule.type == CSSRule.STYLE_RULE ?
-                          this.mDOMUtils.getRuleLine(rule) :
+                          viewer.DOMUtils.getRuleLine(rule) :
                           "";
   }
 
@@ -869,3 +838,34 @@ cmdTogglePriority.prototype =
     this.doTransaction();
   }
 }
+
+/**
+ * Copy the URI for a CSS rule's parent style sheet onto the clipboard.
+ * @param aRule
+ *        The nsIDOMCSSRule whose parent style sheet's URI should be copied.
+ */
+function cmdEditCopyFileURI(aRule)
+{
+  this.mString = aRule && aRule.parentStyleSheet &&
+                 aRule.parentStyleSheet.href;
+}
+
+cmdEditCopyFileURI.prototype = new cmdEditCopySimpleStringBase();
+
+/**
+ * Open a source view on a CSS rule's parent style sheet.  This will attempt
+ * open the file at the line that the rule appears on.
+ * @param aRule
+ *        The source view will open on nsIDOMCSSRule aRule's parent style
+ *        sheet.  If aRule is an nsIDOMCSSStyleRule, the source view will open
+ *        to the line in the style sheet that aRule appears on.
+ */
+function cmdEditViewFileURI(aRule)
+{
+  this.mURI = aRule && aRule.parentStyleSheet && aRule.parentStyleSheet.href;
+  if (aRule.type == CSSRule.STYLE_RULE) {
+    this.mLineNumber = viewer.DOMUtils.getRuleLine(aRule);
+  }
+}
+
+cmdEditViewFileURI.prototype = new cmdEditViewFileURIBase();

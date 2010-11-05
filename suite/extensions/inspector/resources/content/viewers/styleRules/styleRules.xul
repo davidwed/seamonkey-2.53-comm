@@ -16,6 +16,8 @@
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
   <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/commands/baseCommands.js"/>
+  <script type="application/javascript"
           src="chrome://inspector/content/viewers/styleRules/styleRules.js"/>
   <script type="application/javascript"
           src="chrome://global/content/XPCNativeWrapper.js"/>

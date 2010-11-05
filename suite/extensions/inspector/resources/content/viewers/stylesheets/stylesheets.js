@@ -40,7 +40,10 @@
 *  The viewer for the style sheets loaded by a document.
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
+*   chrome://inspector/content/utils.js
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
+*   chrome://global/content/viewSourceUtils.js
+*   chrome://inspector/content/jsutil/commands/baseCommands.js
 *****************************************************************************/
 
 //////////////////////////////////////////////////////////////////////////////
@@ -124,6 +127,8 @@ StyleSheetsViewer.prototype =
   isCommandEnabled: function SSVr_IsCommandEnabled(aCommand)
   {
     switch (aCommand) {
+      case "cmdEditCopyFileURI":
+      case "cmdEditViewFileURI":
       case "cmdEditInspectInNewWindow":
         return !!this.getSelectedSheet();
     }
@@ -156,6 +161,8 @@ StyleSheetsViewer.prototype =
 
   onItemSelected: function SSVr_OnItemSelected()
   {
+    this.pane.panelset.updateAllCommands();
+
     var idx = this.mTree.currentIndex;
     this.mSelection = this.mView.getSheet(idx);
     this.mObsMan.dispatchEvent("selectionChange",
@@ -170,6 +177,22 @@ StyleSheetsViewer.prototype =
       return this.mView.getSheet(minAndMax.value);
     }
     return null;
+  },
+
+  onPopupShowing: function SRVr_OnPopupShowing(aCommandSetId)
+  {
+    // cmdEditInspectInNewWindow should already be up to date, but we need to
+    // make sure the others are as well.
+    var commandset = document.getElementById(aCommandSetId);
+    for (let i = 0; i < commandset.childNodes.length; i++) {
+      var command = commandset.childNodes[i];
+      if (viewer.isCommandEnabled(command.id)) {
+        command.removeAttribute("disabled");
+      }
+      else {
+        command.setAttribute("disabled", "true");
+      }
+    }
   }
 };
 
@@ -347,18 +370,23 @@ function SSV_ToggleOpenState(aRow)
 
 function cmdEditInspectInNewWindow()
 {
-  this.mSheet = viewer.getSelectedSheet();
+  this.mObject = viewer.getSelectedSheet();
 }
 
-cmdEditInspectInNewWindow.prototype = {
-  isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
+cmdEditInspectInNewWindow.prototype = new cmdEditInspectInNewWindowBase();
 
-  doTransaction: function InspectInNewWindow_DoTransaction()
-  {
-    if (this.mSheet) {
-      inspectObject(this.mSheet);
-    }
-  }
-};
+function cmdEditCopyFileURI()
+{
+  var sheet = viewer.getSelectedSheet();
+  this.mString = sheet && sheet.href;
+}
+
+cmdEditCopyFileURI.prototype = new cmdEditCopySimpleStringBase();
+
+function cmdEditViewFileURI()
+{
+  var sheet = viewer.getSelectedSheet();
+  this.mURI = sheet && sheet.href;
+}
+
+cmdEditViewFileURI.prototype = new cmdEditViewFileURIBase();
