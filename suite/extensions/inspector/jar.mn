@@ -43,7 +43,6 @@ inspector.jar:
   content/inspector/tasksOverlay-tb.xul                                 (resources/content/tasksOverlay-tb.xul)
   content/inspector/tasksOverlay-mobile.xul                             (resources/content/tasksOverlay-mobile.xul)
   content/inspector/editingOverlay.xul                                  (resources/content/editingOverlay.xul)
-  content/inspector/utilWindow.xul                                      (resources/content/utilWindow.xul)
   content/inspector/Flasher.js                                          (resources/content/Flasher.js)
   content/inspector/ViewerRegistry.js                                   (resources/content/ViewerRegistry.js)
   content/inspector/utils.js                                            (resources/content/utils.js)

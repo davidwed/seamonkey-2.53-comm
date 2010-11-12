@@ -711,8 +711,3 @@ function BrowserPageShowListener(aEvent)
     inspector.documentLoaded();
   }
 }
-
-function UtilWindowOpenListener(aWindow)
-{
-  inspector.doViewSearchItem(aWindow);
-}
