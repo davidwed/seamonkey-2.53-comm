@@ -553,18 +553,7 @@ function inAccTreeViewNode(aAccessible)
 
 function cmdEditInspectInNewWindow()
 {
-  this.mNode = viewer.getSelectedAccessible();
+  this.mObject = viewer.getSelectedAccessible();
 }
 
-cmdEditInspectInNewWindow.prototype = {
-  isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
-
-  doTransaction: function InspectInNewWindow_DoTransaction()
-  {
-    if (this.mNode) {
-      inspectObject(this.mNode);
-    }
-  }
-};
+cmdEditInspectInNewWindow.prototype = new cmdEditInspectInNewWindowBase();

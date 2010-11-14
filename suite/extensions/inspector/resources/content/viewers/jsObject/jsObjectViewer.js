@@ -118,10 +118,13 @@ JSObjectViewer.prototype =
   isCommandEnabled: function JSOVr_IsCommandEnabled(aCommand)
   {
     switch (aCommand) {
-      case "cmdEditInspectInNewWindow":
       case "cmdCopyValue":
       case "cmdEvalExpr":
         return this.mTree.view.selection.count == 1;
+      case "cmdEditInspectInNewWindow":
+        let item = getSelectedItem();
+        return !!item &&
+               cmdEditInspectInNewWindowBase.isInspectable(item.__JSValue__);
     }
     return false;
   },
@@ -416,18 +419,8 @@ function toggleItem(aItem)
 
 function cmdEditInspectInNewWindow()
 {
-  this.mSelectedItem = getSelectedItem();
+  var selected = getSelectedItem();
+  this.mObject = selected && selected.__JSValue__;
 }
 
-cmdEditInspectInNewWindow.prototype = {
-  isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
-
-  doTransaction: function InspectInNewWindow_DoTransaction()
-  {
-    if (this.mSelectedItem) {
-      inspectObject(this.mSelectedItem.__JSValue__);
-    }
-  }
-};
+cmdEditInspectInNewWindow.prototype = new cmdEditInspectInNewWindowBase();

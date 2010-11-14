@@ -666,35 +666,24 @@ function cmdEditInsert(aRule, aProperty, aValue, aPriority)
   this.priority = aPriority;
 }
 
-cmdEditInsert.prototype =
+cmdEditInsert.prototype = new inBaseCommand(false);
+
+cmdEditInsert.prototype.doTransaction = function Insert_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-
-  doTransaction: function Insert_DoTransaction()
-  {
-    viewer.mPropsBoxObject.beginUpdateBatch();
-    try {
-      this.rule.setProperty(this.property, this.value, this.priority);
-    }
-    finally {
-      viewer.mPropsBoxObject.endUpdateBatch();
-    }
-  },
-
-  undoTransaction: function Insert_UndoTransaction()
-  {
-    this.rule.removeProperty(this.property);
-    viewer.mPropsBoxObject.invalidate();
-  },
-
-  redoTransaction: function Insert_RedoTransaction()
-  {
-    this.doTransaction();
+  viewer.mPropsBoxObject.beginUpdateBatch();
+  try {
+    this.rule.setProperty(this.property, this.value, this.priority);
   }
-}
+  finally {
+    viewer.mPropsBoxObject.endUpdateBatch();
+  }
+};
+
+cmdEditInsert.prototype.undoTransaction = function Insert_UndoTransaction()
+{
+  this.rule.removeProperty(this.property);
+  viewer.mPropsBoxObject.invalidate();
+};
 
 /**
  * Handles deleting CSS declarations
@@ -709,39 +698,28 @@ function cmdEditDelete(aRule, aDeclarations)
   this.declarations = aDeclarations;
 }
 
-cmdEditDelete.prototype =
+cmdEditDelete.prototype = new inBaseCommand(false);
+
+cmdEditDelete.prototype.doTransaction = function Delete_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-
-  doTransaction: function Delete_DoTransaction()
-  {
-    viewer.mPropsBoxObject.beginUpdateBatch();
-    for (let i = 0; i < this.declarations.length; i++) {
-      this.rule.removeProperty(this.declarations[i].property);
-    }
-    viewer.mPropsBoxObject.endUpdateBatch();
-  },
-
-  undoTransaction: function Delete_UndoTransaction()
-  {
-    viewer.mPropsBoxObject.beginUpdateBatch();
-    for (let i = 0; i < this.declarations.length; i++) {
-      this.rule.setProperty(this.declarations[i].property,
-                            this.declarations[i].value,
-                            this.declarations[i].important ?
-                              "important" :
-                              "");
-    }
-  },
-
-  redoTransaction: function Delete_RedoTransaction()
-  {
-    this.doTransaction();
+  viewer.mPropsBoxObject.beginUpdateBatch();
+  for (let i = 0; i < this.declarations.length; i++) {
+    this.rule.removeProperty(this.declarations[i].property);
   }
-}
+  viewer.mPropsBoxObject.endUpdateBatch();
+};
+
+cmdEditDelete.prototype.undoTransaction = function Delete_UndoTransaction()
+{
+  viewer.mPropsBoxObject.beginUpdateBatch();
+  for (let i = 0; i < this.declarations.length; i++) {
+    this.rule.setProperty(this.declarations[i].property,
+                          this.declarations[i].value,
+                          this.declarations[i].important ?
+                            "important" :
+                            "");
+  }
+};
 
 /**
  * Handles editing CSS declarations
@@ -764,32 +742,21 @@ function cmdEditEdit(aRule, aProperty, aNewValue, aNewPriority)
   this.newPriority = aNewPriority;
 }
 
-cmdEditEdit.prototype =
+cmdEditEdit.prototype = new inBaseCommand(false);
+
+cmdEditEdit.prototype.doTransaction = function Edit_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
+  this.rule.setProperty(this.property, this.newValue,
+                        this.newPriority);
+  viewer.mPropsBoxObject.invalidate();
+};
 
-  doTransaction: function Edit_DoTransaction()
-  {
-    this.rule.setProperty(this.property, this.newValue,
-                          this.newPriority);
-    viewer.mPropsBoxObject.invalidate();
-  },
-
-  undoTransaction: function Edit_UndoTransaction()
-  {
-    this.rule.setProperty(this.property, this.oldValue,
-                          this.oldPriority);
-    viewer.mPropsBoxObject.invalidate();
-  },
-
-  redoTransaction: function Edit_RedoTransaction()
-  {
-    this.doTransaction();
-  }
-}
+cmdEditEdit.prototype.undoTransaction = function Edit_UndoTransaction()
+{
+  this.rule.setProperty(this.property, this.oldValue,
+                        this.oldPriority);
+  viewer.mPropsBoxObject.invalidate();
+};
 
 /**
  * Handles toggling CSS !important.
@@ -804,40 +771,31 @@ function cmdTogglePriority(aRule, aDeclarations)
   this.declarations = aDeclarations;
 }
 
-cmdTogglePriority.prototype =
+cmdTogglePriority.prototype = new inBaseCommand(false);
+
+cmdTogglePriority.prototype.doTransaction =
+  function TogglePriority_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-
-  doTransaction: function TogglePriority_DoTransaction()
-  {
-    for (let i = 0; i < this.declarations.length; i++) {
-      // XXX bug 305761 means we can't make something not important, so
-      // instead we'll delete this property and make a new one at the proper
-      // priority.  This method also sucks because the property gets moved to
-      // the bottom.
-      var property = this.declarations[i].property;
-      var value = this.declarations[i].value;
-      var newPriority = this.rule.getPropertyPriority(property) == "" ?
-                          "important" : "";
-      this.rule.removeProperty(property);
-      this.rule.setProperty(property, value, newPriority);
-    }
-    viewer.mPropsBoxObject.invalidate();
-  },
-
-  undoTransaction: function TogglePriority_UndoTransaction()
-  {
-    this.doTransaction();
-  },
-
-  redoTransaction: function TogglePriority_RedoTransaction()
-  {
-    this.doTransaction();
+  for (let i = 0; i < this.declarations.length; i++) {
+    // XXX bug 305761 means we can't make something not important, so
+    // instead we'll delete this property and make a new one at the proper
+    // priority.  This method also sucks because the property gets moved to
+    // the bottom.
+    var property = this.declarations[i].property;
+    var value = this.declarations[i].value;
+    var newPriority = this.rule.getPropertyPriority(property) == "" ?
+                        "important" : "";
+    this.rule.removeProperty(property);
+    this.rule.setProperty(property, value, newPriority);
   }
-}
+  viewer.mPropsBoxObject.invalidate();
+};
+
+cmdTogglePriority.prototype.undoTransaction =
+  function TogglePriority_UndoTransaction()
+{
+  this.doTransaction();
+};
 
 /**
  * Copy the URI for a CSS rule's parent style sheet onto the clipboard.

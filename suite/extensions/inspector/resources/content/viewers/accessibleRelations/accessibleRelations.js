@@ -291,18 +291,7 @@ AccessibleTargetsView.prototype.getSelectedDOMNode =
 // Transactions
 
 function cmdEditInspectInNewWindow() {
-  this.mNode = viewer.getSelectedTargetDOMNode();
+  this.mObject = viewer.getSelectedTargetDOMNode();
 }
 
-cmdEditInspectInNewWindow.prototype = {
-  isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
-
-  doTransaction: function ARVr_InspectInNewWindow_DoTransaction()
-  {
-    if (this.mNode) {
-      inspectObject(this.mNode);
-    }
-  }
-}
+cmdEditInspectInNewWindow.prototype = new cmdEditInspectInNewWindowBase();

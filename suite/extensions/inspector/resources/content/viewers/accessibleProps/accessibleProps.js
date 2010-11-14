@@ -268,15 +268,12 @@ function cmdEditInspectInNewWindow(aMgr)
   this.mPropViewerMgr = aMgr;
 }
 
-cmdEditInspectInNewWindow.prototype = {
-  isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
+cmdEditInspectInNewWindow.prototype = new inBaseCommand();
 
-  doTransaction: function InspectInNewWindow_DoTransaction()
-  {
-    if (this.mPropViewerMgr) {
-      this.mPropViewerMgr.inspectInNewView();
-    }
+cmdEditInspectInNewWindow.prototype.doTransaction =
+  function InspectInNewWindow_DoTransaction()
+{
+  if (this.mPropViewerMgr) {
+    this.mPropViewerMgr.inspectInNewView();
   }
 };

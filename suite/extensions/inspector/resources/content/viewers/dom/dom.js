@@ -60,7 +60,6 @@ var viewer;
 //// Global Constants
 
 const kDOMViewClassID             = "@mozilla.org/inspector/dom-view;1";
-const kClipboardHelperClassID     = "@mozilla.org/widget/clipboardhelper;1";
 const kPromptServiceClassID       = "@mozilla.org/embedcomp/prompt-service;1";
 const kAccessibleRetrievalClassID = "@mozilla.org/accessibleRetrieval;1";
 const kDOMUtilsClassID            = "@mozilla.org/inspector/dom-utils;1";
@@ -1633,95 +1632,74 @@ DOMViewer.prototype =
 
 function cmdEditDelete() {}
 
-cmdEditDelete.prototype =
+cmdEditDelete.prototype = new inBaseCommand(false);
+
+cmdEditDelete.prototype.node = null;
+cmdEditDelete.prototype.nextSibling = null;
+cmdEditDelete.prototype.parentNode = null;
+
+cmdEditDelete.prototype.doTransaction = function Delete_DoTransaction()
 {
-  node: null,
-  nextSibling: null,
-  parentNode: null,
-
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function Delete_DoTransaction()
-  {
-    var node = this.node || viewer.selectedNode;
-    if (node) {
-      this.node = node;
-      this.nextSibling = node.nextSibling;
-      this.parentNode = node.parentNode;
-      var selectNode = this.nextSibling;
-      if (!selectNode) {
-        selectNode = node.previousSibling;
-      }
-      if (!selectNode) {
-        selectNode = this.parentNode;
-      }
-      viewer.showNodeInTree(selectNode);
-      node.parentNode.removeChild(node);
+  var node = this.node || viewer.selectedNode;
+  if (node) {
+    this.node = node;
+    this.nextSibling = node.nextSibling;
+    this.parentNode = node.parentNode;
+    var selectNode = this.nextSibling;
+    if (!selectNode) {
+      selectNode = node.previousSibling;
     }
-  },
-
-  undoTransaction: function Delete_UndoTransaction()
-  {
-    if (this.node) {
-      this.parentNode.insertBefore(this.node, this.nextSibling);
+    if (!selectNode) {
+      selectNode = this.parentNode;
     }
-    viewer.showNodeInTree(this.node);
+    viewer.showNodeInTree(selectNode);
+    node.parentNode.removeChild(node);
   }
+};
+
+cmdEditDelete.prototype.undoTransaction = function Delete_UndoTransaction()
+{
+  if (this.node) {
+    this.parentNode.insertBefore(this.node, this.nextSibling);
+  }
+  viewer.showNodeInTree(this.node);
 };
 
 function cmdEditCut() {}
 
-cmdEditCut.prototype =
+cmdEditCut.prototype = new inBaseCommand(false);
+
+cmdEditCut.prototype.cmdCopy = null;
+cmdEditCut.prototype.cmdDelete = null;
+
+cmdEditCut.prototype.doTransaction = function Cut_DoTransaction()
 {
-  cmdCopy: null,
-  cmdDelete: null,
-
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function Cut_DoTransaction()
-  {
-    if (!this.cmdCopy) {
-      this.cmdDelete = new cmdEditDelete();
-      this.cmdCopy = new cmdEditCopy();
-    }
-    this.cmdCopy.doTransaction();
-    this.cmdDelete.doTransaction();
-  },
-
-  undoTransaction: function Cut_UndoTransaction()
-  {
-    this.cmdDelete.undoTransaction();
+  if (!this.cmdCopy) {
+    this.cmdDelete = new cmdEditDelete();
+    this.cmdCopy = new cmdEditCopy();
   }
+  this.cmdCopy.doTransaction();
+  this.cmdDelete.doTransaction();
+};
+
+cmdEditCut.prototype.undoTransaction = function Cut_UndoTransaction()
+{
+  this.cmdDelete.undoTransaction();
 };
 
 function cmdEditCopy() {
   this.mNode = viewer.selectedNode;
 }
 
-cmdEditCopy.prototype =
+cmdEditCopy.prototype = new inBaseCommand();
+
+cmdEditCopy.prototype.mNode = null;
+
+cmdEditCopy.prototype.doTransaction = function Copy_DoTransaction()
 {
-  mNode: null,
-
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: true,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function Copy_DoTransaction()
-  {
-    if (this.mNode) {
-      viewer.pane.panelset.setClipboardData(this.mNode.cloneNode(true),
-                                            "inspector/dom-node", null);
-    }
+  if (this.mNode) {
+    viewer.pane.panelset.setClipboardData(this.mNode.cloneNode(true),
+                                          "inspector/dom-node", null);
   }
 };
 
@@ -1730,35 +1708,28 @@ cmdEditCopy.prototype =
  */
 function cmdEditPaste() {}
 
-cmdEditPaste.prototype =
+cmdEditPaste.prototype = new inBaseCommand(false);
+
+cmdEditPaste.prototype.pastedNode = null;
+cmdEditPaste.prototype.pastedBefore = null;
+
+cmdEditPaste.prototype.doTransaction = function Paste_DoTransaction()
 {
-  pastedNode: null,
-  pastedBefore: null,
+  var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
+  var ref = this.pastedBefore || viewer.currentNode;
+  if (ref) {
+    this.pastedNode = node.cloneNode(true);
+    this.pastedBefore = ref;
+    ref.parentNode.insertBefore(this.pastedNode, ref.nextSibling);
+    return false;
+  }
+  return true;
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function Paste_DoTransaction()
-  {
-    var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var ref = this.pastedBefore || viewer.currentNode;
-    if (ref) {
-      this.pastedNode = node.cloneNode(true);
-      this.pastedBefore = ref;
-      ref.parentNode.insertBefore(this.pastedNode, ref.nextSibling);
-      return false;
-    }
-    return true;
-  },
-
-  undoTransaction: function Paste_UndoTransaction()
-  {
-    if (this.pastedNode) {
-      this.pastedNode.parentNode.removeChild(this.pastedNode);
-    }
+cmdEditPaste.prototype.undoTransaction = function Paste_UndoTransaction()
+{
+  if (this.pastedNode) {
+    this.pastedNode.parentNode.removeChild(this.pastedNode);
   }
 };
 
@@ -1768,35 +1739,30 @@ cmdEditPaste.prototype =
  */
 function cmdEditPasteBefore() {}
 
-cmdEditPasteBefore.prototype =
+cmdEditPasteBefore.prototype = new inBaseCommand(false);
+
+cmdEditPasteBefore.prototype.pastedNode = null;
+cmdEditPasteBefore.prototype.pastedBefore = null;
+
+cmdEditPasteBefore.prototype.doTransaction =
+  function PasteBefore_DoTransaction()
 {
-  pastedNode: null,
-  pastedBefore: null,
+  var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
+  var ref = this.pastedBefore || viewer.currentNode;
+  if (ref) {
+    this.pastedNode = node.cloneNode(true);
+    this.pastedBefore = ref;
+    ref.parentNode.insertBefore(this.pastedNode, ref);
+    return false;
+  }
+  return true;
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function PasteBefore_DoTransaction()
-  {
-    var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var ref = this.pastedBefore || viewer.currentNode;
-    if (ref) {
-      this.pastedNode = node.cloneNode(true);
-      this.pastedBefore = ref;
-      ref.parentNode.insertBefore(this.pastedNode, ref);
-      return false;
-    }
-    return true;
-  },
-
-  undoTransaction: function PasteBefore_UndoTransaction()
-  {
-    if (this.pastedNode) {
-      this.pastedNode.parentNode.removeChild(this.pastedNode);
-    }
+cmdEditPasteBefore.prototype.undoTransaction =
+  function PasteBefore_UndoTransaction()
+{
+  if (this.pastedNode) {
+    this.pastedNode.parentNode.removeChild(this.pastedNode);
   }
 };
 
@@ -1806,36 +1772,31 @@ cmdEditPasteBefore.prototype =
  */
 function cmdEditPasteReplace() {}
 
-cmdEditPasteReplace.prototype =
+cmdEditPasteReplace.prototype = new inBaseCommand(false);
+
+cmdEditPasteReplace.prototype.pastedNode = null;
+cmdEditPasteReplace.prototype.originalNode = null;
+
+cmdEditPasteReplace.prototype.doTransaction =
+  function PasteReplace_DoTransaction()
 {
-  pastedNode: null,
-  originalNode: null,
+  var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
+  var selected = this.originalNode || viewer.selectedNode;
+  if (selected) {
+    this.pastedNode = node.cloneNode(true);
+    this.originalNode = selected;
+    selected.parentNode.replaceChild(this.pastedNode, selected);
+    return false;
+  }
+  return true;
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function PasteReplace_DoTransaction()
-  {
-    var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var selected = this.originalNode || viewer.selectedNode;
-    if (selected) {
-      this.pastedNode = node.cloneNode(true);
-      this.originalNode = selected;
-      selected.parentNode.replaceChild(this.pastedNode, selected);
-      return false;
-    }
-    return true;
-  },
-
-  undoTransaction: function PasteReplace_UndoTransaction()
-  {
-    if (this.pastedNode) {
-      this.pastedNode.parentNode.replaceChild(this.originalNode,
-                                              this.pastedNode);
-    }
+cmdEditPasteReplace.prototype.undoTransaction =
+  function PasteReplace_UndoTransaction()
+{
+  if (this.pastedNode) {
+    this.pastedNode.parentNode.replaceChild(this.originalNode,
+                                            this.pastedNode);
   }
 };
 
@@ -1844,35 +1805,30 @@ cmdEditPasteReplace.prototype =
  */
 function cmdEditPasteFirstChild() {}
 
-cmdEditPasteFirstChild.prototype =
+cmdEditPasteFirstChild.prototype = new inBaseCommand(false);
+
+cmdEditPasteFirstChild.prototype.pastedNode = null;
+cmdEditPasteFirstChild.prototype.pastedBefore = null;
+
+cmdEditPasteFirstChild.prototype.doTransaction =
+  function PasteFirstChild_DoTransaction()
 {
-  pastedNode: null,
-  pastedBefore: null,
+  var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
+  var selected = this.pastedBefore || viewer.selectedNode;
+  if (selected) {
+    this.pastedNode = node.cloneNode(true);
+    this.pastedBefore = selected.firstChild;
+    selected.insertBefore(this.pastedNode, this.pastedBefore);
+    return false;
+  }
+  return true;
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function PasteFirstChild_DoTransaction()
-  {
-    var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var selected = this.pastedBefore || viewer.selectedNode;
-    if (selected) {
-      this.pastedNode = node.cloneNode(true);
-      this.pastedBefore = selected.firstChild;
-      selected.insertBefore(this.pastedNode, this.pastedBefore);
-      return false;
-    }
-    return true;
-  },
-
-  undoTransaction: function PasteFirstChild_UndoTransaction()
-  {
-    if (this.pastedNode) {
-      this.pastedNode.parentNode.removeChild(this.pastedNode);
-    }
+cmdEditPasteFirstChild.prototype.undoTransaction =
+  function PasteFirstChild_UndoTransaction()
+{
+  if (this.pastedNode) {
+    this.pastedNode.parentNode.removeChild(this.pastedNode);
   }
 };
 
@@ -1881,35 +1837,30 @@ cmdEditPasteFirstChild.prototype =
  */
 function cmdEditPasteLastChild() {}
 
-cmdEditPasteLastChild.prototype =
+cmdEditPasteLastChild.prototype = new inBaseCommand(false);
+
+cmdEditPasteLastChild.prototype.pastedNode = null;
+cmdEditPasteLastChild.prototype.selectedNode = null;
+
+cmdEditPasteLastChild.prototype.doTransaction =
+  function PasteLastChild_DoTransaction()
 {
-  pastedNode: null,
-  selectedNode: null,
+  var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
+  var selected = this.selectedNode || viewer.selectedNode;
+  if (selected) {
+    this.pastedNode = node.cloneNode(true);
+    this.selectedNode = selected;
+    selected.appendChild(this.pastedNode);
+    return false;
+  }
+  return true;
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function PasteLastChild_DoTransaction()
-  {
-    var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var selected = this.selectedNode || viewer.selectedNode;
-    if (selected) {
-      this.pastedNode = node.cloneNode(true);
-      this.selectedNode = selected;
-      selected.appendChild(this.pastedNode);
-      return false;
-    }
-    return true;
-  },
-
-  undoTransaction: function PasteLastChild_UndoTransaction()
-  {
-    if (this.selectedNode) {
-      this.selectedNode.removeChild(this.pastedNode);
-    }
+cmdEditPasteLastChild.prototype.undoTransaction =
+  function PasteLastChild_UndoTransaction()
+{
+  if (this.selectedNode) {
+    this.selectedNode.removeChild(this.pastedNode);
   }
 };
 
@@ -1919,40 +1870,35 @@ cmdEditPasteLastChild.prototype =
  */
 function cmdEditPasteAsParent() {}
 
-cmdEditPasteAsParent.prototype =
+cmdEditPasteAsParent.prototype = new inBaseCommand(false);
+
+cmdEditPasteAsParent.prototype.pastedNode = null;
+cmdEditPasteAsParent.prototype.originalNode = null;
+cmdEditPasteAsParent.prototype.originalParentNode = null;
+
+cmdEditPasteAsParent.prototype.doTransaction =
+  function PasteAsParent_DoTransaction()
 {
-  pastedNode: null,
-  originalNode: null,
-  originalParentNode: null,
+  var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
+  var selected = this.originalNode || viewer.selectedNode;
+  var parent = this.originalParentNode || selected.parentNode;
+  if (selected) {
+    this.pastedNode = node.cloneNode(true);
+    this.originalNode = selected;
+    this.originalParentNode = parent;
+    parent.replaceChild(this.pastedNode, selected);
+    this.pastedNode.appendChild(selected);
+    return false;
+  }
+  return true;
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
-
-  doTransaction: function PasteAsParent_DoTransaction()
-  {
-    var node = this.pastedNode || viewer.pane.panelset.getClipboardData();
-    var selected = this.originalNode || viewer.selectedNode;
-    var parent = this.originalParentNode || selected.parentNode;
-    if (selected) {
-      this.pastedNode = node.cloneNode(true);
-      this.originalNode = selected;
-      this.originalParentNode = parent;
-      parent.replaceChild(this.pastedNode, selected);
-      this.pastedNode.appendChild(selected);
-      return false;
-    }
-    return true;
-  },
-
-  undoTransaction: function PasteAsParent_UndoTransaction()
-  {
-    if (this.pastedNode) {
-      this.originalParentNode.replaceChild(this.originalNode,
-                                           this.pastedNode);
-    }
+cmdEditPasteAsParent.prototype.undoTransaction =
+  function PasteAsParent_UndoTransaction()
+{
+  if (this.pastedNode) {
+    this.originalParentNode.replaceChild(this.originalNode,
+                                         this.pastedNode);
   }
 };
 
@@ -1961,72 +1907,65 @@ cmdEditPasteAsParent.prototype =
  */
 function InsertNode() {}
 
-InsertNode.prototype =
+InsertNode.prototype = new inBaseCommand(false);
+
+InsertNode.prototype.insertedNode = null;
+InsertNode.prototype.originalNode = null;
+InsertNode.prototype.attr = null;
+
+InsertNode.prototype.insertNode = function Insert_InsertNode()
 {
-  insertedNode: null,
-  originalNode: null,
-  attr: null,
+};
 
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-  redoTransaction: txnRedoTransaction,
+InsertNode.prototype.createNode = function Insert_CreateNode()
+{
+  var doc = this.originalNode.ownerDocument;
+  if (!this.attr) {
+    this.attr = { type: null, value: null, namespaceURI: null,
+                  accepted: false,
+                  enableNamespaces: doc.contentType != "text/html" };
 
-  insertNode: function Insert_InsertNode()
-  {
-  },
+    window.openDialog("chrome://inspector/content/viewers/dom/" +
+                        "insertDialog.xul",
+                      "insert", "chrome,modal,centerscreen", doc,
+                      this.attr);
+  }
 
-  createNode: function Insert_CreateNode()
-  {
-    var doc = this.originalNode.ownerDocument;
-    if (!this.attr) {
-      this.attr = { type: null, value: null, namespaceURI: null,
-                    accepted: false,
-                    enableNamespaces: doc.contentType != "text/html" };
-
-      window.openDialog("chrome://inspector/content/viewers/dom/" +
-                          "insertDialog.xul",
-                        "insert", "chrome,modal,centerscreen", doc,
-                        this.attr);
-    }
-
-    if (this.attr.accepted) {
-      switch (this.attr.type) {
-        case nsIDOMNode.ELEMENT_NODE:
-          if (this.attr.enableNamespaces) {
-            this.insertedNode = doc.createElementNS(this.attr.namespaceURI,
-                                                    this.attr.value);
-          }
-          else {
-            this.insertedNode = doc.createElement(this.attr.value);
-          }
-          break;
-        case nsIDOMNode.TEXT_NODE:
-          this.insertedNode = doc.createTextNode(this.attr.value);
-          break;
-      }
-      return true;
-    }
-    return false;
-  },
-
-  doTransaction: function Insert_DoTransaction()
-  {
-    if (this.originalNode) {
-      if (this.createNode()) {
-        this.insertNode();
-        return false;
-      }
+  if (this.attr.accepted) {
+    switch (this.attr.type) {
+      case nsIDOMNode.ELEMENT_NODE:
+        if (this.attr.enableNamespaces) {
+          this.insertedNode = doc.createElementNS(this.attr.namespaceURI,
+                                                  this.attr.value);
+        }
+        else {
+          this.insertedNode = doc.createElement(this.attr.value);
+        }
+        break;
+      case nsIDOMNode.TEXT_NODE:
+        this.insertedNode = doc.createTextNode(this.attr.value);
+        break;
     }
     return true;
-  },
+  }
+  return false;
+};
 
-  undoTransaction: function Insert_UndoTransaction()
-  {
-    if (this.insertedNode) {
-      this.insertedNode.parentNode.removeChild(this.insertedNode);
+InsertNode.prototype.doTransaction = function Insert_DoTransaction()
+{
+  if (this.originalNode) {
+    if (this.createNode()) {
+      this.insertNode();
+      return false;
     }
+  }
+  return true;
+};
+
+InsertNode.prototype.undoTransaction = function Insert_UndoTransaction()
+{
+  if (this.insertedNode) {
+    this.insertedNode.parentNode.removeChild(this.insertedNode);
   }
 };
 
@@ -2097,21 +2036,10 @@ cmdEditInsertLastChild.prototype.insertNode =
 
 function cmdEditInspectInNewWindow()
 {
-  this.mNode = viewer.selectedNode;
+  this.mObject = viewer.selectedNode;
 }
 
-cmdEditInspectInNewWindow.prototype = {
-  isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
-
-  doTransaction: function InspectInNewWindow_DoTransaction()
-  {
-    if (this.mNode) {
-      inspectObject(this.mNode);
-    }
-  }
-};
+cmdEditInspectInNewWindow.prototype = new cmdEditInspectInNewWindowBase();
 
 //////////////////////////////////////////////////////////////////////////////
 //// Listener Objects

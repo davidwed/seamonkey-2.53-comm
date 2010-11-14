@@ -24,7 +24,7 @@
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
   <script type="application/javascript"
-          src="chrome://global/content/XPCNativeWrapper.js"/>
+          src="chrome://inspector/content/jsutil/commands/baseCommands.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/viewers/dom/dom.js"/>
 

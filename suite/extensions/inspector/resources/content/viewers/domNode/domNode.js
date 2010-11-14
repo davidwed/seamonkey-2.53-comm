@@ -303,200 +303,171 @@ DOMNodeViewer.prototype =
 //// Command Objects
 
 function cmdEditCut() {}
-cmdEditCut.prototype =
+cmdEditCut.prototype = new inBaseCommand(false);
+
+cmdEditCut.prototype.cmdCopy = null,
+cmdEditCut.prototype.cmdDelete = null,
+
+cmdEditCut.prototype.doTransaction = function DNVr_Cut_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
+  if (!this.cmdCopy) {
+    this.cmdDelete = new cmdEditDelete();
+    this.cmdCopy = new cmdEditCopy(viewer.selectedAttributes);
+    this.cmdCopy.doTransaction();
+  }
+  this.cmdDelete.doTransaction();
+};
 
-  cmdCopy: null,
-  cmdDelete: null,
-  doTransaction: function DNVr_Cut_DoTransaction()
-  {
-    if (!this.cmdCopy) {
-      this.cmdDelete = new cmdEditDelete();
-      this.cmdCopy = new cmdEditCopy(viewer.selectedAttributes);
-      this.cmdCopy.doTransaction();
-    }
-    this.cmdDelete.doTransaction();
-  },
-
-  undoTransaction: function DVVr_Cut_UndoTransaction()
-  {
-    this.cmdDelete.undoTransaction();
-  },
-
-  redoTransaction: txnRedoTransaction
+cmdEditCut.prototype.undoTransaction = function DVVr_Cut_UndoTransaction()
+{
+  this.cmdDelete.undoTransaction();
 };
 
 function cmdEditPaste() {}
-cmdEditPaste.prototype =
+cmdEditPaste.prototype = new inBaseCommand(false);
+
+cmdEditPaste.prototype.pastedAttr = null;
+cmdEditPaste.prototype.previousAttrValue = null;
+cmdEditPaste.prototype.subject = null;
+cmdEditPaste.prototype.flavor = null;
+
+cmdEditPaste.prototype.doTransaction = function DNVr_Paste_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-
-  pastedAttr: null,
-  previousAttrValue: null,
-  subject: null,
-  flavor: null,
-
-  doTransaction: function DNVr_Paste_DoTransaction()
-  {
-    var subject, pastedAttr, flavor;
-    if (this.subject) {
-      subject = this.subject;
-      pastedAttr = this.pastedAttr;
-      flavor = this.flavor;
-    }
-    else {
-      subject = viewer.subject;
-      pastedAttr = viewer.pane.panelset.getClipboardData();
-      flavor = viewer.pane.panelset.clipboardFlavor;
-      this.pastedAttr = pastedAttr;
-      this.subject = subject;
-      this.flavor = flavor;
-      if (flavor == "inspector/dom-attributes") {
-        this.previousAttrValue = [];
-        for (var i = 0; i < pastedAttr.length; ++i) {
-          this.previousAttrValue[pastedAttr[i].node.nodeName] =
-            viewer.subject.getAttribute(pastedAttr[i].node.nodeName);
-        }
-      }
-      else if (flavor == "inspector/dom-attribute") {
-        this.previousAttrValue =
-          viewer.subject.getAttribute(pastedAttr.node.nodeName);
+  var subject, pastedAttr, flavor;
+  if (this.subject) {
+    subject = this.subject;
+    pastedAttr = this.pastedAttr;
+    flavor = this.flavor;
+  }
+  else {
+    subject = viewer.subject;
+    pastedAttr = viewer.pane.panelset.getClipboardData();
+    flavor = viewer.pane.panelset.clipboardFlavor;
+    this.pastedAttr = pastedAttr;
+    this.subject = subject;
+    this.flavor = flavor;
+    if (flavor == "inspector/dom-attributes") {
+      this.previousAttrValue = [];
+      for (var i = 0; i < pastedAttr.length; ++i) {
+        this.previousAttrValue[pastedAttr[i].node.nodeName] =
+          viewer.subject.getAttribute(pastedAttr[i].node.nodeName);
       }
     }
+    else if (flavor == "inspector/dom-attribute") {
+      this.previousAttrValue =
+        viewer.subject.getAttribute(pastedAttr.node.nodeName);
+    }
+  }
 
-    if (subject && pastedAttr) {
-      if (flavor == "inspector/dom-attributes") {
-        for (var i = 0; i < pastedAttr.length; ++i) {
-          subject.setAttribute(pastedAttr[i].node.nodeName,
-                               pastedAttr[i].node.nodeValue);
-        }
-      }
-      else if (flavor == "inspector/dom-attribute") {
-        subject.setAttribute(pastedAttr.node.nodeName,
-                             pastedAttr.node.nodeValue);
+  if (subject && pastedAttr) {
+    if (flavor == "inspector/dom-attributes") {
+      for (var i = 0; i < pastedAttr.length; ++i) {
+        subject.setAttribute(pastedAttr[i].node.nodeName,
+                             pastedAttr[i].node.nodeValue);
       }
     }
-  },
+    else if (flavor == "inspector/dom-attribute") {
+      subject.setAttribute(pastedAttr.node.nodeName,
+                           pastedAttr.node.nodeValue);
+    }
+  }
+};
 
-  undoTransaction: function DNVr_Paste_UndoTransaction()
-  {
-    if (this.pastedAttr) {
-      if (this.flavor == "inspector/dom-attributes") {
-        for (var i = 0; i < this.pastedAttr.length; ++i) {
-          var attrNodeName = this.pastedAttr[i].node.nodeName;
-          if (this.previousAttrValue[attrNodeName]) {
-            this.subject.setAttribute(attrNodeName,
-                                      this.previousAttrValue[attrNodeName]);
-          }
-          else {
-            this.subject.removeAttribute(attrNodeName);
-          }
-        }
-      }
-      else if (this.flavor == "inspector/dom-attribute") {
-        if (this.previousAttrValue) {
-          this.subject.setAttribute(this.pastedAttr.node.nodeName,
-                                    this.previousAttrValue);
+cmdEditPaste.prototype.undoTransaction = function DNVr_Paste_UndoTransaction()
+{
+  if (this.pastedAttr) {
+    if (this.flavor == "inspector/dom-attributes") {
+      for (var i = 0; i < this.pastedAttr.length; ++i) {
+        var attrNodeName = this.pastedAttr[i].node.nodeName;
+        if (this.previousAttrValue[attrNodeName]) {
+          this.subject.setAttribute(attrNodeName,
+                                    this.previousAttrValue[attrNodeName]);
         }
         else {
-          this.subject.removeAttribute(this.pastedAttr.node.nodeName);
+          this.subject.removeAttribute(attrNodeName);
         }
       }
     }
-  },
-
-  redoTransaction: txnRedoTransaction
+    else if (this.flavor == "inspector/dom-attribute") {
+      if (this.previousAttrValue) {
+        this.subject.setAttribute(this.pastedAttr.node.nodeName,
+                                  this.previousAttrValue);
+      }
+      else {
+        this.subject.removeAttribute(this.pastedAttr.node.nodeName);
+      }
+    }
+  }
 };
 
 function cmdEditInsert() {}
-cmdEditInsert.prototype =
+cmdEditInsert.prototype = new inBaseCommand(false);
+
+cmdEditInsert.prototype.attr = null;
+cmdEditInsert.prototype.subject = null;
+cmdEditInsert.prototype.name = null;
+cmdEditInsert.prototype.value = null;
+cmdEditInsert.prototype.namespaceURI = null;
+cmdEditInsert.prototype.accepted = false;
+
+cmdEditInsert.prototype.promptFor = function DNVr_Insert_PromptFor()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
+  var bundle = viewer.pane.panelset.stringBundle;
+  var title = bundle.getString("newAttribute.title");
+  var doc = viewer.subject.ownerDocument;
 
-  attr: null,
-  subject: null,
-  name: null,
-  value: null,
-  namespaceURI: null,
-  accepted: false,
+  window.openDialog("chrome://inspector/content/viewers/domNode/" +
+                    "domNodeDialog.xul", "insert",
+                    "chrome,modal,centerscreen", this, title, doc);
 
-  promptFor: function DNVr_Insert_PromptFor()
-  {
-    var bundle = viewer.pane.panelset.stringBundle;
-    var title = bundle.getString("newAttribute.title");
-    var doc = viewer.subject.ownerDocument;
+  this.subject = viewer.subject;
 
-    window.openDialog("chrome://inspector/content/viewers/domNode/" +
-                      "domNodeDialog.xul", "insert",
-                      "chrome,modal,centerscreen", this, title, doc);
+  return this.accepted ? this : null;
+};
 
-    this.subject = viewer.subject;
+cmdEditInsert.prototype.doTransaction = function DNVr_Insert_DoTransaction()
+{
+  this.subject.setAttributeNS(this.namespaceURI,
+                              this.name,
+                              this.value);
+};
 
-    return this.accepted ? this : null;
-  },
-
-  doTransaction: function DNVr_Insert_DoTransaction()
-  {
-    this.subject.setAttributeNS(this.namespaceURI,
-                                this.name,
-                                this.value);
-  },
-
-  undoTransaction: function DNVr_Insert_UndoTransaction()
-  {
-    if (this.subject == viewer.subject) {
-      this.subject.removeAttributeNS(this.namespaceURI,
-                                     this.name);
-    }
-  },
-
-  redoTransaction: txnRedoTransaction
+cmdEditInsert.prototype.undoTransaction =
+  function DNVr_Insert_UndoTransaction()
+{
+  if (this.subject == viewer.subject) {
+    this.subject.removeAttributeNS(this.namespaceURI,
+                                   this.name);
+  }
 };
 
 function cmdEditDelete() {}
-cmdEditDelete.prototype =
+cmdEditDelete.prototype = new inBaseCommand(false);
+
+cmdEditDelete.prototype.attrs = null;
+cmdEditDelete.prototype.subject = null;
+
+cmdEditDelete.prototype.doTransaction = function DNVr_Delete_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
-
-  attrs: null,
-  subject: null,
-
-  doTransaction: function DNVr_Delete_DoTransaction()
-  {
-    var attrs = this.attrs ? this.attrs : viewer.selectedAttributes;
-    if (attrs) {
-      this.attrs = attrs;
-      this.subject = viewer.subject;
-      for (var i = 0; i < this.attrs.length; ++i) {
-        this.subject.removeAttribute(this.attrs[i].node.nodeName);
-      }
+  var attrs = this.attrs ? this.attrs : viewer.selectedAttributes;
+  if (attrs) {
+    this.attrs = attrs;
+    this.subject = viewer.subject;
+    for (var i = 0; i < this.attrs.length; ++i) {
+      this.subject.removeAttribute(this.attrs[i].node.nodeName);
     }
-  },
+  }
+};
 
-  undoTransaction: function DNVr_Delete_UndoTransaction()
-  {
-    if (this.attrs) {
-      for (var i = 0; i < this.attrs.length; ++i) {
-        this.subject.setAttribute(this.attrs[i].node.nodeName,
-                                  this.attrs[i].node.nodeValue);
-      }
+cmdEditDelete.prototype.undoTransaction =
+  function DNVr_Delete_UndoTransaction()
+{
+  if (this.attrs) {
+    for (var i = 0; i < this.attrs.length; ++i) {
+      this.subject.setAttribute(this.attrs[i].node.nodeName,
+                                this.attrs[i].node.nodeValue);
     }
-  },
-
-  redoTransaction: txnRedoTransaction
+  }
 };
 
 // XXX when editing the a attribute in this document:
@@ -504,78 +475,70 @@ cmdEditDelete.prototype =
 // You only get "hi" and not the mutltiline text (windows)
 // This seems to work on Linux, but not very usable
 function cmdEditEdit() {}
-cmdEditEdit.prototype =
+cmdEditEdit.prototype = new inBaseCommand(false);
+
+cmdEditEdit.prototype.subject = null;
+cmdEditEdit.prototype.name = null;
+cmdEditEdit.prototype.value = null;
+cmdEditEdit.prototype.namespaceURI = null;
+cmdEditEdit.prototype.previousValue = null;
+cmdEditEdit.prototype.previousNamespaceURI = null;
+cmdEditEdit.prototype.accepted = false;
+
+cmdEditEdit.prototype.promptFor = function DNVr_Edit_PromptFor()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
+  var attr = viewer.selectedAttribute.node;
+  if (!attr) {
+    return null;
+  }
+  var bundle = viewer.pane.panelset.stringBundle;
+  var title = bundle.getString("editAttribute.title");
+  var doc = attr.ownerDocument;
 
-  subject: null,
-  name: null,
-  value: null,
-  namespaceURI: null,
-  previousValue: null,
-  previousNamespaceURI: null,
-  accepted: false,
+  this.subject              = viewer.subject;
+  this.name                 = attr.nodeName;
+  this.previousValue        = attr.nodeValue;
+  this.previousNamespaceURI = attr.namespaceURI;
+  this.value                = this.previousValue;
+  this.namespaceURI         = this.previousNamespaceURI;
 
-  promptFor: function DNVr_Edit_PromptFor()
-  {
-    var attr = viewer.selectedAttribute.node;
-    if (!attr) {
-      return null;
-    }
-    var bundle = viewer.pane.panelset.stringBundle;
-    var title = bundle.getString("editAttribute.title");
-    var doc = attr.ownerDocument;
+  window.openDialog("chrome://inspector/content/viewers/domNode/" +
+                    "domNodeDialog.xul", "edit",
+                    "chrome,modal,centerscreen", this, title, doc);
 
-    this.subject              = viewer.subject;
-    this.name                 = attr.nodeName;
-    this.previousValue        = attr.nodeValue;
-    this.previousNamespaceURI = attr.namespaceURI;
-    this.value                = this.previousValue;
-    this.namespaceURI         = this.previousNamespaceURI;
+  return this.accepted ? this : null;
+};
 
-    window.openDialog("chrome://inspector/content/viewers/domNode/" +
-                      "domNodeDialog.xul", "edit",
-                      "chrome,modal,centerscreen", this, title, doc);
+cmdEditEdit.prototype.doTransaction = function DNVr_Edit_DoTransaction()
+{
+  if (this.previousNamespaceURI == this.namespaceURI) {
+    this.subject.setAttributeNS(this.previousNamespaceURI,
+                                this.name,
+                                this.value);
+  }
+  else {
+    this.subject.removeAttributeNS(this.previousNamespaceURI,
+                                   this.name);
+    this.subject.setAttributeNS(this.namespaceURI,
+                                this.name,
+                                this.value);
+  }
+};
 
-    return this.accepted ? this : null;
-  },
-
-  doTransaction: function DNVr_Edit_DoTransaction()
-  {
-    if (this.previousNamespaceURI == this.namespaceURI) {
-      this.subject.setAttributeNS(this.previousNamespaceURI,
-                                  this.name,
-                                  this.value);
-    }
-    else {
-      this.subject.removeAttributeNS(this.previousNamespaceURI,
-                                     this.name);
-      this.subject.setAttributeNS(this.namespaceURI,
-                                  this.name,
-                                  this.value);
-    }
-  },
-
-  undoTransaction: function DNVr_Edit_UndoTransaction()
-  {
-    if (this.previousNamespaceURI == this.namespaceURI) {
-      this.subject.setAttributeNS(this.previousNamespaceURI,
-                                  this.name,
-                                  this.previousValue);
-    }
-    else {
-      this.subject.removeAttributeNS(this.namespaceURI,
-                                     this.name);
-      this.subject.setAttributeNS(this.previousNamespaceURI,
-                                  this.name,
-                                  this.previousValue);
-    }
-  },
-
-  redoTransaction: txnRedoTransaction
+cmdEditEdit.prototype.undoTransaction = function DNVr_Edit_UndoTransaction()
+{
+  if (this.previousNamespaceURI == this.namespaceURI) {
+    this.subject.setAttributeNS(this.previousNamespaceURI,
+                                this.name,
+                                this.previousValue);
+  }
+  else {
+    this.subject.removeAttributeNS(this.namespaceURI,
+                                   this.name);
+    this.subject.setAttributeNS(this.previousNamespaceURI,
+                                this.name,
+                                this.previousValue);
+  }
 };
 
 /**
@@ -587,35 +550,33 @@ function cmdEditTextValue() {
   this.previousValue = this.subject.nodeValue;
 }
 
-cmdEditTextValue.prototype =
+cmdEditTextValue.prototype = new inBaseCommand(false);
+
+cmdEditTextValue.prototype.doTransaction =
+  function DNVr_EditText_DoTransaction()
 {
-  // required for nsITransaction
-  QueryInterface: txnQueryInterface,
-  merge: txnMerge,
-  isTransient: false,
+  this.subject.nodeValue = this.newValue;
+};
 
-  doTransaction: function DNVr_EditText_DoTransaction()
-  {
-    this.subject.nodeValue = this.newValue;
-  },
+cmdEditTextValue.prototype.undoTransaction =
+  function DNVr_EditText_UndoTransaction()
+{
+  this.subject.nodeValue = this.previousValue;
+  this.refreshView();
+};
 
-  undoTransaction: function DNVr_EditText_UndoTransaction()
-  {
-    this.subject.nodeValue = this.previousValue;
-    this.refreshView();
-  },
+cmdEditTextValue.prototype.redoTransaction =
+  function DNVr_EditText_RedoTransaction()
+{
+  this.doTransaction();
+  this.refreshView();
+};
 
-  redoTransaction: function DNVr_EditText_RedoTransaction()
-  {
-    this.doTransaction();
-    this.refreshView();
-  },
-
-  refreshView: function DNVr_EditText_RefreshView() {
-    // if we're still on the same subject, update the textbox
-    if (viewer.subject == this.subject) {
-      document.getElementById("txbTextNodeValue").value =
-               this.subject.nodeValue;
-    }
+cmdEditTextValue.prototype.refreshView = function DNVr_EditText_RefreshView()
+{
+  // if we're still on the same subject, update the textbox
+  if (viewer.subject == this.subject) {
+    document.getElementById("txbTextNodeValue").value =
+             this.subject.nodeValue;
   }
 };
