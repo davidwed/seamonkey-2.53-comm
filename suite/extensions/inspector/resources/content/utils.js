@@ -170,62 +170,10 @@ function debug(aText)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//// nsITransaction Helper Functions
+//// Clipboard Flavors
 
-function txnQueryInterface(theUID, theResult)
-{
-  const nsITransaction = Components.interfaces.nsITransaction;
-  const nsISupports    = Components.interfaces.nsISupports;
-  if (theUID == nsITransaction || theUID == nsISupports) {
-    return this;
-  }
-  return null;
-}
-
-function txnMerge()
-{
-  return false;
-}
-
-function txnRedoTransaction()
-{
-  this.doTransaction();
-}
-
-/**
- * A nsITransaction for clipboard copy.
- * @param aObjects
- *        an array of objects that define a clipboard flavor, a delimiter, and
- *        toString().
- */
-function cmdEditCopy(aObjects)
-{
-  // remove this line for bug 179621, Phase Three
-  this.txnType = "standard";
-
-  // required for nsITransaction
-  this.QueryInterface = txnQueryInterface;
-  this.merge = txnMerge;
-  this.isTransient = true;
-
-  this.objects = aObjects;
-}
-
-cmdEditCopy.prototype.doTransaction = function Utils_Copy_DoTransaction()
-{
-  if (this.objects.length == 1) {
-    viewer.pane.panelset.setClipboardData(this.objects[0],
-                                          this.objects[0].flavor,
-                                          this.objects.toString());
-  }
-  else {
-    var joinedObjects = this.objects.join(this.objects[0].delimiter);
-    viewer.pane.panelset.setClipboardData(this.objects,
-                                          this.objects[0].flavor + "s",
-                                          joinedObjects);
-  }
-}
-
+// TODO: Move these (or similar) to jsutil/system/clipboardFlavors.js or
+// something as part of bug 328878.
 
 /**
  * Represents a CSS declaration.

@@ -59,6 +59,8 @@
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/commands/baseCommands.js"/>
 
   <commandset id="cmdsEditing"/>
 

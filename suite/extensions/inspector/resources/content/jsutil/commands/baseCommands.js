@@ -19,6 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Jason Barnabe <jason_barnabe@fastmail.fm>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,10 +44,10 @@
 * bug 609789
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
-*   chrome://inspector/content/utils.js
 *   (Other files may be necessary, depending on which base commands are used.)
 *****************************************************************************/
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 //////////////////////////////////////////////////////////////////////////////
 //// Global Constants
@@ -70,10 +71,18 @@ function inBaseCommand(aIsTransient)
 
 inBaseCommand.prototype = {
   isTransient: true,
-  merge: txnMerge,
-  QueryInterface: txnQueryInterface,
+
+  merge: function BaseCommand_Merge()
+  {
+    return false;
+  },
+
+  QueryInterface:
+    XPCOMUtils.generateQI([Components.interfaces.nsITransaction]),
+
   doTransaction: function BaseCommand_DoTransaction() {},
   undoTransaction: function BaseCommand_UndoTransaction() {},
+
   redoTransaction: function BaseCommand_RedoTransaction()
   {
     this.doTransaction();
@@ -131,6 +140,34 @@ cmdEditCopySimpleStringBase.prototype.doTransaction =
     helper.copyString(this.mString);
   }
 };
+
+/**
+ * An nsITransaction to copy items to the panelset clipboard.
+ * @param aObjects
+ *        an array of objects that define a clipboard flavor, a delimiter, and
+ *        toString().
+ */
+function cmdEditCopy(aObjects)
+{
+  this.mObjects = aObjects;
+}
+
+cmdEditCopy.prototype = new inBaseCommand();
+
+cmdEditCopy.prototype.doTransaction = function Utils_Copy_DoTransaction()
+{
+  if (this.mObjects.length == 1) {
+    viewer.pane.panelset.setClipboardData(this.mObjects[0],
+                                          this.mObjects[0].flavor,
+                                          this.mObjects.toString());
+  }
+  else {
+    var joinedObjects = this.mObjects.join(this.mObjects[0].delimiter);
+    viewer.pane.panelset.setClipboardData(this.mObjects,
+                                          this.mObjects[0].flavor + "s",
+                                          joinedObjects);
+  }
+}
 
 /**
  * Open a source view on a file.  The mURI field should be overridden to
