@@ -57,9 +57,16 @@ const kClipboardHelperClassID = "@mozilla.org/widget/clipboardhelper;1";
 //// Transactions
 
 /**
- * Base implementation of a transient nsITransaction.
+ * Base implementation of an nsITransaction.
+ * @param aIsTransient [optional]
+ *        Override the isTransient field.  The default is true.
  */
-function inBaseCommand() {}
+function inBaseCommand(aIsTransient)
+{
+  if (aIsTransient !== undefined) {
+    this.isTransient = aIsTransient;
+  }
+}
 
 inBaseCommand.prototype = {
   isTransient: true,
@@ -67,7 +74,10 @@ inBaseCommand.prototype = {
   QueryInterface: txnQueryInterface,
   doTransaction: function BaseCommand_DoTransaction() {},
   undoTransaction: function BaseCommand_UndoTransaction() {},
-  redoTransaction: function BaseCommand_RedoTransaction() {}
+  redoTransaction: function BaseCommand_RedoTransaction()
+  {
+    this.doTransaction();
+  }
 };
 
 /**
