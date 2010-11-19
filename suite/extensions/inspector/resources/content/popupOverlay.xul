@@ -9,12 +9,24 @@
 <overlay id="ovPopupsMain"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
+  <popupset id="aTooltipSet">
+    <tooltip id="docItemsTooltip"
+             noautohide="true"
+             onpopupshowing="return inspector.fillInTooltip(document.tooltipNode);">
+      <vbox>
+        <label id="docItemsTitle" class="tooltip-label"/>
+        <label id="docItemsURI" class="tooltip-label"/>
+      </vbox>
+    </tooltip>
+  </popupset>
+
   <menupopup id="menu_FilePopup">
     <menu oncommand="inspector.setTargetDocument(event.target.doc);"
           id="mnInspectContentDocumentFile"
           label="&mnInspectContentDocument.label;"
           accesskey="&mnInspectContentDocument.accesskey;">
       <menupopup id="list-content-documents-popup"
+                 tooltip="docItemsTooltip"
                  onpopupshowing="inspector.showInspectDocumentList(event, false);"/>
     </menu>
     <menu oncommand="inspector.setTargetDocument(event.target.doc);"
@@ -22,6 +34,7 @@
           label="&mnInspectChromeDocument.label;"
           accesskey="&mnInspectChromeDocument.accesskey;">
       <menupopup id="list-chrome-documents-popup"
+                 tooltip="docItemsTooltip"
                  onpopupshowing="inspector.showInspectDocumentList(event, true);"/>
     </menu>
     <menuitem oncommand="inspector.setTargetApplicationAccessible();"

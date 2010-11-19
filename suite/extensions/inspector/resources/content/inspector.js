@@ -629,22 +629,19 @@ InspectorApp.prototype =
     return this.mPanelSet.getPanel(0).subject != null;
   },
 
-  fillInTooltip: function IA_FillInTooltip(tipElement)
+  fillInTooltip: function IA_FillInTooltip(aMenuItem)
   {
-    var retVal = false;
-    var textNode = document.getElementById("txTooltip");
-    if (textNode) {
-      try {
-        var tipText = tipElement.getAttribute("tooltiptext");
-        if (tipText != "") {
-          textNode.setAttribute("value", tipText);
-          retVal = true;
-        }
-      }
-      catch (e) { }
+    var doc = aMenuItem.doc;
+    if (!doc) {
+      return false;
     }
 
-    return retVal;
+    var titleLabel = document.getElementById("docItemsTitle");
+    var uriLabel = document.getElementById("docItemsURI");
+    titleLabel.value = doc.title;
+    uriLabel.value = doc.location.href;
+    titleLabel.hidden = !titleLabel.value;
+    return true;
   },
 
   initPopup: function IA_InitPopup(aPopup)
