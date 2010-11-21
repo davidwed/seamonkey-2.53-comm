@@ -40,10 +40,11 @@
 
   <!ENTITY cmdShowFindDialog.label "Rechercher un nœud…">
   <!ENTITY cmdShowFindDialog.accesskey "R">
-  <!ENTITY cmdShowFindDialog.accelkey "r">
+  <!ENTITY cmdShowFindDialog.key "f">
 
-  <!ENTITY cmdFindNext.label "Rechercher le suivant">
-  <!ENTITY cmdFindNext.accesskey "s">
+  <!ENTITY cmdFindAgain.label "Rechercher le suivant">
+  <!ENTITY cmdFindAgain.accesskey "e">
+  <!ENTITY cmdFindAgain.key "G">
 
   <!ENTITY cmdToggleAnonContent.label "Afficher le contenu anonyme">
   <!ENTITY cmdToggleAnonContent.accesskey "A">

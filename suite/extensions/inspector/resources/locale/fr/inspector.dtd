@@ -17,8 +17,12 @@
 <!ENTITY mnInspectContentDocument.accesskey "E">
 <!ENTITY mnInspectChromeDocument.label "Examiner le Chrome d'un document">
 <!ENTITY mnInspectChromeDocument.accesskey "x">
-<!ENTITY cmdShowOpenURLDialog.label "Examiner une URL…">
-<!ENTITY cmdShowOpenURLDialog.accesskey "U">
+<!ENTITY mnInspectApplicationAccessible.label "Examiner l'accessibilité de l'application">
+<!ENTITY mnInspectApplicationAccessible.accesskey "a">
+<!ENTITY cmdEnterLocation.label "Examiner une URL">
+<!ENTITY cmdEnterLocation.accesskey "m">
+<!ENTITY cmdEnterLocation.key "L">
+<!ENTITY cmdEnterLocation.key2 "D">
 <!ENTITY cmdSave.label "Enregistrer le DOM sous…">
 <!ENTITY cmdSave.accesskey "D">
 <!ENTITY cmdClose.label "Fermer">
@@ -40,9 +44,6 @@
 <!ENTITY cmdPaste.accesskey "l">
 <!ENTITY cmdDelete.label "Supprimer">
 <!ENTITY cmdDelete.accesskey "e">
-
-<!ENTITY mnSearch.label "Rechercher">
-<!ENTITY mnSearch.accesskey "R">
 
 <!ENTITY mnView.label "Affichage">
 <!ENTITY mnView.accesskey "A">
