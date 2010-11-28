@@ -719,7 +719,7 @@ DOMViewer.prototype =
         (node.namespaceURI == kXULNSURI && (n == "browser" ||
                                             n == "tabbrowser" ||
                                             n == "editor"))) {
-      this.subject = node.contentDocument;
+      this.pane.subject = node.contentDocument;
     }
   },
 
