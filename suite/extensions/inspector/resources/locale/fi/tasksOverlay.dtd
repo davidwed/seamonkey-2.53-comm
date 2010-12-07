@@ -1,0 +1,7 @@
+<!ENTITY inspectorTaskCmd.label "DOM-tutkija">
+<!ENTITY inspectorTaskCmd.commandkey "i">
+<!ENTITY inspectorTaskCmd.accesskey.ff "D">
+<!ENTITY inspectorTaskCmd.accesskey "D">
+
+<!ENTITY inspectPageTaskCmd.label "Tutki sivu">
+<!ENTITY inspectPageTaskCmd.accesskey "T">
