@@ -457,7 +457,6 @@ DOMViewer.prototype =
     this.mDOMView.showAccessibleNodes = aValue;
     this.mPanel.panelset.setCommandAttribute("cmd:toggleAccessibleNodes",
                                              "checked", aValue);
-    this.onTreeSelectionChange();
   },
 
   /**
