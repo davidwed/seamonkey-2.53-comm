@@ -712,12 +712,17 @@ cmdEditDelete.prototype.doTransaction = function Delete_DoTransaction()
 cmdEditDelete.prototype.undoTransaction = function Delete_UndoTransaction()
 {
   viewer.mPropsBoxObject.beginUpdateBatch();
-  for (let i = 0; i < this.declarations.length; i++) {
-    this.rule.setProperty(this.declarations[i].property,
-                          this.declarations[i].value,
-                          this.declarations[i].important ?
-                            "important" :
-                            "");
+  try {
+    for (let i = 0; i < this.declarations.length; i++) {
+      this.rule.setProperty(this.declarations[i].property,
+                            this.declarations[i].value,
+                            this.declarations[i].important ?
+                              "important" :
+                              "");
+    }
+  }
+  finally {
+    viewer.mPropsBoxObject.endUpdateBatch();
   }
 };
 
