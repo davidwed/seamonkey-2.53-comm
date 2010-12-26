@@ -83,15 +83,24 @@ function XBLBindingsViewer()
   this.mHandlerTree = document.getElementById("olHandlers");
   this.mResourceTree = document.getElementById("olResources");
 
+  this.mTreeViews = {};
+
+  this.generateViewGetterAndSetter("contentView", this.mContentTree);
+  this.generateViewGetterAndSetter("methodView", this.mMethodTree);
+  this.generateViewGetterAndSetter("propView", this.mPropTree);
+  this.generateViewGetterAndSetter("handlerView", this.mHandlerTree);
+  this.generateViewGetterAndSetter("resourceView", this.mResourceTree);
+
   this.mControllers = {};
 
   this.addController(this.mBindingsList, BindingsListController);
   this.addController(this.mResourceTree, ResourceTreeController);
 
   // prepare and attach the content DOM datasource
-  this.mContentView = XPCU.createInstance(kDOMViewContractID, "inIDOMView");
-  this.mContentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
-  this.mContentTree.view = this.mContentView;
+  var contentView = XPCU.createInstance(kDOMViewContractID, "inIDOMView");
+  contentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
+  XPCU.QI(contentView, "nsITreeView");
+  this.contentView = contentView;
 }
 
 XBLBindingsViewer.prototype =
@@ -102,6 +111,7 @@ XBLBindingsViewer.prototype =
   mSubject: null,
   mPane: null,
   mControllers: null,
+  mTreeViews: null,
 
   ////////////////////////////////////////////////////////////////////////////
   //// Interface inIViewer
@@ -141,11 +151,11 @@ XBLBindingsViewer.prototype =
 
   destroy: function XBLBVr_Destroy()
   {
-    this.mContentTree.view = null;
-    this.mMethodTree.view = null;
-    this.mPropTree.view = null;
-    this.mHandlerTree.view = null;
-    this.mResourceTree.view = null;
+    this.contentView = null;
+    this.methodView = null;
+    this.propView = null;
+    this.handlerView = null;
+    this.resourceView = null;
   },
 
   isCommandEnabled: function XBLBVr_IsCommandEnabled(aCommand)
@@ -256,61 +266,61 @@ XBLBindingsViewer.prototype =
 
   displayContent: function XBLBVr_DisplayContent()
   {
-    this.mContentView.rootNode = this.mBinding &&
+    this.contentView.rootNode = this.mBinding &&
       this.mBinding.getElementsByTagNameNS(kXBLNSURI, "content").item(0);
-    this.mContentTree.disabled = !this.mContentView.rootNode;
+    this.mContentTree.disabled = !this.contentView.rootNode;
     document.getElementById("tbContent").disabled =
-      !this.mContentView.rootNode;
-    if (this.mContentView.rootNode) {
-      this.mContentTree.view.selection.select(0);
+      !this.contentView.rootNode;
+    if (this.contentView.rootNode) {
+      this.contentView.selection.select(0);
     }
   },
 
   displayMethods: function XBLBVr_DisplayMethods()
   {
-    this.mMethodTree.view =
+    this.methodView =
       this.mBinding ? new MethodTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
       this.mBinding.getElementsByTagNameNS(kXBLNSURI, "method").length > 0;
     this.mMethodTree.disabled = !active;
     document.getElementById("tbMethods").disabled = !active;
-    if (active && this.mMethodTree.view.rowCount) {
-      this.mMethodTree.view.selection.select(0);
+    if (active && this.methodView.rowCount) {
+      this.methodView.selection.select(0);
     }
   },
 
   displayProperties: function XBLBVr_DisplayProperties()
   {
-    this.mPropTree.view =
+    this.propView =
       this.mBinding ? new PropTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
       this.mBinding.getElementsByTagNameNS(kXBLNSURI, "property").length > 0;
     this.mPropTree.disabled = !active;
     document.getElementById("tbProps").disabled = !active;
-    if (active && this.mPropTree.view.rowCount) {
-      this.mPropTree.view.selection.select(0);
+    if (active && this.propView.rowCount) {
+      this.propView.selection.select(0);
     }
   },
 
   displayHandlers: function XBLBVr_DisplayHandlers()
   {
-    this.mHandlerTree.view =
+    this.handlerView =
       this.mBinding ? new HandlerTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
       this.mBinding.getElementsByTagNameNS(kXBLNSURI, "handler").length > 0;
     this.mHandlerTree.disabled = !active;
     document.getElementById("tbHandlers").disabled = !active;
-    if (active && this.mHandlerTree.view.rowCount) {
-      this.mHandlerTree.view.selection.select(0);
+    if (active && this.handlerView.rowCount) {
+      this.handlerView.selection.select(0);
     }
   },
 
   displayResources: function XBLBVr_DisplayResources()
   {
-    this.mResourceTree.view =
+    this.resourceView =
       this.mBinding ? new ResourceTreeView(this.mBinding) : null;
 
     var active = this.mBinding &&
@@ -403,6 +413,29 @@ XBLBindingsViewer.prototype =
 
   ////////////////////////////////////////////////////////////////////////////
   //// Misc
+
+  /**
+   * Generates getter and setter methods for property named by the given
+   * identifier.  The setter will set the tree's view and cache it.  The
+   * getter will recall the cached view.
+   * @param aIdentifier
+   *        The name of the property where the getter and setter should live.
+   * @param aTree
+   *        The tree whose view should be set in the setter.
+   */
+  generateViewGetterAndSetter:
+    function XBLBVr_GenerateViewGetterAndSetter(aIdentifier, aTree)
+  {
+    this.__defineSetter__(aIdentifier, function(aVal)
+      {
+	aTree.view = aVal;
+	return this.mTreeViews[aIdentifier] = aVal;
+      });
+    this.__defineGetter__(aIdentifier, function()
+      {
+	return this.mTreeViews[aIdentifier];
+      });
+  },
 
   /**
    * Creates a controller, registers it with this viewer, and appends it to
@@ -498,7 +531,7 @@ BindingsListController.prototype = {
 
   getCommand: function BLC_GetCommand(aCommand)
   {
-    if (aCommand in this.commands) {
+    if (this.supportsCommand(aCommand)) {
       return new this.commands[aCommand]();
     }
     return null;
@@ -532,34 +565,26 @@ let (commands = BindingsListController.prototype.commands) {
   commands.cmdEditViewFileURI.prototype = new cmdEditViewFileURIBase();
 }
 
-function ResourceTreeController(aTree)
-{
-  this.mTree = aTree;
-}
+function ResourceTreeController(aTree) {}
 
 ResourceTreeController.prototype = {
 
-  get view()
-  {
-    return this.mTree.view.wrappedJSObject;
-  },
-
   commands: {
-    cmdEditCopyFileURI: function RTC_CopyFileURI(aController)
+    cmdEditCopyFileURI: function RTC_CopyFileURI()
     {
-      this.mString = aController.view.getSelectedResourceURI();
+      this.mString = viewer.resourceView.getSelectedResourceURI();
     },
   
-    cmdEditViewFileURI: function RTC_ViewFileURI(aController)
+    cmdEditViewFileURI: function RTC_ViewFileURI()
     {
-      this.mURI = aController.view.getSelectedResourceURI();
+      this.mURI = viewer.resourceView.getSelectedResourceURI();
     }
   },
 
   getCommand: function RTC_GetCommand(aCommand)
   {
     if (this.supportsCommand(aCommand)) {
-      return new this.commands[aCommand](this);
+      return new this.commands[aCommand]();
     }
     return null;
   },
@@ -571,10 +596,10 @@ ResourceTreeController.prototype = {
   {
     switch (aCommand) {
       case "cmdEditCopyFileURI":
-        return !!this.view.getSelectedResourceURI();
+        return !!viewer.resourceView.getSelectedResourceURI();
       case "cmdEditViewFileURI":
-        return !!this.view.getSelectedResourceURI() &&
-               this.view.getSelectedResourceType() != "image";
+        return !!viewer.resourceView.getSelectedResourceURI() &&
+               viewer.resourceView.getSelectedResourceType() != "image";
     }
     return false;
   },
