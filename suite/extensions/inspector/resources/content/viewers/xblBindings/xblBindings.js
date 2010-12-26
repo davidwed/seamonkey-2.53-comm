@@ -83,6 +83,11 @@ function XBLBindingsViewer()
   this.mHandlerTree = document.getElementById("olHandlers");
   this.mResourceTree = document.getElementById("olResources");
 
+  this.mControllers = {};
+
+  this.addController(this.mBindingsList, BindingsListController);
+  this.addController(this.mResourceTree, ResourceTreeController);
+
   // prepare and attach the content DOM datasource
   this.mContentView = XPCU.createInstance(kDOMViewContractID, "inIDOMView");
   this.mContentView.whatToShow &= ~(NodeFilter.SHOW_TEXT);
@@ -96,6 +101,7 @@ XBLBindingsViewer.prototype =
 
   mSubject: null,
   mPane: null,
+  mControllers: null,
 
   ////////////////////////////////////////////////////////////////////////////
   //// Interface inIViewer
@@ -144,11 +150,18 @@ XBLBindingsViewer.prototype =
 
   isCommandEnabled: function XBLBVr_IsCommandEnabled(aCommand)
   {
-    return false;
+    var controller =
+      document.commandDispatcher.getControllerForCommand(aCommand);
+    return !!controller && controller.isCommandEnabled(aCommand);
   },
 
   getCommand: function XBLBVr_GetCommand(aCommand)
   {
+    var controller =
+      this.mControllers[document.commandDispatcher.focusedElement.id];
+    if (controller) {
+      return controller.getCommand(aCommand);
+    }
     return null;
   },
 
@@ -390,6 +403,39 @@ XBLBindingsViewer.prototype =
 
   ////////////////////////////////////////////////////////////////////////////
   //// Misc
+
+  /**
+   * Creates a controller, registers it with this viewer, and appends it to
+   * the controllers of the given element.
+   * @param aEl
+   *        The element to which we should add the controller.  aEl.id must be
+   *        non-empty.
+   * @param aControllerConstructor
+   *        A constructor function whose instances will implement
+   *        nsIController.  aEl will be passed as the first parameter during
+   *        construction.
+   */
+  addController: function XBLBVr_AddController(aEl, aControllerConstructor) {
+    var controller = new aControllerConstructor(aEl);
+    this.mControllers[aEl.id] = controller;
+    aEl.controllers.appendController(controller);
+  },
+
+
+  onPopupShowing: function XBLBVr_OnPopupShowing(aPopup)
+  {
+    var kids = aPopup.childNodes;
+    for (let i = 0, n = kids.length; i < n; ++i) {
+      let command = document.getElementById(kids[i].command);
+      if (this.isCommandEnabled(command.id)) {
+        command.removeAttribute("disabled");
+      }
+      else {
+        command.setAttribute("disabled", "true");
+      }
+    }
+  },
+
   readDOMText: function XBLBVr_ReadDOMText(aEl)
   {
     if (!aEl) {
@@ -430,6 +476,123 @@ XBLBindingsViewer.prototype =
     return aStr;
   }
 };
+
+//////////////////////////////////////////////////////////////////////////////
+//// Controllers
+
+function BindingsListController(aBindingsList) {}
+
+BindingsListController.prototype = {
+
+  commands: {
+    cmdEditCopyFileURI: function BLC_CopyFileURI()
+    {
+      this.mString = document.popupNode.value;
+    },
+
+    cmdEditViewFileURI: function BLC_ViewFileURI()
+    {
+      this.mURI = document.popupNode.value;
+    }
+  },
+
+  getCommand: function BLC_GetCommand(aCommand)
+  {
+    if (aCommand in this.commands) {
+      return new this.commands[aCommand]();
+    }
+    return null;
+  },
+
+  ////////////////////////////////////////////////////////////////////////////
+  //// nsIController Implementation
+
+  isCommandEnabled: function BLC_IsCommandEnabled(aCommand)
+  {
+    switch (aCommand) {
+      case "cmdEditCopyFileURI":
+      case "cmdEditViewFileURI":
+        return !!document.popupNode.value;
+    }
+    return false;
+  },
+
+  supportsCommand: function BLC_SupportsCommand(aCommand)
+  {
+    return aCommand in this.commands;
+  },
+
+  doCommand: function BLC_DoCommand(aCommand) {},
+
+  onEvent: function BLC_OnEvent(aEvent) {}
+}
+
+let (commands = BindingsListController.prototype.commands) {
+  commands.cmdEditCopyFileURI.prototype = new cmdEditCopySimpleStringBase();
+  commands.cmdEditViewFileURI.prototype = new cmdEditViewFileURIBase();
+}
+
+function ResourceTreeController(aTree)
+{
+  this.mTree = aTree;
+}
+
+ResourceTreeController.prototype = {
+
+  get view()
+  {
+    return this.mTree.view.wrappedJSObject;
+  },
+
+  commands: {
+    cmdEditCopyFileURI: function RTC_CopyFileURI(aController)
+    {
+      this.mString = aController.view.getSelectedResourceURI();
+    },
+  
+    cmdEditViewFileURI: function RTC_ViewFileURI(aController)
+    {
+      this.mURI = aController.view.getSelectedResourceURI();
+    }
+  },
+
+  getCommand: function RTC_GetCommand(aCommand)
+  {
+    if (this.supportsCommand(aCommand)) {
+      return new this.commands[aCommand](this);
+    }
+    return null;
+  },
+
+  ////////////////////////////////////////////////////////////////////////////
+  //// nsIController Implementation
+
+  isCommandEnabled: function RTC_IsCommandEnabled(aCommand)
+  {
+    switch (aCommand) {
+      case "cmdEditCopyFileURI":
+        return !!this.view.getSelectedResourceURI();
+      case "cmdEditViewFileURI":
+        return !!this.view.getSelectedResourceURI() &&
+               this.view.getSelectedResourceType() != "image";
+    }
+    return false;
+  },
+
+  supportsCommand: function RTC_SupportsCommand(aCommand)
+  {
+    return aCommand in this.commands;
+  },
+
+  doCommand: function RTC_DoCommand(aCommand) {},
+
+  onEvent: function RTC_OnEvent(aEvent) {}
+}
+
+let (commands = ResourceTreeController.prototype.commands) {
+  commands.cmdEditCopyFileURI.prototype = new cmdEditCopySimpleStringBase();
+  commands.cmdEditViewFileURI.prototype = new cmdEditViewFileURIBase();
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //// MethodTreeView
@@ -525,6 +688,8 @@ function ResourceTreeView(aBinding)
   }
 
   this.mRowCount = this.mResources.length;
+
+  this.wrappedJSObject = this;
 }
 
 ResourceTreeView.prototype = new inBaseTreeView();
@@ -542,6 +707,28 @@ function RTV_GetCellText(aRow, aCol)
 
   return "";
 }
+
+ResourceTreeView.prototype.getSelectedResourceURI =
+  function RTV_GetSelectedResourceURI()
+{
+  if (this.selection.count == 1) {
+    let minAndMax = {};
+    this.selection.getRangeAt(0, minAndMax, minAndMax);
+    return this.mResources[minAndMax.value].getAttribute("src");
+  }
+  return null;
+};
+
+ResourceTreeView.prototype.getSelectedResourceType =
+  function RTV_GetSelectedResourceType()
+{
+  if (this.selection.count == 1) {
+    let minAndMax = {};
+    this.selection.getRangeAt(0, minAndMax, minAndMax);
+    return this.mResources[minAndMax.value].localName;
+  }
+  return null;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 //// Event Listeners

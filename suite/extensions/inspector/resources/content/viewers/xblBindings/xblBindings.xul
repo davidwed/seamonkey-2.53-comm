@@ -2,6 +2,8 @@
 
 <!DOCTYPE page SYSTEM "chrome://inspector/locale/viewers/xblBindings.dtd">
 
+<?xul-overlay href="chrome://inspector/content/editingOverlay.xul"?>
+
 <?xml-stylesheet
     href="chrome://inspector/skin/viewers/xblBindings/xblBindings.css"?>
 
@@ -12,8 +14,6 @@
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/xul/inBaseTreeView.js"/>
   <script type="application/javascript"
-          src="chrome://inspector/content/viewers/xblBindings/xblBindings.js"/>
-  <script type="application/javascript"
           src="chrome://inspector/content/utils.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/hooks.js"/>
@@ -21,9 +21,26 @@
           src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/commands/baseCommands.js"/>
+  <script type="application/javascript"
+          src="chrome://global/content/viewSourceUtils.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/viewers/xblBindings/xblBindings.js"/>
+
+  <commandset id="cmdsEditingExtras"/>
+
+  <popupset id="psPopups">
+    <!-- Just split this if it's ever at all specialized. -->
+    <menupopup id="ppSharedContext"
+               onpopupshowing="viewer.onPopupShowing(this);">
+      <menuitem id="mnEditCopyFileURI"/>
+      <menuitem id="mnEditViewFileURI"/>
+    </menupopup>
+  </popupset>
 
   <menulist id="mlBindings" oncommand="viewer.displayBinding(this.value)"
-            crop="center">
+            crop="center" contextmenu="ppSharedContext">
     <menupopup id="mpBindings"/>
   </menulist>
 
@@ -55,7 +72,6 @@
         <tree id="olMethods" seltype="single"
               hidecolumnpicker="true"
               flex="1"
-              contextmenu="ppDOMContext"
               onselect="viewer.onMethodSelected()"
               persist="height">
           <treecols>
@@ -80,7 +96,6 @@
           <tree id="olProps" seltype="single"
                 hidecolumnpicker="true"
                 flex="1"
-                contextmenu="ppDOMContext"
                 onselect="viewer.onPropSelected()">
             <treecols>
               <treecol id="olcPropName" label="&bindingProperty.label;"
@@ -110,7 +125,6 @@
       <vbox>
         <tree id="olHandlers" seltype="single"
               flex="1"
-              contextmenu="ppDOMContext"
               onselect="viewer.onHandlerSelected()"
               persist="height">
           <treecols>
@@ -134,7 +148,7 @@
       </vbox>
 
       <tree id="olResources" seltype="single"
-            contextmenu="ppDOMContext">
+            contextmenu="ppSharedContext">
         <treecols>
           <treecol id="olcResourceType" label="&bindingResourceType.label;"
                    flex="1"/>
