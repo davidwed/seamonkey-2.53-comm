@@ -65,6 +65,18 @@
   </menupopup>
 
   <menupopup id="mppView">
+    <menu label="&mnDocViewerList.label;"
+          accesskey="&mnDocViewerList.accesskey;"
+          oncommand="inspector.onViewerListCommand(event.target);"
+          disabled="true">
+      <menupopup id="mppDocViewerList"/>
+    </menu>
+    <menu label="&mnObjectViewerList.label;"
+          accesskey="&mnObjectViewerList.accesskey;"
+          oncommand="inspector.onViewerListCommand(event.target);"
+          disabled="true">
+      <menupopup id="mppObjectViewerList"/>
+    </menu>
     <menuitem class="menuitem-iconic" type="checkbox"
               label="&cmdToggleBrowser.label;"
               accesskey="&cmdToggleBrowser.accesskey;"

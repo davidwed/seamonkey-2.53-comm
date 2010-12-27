@@ -77,7 +77,7 @@ function StyleRulesViewer_initialize()
 
 function StyleRulesViewer() // implements inIViewer
 {
-  this.mObsMan = new ObserverManager();
+  this.mObsMan = new ObserverManager(this);
 
   this.mURL = window.location;
   this.mRuleTree = document.getElementById("olStyleRules");

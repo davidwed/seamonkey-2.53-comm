@@ -486,6 +486,7 @@
       <field name="mLinkedViewer">null</field>
       <field name="mCurrentViewer">null</field>
       <field name="mCurrentEntry">null</field>
+      <field name="mCachedEntries">null</field>
 
       <method name="initialize">
         <body><![CDATA[
@@ -527,6 +528,7 @@
           }
 
           this.rebuildViewerContextMenu();
+          this.updateViewerListSelection(this.mListElPopup);
 
           // listen for subjectChange so we can bubble it
           if (old) {
@@ -591,7 +593,8 @@
           // get the list of viewers which match the node
           var entries = this.registry.findViewersForObject(aObject, this.id,
                                                            this.mLinkedViewer);
-          this.rebuildViewerList(entries);
+          this.mCachedEntries = entries;
+          this.rebuildViewerList(this.mListElPopup);
 
           if (entries.length == 0) {
             this.switchViewer(-1);
@@ -604,8 +607,11 @@
           else {
             this.mCurrentViewer.subject = aObject;
             this.removeAttribute("disabled");
+            // We need to ensure here that the viewer list selection gets
+            // updated, because otherwise it will only get updated when a new
+            // viewer loads and calls notifyViewerReady.
+            this.updateViewerListSelection(this.mListElPopup);
           }
-
         ]]></body>
       </method>
 
@@ -613,35 +619,51 @@
       // Clear out and rebuild the menulist full of the available views for
       // the currently selected node.
       //
-      // @param aEntries
-      //        an array of entries from the viewer registry
+      // @param aPopup
+      //        the menupopup to which the items should be added
       //////////////////////////////////////////////////////////////////// -->
 
       <method name="rebuildViewerList">
-        <parameter name="aEntries"/>
+        <parameter name="aPopup"/>
         <body><![CDATA[
-          var mpp = this.mListElPopup;
-
-          if (aEntries.length <= 0) {
-            this.mListEl.setAttribute("disabled", true);
+          var entries = this.mCachedEntries;
+          if (entries.length <= 0) {
+            aPopup.parentNode.setAttribute("disabled", true);
           }
           else {
-            this.mListEl.removeAttribute("disabled");
+            aPopup.parentNode.removeAttribute("disabled");
           }
 
           // empty the list
-          while (mpp.childNodes.length) {
-            mpp.removeChild(mpp.childNodes[0]);
+          while (aPopup.firstChild) {
+            aPopup.removeChild(aPopup.firstChild);
           }
 
-          for (let i = 0; i < aEntries.length; i++) {
-            var entry = aEntries[i];
-            var menuitem = document.createElement("menuitem");
+          for (let i = 0; i < entries.length; i++) {
+            let entry = entries[i];
+            let menuitem = aPopup.ownerDocument.createElement("menuitem");
             menuitem.setAttribute("label",
                                   this.registry
                                     .getEntryProperty(entry, "description"));
             menuitem.setAttribute("viewerListEntry", entry);
-            mpp.appendChild(menuitem);
+            menuitem.setAttribute("type", "radio");
+            menuitem.setAttribute("name", "viewerListEntries");
+            aPopup.appendChild(menuitem);
+          }
+        ]]></body>
+      </method>
+
+      <method name="updateViewerListSelection">
+        <parameter name="aPopup"/>
+        <body><![CDATA[
+          var entry = this.mCurrentEntry;
+          var els = aPopup.getElementsByAttribute("viewerListEntry", entry);
+          if (els.length == 1) {
+            els[0].setAttribute("checked", "true");
+          }
+          else {
+            Components.utils.reportError("expected one item to match entry " +
+                                         entry);
           }
         ]]></body>
       </method>

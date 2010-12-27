@@ -146,6 +146,11 @@ InspectorApp.prototype =
   mClipboardHelper: null,
   mPromptService: null,
 
+  mDocPanel: null,
+  mObjectPanel: null,
+  mDocViewerListPopup: null,
+  mObjectViewerListPopup: null,
+
   get document()
   {
     return this.mDocPanel.viewer.subject
@@ -170,8 +175,13 @@ InspectorApp.prototype =
     this.mPromptService = XPCU.getService(kPromptServiceContractID,
                                           "nsIPromptService");
 
+    this.mDocViewerListPopup =
+      document.getElementById("mppDocViewerList");
+    this.mObjectViewerListPopup =
+      document.getElementById("mppObjectViewerList");
+
     this.mPanelSet = document.getElementById("bxPanelSet");
-    this.mPanelSet.addObserver("panelsetready", this, false);
+    this.mPanelSet.addObserver("panelsetready", this);
     this.mPanelSet.initialize();
 
     // check if accessibility service is available
@@ -204,8 +214,9 @@ InspectorApp.prototype =
   initViewerPanels: function IA_InitViewerPanels()
   {
     this.mDocPanel = this.mPanelSet.getPanel(0);
-    this.mDocPanel.addObserver("subjectChange", this, false);
+    this.mDocPanel.addObserver("subjectChange", this);
     this.mObjectPanel = this.mPanelSet.getPanel(1);
+    this.mObjectPanel.addObserver("subjectChange", this);
 
     if (this.mInitTarget) {
       if (this.mInitTarget.nodeType == Node.DOCUMENT_NODE) {
@@ -226,29 +237,47 @@ InspectorApp.prototype =
         this.initViewerPanels();
         break;
       case "subjectChange":
-        if (aEvent.target == this.mDocPanel.viewer && aEvent.subject) {
-          if ("location" in aEvent.subject) {
-            this.locationText = aEvent.subject.location; // display document url
+        if (aEvent.target == this.mDocPanel.viewer) {
+          let panel = this.mDocPanel;
+          let mpp = this.mDocViewerListPopup;
+          // Update the viewer list.
+          panel.rebuildViewerList(mpp);
+          panel.updateViewerListSelection(mpp);
 
-            document.title = (aEvent.subject.title || aEvent.subject.location) +
-                             kInspectorTitle;
+          if (aEvent.subject) {
+            if ("location" in aEvent.subject) {
+              // display document url
+              this.locationText = aEvent.subject.location;
+  
+              document.title =
+                (aEvent.subject.title || aEvent.subject.location) +
+                kInspectorTitle;
+  
+              this.updateCommand("cmdSave");
+            }
+            else if (("nsIAccessibleApplication" in Components.interfaces &&
+                      aEvent.subject instanceof
+                        Components.interfaces.nsIAccessibleApplication) ||
+                     (aEvent.subject instanceof nsIAccessible &&
+                      !aEvent.subject.parent)) {
+              // Update title for application accessible in compatible way for
+              // Gecko 2.0 and 1.9.2.
+              this.locationText = "";
 
-            this.updateCommand("cmdSave");
+              var title = this.mPanelSet.
+                stringBundle.getString("applicationAccesible.title");
+              document.title = title + kInspectorTitle;
+
+              this.updateCommand("cmdSave");
+            }
           }
-          else if (("nsIAccessibleApplication" in Components.interfaces &&
-                    aEvent.subject instanceof Components.interfaces.nsIAccessibleApplication) ||
-                   (aEvent.subject instanceof nsIAccessible &&
-                    !aEvent.subject.parent)) {
-            // Update title for application accessible in compatible way for
-            // Gecko 2.0 and 1.9.2.
-            this.locationText = "";
-
-            var title = this.mPanelSet.
-              stringBundle.getString("applicationAccesible.title");
-            document.title = title + kInspectorTitle;
-
-            this.updateCommand("cmdSave");
-          }
+        }
+        else if (aEvent.target == this.mObjectPanel.viewer) {
+          let panel = this.mObjectPanel;
+          let mpp = this.mObjectViewerListPopup;
+          // Update the viewer list.
+          panel.rebuildViewerList(mpp);
+          panel.updateViewerListSelection(mpp);
         }
         break;
     }
@@ -686,6 +715,17 @@ InspectorApp.prototype =
   {
     if (aSplitter.id == "splBrowser") {
       this.setBrowser(aSplitter.isOpened, false);
+    }
+  },
+
+  onViewerListCommand: function IA_OnViewerListCommand(aItem)
+  {
+    var mpp = aItem.parentNode;
+    if (mpp == this.mDocViewerListPopup) {
+      this.mDocPanel.onViewerListCommand(aItem);
+    }
+    else if (mpp == this.mObjectViewerListPopup) {
+      this.mObjectPanel.onViewerListCommand(aItem);
     }
   },
 
