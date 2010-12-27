@@ -39,6 +39,10 @@ panel[disabled="true"] > .viewer-pane-box-1 {
   visibility: collapse;
 }
 
+.viewer-menu, .viewer-list {
+  -moz-user-focus: normal;
+}
+
 .viewer-list {
   list-style-image: url("chrome://inspector/skin/iconViewerList.gif");
 }

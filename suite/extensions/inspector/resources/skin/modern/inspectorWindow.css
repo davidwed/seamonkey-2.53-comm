@@ -75,3 +75,6 @@
   list-style-image: url("chrome://inspector/skin/btnFind-dis.gif");
 }
 
+.viewer-list, .viewer-menu {
+  -moz-user-focus: ignore;
+}

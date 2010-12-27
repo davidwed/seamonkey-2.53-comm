@@ -9,7 +9,7 @@
 <?xul-overlay href="chrome://inspector/content/keysetOverlay.xul"?>
 <?xul-overlay href="chrome://inspector/content/popupOverlay.xul"?>
 
-<?xml-stylesheet href="chrome://inspector/skin/inspectorWindow.css"?>
+<?xml-stylesheet href="chrome://inspector/skin/"?>
 
 <window id="winInspectorMain" class="color-dialog" 
         title="&Inspector.title;"
