@@ -40,6 +40,10 @@
 <!ENTITY cmdDelete.accesskey "д">
 <!ENTITY mnView.label "Вид">
 <!ENTITY mnView.accesskey "и">
+<!ENTITY mnDocViewerList.label "Просмотр документов">
+<!ENTITY mnDocViewerList.accesskey "д">
+<!ENTITY mnObjectViewerList.label "Просмотр объектов">
+<!ENTITY mnObjectViewerList.accesskey "о">
 <!ENTITY cmdToggleBrowser.label "Браузер">
 <!ENTITY cmdToggleBrowser.accesskey "б">
 <!ENTITY cmdToggleSearch.label "Результаты поиска">
