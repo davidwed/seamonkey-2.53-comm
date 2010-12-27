@@ -587,14 +587,24 @@
       <method name="setSubject">
         <parameter name="aObject"/>
         <body><![CDATA[
-          this.mSubject = aObject;
           this.mParams = null;
 
-          // get the list of viewers which match the node
-          var entries = this.registry.findViewersForObject(aObject, this.id,
-                                                           this.mLinkedViewer);
-          this.mCachedEntries = entries;
-          this.rebuildViewerList(this.mListElPopup);
+          var didRebuild = false;
+          var entries = this.mCachedEntries;
+          if (this.mSubject != aObject || !entries) {
+            this.mSubject = aObject;
+            entries = this.registry.findViewersForObject(aObject, this.id,
+                                                         this.mLinkedViewer);
+            // It's possible that the entries will be the same, even for
+            // different objects.  If they are, we can forego the DOM
+            // manipulations involved in rebuilding.
+            if (!this.mCachedEntries ||
+                this.mCachedEntries.toString() != entries.toString()) {
+              this.mCachedEntries = entries;
+              this.rebuildViewerList(this.mListElPopup);
+              didRebuild = true;
+            }
+          }
 
           if (entries.length == 0) {
             this.switchViewer(-1);
@@ -607,10 +617,12 @@
           else {
             this.mCurrentViewer.subject = aObject;
             this.removeAttribute("disabled");
-            // We need to ensure here that the viewer list selection gets
-            // updated, because otherwise it will only get updated when a new
-            // viewer loads and calls notifyViewerReady.
-            this.updateViewerListSelection(this.mListElPopup);
+            if (didRebuild) {
+              // We need to ensure here that the viewer list selection gets
+              // updated, because otherwise it will only get updated when a
+              // new viewer loads and calls notifyViewerReady.
+              this.updateViewerListSelection(this.mListElPopup);
+            }
           }
         ]]></body>
       </method>
@@ -656,10 +668,18 @@
       <method name="updateViewerListSelection">
         <parameter name="aPopup"/>
         <body><![CDATA[
+          // Uncheck any previously checked items.
+          var checked = aPopup.getElementsByAttribute("checked", "true");
+          if (checked.length > 1) {
+            Components.utils.reportError("expected only zero or one checked items");
+          }
+          while (checked.length) {
+            checked[0].removeAttribute("checked");
+          }
           var entry = this.mCurrentEntry;
-          var els = aPopup.getElementsByAttribute("viewerListEntry", entry);
-          if (els.length == 1) {
-            els[0].setAttribute("checked", "true");
+          checked = aPopup.getElementsByAttribute("viewerListEntry", entry);
+          if (checked.length == 1) {
+            checked[0].setAttribute("checked", "true");
           }
           else {
             Components.utils.reportError("expected one item to match entry " +
@@ -802,6 +822,7 @@
             this.mLinkedViewer.removeObserver("selectionChange", this);
           }
 
+          this.mCachedEntries = null;
           this.mLinkedViewer = this.mLinkedPanel.viewer;
           this.mLinkedViewer.addObserver("selectionChange", this);
         ]]></body>

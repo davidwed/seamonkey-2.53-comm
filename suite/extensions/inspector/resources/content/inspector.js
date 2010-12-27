@@ -151,6 +151,9 @@ InspectorApp.prototype =
   mDocViewerListPopup: null,
   mObjectViewerListPopup: null,
 
+  mLastKnownDocPanelSubject: null,
+  mLastKnownObjectPanelSubject: null,
+
   get document()
   {
     return this.mDocPanel.viewer.subject
@@ -237,11 +240,18 @@ InspectorApp.prototype =
         this.initViewerPanels();
         break;
       case "subjectChange":
+        // A subjectChange really means the *viewer's* subject changed, and
+        // one will be dispatched everytime a new viewer is loaded.  Don't
+        // update the entries if the panel's subject is the same as before and
+        // the subjectChange was only dispatched because of a new viewer.
         if (aEvent.target == this.mDocPanel.viewer) {
           let panel = this.mDocPanel;
           let mpp = this.mDocViewerListPopup;
           // Update the viewer list.
-          panel.rebuildViewerList(mpp);
+          if (this.mLastKnownDocPanelSubject != aEvent.subject) {
+            panel.rebuildViewerList(mpp);
+            this.mLastKnownDocPanelSubject = aEvent.subject;
+          }
           panel.updateViewerListSelection(mpp);
 
           if (aEvent.subject) {
@@ -276,7 +286,10 @@ InspectorApp.prototype =
           let panel = this.mObjectPanel;
           let mpp = this.mObjectViewerListPopup;
           // Update the viewer list.
-          panel.rebuildViewerList(mpp);
+          if (this.mLastKnownObjectPanelSubject != aEvent.subject) {
+            panel.rebuildViewerList(mpp);
+            this.mLastKnownObjectPanelSubject = aEvent.subject;
+          }
           panel.updateViewerListSelection(mpp);
         }
         break;
