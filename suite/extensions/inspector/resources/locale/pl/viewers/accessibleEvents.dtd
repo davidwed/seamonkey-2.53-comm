@@ -20,7 +20,7 @@
    -
    - Contributor(s):
    -   Alexander Surkov <surkov.alexander@gmail.com>
-   -   Marek Stępień <mstepien@aviary.pl>
+   -   Marek Stępień <mstepien@aviary.pl> (Polish localization)
    -
    - Alternatively, the contents of this file may be used under the terms of
    - either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,5 +39,9 @@
 <!ENTITY eventType.label "Typ zdarzenia">
 <!ENTITY eventTime.label "Czas">
 <!ENTITY eventNodeName.label "Nazwa węzła">
+<!ENTITY isWatched.label "Są obserwowane">
 <!ENTITY clearEventList.label "Wyczyść listę zdarzeń">
+<!ENTITY chooseEventsToWatch.label "Wybierz zdarzenie do obserwacji">
+<!ENTITY selectAll.label "Zaznacz wszystko">
+<!ENTITY unselectAll.label "Odznacz wszystko">
 

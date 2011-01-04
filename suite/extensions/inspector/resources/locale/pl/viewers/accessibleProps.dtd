@@ -41,6 +41,20 @@
 <!ENTITY descDescription.label "Opis:">
 <!ENTITY descValue.label "Wartość:">
 <!ENTITY descState.label "Stan:">
-<!ENTITY descActionName.label "Nazwa czynności:">
 <!ENTITY descBounds.label "Granice:">
-
+<!ENTITY tabAttrs.label "Atrybuty objektu">
+<!ENTITY colAttrName.label "Nazwa">
+<!ENTITY colAttrValue.label "Wartość">
+<!ENTITY tabActions.label "Czynności">
+<!ENTITY descKeyBindings.label "Zawiązane klucze:">
+<!ENTITY descInvoke.label "Uruchom">
+<!ENTITY tabTableCell.label "Komórka tabeli">
+<!ENTITY descColumnIdx.label "Indeks kolumny:">
+<!ENTITY descRowIdx.label "Indeks wiersza:">
+<!ENTITY descColumnExtent.label "Rozmiary kolumny:">
+<!ENTITY descRowExtent.label "Rozmiary wiersza:">
+<!ENTITY descIsSelected.label "Jest zaznaczone:">
+<!ENTITY colProp.label "Właściwość">
+<!ENTITY colRole.label "Rola">
+<!ENTITY colName.label "Nazwa">
+<!ENTITY colNodeName.label "Nazwa węzła">

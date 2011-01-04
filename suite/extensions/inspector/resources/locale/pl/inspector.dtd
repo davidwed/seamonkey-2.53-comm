@@ -17,8 +17,12 @@
 <!ENTITY mnInspectContentDocument.accesskey "b">
 <!ENTITY mnInspectChromeDocument.label "Zbadaj dokument chrome">
 <!ENTITY mnInspectChromeDocument.accesskey "a">
-<!ENTITY cmdShowOpenURLDialog.label "Zbadaj URL…">
-<!ENTITY cmdShowOpenURLDialog.accesskey "U">
+<!ENTITY mnInspectApplicationAccessible.label "Zbadaj dostępną aplikację">
+<!ENTITY mnInspectApplicationAccessible.accesskey "d">
+<!ENTITY cmdEnterLocation.label "Zbadaj URL">
+<!ENTITY cmdEnterLocation.accesskey "U">
+<!ENTITY cmdEnterLocation.key "L">
+<!ENTITY cmdEnterLocation.key2 "D">
 <!ENTITY cmdSave.label "Zapisz DOM jako…">
 <!ENTITY cmdSave.accesskey "s">
 <!ENTITY cmdClose.label "Zamknij">
@@ -41,14 +45,17 @@
 <!ENTITY cmdDelete.label "Usuń">
 <!ENTITY cmdDelete.accesskey "U">
 
-<!ENTITY mnSearch.label "Szukaj">
-<!ENTITY mnSearch.accesskey "S">
-
 <!ENTITY mnView.label "Widok">
 <!ENTITY mnView.accesskey "W">
+<!ENTITY mnDocViewerList.label "Przeglądarka dokumentów">
+<!ENTITY mnDocViewerList.accesskey "d">
+<!ENTITY mnObjectViewerList.label "Przeglądarka objektów">
+<!ENTITY mnObjectViewerList.accesskey "o">
 <!ENTITY cmdToggleBrowser.label "Przeglądarka">
 <!ENTITY cmdToggleBrowser.accesskey "P">
 <!ENTITY cmdToggleSearch.label "Wyniki wyszukiwania">
+<!ENTITY cmdFlashOnSelect.label "Wyróżnij wybrany element mruganiem">
+<!ENTITY cmdFlashOnSelect.accesskey "y">
 
 <!ENTITY browserPanel.label "Przeglądarka">
 
