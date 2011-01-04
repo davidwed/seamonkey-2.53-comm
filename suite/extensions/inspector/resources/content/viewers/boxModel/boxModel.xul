@@ -2,8 +2,7 @@
 
 <!DOCTYPE page [
   <!ENTITY % dtd1 SYSTEM "chrome://inspector/locale/inspector.dtd"> %dtd1;
-  <!ENTITY % dtd2 SYSTEM "chrome://inspector/content/util.dtd"> %dtd2;
-  <!ENTITY % dtd3 SYSTEM "chrome://inspector/locale/viewers/boxModel.dtd"> %dtd3;
+  <!ENTITY % dtd2 SYSTEM "chrome://inspector/locale/viewers/boxModel.dtd"> %dtd2;
 ]>
 
 <?xml-stylesheet href="chrome://inspector/skin/viewers/boxModel/boxModel.css"?>
@@ -19,46 +18,155 @@
   <script type="application/javascript" src="chrome://inspector/content/jsutil/xpcom/XPCU.js"/>
   <script type="application/javascript" src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>  
 
-  <groupbox>
-    <caption>
-      <menulist id="mlStats" value="position" oncommand="viewer.showStatGroup(this.value)">
-        <menupopup>
-          <menuitem value="position" label="&boxPosition.label;"/>
-          <menuitem value="dimension" label="&boxDimension.label;"/>
-          <menuitem value="margin" label="&boxMargin.label;"/>
-          <menuitem value="border" label="&boxBorder.label;"/>
-          <menuitem value="padding" label="&boxPadding.label;"/>
-        </menupopup>
-      </menulist>
-    </caption>
-    <grid flex="1">
-      <columns>
-        <column/>
-        <column flex="1" class="value-column"/>
-        <column/>
-        <column flex="1" class="value-column"/>
-        <column/>
-        <column flex="1" class="value-column"/>
-      </columns>
-      <rows>
-        <row>
-          <label id="txR1C1Label"/>
-          <label id="txR1C1Value"/>
-          <label id="txR1C2Label"/>
-          <label id="txR1C2Value"/>
-          <label id="txR1C3Label"/>
-          <label id="txR1C3Value"/>
-        </row>
-        <row>
-          <label id="txR2C1Label"/>
-          <label id="txR2C1Value"/>
-          <label id="txR2C2Label"/>
-          <label id="txR2C2Value"/>
-          <label id="txR2C3Label"/>
-          <label id="txR2C3Value"/>
-        </row>
-      </rows>
-    </grid>
-  </groupbox>
+  <vbox id="enclosingBox" flex="1">
+    <vbox>
+
+      <groupbox id="boxPosition">
+        <caption><label>&boxPosition.label;</label>
+        </caption>
+        <grid flex="1">
+          <columns>
+            <column/>
+            <column class="value-column"/>
+          </columns>
+          <rows>
+            <row>
+              <label id="positionXLabel" value="&xCoord.label;" class="title"/>
+              <textbox id="positionXValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="positionYLabel" value="&yCoord.label;" class="title"/>
+              <textbox id="positionYValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="positionScreenXLabel" value="&screenXCoord.label;"
+                     class="title"/>
+              <textbox id="positionScreenXValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="positionScreenYLabel" value="&screenYCoord.label;"
+                     class="title"/>
+              <textbox id="positionScreenYValue" readonly="true" class="plain"/>
+            </row>
+          </rows>
+        </grid>
+      </groupbox>
+
+      <groupbox id="boxDimension">
+        <caption><label>&boxDimension.label;</label>
+        </caption>
+        <grid flex="1">
+          <columns>
+            <column/>
+            <column class="value-column"/>
+          </columns>
+          <rows>
+            <row>
+              <label id="dimensionWidthLabel" value="&dimensionWidth.label;"
+                     class="title"/>
+              <textbox id="dimensionWidthValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="dimensionHeightLabel" value="&dimensionHeight.label;"
+                     class="title"/>
+              <textbox id="dimensionHeightValue" readonly="true" class="plain"/>
+            </row>
+          </rows>
+        </grid>
+      </groupbox>
+
+      <groupbox id="boxMargin">
+        <caption><label>&boxMargin.label;</label>
+        </caption>
+        <grid flex="1">
+          <columns>
+            <column/>
+            <column class="value-column"/>
+          </columns>
+          <rows>
+            <row>
+              <label id="marginTopLabel" value="margin-top" class="title"/>
+              <textbox id="marginTopValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="marginRightLabel" value="margin-right" class="title"/>
+              <textbox id="marginRightValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="marginBottomLabel" value="margin-bottom"
+                     class="title"/>
+              <textbox id="marginBottomValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="marginLeftLabel" value="margin-left" class="title"/>
+              <textbox id="marginLeftValue" readonly="true" class="plain"/>
+            </row>
+          </rows>
+        </grid>
+      </groupbox>
+
+      <groupbox id="boxBorder">
+        <caption><label>&boxBorder.label;</label>
+        </caption>
+        <grid flex="1">
+          <columns>
+            <column/>
+            <column class="value-column" flex="1"/>
+          </columns>
+          <rows>
+            <row>
+              <label id="borderTopLabel" value="border-top" class="title"/>
+              <textbox id="borderTopValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="borderRightLabel" value="border-right" class="title"/>
+              <textbox id="borderRightValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="borderBottomLabel" value="border-bottom"
+                     class="title"/>
+              <textbox id="borderBottomValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="borderLeftLabel" value="border-left" class="title"/>
+              <textbox id="borderLeftValue" readonly="true" class="plain"/>
+            </row>
+          </rows>
+        </grid>
+      </groupbox>
+
+      <groupbox id="boxPadding">
+        <caption><label>&boxPadding.label;</label>
+        </caption>
+        <grid flex="1">
+          <columns>
+            <column/>
+            <column class="value-column"/>
+          </columns>
+          <rows>
+            <row>
+              <label id="paddingTopLabel" value="padding-top" class="title"/>
+              <textbox id="paddingTopValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="paddingRightLabel" value="padding-right"
+                     class="title"/>
+              <textbox id="paddingRightValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="paddingBottomLabel" value="padding-bottom"
+                     class="title"/>
+              <textbox id="paddingBottomValue" readonly="true" class="plain"/>
+            </row>
+            <row>
+              <label id="paddingLeftLabel" value="padding-left" class="title"/>
+              <textbox id="paddingLeftValue" readonly="true" class="plain"/>
+            </row>
+          </rows>
+        </grid>
+      </groupbox>
+
+    </vbox>
+  </vbox>
 
 </page>

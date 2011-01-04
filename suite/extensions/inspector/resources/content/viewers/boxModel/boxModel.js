@@ -88,14 +88,52 @@ BoxModelViewer.prototype =
   set subject(aObject) 
   {
     this.mSubject = aObject;
-    this.updateStatGroup();
+    this.showStats();
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
   initialize: function(aPane)
   {
+    this.initGroups();
+
     this.mPane = aPane;
     aPane.notifyViewerReady(this);
+  },
+
+  groupPosition:  {},
+  groupDimension: {},
+  groupMargin:    {},
+  groupBorder:    {},
+  groupPadding:   {},
+
+  initGroups: function()
+  {
+    this.groupPosition.x =    document.getElementById("positionXValue");
+    this.groupPosition.y =    document.getElementById("positionYValue");
+    this.groupPosition.screenX =
+                              document.getElementById("positionScreenXValue");
+    this.groupPosition.screenY =
+                              document.getElementById("positionScreenYValue");
+
+    this.groupDimension.width  =
+                              document.getElementById("dimensionWidthValue");
+    this.groupDimension.height =
+                              document.getElementById("dimensionHeightValue");
+
+    this.groupMargin.top =    document.getElementById("marginTopValue");
+    this.groupMargin.right =  document.getElementById("marginRightValue");
+    this.groupMargin.bottom = document.getElementById("marginBottomValue");
+    this.groupMargin.left =   document.getElementById("marginLeftValue");
+
+    this.groupBorder.top =    document.getElementById("borderTopValue");
+    this.groupBorder.right =  document.getElementById("borderRightValue");
+    this.groupBorder.bottom = document.getElementById("borderBottomValue");
+    this.groupBorder.left =   document.getElementById("borderLeftValue");
+
+    this.groupPadding.top =    document.getElementById("paddingTopValue");
+    this.groupPadding.right =  document.getElementById("paddingRightValue");
+    this.groupPadding.bottom = document.getElementById("paddingBottomValue");
+    this.groupPadding.left =   document.getElementById("paddingLeftValue");
   },
 
   destroy: function()
@@ -121,68 +159,58 @@ BoxModelViewer.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// statistical updates
   
-  updateStatGroup: function()
+  showStats: function()
   {
-    var ml = document.getElementById("mlStats");
-    this.showStatGroup(ml.value);
+    this.showPositionStats();
+    this.showDimensionStats();
+    this.showMarginStats();
+    this.showBorderStats();
+    this.showPaddingStats();
   },
   
-  showStatGroup: function(aGroup)
+  showStatistic: function(aElement,  aSize)
   {
-    if (aGroup == "position") {
-      this.showPositionStats();
-    } else if (aGroup == "dimension") {
-      this.showDimensionStats();
-    } else if (aGroup == "margin") {
-      this.showMarginStats();
-    } else if (aGroup == "border") {
-      this.showBorderStats();
-    } else if (aGroup == "padding") {
-      this.showPaddingStats();
-    }    
-  },
-  
-  showStatistic: function(aCol, aRow, aSide, aSize)
-  {
-    var label = document.getElementById("txR"+aRow+"C"+aCol+"Label");
-    var val = document.getElementById("txR"+aRow+"C"+aCol+"Value");
-    label.setAttribute("value", aSide && aSide.length ? aSide + ":" : "");
-    val.setAttribute("value", aSize);
+    if (aSize == null) {
+        aSize = "";
+    }
+    var str = aSize.toString();
+    aElement.setAttribute("value", str);
+
+    var nonzero = aSize != 0 && str.indexOf("0px");
+    aElement.setAttribute("class", nonzero ? "plain nonzero" : "plain");
+
+    aElement.setAttribute("size", str.length + 1);
   },
   
   showPositionStats: function()
   {
+    var group = this.groupPosition;
     if ("boxObject" in this.mSubject) { // xul elements
       var bx = this.mSubject.boxObject;
-      this.showStatistic(1, 1, "x", bx.x);
-      this.showStatistic(1, 2, "y", bx.y);
-      this.showStatistic(2, 1, "screen x", bx.screenX);
-      this.showStatistic(2, 2, "screen y", bx.screenY);
+      this.showStatistic(group.x, bx.x);
+      this.showStatistic(group.y, bx.y);
+      this.showStatistic(group.screenX, bx.screenX);
+      this.showStatistic(group.screenY, bx.screenY);
+      group.screenX.parentNode.hidden = false;
+      group.screenY.parentNode.hidden = false;
     } else { // html elements
-      this.showStatistic(1, 1, "x", this.mSubject.offsetLeft);
-      this.showStatistic(1, 2, "y", this.mSubject.offsetTop);
-      this.showStatistic(2, 1, "", "");
-      this.showStatistic(2, 2, "", "");
+      this.showStatistic(group.x, this.mSubject.offsetLeft);
+      this.showStatistic(group.y, this.mSubject.offsetTop);
+      group.screenX.parentNode.hidden = true;
+      group.screenY.parentNode.hidden = true;
     }
   },
   
   showDimensionStats: function()
   {
+    var group = this.groupDimension;
     if ("boxObject" in this.mSubject) { // xul elements
       var bx = this.mSubject.boxObject;
-      this.showStatistic(1, 1, "box width", bx.width);
-      this.showStatistic(1, 2, "box height", bx.height);
-      this.showStatistic(2, 1, "content width", "");
-      this.showStatistic(2, 2, "content height", "");
-      this.showStatistic(3, 1, "", "");
-      this.showStatistic(3, 2, "", "");
+      this.showStatistic(group.width,  bx.width);
+      this.showStatistic(group.height, bx.height);
     } else { // html elements
-      this.showStatistic(1, 1, "box width", this.mSubject.offsetWidth);
-      this.showStatistic(1, 2, "box height", this.mSubject.offsetHeight);
-      this.showStatistic(2, 1, "content width", "");
-      this.showStatistic(2, 2, "content height", "");
-      this.showStatistic(3, 1, "", "");
-      this.showStatistic(3, 2, "", "");
+      this.showStatistic(group.width,  this.mSubject.offsetWidth);
+      this.showStatistic(group.height, this.mSubject.offsetHeight);
     }
   },
 
@@ -197,7 +225,7 @@ BoxModelViewer.prototype =
     var style = this.getSubjectComputedStyle();
     var data = [this.readMarginStyle(style, "top"), this.readMarginStyle(style, "right"), 
                 this.readMarginStyle(style, "bottom"), this.readMarginStyle(style, "left")];
-    this.showSideStats("margin", data);                
+    this.showSideStats(this.groupMargin, data);
   },
 
   showBorderStats: function()
@@ -205,7 +233,7 @@ BoxModelViewer.prototype =
     var style = this.getSubjectComputedStyle();
     var data = [this.readBorderStyle(style, "top"), this.readBorderStyle(style, "right"), 
                 this.readBorderStyle(style, "bottom"), this.readBorderStyle(style, "left")];
-    this.showSideStats("border", data);                
+    this.showSideStats(this.groupBorder, data);
   },
 
   showPaddingStats: function()
@@ -213,17 +241,15 @@ BoxModelViewer.prototype =
     var style = this.getSubjectComputedStyle();
     var data = [this.readPaddingStyle(style, "top"), this.readPaddingStyle(style, "right"), 
                 this.readPaddingStyle(style, "bottom"), this.readPaddingStyle(style, "left")];
-    this.showSideStats("padding", data);
+    this.showSideStats(this.groupPadding, data);
   },
 
-  showSideStats: function(aName, aData)
+  showSideStats: function(aGroup, aData)
   {
-    this.showStatistic(1, 1, aName+"-top", aData[0]);
-    this.showStatistic(2, 1, aName+"-right", aData[1]);
-    this.showStatistic(1, 2, aName+"-bottom", aData[2]);
-    this.showStatistic(2, 2, aName+"-left", aData[3]);
-    this.showStatistic(3, 1, "", "");
-    this.showStatistic(3, 2, "", "");
+    this.showStatistic(aGroup.top,    aData[0]);
+    this.showStatistic(aGroup.right,  aData[1]);
+    this.showStatistic(aGroup.bottom, aData[2]);
+    this.showStatistic(aGroup.left,   aData[3]);
   },
   
   readMarginStyle: function(aStyle, aSide)
