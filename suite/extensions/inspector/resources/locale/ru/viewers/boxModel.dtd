@@ -45,5 +45,5 @@
 <!ENTITY yCoord.label "y">
 <!ENTITY screenXCoord.label "экранный x">
 <!ENTITY screenYCoord.label "экранный y">
-<!ENTITY dimensionWidth.label "ширина box">
-<!ENTITY dimensionHeight.label "высота box">
+<!ENTITY dimensionWidth.label "ширина блока">
+<!ENTITY dimensionHeight.label "высота блока">
