@@ -41,3 +41,9 @@
 <!ENTITY boxMargin.label "Поле">
 <!ENTITY boxBorder.label "Граница">
 <!ENTITY boxPadding.label "Отступ">
+<!ENTITY xCoord.label "x">
+<!ENTITY yCoord.label "y">
+<!ENTITY screenXCoord.label "экранный x">
+<!ENTITY screenYCoord.label "экранный y">
+<!ENTITY dimensionWidth.label "ширина box">
+<!ENTITY dimensionHeight.label "высота box">
