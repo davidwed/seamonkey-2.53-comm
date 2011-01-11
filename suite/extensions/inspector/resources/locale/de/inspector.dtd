@@ -47,6 +47,10 @@
 
 <!ENTITY mnView.label "Ansicht">
 <!ENTITY mnView.accesskey "A">
+  <!ENTITY mnDocViewerList.label "Dokument-Ansicht">
+  <!ENTITY mnDocViewerList.accesskey "D">
+  <!ENTITY mnObjectViewerList.label "Objekt-Ansicht">
+  <!ENTITY mnObjectViewerList.accesskey "O">
   <!ENTITY cmdToggleBrowser.label "Browser">
   <!ENTITY cmdToggleBrowser.accesskey "o">
   <!ENTITY cmdToggleSearch.label "Suchergebnisse">

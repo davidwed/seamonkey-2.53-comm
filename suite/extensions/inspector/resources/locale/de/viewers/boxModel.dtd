@@ -41,3 +41,11 @@
 <!ENTITY boxMargin.label "Außenabstand">
 <!ENTITY boxBorder.label "Rahmen">
 <!ENTITY boxPadding.label "Innenabstand">
+
+<!ENTITY xCoord.label "x">
+<!ENTITY yCoord.label "y">
+<!ENTITY screenXCoord.label "Bildschirm-X">
+<!ENTITY screenYCoord.label "Bildschirm-Y">
+
+<!ENTITY dimensionWidth.label  "Box-Breite">
+<!ENTITY dimensionHeight.label "Box-Höhe">
