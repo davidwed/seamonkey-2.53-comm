@@ -17,8 +17,12 @@
   <!ENTITY mnInspectContentDocument.accesskey "P">
   <!ENTITY mnInspectChromeDocument.label "Preskúmať chrome dokumentu">
   <!ENTITY mnInspectChromeDocument.accesskey "h">
-  <!ENTITY cmdShowOpenURLDialog.label "Preskúmať URL">
-  <!ENTITY cmdShowOpenURLDialog.accesskey "U">
+  <!ENTITY mnInspectApplicationAccessible.label "Preskúmať prístupnosť aplikácie">
+  <!ENTITY mnInspectApplicationAccessible.accesskey "s">
+  <!ENTITY cmdEnterLocation.label "Preskúmať URL">
+  <!ENTITY cmdEnterLocation.accesskey "U">
+  <!ENTITY cmdEnterLocation.key "L">
+  <!ENTITY cmdEnterLocation.key2 "D">
   <!ENTITY cmdSave.label "Uložiť DOM ako…">
   <!ENTITY cmdSave.accesskey "a">
   <!ENTITY cmdClose.label "Zavrieť">
@@ -41,11 +45,12 @@
   <!ENTITY cmdDelete.label "Odstrániť">
   <!ENTITY cmdDelete.accesskey "O">
   
-<!ENTITY mnSearch.label "Hľadať">  
-<!ENTITY mnSearch.accesskey "H">
-      
 <!ENTITY mnView.label "Zobraziť">
 <!ENTITY mnView.accesskey "Z">
+  <!ENTITY mnDocViewerList.label "Zobrazovač dokumentu">
+  <!ENTITY mnDocViewerList.accesskey "Z">
+  <!ENTITY mnObjectViewerList.label "Zobrazovač objektu">
+  <!ENTITY mnObjectViewerList.accesskey "o">
   <!ENTITY cmdToggleBrowser.label "Prehliadač">
   <!ENTITY cmdToggleBrowser.accesskey "P">
   <!ENTITY cmdFlashOnSelect.label "Zvýrazniť vybraný prvok">

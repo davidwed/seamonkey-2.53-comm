@@ -16,5 +16,8 @@
 <!ENTITY mnEditDelete.accesskey "O">
 <!ENTITY mnEditInspectInNewWindow.label "Preskúmať v novom okne">
 <!ENTITY mnEditInspectInNewWindow.accesskey "e">
+<!ENTITY mnEditInspectInNewWindow.key "I">
 <!ENTITY mnEditCopyFileURI.label "Kopírovať URI">
+<!ENTITY mnEditCopyFileURI.accesskey "R">
 <!ENTITY mnEditViewFileURI.label "Zobraziť súbor">
+<!ENTITY mnEditViewFileURI.accesskey "b">

@@ -40,10 +40,11 @@
 
 <!ENTITY cmdShowFindDialog.label "Hľadať uzly…">
 <!ENTITY cmdShowFindDialog.accesskey "H">
-<!ENTITY cmdShowFindDialog.accelkey "f">
+<!ENTITY cmdShowFindDialog.key "f">
 
-<!ENTITY cmdFindNext.label "Hľadať ďalej">
-<!ENTITY cmdFindNext.accesskey "a">
+<!ENTITY cmdFindAgain.label "Hľadať znova">
+<!ENTITY cmdFindAgain.accesskey "a">
+<!ENTITY cmdFindAgain.key "G">
 
 <!ENTITY cmdToggleAnonContent.label "Zobraziť anonymný obsah">
 <!ENTITY cmdToggleAnonContent.accesskey "a">
@@ -54,8 +55,8 @@
 <!ENTITY cmdToggleAccessibleNodes.label "Zobraziť prístupové uzly">
 <!ENTITY cmdToggleAccessibleNodes.accesskey "b">
 
-  <!ENTITY cmdToggleProcessingInstructions.label "Zobraziť vykonávacie inštrukcie">
-  <!ENTITY cmdToggleProcessingInstructions.accesskey "Z">
+<!ENTITY cmdToggleProcessingInstructions.label "Zobraziť vykonávacie inštrukcie">
+<!ENTITY cmdToggleProcessingInstructions.accesskey "Z">
 
 <!ENTITY cmdToggleAttributes.label "Zobraziť atribúty">
 <!ENTITY cmdToggleAttributes.accesskey "r">
@@ -145,9 +146,10 @@
   <!ENTITY namespaceTitle.default.label "Predvolený podľa dokumentu">
   <!ENTITY namespaceTitle.custom.label "Vlastný">
 
-<!-- LOCALIZATION NOTE: The following entities are names of W3C specifications.
-                        Please consult http://www.w3.org/Consortium/Translation/
-                        for appropriate translation or leave unchanged. -->
+  <!-- LOCALIZATION NOTE: The following entities are names of W3C
+       specifications.  Please consult
+       http://www.w3.org/Consortium/Translation/ for appropriate translation
+       or leave unchanged. -->
   <!ENTITY namespaceTitle.XMLNS.label "XMLNS">
   <!ENTITY namespaceTitle.XML.label "XML">
   <!ENTITY namespaceTitle.XHTML.label "XHTML">
@@ -162,7 +164,10 @@
   <!ENTITY namespaceTitle.WAIRoles.label "Úlohy WAI">
   <!ENTITY namespaceTitle.WAIProperties.label "Vlastnosti WAI">
 
-  <!-- LOCALIZATION NOTE: Localizers can choose not to translate the following access keys. For a discussion about the pros and cons of such a decision, see https://bugzilla.mozilla.org/show_bug.cgi?id=398704, comments 1 and 2. -->
+  <!-- LOCALIZATION NOTE: Localizers can choose not to translate the following
+       access keys. For a discussion about the pros and cons of such a
+       decision, see https://bugzilla.mozilla.org/show_bug.cgi?id=398704,
+       comments 1 and 2. -->
   <!ENTITY cbxStateHover.accesskey "h">
   <!ENTITY cbxStateActive.accesskey "a">
   <!ENTITY cbxStateFocus.accesskey "f">

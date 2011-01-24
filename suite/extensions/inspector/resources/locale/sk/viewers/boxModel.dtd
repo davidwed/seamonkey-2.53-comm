@@ -42,4 +42,10 @@
 <!ENTITY boxMargin.label "Orámovanie">
 <!ENTITY boxPadding.label "Vyplnenie">
 
+<!ENTITY xCoord.label "x">
+<!ENTITY yCoord.label "y">
+<!ENTITY screenXCoord.label "obrazovka x">
+<!ENTITY screenYCoord.label "obrazovka y">
 
+<!ENTITY dimensionWidth.label  "šírka boxu">
+<!ENTITY dimensionHeight.label "výška boxu">
