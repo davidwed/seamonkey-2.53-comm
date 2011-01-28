@@ -41,3 +41,11 @@
 <!ENTITY boxMargin.label "Marges">
 <!ENTITY boxBorder.label "Bordure">
 <!ENTITY boxPadding.label "Remplissage">
+
+<!ENTITY xCoord.label "x">
+<!ENTITY yCoord.label "y">
+<!ENTITY screenXCoord.label "écran x">
+<!ENTITY screenYCoord.label "écran y">
+
+<!ENTITY dimensionWidth.label  "largeur de boîte">
+<!ENTITY dimensionHeight.label "hauteur de boîte">

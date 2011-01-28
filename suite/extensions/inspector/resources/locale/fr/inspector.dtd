@@ -47,6 +47,10 @@
 
 <!ENTITY mnView.label "Affichage">
 <!ENTITY mnView.accesskey "A">
+<!ENTITY mnDocViewerList.label "Afficher le document">
+<!ENTITY mnDocViewerList.accesskey "c">
+<!ENTITY mnObjectViewerList.label "Afficher l'objet">
+<!ENTITY mnObjectViewerList.accesskey "h">
 <!ENTITY cmdToggleBrowser.label "Navigateur">
 <!ENTITY cmdToggleBrowser.accesskey "N">
 <!ENTITY cmdFlashOnSelect.label "Faire clignoter l'élément sélectionné">
