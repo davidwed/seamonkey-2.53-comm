@@ -41,3 +41,11 @@
 <!ENTITY boxMargin.label "Margines">
 <!ENTITY boxBorder.label "Obramowanie">
 <!ENTITY boxPadding.label "Odstępy wewnętrzne">
+
+<!ENTITY xCoord.label "współrzędna pozioma">
+<!ENTITY yCoord.label "współrzędna pionowa">
+<!ENTITY screenXCoord.label "współrzędna pozioma ekranu">
+<!ENTITY screenYCoord.label "współrzędna pionowa ekranu">
+
+<!ENTITY dimensionWidth.label "szerokość pudełka">
+<!ENTITY dimensionHeight.label "wysokość pudełka">
