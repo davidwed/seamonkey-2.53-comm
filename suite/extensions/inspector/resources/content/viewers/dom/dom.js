@@ -1920,7 +1920,8 @@ InsertNode.prototype.createNode = function Insert_CreateNode()
 {
   var doc = this.originalNode.ownerDocument;
   if (!this.attr) {
-    this.attr = { type: null, value: null, namespaceURI: null,
+    this.attr = { type: null, value: null,
+                  namespaceURI: this.originalNode.namespaceURI,
                   accepted: false,
                   enableNamespaces: doc.contentType != "text/html" };
 

@@ -65,6 +65,7 @@ function InsertDialog()
   this.nodeValue = document.getElementById("tx_nodeValue");
   this.namespace = document.getElementById("tx_namespace");
   this.menulist  = document.getElementById("ml_namespace");
+  this.customNS  = document.getElementById("mi_custom");
 }
 
 InsertDialog.prototype =
@@ -74,16 +75,26 @@ InsertDialog.prototype =
   */
   initialize: function initialize()
   {
-    var menuitems  = this.menulist.firstChild.childNodes;
+    var menulist   = this.menulist;
+    var menuitems  = menulist.firstChild.childNodes;
     var defaultNS  = document.getElementById("mi_namespace");
-    var customNS   = document.getElementById("mi_custom");
     var accept     = document.documentElement.getButton("accept");
 
-    this.menulist.disabled = !this.mData.enableNamespaces;
+    menulist.disabled = !this.mData.enableNamespaces;
     defaultNS.value        = this.mDoc.documentElement.namespaceURI;
 
-    this.toggleNamespace();
+    if (this.mData.enableNamespaces) {
+      let uri = this.mData.namespaceURI;
+      menulist.value = uri;
+      if (!menulist.selectedItem) {
+        // The original node's namespace isn't one listed in the menulist.
+        this.customNS.value = uri;
+        menulist.selectedItem = this.customNS;
+      }
+    }
+    this.updateNamespace();
     this.updateType();
+    this.tagName.focus();
   },
 
  /**
@@ -127,12 +138,24 @@ InsertDialog.prototype =
   },
 
  /**
-  * toggleNamespace toggles the namespace textbox based on the namespace menu.
+  * updateNamespace updates the namespace textbox based on the namespace menu.
   */
-  toggleNamespace: function toggleNamespace()
+  updateNamespace: function updateNamespace()
   {
-    dialog.namespace.disabled = dialog.menulist.selectedItem.id != "mi_custom";
-    dialog.namespace.value    = dialog.menulist.value;
+    this.namespace.disabled = dialog.menulist.selectedItem != this.customNS;
+    this.namespace.value    = dialog.menulist.value;
+  },
+
+  /**
+   * Change the "Custom" menuitem's value to reflect the namespace textbox's
+   * value.
+   *
+   * This fires on input events, so if the user switches away from the
+   * "Custom" menuitem and then back, the previously-entered value remains.
+   */
+  updateCustom: function updateCustom()
+  {
+    this.customNS.value = this.namespace.value;
   },
 
  /**

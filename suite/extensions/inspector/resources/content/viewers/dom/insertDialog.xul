@@ -74,7 +74,7 @@
          <label value="&namespaceURI.label;"
                 accesskey="&namespaceURI.accesskey;"
                 control="ml_namespace"/>
-	        <menulist id="ml_namespace" oncommand="dialog.toggleNamespace();">
+	        <menulist id="ml_namespace" oncommand="dialog.updateNamespace();">
 	          <menupopup id="mp_namespaces">
 	            <!-- This must be first, and must have the value attribute set to
 	                 "" in order for it to work properly -->
@@ -125,7 +125,7 @@
 	      </row>
 	      <row>
 	        <spacer/>
-	        <textbox id="tx_namespace"/>
+	        <textbox id="tx_namespace" oninput="dialog.updateCustom();"/>
 	      </row>
 	      <row>
          <label value="&tagName.label;"
