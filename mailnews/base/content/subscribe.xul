@@ -7,6 +7,7 @@
 <?xml-stylesheet href="chrome://messenger/skin/subscribe.css" type="text/css"?>
 <!-- <?xml-stylesheet href="chrome://messenger/skin/messenger.css" type="text/css"?> -->
 <?xml-stylesheet href="chrome://messenger/skin/folderMenus.css" type="text/css"?>
+<?xml-stylesheet href="chrome://messenger/content/bindings.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://messenger/locale/subscribe.dtd">
 
@@ -23,6 +24,7 @@
 
   <stringbundle id="bundle_subscribe" src="chrome://messenger/locale/subscribe.properties"/>
   <stringbundle id="bundle_messenger" src="chrome://messenger/locale/messenger.properties"/>
+  <stringbundle id="bundle_offlinePrompts" src="chrome://messenger/locale/offline.properties"/>
 
   <script type="application/javascript"
           src="chrome://global/content/globalOverlay.js"/>
