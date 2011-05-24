@@ -57,7 +57,7 @@ function initCommands()
          ["away",              cmdAway,                            CMD_CONSOLE],
          ["back",              cmdAway,                            CMD_CONSOLE],
          ["ban",               cmdBanOrExcept,     CMD_NEED_CHAN | CMD_CONSOLE],
-         ["cancel",            cmdCancel,           CMD_NEED_NET | CMD_CONSOLE],
+         ["cancel",            cmdCancel,                          CMD_CONSOLE],
          ["charset",           cmdCharset,                         CMD_CONSOLE],
          ["channel-motif",     cmdMotif,           CMD_NEED_CHAN | CMD_CONSOLE],
          ["channel-pref",      cmdPref,            CMD_NEED_CHAN | CMD_CONSOLE],
@@ -119,6 +119,7 @@ function initCommands()
          ["font-family-other", cmdFont,                                      0],
          ["font-size",         cmdFont,                            CMD_CONSOLE],
          ["font-size-other",   cmdFont,                                      0],
+         ["goto-startup",      cmdGotoStartup,                     CMD_CONSOLE],
          ["goto-url",          cmdGotoURL,                                   0],
          ["goto-url-newwin",   cmdGotoURL,                                   0],
          ["goto-url-newtab",   cmdGotoURL,                                   0],
@@ -978,28 +979,30 @@ function cmdBanOrExcept(e)
 
 function cmdCancel(e)
 {
-    var network = e.network;
-
-    if (network.isRunningList())
+    if (e.network && e.network.isRunningList())
     {
         // We're running a /list, terminate the output so we return to sanity.
         display(MSG_CANCELLING_LIST);
-        network.abortList();
+        return e.network.abortList();
     }
-    else if ((network.state == NET_CONNECTING) ||
-             (network.state == NET_WAITING))
+
+    if (e.network && ((e.network.state == NET_CONNECTING) ||
+                      (e.network.state == NET_WAITING)))
     {
         // We're trying to connect to a network, and want to cancel. Do so:
         if (e.deleteWhenDone)
             e.network.deleteWhenDone = true;
 
-        display(getMsg(MSG_CANCELLING, network.unicodeName));
-        network.cancel();
+        display(getMsg(MSG_CANCELLING, e.network.unicodeName));
+        return e.network.cancel();
     }
-    else
-    {
-        display(MSG_NOTHING_TO_CANCEL, MT_ERROR);
-    }
+
+    // If we're transferring a file, abort it.
+    var source = e.sourceObject;
+    if ((source.TYPE == "IRCDCCFileTransfer") && source.isActive())
+        return source.abort();
+
+    display(MSG_NOTHING_TO_CANCEL, MT_ERROR);
 }
 
 function cmdChanUserMode(e)
@@ -1048,11 +1051,19 @@ function cmdChanUserMode(e)
     else if (e.nickname && (e.nickname == "*"))
     {
         var me = e.server.me;
-        for (user in e.channel.users)
+        var mode = modestr.substr(1, 1);
+        var adding = modestr[0] == "+";
+        for (userKey in e.channel.users)
         {
-            var user2 = e.channel.users[user];
-            if (user2.encodedName != me.encodedName)
-                nickList.push(user2.encodedName);
+            var user = e.channel.users[userKey];
+            /* Never change our own mode and avoid trying to change someone
+             * else in a no-op manner (e.g. voicing an already voiced user).
+             */
+            if ((user.encodedName != me.encodedName) &&
+                (arrayContains(user.modes, mode) ^ adding))
+            {
+                nickList.push(user.encodedName);
+            }
         }
         nicks = combineNicks(nickList);
     }
@@ -1208,9 +1219,10 @@ function cmdSync(e)
                       if (view.prefs["log"] ^ Boolean(view.logFile))
                       {
                           if (view.prefs["log"])
-                              client.openLogFile(view);
+                              client.openLogFile(view, true);
                           else
-                              client.closeLogFile(view);
+                              client.closeLogFile(view, true);
+                          updateLoggingIcon();
                       }
                   };
             break;
@@ -1348,9 +1360,7 @@ function cmdNetwork(e)
 
     var network = client.networks[e.networkName];
 
-    if (!("messages" in network))
-        network.displayHere(getMsg(MSG_NETWORK_OPENED, network.unicodeName));
-
+    dispatch("create-tab-for-view", { view: network });
     dispatch("set-current-view", { view: network });
 }
 
@@ -1508,16 +1518,12 @@ function cmdDeleteView(e)
         return;
     }
 
-    if (e.view.TYPE == "IRCDCCChat")
+    if (e.view.TYPE.substr(0, 6) == "IRCDCC")
     {
-        if ((e.view.state.state == DCC_STATE_REQUESTED) ||
-            (e.view.state.state == DCC_STATE_ACCEPTED) ||
-            (e.view.state.state == DCC_STATE_CONNECTED))
-        {
-            // abort() calls disconnect() if it is appropriate.
+        if (e.view.isActive())
             e.view.abort();
-            // Fall through: we don't delete on disconnect.
-        }
+        // abort() calls disconnect() if it is appropriate.
+        // Fall through: we don't delete on disconnect.
     }
 
     if (e.view.TYPE == "IRCNetwork" && (e.view.state == NET_CONNECTING ||
@@ -1546,8 +1552,7 @@ function cmdDeleteView(e)
             }
             delete e.view.messageCount;
             delete e.view.messages;
-            client.deck.removeChild(e.view.frame);
-            delete e.view.frame;
+            deleteFrame(e.view);
 
             var oldView = client.currentObject;
             if (client.currentObject == e.view)
@@ -1593,8 +1598,7 @@ function cmdHideView(e)
         var i = deleteTab (tb);
         if (i != -1)
         {
-            client.deck.removeChild(e.view.frame);
-            delete e.view.frame;
+            deleteFrame(e.view);
 
             var oldView = client.currentObject;
             if (client.currentObject == e.view)
@@ -2187,6 +2191,11 @@ function cmdFocusInput(e)
         document.commandDispatcher.focusedElement = client.input;
 }
 
+function cmdGotoStartup(e)
+{
+    openStartupURLs();
+}
+
 function cmdGotoURL(e)
 {
     const EXT_PROTO_SVC = "@mozilla.org/uriloader/external-protocol-service;1";
@@ -2245,13 +2254,29 @@ function cmdGotoURL(e)
     }
 
     if (client.host == "Songbird")
-        var window = getWindowByType("Songbird:Main");
+        var browserWin = getWindowByType("Songbird:Main");
     else
-        window = getWindowByType("navigator:browser");
+        browserWin = getWindowByType("navigator:browser");
 
-    if (!window)
+    var location = browserWin ? browserWin.content.document.location : null;
+    var action = e.command.name;
+
+    // We don't want to replace ChatZilla running in a tab.
+    if ((action == "goto-url-newwin") ||
+        ((action == "goto-url") && browserWin &&
+         (location.href.indexOf("chrome://chatzilla/content/") == 0)))
     {
-        openTopWin(e.url);
+        try
+        {
+            if (typeof openUILinkIn == "function")
+                openUILinkIn(e.url, "window");
+            else
+                openTopWin(e.url);
+        }
+        catch (ex)
+        {
+            dd(formatException(ex));
+        }
         dispatch("focus-input");
         return;
     }
@@ -2260,23 +2285,24 @@ function cmdGotoURL(e)
     {
         try
         {
-            window.focus();
+            browserWin.focus();
         }
         catch (ex)
         {
             dd(formatException(ex));
         }
-
     }
 
-    if (e.command.name == "goto-url-newwin")
+    if (action == "goto-url-newtab")
     {
         try
         {
-            if (client.host == "Mozilla")
-                window.openNewWindowWith(e.url, false);
+            if (typeof browserWin.openUILinkIn == "function")
+                browserWin.openUILinkIn(e.url, "tab");
+            else if (client.host == "Mozilla")
+                browserWin.openNewTabWith(e.url, false, false);
             else
-                window.openNewWindowWith(e.url, null, null, null);
+                browserWin.openNewTabWith(e.url, null, null, null, null);
         }
         catch (ex)
         {
@@ -2286,31 +2312,6 @@ function cmdGotoURL(e)
         return;
     }
 
-    if (e.command.name == "goto-url-newtab")
-    {
-        try
-        {
-            if (client.host == "Mozilla")
-                window.openNewTabWith(e.url, false, false);
-            else
-                window.openNewTabWith(e.url, null, null, null, null);
-        }
-        catch (ex)
-        {
-            dd(formatException(ex));
-        }
-        dispatch("focus-input");
-        return;
-    }
-
-    var location = window.content.document.location;
-    if (location.href.indexOf("chrome://chatzilla/content/") == 0)
-    {
-        // don't replace chatzilla running in a tab
-        openTopWin(e.url);
-        dispatch("focus-input");
-        return;
-    }
     try
     {
         location.href = e.url;
@@ -2399,10 +2400,7 @@ function cmdJoin(e)
      * replies (since the reply will have the appropriate prefix). */
     if (chan.unicodeName[0] != "!")
     {
-        var chanName = chan.unicodeName;
-        if (!("messages" in chan))
-            chan.displayHere(getMsg(MSG_CHANNEL_OPENED, chanName), MT_INFO);
-
+        dispatch("create-tab-for-view", { view: chan });
         dispatch("set-current-view", { view: chan });
     }
 
@@ -2571,18 +2569,19 @@ function cmdLoad(e)
         if ("init" in plugin)
         {
             // Sanity check plugin's methods and properties:
+            var okay = false;
             if (!("id" in plugin) || (plugin.id == MSG_UNKNOWN))
                 display(getMsg(MSG_ERR_PLUGINAPI_NOID, e.url));
-            else if (!(plugin.id.match(/^[A-Za-z-_]+$/)))
+            else if (!(plugin.id.match(/^[A-Za-z0-9-_]+$/)))
                 display(getMsg(MSG_ERR_PLUGINAPI_FAULTYID, e.url));
             else if (!("enable" in plugin))
                 display(getMsg(MSG_ERR_PLUGINAPI_NOENABLE, e.url));
             else if (!("disable" in plugin))
                 display(getMsg(MSG_ERR_PLUGINAPI_NODISABLE, e.url));
+            else
+                okay = true;
 
-            if (!("enable" in plugin) || !("disable" in plugin) ||
-                !("id" in plugin) || (plugin.id == MSG_UNKNOWN) ||
-                !(plugin.id.match(/^[A-Za-z-_]+$/)))
+            if (!okay)
             {
                 display (getMsg(MSG_ERR_SCRIPTLOAD, e.url));
                 return null;
@@ -4025,10 +4024,15 @@ function cmdDCCClose(e)
     // If there is no nickname specified, use current view.
     if (!e.nickname)
     {
-        if (client.currentObject.TYPE == "IRCDCCChat")
-            return client.currentObject.abort();
+        // Both DCC chat and file transfers can be aborted like this.
+        if (e.sourceObject.TYPE.substr(0, 6) == "IRCDCC")
+        {
+            if (e.sourceObject.isActive())
+                return e.sourceObject.abort();
+            return true;
+        }
         // ...if there is one.
-        return display(MSG_DCC_ERR_NOCHAT);
+        return display(MSG_DCC_ERR_NOTDCC);
     }
 
     var o = client.dcc.findByID(e.nickname);

@@ -803,10 +803,19 @@ function xtvr_remchild (index)
  * hide this record and all descendants.
  */
 XULTreeViewRecord.prototype.hide =
-function xtvr_hide ()
+function xtvr_hide()
 {
     if (this.isHidden)
         return;
+
+    var tree = this.findContainerTree();
+    if (tree && tree.frozen)
+    {
+        this.isHidden = true;
+        if ("parentRecord" in this)
+            this.parentRecord.onVisualFootprintChanged(0, -this.visualFootprint);
+        return;
+    }
 
     /* get the row before hiding */
     var row = this.calculateVisualRow();
@@ -815,23 +824,32 @@ function xtvr_hide ()
     /* go right to the parent so we don't muck with our own visualFootprint
      * record, we'll need it to be correct if we're ever unHidden. */
     if ("parentRecord" in this)
-        this.parentRecord.onVisualFootprintChanged (row, -this.visualFootprint);
+        this.parentRecord.onVisualFootprintChanged(row, -this.visualFootprint);
 }
 
 /*
  * unhide this record and all descendants.
  */
 XULTreeViewRecord.prototype.unHide =
-function xtvr_uhide ()
+function xtvr_uhide()
 {
     if (!this.isHidden)
         return;
+
+    var tree = this.findContainerTree();
+    if (tree && tree.frozen)
+    {
+        this.isHidden = false;
+        if ("parentRecord" in this)
+            this.parentRecord.onVisualFootprintChanged(0, this.visualFootprint);
+        return;
+    }
 
     this.isHidden = false;
     this.invalidateCache();
     var row = this.calculateVisualRow();
     if (this.parentRecord)
-        this.parentRecord.onVisualFootprintChanged (row, this.visualFootprint);
+        this.parentRecord.onVisualFootprintChanged(row, this.visualFootprint);
 }
 
 /*
@@ -1050,9 +1068,7 @@ function tolr_getshare()
     return null;
 }
 
-/**
- * Used internally by |XULTreeView|.
- */
+// @internal
 function XTRootRecord (tree, share)
 {
     this._share = share;
@@ -1207,11 +1223,11 @@ function XULTreeView(share)
 
 /*
  * Changes to the tree contents will not cause the tree to be invalidated
- * until thaw() is called.  All changes will be pooled into a single invalidate
+ * until |thaw()| is called.  All changes will be pooled into a single invalidate
  * call.
  *
  * Freeze/thaws are nestable, the tree will not update until the number of
- * thaw() calls matches the number of freeze() calls.
+ * |thaw()| calls matches the number of freeze() calls.
  */
 XULTreeView.prototype.freeze =
 function xtv_freeze ()
@@ -1221,7 +1237,6 @@ function xtv_freeze ()
         this.changeStart = 0;
         this.changeAmount = 0;
     }
-    //dd ("freeze " + this.frozen);
 }
 
 /*
@@ -1309,6 +1324,7 @@ function xtv_ctrln (line)
  * functions the tree will call to retrieve the list state (nsITreeView.)
  */
 
+// @internal
 XULTreeView.prototype.__defineGetter__("rowCount", xtv_getRowCount);
 function xtv_getRowCount ()
 {
@@ -1318,6 +1334,7 @@ function xtv_getRowCount ()
     return this.childData.visualFootprint;
 }
 
+// @internal
 XULTreeView.prototype.isContainer =
 function xtv_isctr (index)
 {
@@ -1326,6 +1343,7 @@ function xtv_isctr (index)
     return Boolean(row && ("alwaysHasChildren" in row || "childData" in row));
 }
 
+// @internal
 XULTreeView.prototype.__defineGetter__("selectedIndex", xtv_getsel);
 function xtv_getsel()
 {
@@ -1337,6 +1355,7 @@ function xtv_getsel()
     return min.value;
 }
 
+// @internal
 XULTreeView.prototype.__defineSetter__("selectedIndex", xtv_setsel);
 function xtv_setsel(i)
 {
@@ -1346,8 +1365,10 @@ function xtv_setsel(i)
     return i;
 }
 
+// @internal
 XULTreeView.prototype.scrollTo = BasicOView.prototype.scrollTo;
 
+// @internal
 XULTreeView.prototype.isContainerOpen =
 function xtv_isctropen (index)
 {
@@ -1355,6 +1376,7 @@ function xtv_isctropen (index)
     return row && row.isContainerOpen;
 }
 
+// @internal
 XULTreeView.prototype.toggleOpenState =
 function xtv_toggleopen (index)
 {
@@ -1369,6 +1391,7 @@ function xtv_toggleopen (index)
     }
 }
 
+// @internal
 XULTreeView.prototype.isContainerEmpty =
 function xtv_isctrempt (index)
 {
@@ -1382,12 +1405,14 @@ function xtv_isctrempt (index)
     return !row.childData.length;
 }
 
+// @internal
 XULTreeView.prototype.isSeparator =
 function xtv_isseparator (index)
 {
     return false;
 }
 
+// @internal
 XULTreeView.prototype.getParentIndex =
 function xtv_getpi (index)
 {
@@ -1401,6 +1426,7 @@ function xtv_getpi (index)
     return (rv != null) ? rv : -1;
 }
 
+// @internal
 XULTreeView.prototype.hasNextSibling =
 function xtv_hasnxtsib (rowIndex, afterIndex)
 {
@@ -1408,6 +1434,7 @@ function xtv_hasnxtsib (rowIndex, afterIndex)
     return row.childIndex < row.parentRecord.childData.length - 1;
 }
 
+// @internal
 XULTreeView.prototype.getLevel =
 function xtv_getlvl (index)
 {
@@ -1418,21 +1445,25 @@ function xtv_getlvl (index)
     return row.level;
 }
 
+// @internal
 XULTreeView.prototype.getImageSrc =
 function xtv_getimgsrc (index, col)
 {
 }
 
+// @internal
 XULTreeView.prototype.getProgressMode =
 function xtv_getprgmode (index, col)
 {
 }
 
+// @internal
 XULTreeView.prototype.getCellValue =
 function xtv_getcellval (index, col)
 {
 }
 
+// @internal
 XULTreeView.prototype.getCellText =
 function xtv_getcelltxt (index, col)
 {
@@ -1452,24 +1483,29 @@ function xtv_getcelltxt (index, col)
         return "";
 }
 
+// @internal
 XULTreeView.prototype.getCellProperties =
 function xtv_cellprops (row, col, properties)
 {}
 
+// @internal
 XULTreeView.prototype.getColumnProperties =
 function xtv_colprops (col, properties)
 {}
 
+// @internal
 XULTreeView.prototype.getRowProperties =
 function xtv_rowprops (index, properties)
 {}
 
+// @internal
 XULTreeView.prototype.isSorted =
 function xtv_issorted (index)
 {
     return false;
 }
 
+// @internal
 XULTreeView.prototype.canDrop =
 function xtv_drop (index, orientation)
 {
@@ -1478,6 +1514,7 @@ function xtv_drop (index, orientation)
     return (row && ("canDrop" in row) && row.canDrop(orientation));
 }
 
+// @internal
 XULTreeView.prototype.drop =
 function xtv_drop (index, orientation)
 {
@@ -1486,6 +1523,7 @@ function xtv_drop (index, orientation)
     return (row && ("drop" in row) && row.drop(orientation));
 }
 
+// @internal
 XULTreeView.prototype.setTree =
 function xtv_seto (tree)
 {
@@ -1493,58 +1531,69 @@ function xtv_seto (tree)
     this.tree = tree;
 }
 
+// @internal
 XULTreeView.prototype.cycleHeader =
 function xtv_cyclehdr (col)
 {
 }
 
+// @internal
 XULTreeView.prototype.selectionChanged =
 function xtv_selchg ()
 {
 }
 
+// @internal
 XULTreeView.prototype.cycleCell =
 function xtv_cyclecell (row, col)
 {
 }
 
+// @internal
 XULTreeView.prototype.isEditable =
 function xtv_isedit (row, col)
 {
     return false;
 }
 
+// @internal
 XULTreeView.prototype.isSelectable =
 function xtv_isselect (row, col)
 {
     return false;
 }
 
+// @internal
 XULTreeView.prototype.setCellValue =
 function xtv_setct (row, col, value)
 {
 }
 
+// @internal
 XULTreeView.prototype.setCellText =
 function xtv_setct (row, col, value)
 {
 }
 
+// @internal
 XULTreeView.prototype.performAction =
 function xtv_pact (action)
 {
 }
 
+// @internal
 XULTreeView.prototype.performActionOnRow =
 function xtv_pactrow (action)
 {
 }
 
+// @internal
 XULTreeView.prototype.performActionOnCell =
 function xtv_pactcell (action)
 {
 }
 
+// @internal
 XULTreeView.prototype.onRouteFocus =
 function xtv_rfocus (event)
 {
@@ -1552,6 +1601,7 @@ function xtv_rfocus (event)
         this.onFocus(event);
 }
 
+// @internal
 XULTreeView.prototype.onRouteBlur =
 function xtv_rblur (event)
 {
@@ -1559,6 +1609,7 @@ function xtv_rblur (event)
         this.onBlur(event);
 }
 
+// @internal
 XULTreeView.prototype.onRouteDblClick =
 function xtv_rdblclick (event)
 {
@@ -1578,6 +1629,7 @@ function xtv_rdblclick (event)
     this.onRowCommand(rec, event);
 }
 
+// @internal
 XULTreeView.prototype.onRouteKeyPress =
 function xtv_rkeypress (event)
 {
