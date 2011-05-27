@@ -36,12 +36,12 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY descIsFromUserInput.label "Från användarindata: ">
-<!ENTITY descState.label "Tillstånd: ">
-<!ENTITY descIsEnabled.label "Tillstånd aktiverat: ">
-<!ENTITY descStartOffset.label "Startförskjutning: ">
+<!ENTITY descIsFromUserInput.label "Är från användares inmatning: ">
+<!ENTITY descState.label "Status: ">
+<!ENTITY descIsEnabled.label "Är aktiverad status: ">
+<!ENTITY descStartOffset.label "Börjar vid sidan av: ">
 <!ENTITY descLength.label "Längd: ">
-<!ENTITY descIsInserted.label "Infogad text: ">
+<!ENTITY descIsInserted.label "Är infogad text: ">
 <!ENTITY descModifiedText.label "Ändrad text: ">
-<!ENTITY descCaretOffset.label "Textmarkörförskjutning: ">
+<!ENTITY descCaretOffset.label "Insättningspunkt vid sidan av: ">
 

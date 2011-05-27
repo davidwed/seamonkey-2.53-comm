@@ -44,8 +44,8 @@
 <!ENTITY jsValue.label "Värde">
 
 <!ENTITY evaluateDialog.title "Utvärdera uttryck">
-<!ENTITY jsEval.desc "Ange ett JavaScript-uttryck.  Variabeln &quot;target&quot; är den egenskap som för närvarande är markerad.">
+<!ENTITY jsEval.desc "Skriv in ett JavaScript-uttryck.  Variabeln &quot;target&quot; är för närvarande det valda objektet.">
 <!ENTITY jsExecute.label "Kör">
-<!ENTITY inspectReturn.label "Granska svar i">
+<!ENTITY inspectReturn.label "Inspektera återgång i">
 <!ENTITY inspectReturnNew.label "Nytt fönster">
 <!ENTITY inspectReturnExisting.label "Befintligt fönster">

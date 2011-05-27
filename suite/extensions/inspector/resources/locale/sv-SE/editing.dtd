@@ -1,23 +1,18 @@
 <!ENTITY mnEditUndo.label "Ångra">
-<!ENTITY mnEditUndo.accesskey "å">
+<!ENTITY mnEditUndo.accesskey "Å">
 <!ENTITY mnEditRedo.label "Gör om">
-<!ENTITY mnEditRedo.accesskey "g">
+<!ENTITY mnEditRedo.accesskey "G">
 <!ENTITY mnEditCut.label "Klipp ut">
-<!ENTITY mnEditCut.accesskey "t">
+<!ENTITY mnEditCut.accesskey "K">
 <!ENTITY mnEditCopy.label "Kopiera">
-<!ENTITY mnEditCopy.accesskey "k">
+<!ENTITY mnEditCopy.accesskey "o">
 <!ENTITY mnEditPaste.label "Klistra in">
 <!ENTITY mnEditPaste.accesskey "l">
 <!ENTITY mnEditInsert.label "Infoga">
-<!ENTITY mnEditInsert.accesskey "i">
+<!ENTITY mnEditInsert.accesskey "I">
 <!ENTITY mnEditEdit.label "Redigera">
-<!ENTITY mnEditEdit.accesskey "e">
+<!ENTITY mnEditEdit.accesskey "R">
 <!ENTITY mnEditDelete.label "Ta bort">
-<!ENTITY mnEditDelete.accesskey "b">
-<!ENTITY mnEditInspectInNewWindow.label "Granska i nytt fönster">
-<!ENTITY mnEditInspectInNewWindow.accesskey "n">
-<!ENTITY mnEditInspectInNewWindow.key "r">
-<!ENTITY mnEditCopyFileURI.label "Kopiera URI">
-<!ENTITY mnEditCopyFileURI.accesskey "u">
-<!ENTITY mnEditViewFileURI.label "Visa fil">
-<!ENTITY mnEditViewFileURI.accesskey "v">
+<!ENTITY mnEditDelete.accesskey "T">
+<!ENTITY mnEditInspectInNewWindow.label "Inspektera i nytt fönster">
+<!ENTITY mnEditInspectInNewWindow.accesskey "n">  

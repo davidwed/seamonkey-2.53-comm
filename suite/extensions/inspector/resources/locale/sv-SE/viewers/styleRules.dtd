@@ -37,15 +37,16 @@
 #endif
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY miFindCSSRules.label "Sök CSS-regler…">
-<!ENTITY miFindCSSRules.accesskey "C">
+<!ENTITY miFindCSSRules.label "Hitta CSS-regler…">
+<!ENTITY miFindCSSRules.accesskey "H">
 
-<!ENTITY newRules.label "Nytt">
+<!ENTITY newRules.label "Ny">
 <!ENTITY deleteSelectedRules.label "Ta bort">
 <!ENTITY disableSelectedRules.label "Inaktivera">
+<!ENTITY openSelectedFileInEditor.label "Öppna fil i redigerare">
 
 <!-- LOCALIZATION NOTE: DO NOT LOCALIZE "!important" since it is a CSS API -->
-<!ENTITY toggleSelectedImportant.label "Visa/Dölj !important">
+<!ENTITY toggleSelectedImportant.label "Växla !important-läge">
 
 <!ENTITY styleRule.label "Regel">
 <!ENTITY styleRuleURI.label "Fil">

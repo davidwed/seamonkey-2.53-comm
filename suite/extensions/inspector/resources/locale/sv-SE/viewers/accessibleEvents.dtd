@@ -39,9 +39,5 @@
 <!ENTITY eventType.label "Händelsetyp">
 <!ENTITY eventTime.label "Tid">
 <!ENTITY eventNodeName.label "Nodnamn">
-<!ENTITY isWatched.label "Bevakas">
-<!ENTITY clearEventList.label "Rensa händelselistan">
-<!ENTITY chooseEventsToWatch.label "Välj händelser att bevaka">
-<!ENTITY selectAll.label "Markera alla">
-<!ENTITY unselectAll.label "Avmarkera alla">
+<!ENTITY clearEventList.label "Rensa händelselista">
 
