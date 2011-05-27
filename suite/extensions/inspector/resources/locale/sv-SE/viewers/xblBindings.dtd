@@ -39,10 +39,15 @@
 
 <!ENTITY bindingContent.label      "Innehåll">
 <!ENTITY bindingMethods.label      "Metoder">
+<!ENTITY bindingMethodName.label   "Metodnamn">
 <!ENTITY bindingProperties.label   "Egenskaper">
 <!ENTITY bindingGetter.label       "Hämtare">
-<!ENTITY bindingSetter.label       "Angivare">
+<!ENTITY bindingSetter.label       "Sättare">
 <!ENTITY bindingProperty.label     "Egenskap">
 <!ENTITY bindingHandlers.label     "Hanterare">
+<!ENTITY bindingHandlerEvent.label "Händelse">
+<!ENTITY bindingHandlerPhase.label "Fas">
 <!ENTITY bindingResources.label    "Resurser">
+<!ENTITY bindingResourceType.label "Typ">
+<!ENTITY bindingResourceSrc.label  "Källa">
 <!ENTITY bindingSourceCode.label   "Källkod">

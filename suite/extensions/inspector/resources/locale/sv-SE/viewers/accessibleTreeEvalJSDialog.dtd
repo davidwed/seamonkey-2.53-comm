@@ -1,0 +1,12 @@
+<!-- ***** BEGIN LICENSE BLOCK *****
+   - ***** END LICENSE BLOCK ***** -->
+
+  <!ENTITY evaluateDialog.title "Utvärdera JavaScript">
+
+  <!ENTITY btnEvaluateJS.label "Utvärdera">
+  <!ENTITY btnEvaluateJS.accesskey "e">
+  
+  <!ENTITY txtInputArea.label "Indataområde (använd variabeln &quot;accessible&quot; för att arbeta med markerat accessibility-element och funktionen &quot;output&quot; för att skriva i fönstret &quot;Utdataområde&quot;): ">
+  <!ENTITY txtInputArea.accesskey "I">
+  <!ENTITY txtOutputArea.label "Utdataområde: ">
+  <!ENTITY txtOutputArea.accesskey "U">

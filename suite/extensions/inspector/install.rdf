@@ -76,5 +76,13 @@
       </Description>
     </em:localized>
 
+    <em:localized>
+      <Description>
+        <em:locale>sv-SE</em:locale>
+        <em:name>DOM-granskaren (DOM Inspector)</em:name>
+        <em:description>Granskar strukturen och egenskaperna för ett fönster och dess innehåll.</em:description>
+      </Description>
+    </em:localized>
+
   </Description>
 </RDF>

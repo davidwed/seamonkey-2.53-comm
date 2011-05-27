@@ -1,7 +1,7 @@
-<!ENTITY inspectorTaskCmd.label        "DOM Inspector">
-<!ENTITY inspectorTaskCmd.commandkey   "i">
-<!ENTITY inspectorTaskCmd.accesskey.ff "O">
-<!ENTITY inspectorTaskCmd.accesskey    "I">
+<!ENTITY inspectorTaskCmd.label "DOM-granskaren">
+<!ENTITY inspectorTaskCmd.commandkey "g">
+<!ENTITY inspectorTaskCmd.accesskey.ff "n">
+<!ENTITY inspectorTaskCmd.accesskey "G">
 
-<!ENTITY inspectPageTaskCmd.label      "Inspektera sida">
-<!ENTITY inspectPageTaskCmd.accesskey  "I">
+<!ENTITY inspectPageTaskCmd.label "Granska sida">
+<!ENTITY inspectPageTaskCmd.accesskey "g">
