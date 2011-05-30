@@ -277,6 +277,20 @@
         ]]></body>
       </method>
 
+      <method name="addTransactionListener">
+        <parameter name="aListener"/>
+        <body><![CDATA[
+          this.mTransactionManager.AddListener(aListener);
+        ]]></body>
+      </method>
+
+      <method name="removeTransactionListener">
+        <parameter name="aListener"/>
+        <body><![CDATA[
+          this.mTransactionManager.RemoveListener(aListener);
+        ]]></body>
+      </method>
+
       <!-- ///////////////////////////////////////////////////////////////////
       //// Clipboard -->
 

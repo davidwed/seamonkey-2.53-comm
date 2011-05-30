@@ -207,12 +207,15 @@ DOMViewer.prototype =
       PrefUtils.getPref("inspector.dom.showWhitespaceNodes")
     );
 
+    this.pane.panelset.addTransactionListener(this);
+
     aPane.notifyViewerReady(this);
   },
 
   destroy: function DVr_Destroy()
   {
     this.mDOMTree.treeBoxObject.view = null;
+    this.pane.panelset.removeTransactionListener(this);
   },
 
   isCommandEnabled: function DVr_IsCommandEnabled(aCommand)
@@ -262,13 +265,20 @@ DOMViewer.prototype =
       	return selectedNode instanceof nsIDOMElement;
       case "cmdEditCut":
       case "cmdEditCopy":
-      case "cmdEditDelete":
         return !!selectedNode;
+      case "cmdEditDelete":
+        // If at least one of the selected nodes can be deleted, allow it.
+        let selectedNodes = this.getSelectedNodes();
+        for (let i = 0, n = selectedNodes.length; i < n; ++i) {
+          if (cmdEditDelete.isDeletable(selectedNodes[i])) {
+            return true;
+          }
+        }
+        return false;
       case "cmdInspectBrowser":
         if (!(selectedNode instanceof nsIDOMElement)) {
           return false;
         }
-
         let n = selectedNode.localName.toLowerCase();
         return n == "tabbrowser" || n == "browser" || n == "iframe" ||
                n == "frame" || n == "editor";
@@ -346,10 +356,139 @@ DOMViewer.prototype =
   getCommand: function DVr_GetCommand(aCommand)
   {
     if (aCommand in window) {
-      return new window[aCommand]();
+      try {
+        return new window[aCommand]();
+      }
+      catch (ex) {
+        // User canceled the transaction.
+      }
     }
     return null;
   },
+
+  ////////////////////////////////////////////////////////////////////////////
+  //// nsITransactionListener implementation
+
+  willDo: function DVr_WillDo(aManager, aTransaction)
+  {
+    var command = aTransaction.wrappedJSObject;
+    if (command instanceof cmdEditDelete) {
+      let nodes = command.nodes;
+      let deletables = [];
+      for (let i = 0, n = nodes.length; i < n; ++i) {
+        let node = nodes[i];
+        if (cmdEditDelete.isDeletable(node)) {
+          deletables.push(node);
+        }
+      }
+
+      // Save the currentNode and the linked pane's current subject, but
+      // don't overwrite them on redo.
+      if (!("oldCurrentNode" in command)) {
+        command.oldCurrentNode = this.currentNode;
+        command.oldLinkedSubject = this.mSelection;
+      }
+
+      if (cmdEditDelete.isDeletable(this.mSelection)) {
+        command.newLinkedSubject =
+          this.getNextInNextBestChain(this.mSelection, undefined,
+                                      function DVr_WillDo_Filter(aNode)
+                                      {
+                                        return deletables.indexOf(aNode) >= 0;
+                                      });
+      }
+    }
+  },
+
+  didDo: function DVr_DidDo(aManager, aTransaction, aResult)
+  {
+    var command = aTransaction.wrappedJSObject;
+    if (command instanceof cmdEditDelete) {
+      if (!("newLinkedSubject" in command)) {
+        // The linked panel's old subject wasn't deletable, but the
+        // transaction went through because other selected nodes were.  Leave
+        // things alone and let the linked subject and any other non-deletable
+        // nodes remain selected.
+        return;
+      }
+      let newLinkedSubject = command.newLinkedSubject;
+      let selection = this.mDOMTree.view.selection;
+      if (selection.count > 0) {
+        // There are still some nodes selected (because they weren't
+        // deletable).  newLinkedSubject should be one of them.
+        let idx = this.getRowIndexFromNode(newLinkedSubject);
+        if (!selection.isSelected(idx)) {
+          debug("node chosen for new linked subject was apparently deletable");
+          return;
+        }
+        this.changeSelection(newLinkedSubject);
+      }
+      else {
+        this.showNodeInTree(newLinkedSubject);
+      }
+    }
+  },
+
+  willUndo: stubImpl,
+
+  didUndo: function DVr_DidUndo(aManager, aTransaction, aResult)
+  {
+    var command = aTransaction.wrappedJSObject;
+    if (command instanceof cmdEditDelete) {
+      // Find all "deleted" rows and select them, even any that weren't
+      // deletable.  We also want currentNode and mSelection to reflect the
+      // values they had before this transaction.
+      let nodes = command.nodes;
+      if (!nodes.length) {
+        return;
+      }
+
+      // Disable selectionChange events, because otherwise the linked pane's
+      // viewers will be flipping around, which is also computational overhead
+      // that we just don't need.
+      this.mDOMTree.treeBoxObject.beginUpdateBatch();
+      this.beginSelectionBatch();
+
+      this.mDOMTree.view.selection.clearSelection();
+      for (let i = nodes.length - 1; i >= 0; --i) {
+        this.showNodeInTree(nodes[i], true);
+      }
+      this.changeSelection(command.oldLinkedSubject);
+      this.mDOMTree.currentIndex =
+        this.getRowIndexFromNode(command.oldCurrentNode);
+
+      this.endSelectionBatch();
+      this.mDOMTree.treeBoxObject.endUpdateBatch();
+    }
+  },
+
+  willRedo: function DVr_WillRedo(aManager, aTransaction)
+  {
+    var command = aTransaction.wrappedJSObject;
+    if (command instanceof cmdEditDelete) {
+      this.willDo(aManager, aTransaction);
+    }
+  },
+
+  didRedo: function DVr_DidRedo(aManager, aTransaction, aResult)
+  {
+    var command = aTransaction.wrappedJSObject;
+    if (command instanceof cmdEditDelete) {
+      this.didDo(aManager, aTransaction, aResult);
+    }
+  },
+
+  willBeginBatch: stubImpl,
+
+  didBeginBatch: stubImpl,
+
+  willEndBatch: stubImpl,
+
+  didEndBatch: stubImpl,
+
+  willMerge: stubImpl,
+
+  didMerge: stubImpl,
 
   ////////////////////////////////////////////////////////////////////////////
   //// Event Dispatching
@@ -1297,14 +1436,34 @@ DOMViewer.prototype =
    *        view's showAnonymousContent attribute, and even if true, won't
    *        affect whether anonymous nodes can be returned.  However, the
    *        default is whatever the showAnonymousContent attribute's value is.
+   * @param aFilterFn [optional]
+   *        If specified, when a node is considered, aFilterFn will be called
+   *        with that node as its only parameter.  A truthy return value will
+   *        disqualify the node's eligibility to be returned as the next in
+   *        the next-best chain.  NB: A falsy return value won't guarantee
+   *        that the node will positively appear in the chain; all nodes still
+   *        need to pass the isIgnorableNode check.
    * @return The next node in the next-best chain.
    */
   getNextInNextBestChain:
-    function DVr_GetNextInNextBestChain(aNode, aIncludeAnons)
+    function DVr_GetNextInNextBestChain(aNode, aIncludeAnons, aFilterFn)
   {
     if (!aNode) {
       return null;
     }
+
+    var withoutFilter = function DVr_GetNextInNextBestChain_IsIgnorable(aNode)
+    {
+      return viewer.isIgnorableNode(aNode);
+    };
+    var withFilter =
+      function DVr_GetNextInNextBestChain_FilteredIsIgnorable(aNode)
+    {
+      return viewer.isIgnorableNode(aNode) || aFilterFn(aNode);
+    };
+
+    var isIgnorable = aFilterFn ? withFilter : withoutFilter;
+    
 
     // The approach is broken down as follows:
     // 1. Locating the topmost ignorable node in the ancestor chain (including
@@ -1331,7 +1490,7 @@ DOMViewer.prototype =
       // here, but d is expected to be much smaller than h in practice, i.e.,
       // anywhere between 1 and something like 3, and I can't think of a good
       // way to get around this right now without creating API awkwardness.
-      if (this.isIgnorableNode(ancestorChain[i])) {
+      if (isIgnorable(ancestorChain[i])) {
         topmost = ancestorChain[i];
         break;
       }
@@ -1339,7 +1498,7 @@ DOMViewer.prototype =
     // Short circuit for rootNode; it won't have any siblings.
     if (topmost == this.mDOMView.rootNode) {
       // Just in case for some crazy reason the root node is ignorable...
-      return this.isIgnorableNode(topmost) ? null : topmost;
+      return isIgnorable(topmost) ? null : topmost;
     }
 
     // Follow through on step 2.
@@ -1380,7 +1539,7 @@ DOMViewer.prototype =
     // Look for the next non-ignorable in the nodes that follow topmost.
     do {
       current = walker.nextSibling();
-      if (!this.isIgnorableNode(current)) {
+      if (!isIgnorable(current)) {
         return current;
       }
     } while (current);
@@ -1388,7 +1547,7 @@ DOMViewer.prototype =
     // Look for the next non-ignorable in the nodes that precede topmost.
     for (let i = preceding.length - 1; i >= 0; --i) {
       current = preceding[i];
-      if (!this.isIgnorableNode(current)) {
+      if (!isIgnorable(current)) {
         return current;
       }
     }
@@ -1629,39 +1788,216 @@ DOMViewer.prototype =
 //////////////////////////////////////////////////////////////////////////////
 //// Command Objects
 
-function cmdEditDelete() {}
+/**
+ * Deletes one or more nodes from the tree.
+ */
+function cmdEditDelete()
+{
+  // Approach:
+  // 1. Order the nodes with the primary criterion being the node depth, with
+  //    the nodes of greatest depth appearing near the beginning of the list.
+  //    The secondary (tiebreaker) criterion is applied only to nodes which
+  //    are siblings, and is the node order, corresponding to the nodes'
+  //    indexing in their parents' childNodes NodeLists.
+  // 2. Iterate over the list, storing the current node's parent and its next
+  //    sibling (or null if it's the last of its parent's children).
+  //
+  // Observe that after the nodes are deleted, this allows us to cleanly undo
+  // this transaction by working backwards and reinserting nodes.
+  var nodes = viewer.getSelectedNodes().sort(cmdEditDelete.sortComparator);
+
+  this.nodes = [];
+  this.mParents = [];
+  this.mSiblings = [];
+
+  var didPrompt = false;
+  for (let i = 0, n = nodes.length; i < n; ++i) {
+    let node = nodes[i];
+
+    // If we delete a descendant of an anonymous node and that anonymous
+    // node's binding parent, the nodes array and the mParents array (and
+    // potentially the mSiblings array) would continue to needlessly reference
+    // nodes from that anonymous subtree.  Even if the binding parent gets
+    // restored via undo, a new anonymous content tree will be created for it,
+    // so we can eliminate the references to the nodes in the old subtree.
+    let bindingParent = node.ownerDocument.getBindingParent(node);
+    if (bindingParent && cmdEditDelete.isDeletable(bindingParent) &&
+        nodes.indexOf(bindingParent, i) >= 0) { // XXX O(1/2 * n^2)
+      // Notify about the issue described above, and ask if it's okay to
+      // continue.
+      if (!didPrompt) {
+        let bundle = viewer.pane.panelset.stringBundle;
+        let msg = bundle.getString("irrecoverableSubtree.message");
+        let title = bundle.getString("irrecoverableSubtree.title");
+
+        let promptService = XPCU.getService(kPromptServiceClassID,
+                                            "nsIPromptService");
+        let confirmation = promptService.confirm(window, title, msg);
+
+        if (!confirmation) {
+          throw new Error("User canceled transaction");
+        }
+
+        didPrompt = true;
+      }
+    }
+    else {
+      this.nodes.push(node);
+      this.mParents.push(node.parentNode);
+      this.mSiblings.push(node.nextSibling);
+    }
+  }
+
+  this.wrappedJSObject = this;
+}
+
+cmdEditDelete.sortComparator = function Delete_SortComparator(a, b)
+{
+  // Sibling nodes get arranged by natural order.
+  if (a.parentNode && a.parentNode == b.parentNode) {
+    let kids = a.parentNode.childNodes;
+    for (let i = 0, n = kids.length; i < n; ++i) {
+      if (kids[i] == a) {
+        return -1;
+      }
+      if (kids[i] == b) {
+        break;
+      }
+    }
+    return 1;
+  }
+
+  // Otherwise, nodes at greatest depth appear first.
+  var rootNode = viewer.mDOMView.rootNode;
+  var showAnons = viewer.mDOMView.showAnonymousContent;
+  var aAncestor = viewer.mDOMUtils.getParentForNode(a, showAnons);
+  var bAncestor = viewer.mDOMUtils.getParentForNode(b, showAnons);
+
+  // Check for equivalence to the root node, too, because getParentForNode
+  // will walk all the way up the tree (e.g., out of a content document to a
+  // browser containing it).
+  while (aAncestor != bAncestor && aAncestor && bAncestor &&
+         aAncestor != rootNode && bAncestor != rootNode) {
+    aAncestor = viewer.mDOMUtils.getParentForNode(aAncestor, showAnons);
+    bAncestor = viewer.mDOMUtils.getParentForNode(bAncestor, showAnons);
+  }
+  if (!aAncestor || aAncestor == rootNode) {
+    return 1;
+  }
+  return -1;
+};
+
+/**
+ * Determine if a node is deletable by our deletion methods.
+ * @param aNode
+ *        The node to check.
+ * @param aFailure [optional]
+ *        Outparam whose value will correspond to a cmdEditDelete error
+ *        constant.  If the node is found to be deletable, aFailure will be
+ *        not be altered.
+ * @return Boolean indicating deletability.
+ */
+cmdEditDelete.isDeletable = function Delete_IsDeletable(aNode, aFailure)
+{
+  var failure = aFailure || { };
+  if (!aNode) {
+    failure.value = this.NODE_NULL;
+    return false;
+  }
+  var parent = aNode.parentNode;
+  if (!parent) {
+    failure.value = this.NO_PARENT;
+    return false;
+  }
+  if (Array.indexOf(parent.childNodes, aNode) < 0) {
+    failure.value = this.NOT_EXPLICIT_CHILD;
+    return false;
+  }
+  return true;
+};
+
+cmdEditDelete.NODE_NULL = 1;
+cmdEditDelete.NO_PARENT = 2;
+cmdEditDelete.NOT_EXPLICIT_CHILD = 3;
 
 cmdEditDelete.prototype = new inBaseCommand(false);
+cmdEditDelete.prototype.constructor = cmdEditDelete;
 
-cmdEditDelete.prototype.node = null;
-cmdEditDelete.prototype.nextSibling = null;
-cmdEditDelete.prototype.parentNode = null;
+cmdEditDelete.prototype.nodes = null;
 
 cmdEditDelete.prototype.doTransaction = function Delete_DoTransaction()
 {
-  var node = this.node || viewer.selectedNode;
-  if (node) {
-    this.node = node;
-    this.nextSibling = node.nextSibling;
-    this.parentNode = node.parentNode;
-    var selectNode = this.nextSibling;
-    if (!selectNode) {
-      selectNode = node.previousSibling;
+  // Note that the "indexes" here refer to the given nodes' indexes in this
+  // instance's |nodes| array, not the row indexes of the view.
+  this.mDeletedIndexes = [];
+  for (let i = 0, n = this.nodes.length; i < n; ++i) {
+    let node = this.nodes[i];
+    let failure = {};
+    if (cmdEditDelete.isDeletable(node, failure)) {
+      try {
+        this.mParents[i].removeChild(node);
+        this.mDeletedIndexes.push(i);
+      }
+      catch (ex) {
+        Components.utils.reportError(node + " was expected to be deletable but isn't");
+      }
     }
-    if (!selectNode) {
-      selectNode = this.parentNode;
+    else {
+      let consoleMsg = node.toString();
+      switch (failure.value) {
+        case cmdEditDelete.NO_PARENT:
+          consoleMsg += " has no parent node and cannot be deleted.";
+          break;
+        case cmdEditDelete.NOT_EXPLICIT_CHILD:
+          consoleMsg += " is anonymous to its parent node and cannot be deleted.";
+          break;
+      }
+      this.logString(consoleMsg);
     }
-    viewer.showNodeInTree(selectNode);
-    node.parentNode.removeChild(node);
+  }
+};
+
+cmdEditDelete.prototype.logString = function Delete_LogString(aMessage)
+{
+  if (("mConsoleService" in this)) {
+    // This is not the first call.
+    if (this.mConsoleService) {
+      this.mConsoleService.logStringMessage(aMessage);
+    }
+    else {
+      dump(aMessage);
+    }
+  }
+  else {
+    try {
+      this.mConsoleService = XPCU.getService("@mozilla.org/consoleservice;1",
+                                             "nsIConsoleService");
+    }
+    catch (ex) {
+      // Null it out for the next call, so we can use our fallback.
+      this.mConsoleService = null;
+    }
+    this.logString(aMessage);
   }
 };
 
 cmdEditDelete.prototype.undoTransaction = function Delete_UndoTransaction()
 {
-  if (this.node) {
-    this.parentNode.insertBefore(this.node, this.nextSibling);
+  // Recall that since not all nodes in this.nodes are necessarily deletable,
+  // this.mDeletedIndexes is a list of indexes into this.nodes where the node
+  // at each index is one which was found to be deletable and was successfully
+  // removed.
+  for (let i = this.mDeletedIndexes.length - 1; i >= 0; --i) {
+    let idx = this.mDeletedIndexes[i];
+    try {
+      this.mParents[idx].insertBefore(this.nodes[idx], this.mSiblings[idx]); 
+    }
+    catch (ex) {
+      // XXX allow recovery from external manipulation
+      Components.utils.reportError("Couldn't undo deletion for node " +
+                                   this.nodes[idx]);
+    }
   }
-  viewer.showNodeInTree(this.node);
 };
 
 function cmdEditCut() {}
@@ -2098,4 +2434,8 @@ function gColumnRemoveListener(aIndex)
 function dumpDOM2(aNode)
 {
   dump(DOMViewer.prototype.toXML(aNode));
+}
+
+function stubImpl(aNode)
+{
 }
