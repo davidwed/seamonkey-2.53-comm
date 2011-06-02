@@ -12,6 +12,13 @@
     function inspectorWindowLoad()
     {
       setTimeout(initWindowMediator, 0);
+
+      // Hide the menuitem in the Tools menupopup, leaving only the item in
+      // the Web Developer popup.  XXX For compatibility with versions <6.
+      var legacyMenuItem = document.getElementById("menu_inspector");
+      if (legacyMenuItem && document.getElementById("menu_domInspector")) {
+        legacyMenuItem.parentNode.removeChild(legacyMenuItem);
+      }
     }
 
     function initWindowMediator()
@@ -38,11 +45,20 @@
          modifiers="accel,shift" command="Tasks:InspectPage"/>
   </keyset>
 
-  <!-- remove the conflicting Firefox 4 built-in Inspect key -->
+  <!-- Remove the conflicting built-in Inspect key.  XXX For compatibility
+       with version 4 only. -->
   <key id="key_inspect" removeelement="true"/>
 
+  <!-- XXX For compatibility with the versions <6. -->
   <menupopup id="menu_ToolsPopup">
     <menuitem id="menu_inspector" label="&inspectorTaskCmd.label;"
+              insertafter="javascriptConsole" key="key_inspectPage"
+              accesskey="&inspectorTaskCmd.accesskey.ff;"
+              command="Tasks:InspectPage"/>
+  </menupopup>
+
+  <menupopup id="menuWebDeveloperPopup">
+    <menuitem id="menu_domInspector" label="&inspectorTaskCmd.label;"
               insertafter="javascriptConsole" key="key_inspectPage"
               accesskey="&inspectorTaskCmd.accesskey.ff;"
               command="Tasks:InspectPage"/>
