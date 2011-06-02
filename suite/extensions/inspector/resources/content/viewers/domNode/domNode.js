@@ -177,7 +177,7 @@ DOMNodeViewer.prototype =
       case Node.CDATA_SECTION_NODE:
       case Node.COMMENT_NODE:
       case Node.PROCESSING_INSTRUCTION_NODE:
-        deck.setAttribute("selectedIndex", 1);
+        deck.selectedIndex = 1;
         var txb = document.getElementById("txbTextNodeValue").value =
                   aObject.nodeValue;
         break;
@@ -185,7 +185,7 @@ DOMNodeViewer.prototype =
       // document nodes, etc.
       default:
         var bundle = this.pane.panelset.stringBundle;
-        deck.setAttribute("selectedIndex", 0);
+        deck.selectedIndex = 0;
 
         this.setTextValue("localName", aObject.localName);
         this.setTextValue("nodeType", bundle.getString(aObject.nodeType));

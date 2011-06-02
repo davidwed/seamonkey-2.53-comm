@@ -134,9 +134,9 @@ FindDialog.prototype =
     // Remove the control attribute from the old panel.
     deck.selectedPanel.removeAttribute("control");
 
-    deck.setAttribute("selectedIndex", aIndex);
+    deck.selectedIndex = aIndex;
     // Add the control attribute to the new panel.
-    deck.selectedPanel.setAttribute("control", "tfText1");
+    deck.selectedPanel.control = "tfText1";
   },
 
   showRow2: function(aTruth)
