@@ -878,74 +878,7 @@ DOMViewer.prototype =
 
   toXML: function DVr_ToXML(aNode)
   {
-    // we'll use XML serializer, if available
-    if (typeof XMLSerializer != "undefined") {
-      return (new XMLSerializer()).serializeToString(aNode);
-    }
-    else {
-      return this._toXML(aNode, 0);
-    }
-  },
-
-  // not the most complete serialization ever conceived, but it'll do for now
-  _toXML: function DVr__toXML(aNode, aLevel)
-  {
-    if (!aNode) {
-      return "";
-    }
-
-    var s = "";
-    var indent = "";
-    for (var i = 0; i < aLevel; ++i) {
-      indent += "  ";
-    }
-    var line = indent;
-
-    if (aNode.nodeType == nsIDOMNode.ELEMENT_NODE) {
-      line += "<" + aNode.localName;
-
-      var attrIndent = "";
-      for (i = 0; i < line.length; ++i) {
-        attrIndent += " ";
-      }
-
-      for (i = 0; i < aNode.attributes.length; ++i) {
-        var a = aNode.attributes[i];
-        var attr = " " + a.localName + '="' +
-                   InsUtil.unicodeToEntity(a.nodeValue) + '"';
-        if (line.length + attr.length > 80) {
-          s += line + (i < aNode.attributes.length - 1 ?
-                         "\n" + attrIndent :
-                         "");
-          line = "";
-        }
-
-        line += attr;
-      }
-      s += line;
-
-      if (aNode.childNodes.length == 0) {
-        s += "/>\n";
-      }
-      else {
-        s += ">\n";
-        for (i = 0; i < aNode.childNodes.length; ++i) {
-          s += this._toXML(aNode.childNodes[i], aLevel + 1);
-        }
-        s += indent + "</" + aNode.localName + ">\n";
-      }
-    }
-    else if (aNode.nodeType == nsIDOMNode.TEXT_NODE) {
-      s += InsUtil.unicodeToEntity(aNode.data);
-    }
-    else if (aNode.nodeType == nsIDOMNode.COMMENT_NODE) {
-      s += line + "<!--" + InsUtil.unicodeToEntity(aNode.data) + "-->\n";
-    }
-    else if (aNode.nodeType == nsIDOMNode.DOCUMENT_NODE) {
-      s += this._toXML(aNode.documentElement);
-    }
-
-    return s;
+    return (new XMLSerializer()).serializeToString(aNode);
   },
 
   ////////////////////////////////////////////////////////////////////////////
