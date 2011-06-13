@@ -44,17 +44,17 @@
 *****************************************************************************/
 
 /**
- * Represents a CSS declaration.
+ * Represents a CSS property.
  * @param aProperty
- *        the property of the declaration
+ *        the name of the property
  * @param aValue
- *        the value of the declaration
+ *        the value of the property
  * @param aImportant
  *        boolean indicating whether this is !important
  */
-function CSSDeclaration(aProperty, aValue, aImportant)
+function CSSProperty(aProperty, aValue, aImportant)
 {
-  this.flavor = "inspector/css-declaration";
+  this.flavor = "inspector/css-property";
   this.delimiter = "\n";
   this.property = aProperty;
   this.value = aValue;
@@ -62,10 +62,10 @@ function CSSDeclaration(aProperty, aValue, aImportant)
 }
 
 /**
- * Returns a usable CSS string for the CSSDeclaration.
+ * Returns a usable CSS string for the CSSProperty.
  * @return a string in the form "property: value;"
  */
-CSSDeclaration.prototype.toString = function CSSD_ToString()
+CSSProperty.prototype.toString = function CSSProperty_ToString()
 {
   return this.property + ": " + this.value + (this.important ?
                                                 " !important" :

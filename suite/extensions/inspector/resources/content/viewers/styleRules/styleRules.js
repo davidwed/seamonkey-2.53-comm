@@ -633,30 +633,30 @@ StylePropsView.prototype.getCellText = function SPV_GetCellText(aRow, aCol)
 }
 
 /**
- * Returns a CSSDeclaration for the row in the tree corresponding to the
+ * Returns a CSSProperty for the row in the tree corresponding to the
  * passed index.
  * @param aIndex
  *        index of the row in the tree
- * @return a CSSDeclaration
+ * @return a CSSProperty
  */
 StylePropsView.prototype.getRowObjectFromIndex =
   function SPV_GetRowObjectFromIndex(aIndex)
 {
   var prop = this.mDec.item(aIndex);
-  return new CSSDeclaration(prop, this.mDec.getPropertyValue(prop),
-                            this.mDec.getPropertyPriority(prop));
+  return new CSSProperty(prop, this.mDec.getPropertyValue(prop),
+                         this.mDec.getPropertyPriority(prop));
 }
 
 /**
- * Handles inserting a CSS declaration
+ * Handles inserting a CSS property
  * @param aRule
- *        the rule that will contain the new declaration
+ *        the rule that will contain the new property
  * @param aProperty
- *        the property of the new declaration
+ *        the name of the new property
  * @param aValue
- *        the value of the new declaration
+ *        the value of the new property
  * @param aPriority
- *        the priority of the new declaration ("important" or "")
+ *        the priority of the new property ("important" or "")
  */
 function cmdEditInsert(aRule, aProperty, aValue, aPriority)
 {
@@ -686,16 +686,16 @@ cmdEditInsert.prototype.undoTransaction = function Insert_UndoTransaction()
 };
 
 /**
- * Handles deleting CSS declarations
+ * Handles deleting CSS properties
  * @param aRule
- *        the rule containing the declarations
- * @param aDeclarations
- *        an array of CSSDeclarations to delete
+ *        the rule containing the properties
+ * @param aProperties
+ *        an array of CSSPropertys to delete
  */
-function cmdEditDelete(aRule, aDeclarations)
+function cmdEditDelete(aRule, aProperties)
 {
   this.rule = aRule;
-  this.declarations = aDeclarations;
+  this.properties = aProperties;
 }
 
 cmdEditDelete.prototype = new inBaseCommand(false);
@@ -703,8 +703,8 @@ cmdEditDelete.prototype = new inBaseCommand(false);
 cmdEditDelete.prototype.doTransaction = function Delete_DoTransaction()
 {
   viewer.mPropsBoxObject.beginUpdateBatch();
-  for (let i = 0; i < this.declarations.length; i++) {
-    this.rule.removeProperty(this.declarations[i].property);
+  for (let i = 0; i < this.properties.length; i++) {
+    this.rule.removeProperty(this.properties[i].property);
   }
   viewer.mPropsBoxObject.endUpdateBatch();
 };
@@ -713,10 +713,10 @@ cmdEditDelete.prototype.undoTransaction = function Delete_UndoTransaction()
 {
   viewer.mPropsBoxObject.beginUpdateBatch();
   try {
-    for (let i = 0; i < this.declarations.length; i++) {
-      this.rule.setProperty(this.declarations[i].property,
-                            this.declarations[i].value,
-                            this.declarations[i].important ?
+    for (let i = 0; i < this.properties.length; i++) {
+      this.rule.setProperty(this.properties[i].property,
+                            this.properties[i].value,
+                            this.properties[i].important ?
                               "important" :
                               "");
     }
@@ -727,9 +727,9 @@ cmdEditDelete.prototype.undoTransaction = function Delete_UndoTransaction()
 };
 
 /**
- * Handles editing CSS declarations
+ * Handles editing CSS properties
  * @param aRule
- *        the rule containing the declaration
+ *        the rule containing the property
  * @param aProperty
  *        the property to change
  * @param aNewValue
@@ -766,14 +766,14 @@ cmdEditEdit.prototype.undoTransaction = function Edit_UndoTransaction()
 /**
  * Handles toggling CSS !important.
  * @param aRule
- *        the rule containing the declarations
- * @param aDeclarations
- *        an array of CSSDeclarations to toggle
+ *        the rule containing the properties
+ * @param aProperties
+ *        an array of CSSPropertys to toggle
  */
-function cmdTogglePriority(aRule, aDeclarations)
+function cmdTogglePriority(aRule, aProperties)
 {
   this.rule = aRule;
-  this.declarations = aDeclarations;
+  this.properties = aProperties;
 }
 
 cmdTogglePriority.prototype = new inBaseCommand(false);
@@ -781,13 +781,13 @@ cmdTogglePriority.prototype = new inBaseCommand(false);
 cmdTogglePriority.prototype.doTransaction =
   function TogglePriority_DoTransaction()
 {
-  for (let i = 0; i < this.declarations.length; i++) {
+  for (let i = 0; i < this.properties.length; i++) {
     // XXX bug 305761 means we can't make something not important, so
     // instead we'll delete this property and make a new one at the proper
     // priority.  This method also sucks because the property gets moved to
     // the bottom.
-    var property = this.declarations[i].property;
-    var value = this.declarations[i].value;
+    var property = this.properties[i].property;
+    var value = this.properties[i].value;
     var newPriority = this.rule.getPropertyPriority(property) == "" ?
                         "important" : "";
     this.rule.removeProperty(property);

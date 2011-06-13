@@ -166,14 +166,14 @@ function getCellText(aRow, aCol)
 }
 
 /**
-  * Returns a CSSDeclaration for the row in the tree corresponding to the
+  * Returns a CSSProperty for the row in the tree corresponding to the
   * passed index.
   * @param aIndex index of the row in the tree
-  * @return a CSSDeclaration
+  * @return a CSSProperty
   */
 ComputedStyleView.prototype.getRowObjectFromIndex = 
 function getRowObjectFromIndex(aIndex)
 {
   var prop = this.mStyleList.item(aIndex);
-  return new CSSDeclaration(prop, this.mStyleList.getPropertyValue(prop));
+  return new CSSProperty(prop, this.mStyleList.getPropertyValue(prop));
 }
