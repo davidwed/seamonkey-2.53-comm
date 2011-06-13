@@ -61,6 +61,8 @@
           src="chrome://inspector/content/jsutil/events/ObserverManager.js"/>
   <script type="application/javascript"
           src="chrome://inspector/content/jsutil/commands/baseCommands.js"/>
+  <script type="application/javascript"
+          src="chrome://inspector/content/jsutil/system/clipboardFlavors.js"/>
 
   <commandset id="cmdsEditing"/>
 

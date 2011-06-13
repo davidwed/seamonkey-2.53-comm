@@ -57,6 +57,7 @@ inspector.jar:
   content/inspector/jsutil/system/DiskSearch.js                         (resources/content/jsutil/system/DiskSearch.js)
   content/inspector/jsutil/system/FilePickerUtils.js                    (resources/content/jsutil/system/FilePickerUtils.js)
   content/inspector/jsutil/system/PrefUtils.js                          (resources/content/jsutil/system/PrefUtils.js)
+  content/inspector/jsutil/system/clipboardFlavors.js                   (resources/content/jsutil/system/clipboardFlavors.js)
   content/inspector/jsutil/xpcom/XPCU.js                                (resources/content/jsutil/xpcom/XPCU.js)
   content/inspector/jsutil/xul/DNDUtils.js                              (resources/content/jsutil/xul/DNDUtils.js)
   content/inspector/jsutil/xul/FrameExchange.js                         (resources/content/jsutil/xul/FrameExchange.js)
