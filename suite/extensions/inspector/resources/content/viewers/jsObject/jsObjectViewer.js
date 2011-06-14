@@ -92,12 +92,20 @@ JSObjectViewer.prototype =
 
   set subject(aObject)
   {
+    this.setSubject(aObject);
+  },
+
+  // The accessibleObject viewer extends JSObjectViewer.  This method is here
+  // (and not just inlined above) so that the accessibleObject viewer can get
+  // access to this function without having to use __lookupSetter__ before
+  // overriding with its own subject setter.
+  setSubject: function JSOVr_SetSubject(aObject)
+  {
     aObject = this.unwrapObject(aObject);
     this.mSubject = aObject;
-    this.emptyTree(this.mTreeKids);
-    var ti = this.addTreeItem(this.mTreeKids, bundle.getString("root.title"),
-                              aObject, aObject);
-    ti.setAttribute("open", "true");
+    this.mView = new JSObjectView(aObject);
+    this.mView.toggleOpenState(0);
+    this.mTree.view = this.mView;
 
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
@@ -106,7 +114,6 @@ JSObjectViewer.prototype =
   {
     this.mPane = aPane;
     this.mTree = document.getElementById("treeJSObject");
-    this.mTreeKids = document.getElementById("trchJSObject");
 
     aPane.notifyViewerReady(this);
   },
@@ -120,11 +127,13 @@ JSObjectViewer.prototype =
     switch (aCommand) {
       case "cmdCopyValue":
       case "cmdEvalExpr":
-        return this.mTree.view.selection.count == 1;
+        return this.getSelectedCount() == 1;
       case "cmdEditInspectInNewWindow":
-        let item = getSelectedItem();
-        return !!item &&
-               cmdEditInspectInNewWindowBase.isInspectable(item.__JSValue__);
+        if (this.getSelectedCount() != 1) {
+          return false;
+        }
+        let obj = this.getSelectedObject();
+        return cmdEditInspectInNewWindowBase.isInspectable(obj);
     }
     return false;
   },
@@ -155,34 +164,34 @@ JSObjectViewer.prototype =
 
   cmdCopyValue: function JSOVr_CmdCopyValue()
   {
-    var sel = getSelectedItem();
-    if (sel) {
-      var val = sel.__JSValue__;
-      if (val) {
-        var helper = XPCU.getService(kClipboardHelperCID,
-                                     "nsIClipboardHelper");
-        helper.copyString(val);
-      }
+    if (this.getSelectedCount() != 1) {
+      return;
     }
+
+    var obj = this.getSelectedObject();
+    var helper = XPCU.getService(kClipboardHelperCID, "nsIClipboardHelper");
+    helper.copyString(obj);
   },
 
   cmdEvalExpr: function JSOVr_CmdEvalExpr()
   {
-    var sel = getSelectedItem();
-    if (sel) {
-      var win = openDialog("chrome://inspector/content/viewers/jsObject/evalExprDialog.xul",
-                           "_blank", "chrome", this, sel);
+    if (this.getSelectedCount() != 1) {
+      return;
     }
+
+    var obj = this.getSelectedObject();
+    openDialog("chrome://inspector/content/viewers/jsObject/evalExprDialog.xul",
+               "_blank", "chrome", this, obj);
   },
 
-  doEvalExpr: function JSOVr_DoEvalExpr(aExpr, aItem, aNewView)
+  doEvalExpr: function JSOVr_DoEvalExpr(aExpr, aTarget, aNewView)
   {
     // TODO: I should really write some C++ code to execute the js code in the
     // js context of the inspected window
 
     try {
       var f = Function("target", aExpr);
-      var result = f(aItem.__JSValue__);
+      var result = f(aTarget);
 
       if (result) {
         if (aNewView) {
@@ -197,6 +206,19 @@ JSObjectViewer.prototype =
       dump("Error in expression.\n");
       throw (ex);
     }
+  },
+
+  getSelectedCount: function JSOVr_GetSelectedCount()
+  {
+    return this.mView.selection.count;
+  },
+
+  getSelectedObject: function JSOVr_GetSelectedObject()
+  {
+    if (this.getSelectedCount() != 1) {
+      throw new Error("Selection count not 1");
+    }
+    return this.mView.getSelectedRowObjects()[0];
   },
 
   onTreeSelectionChange: function JSOVr_OnTreeSelectionChange()
@@ -218,162 +240,6 @@ JSObjectViewer.prototype =
   },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// Tree Construction
-
-  emptyTree: function JSOVr_EmptyTree(aTreeKids)
-  {
-    while (aTreeKids.hasChildNodes()) {
-      aTreeKids.removeChild(aTreeKids.lastChild);
-    }
-  },
-
-  buildPropertyTree: function JSOVr_BuildPropertyTree(aTreeChildren, aObject)
-  {
-    // sort the properties
-    var propertyNames = [];
-    for (let prop in aObject) {
-      propertyNames.push(prop);
-    }
-
-
-   /**
-    * A sorter for numeric values. Numerics come before non-numerics. If both
-    * parameters are non-numeric, returns 0.
-    *
-    * @param a
-    *        One value to compare.
-    * @param b
-    *        The other value to compare against a.
-    * @return -1 if a should come before b, 1 if b should come before a, or 0
-    *         if they are equal
-    */
-    function sortNumeric(a, b) {
-      if (isNaN(a)) {
-        return isNaN(b) ? 0 : 1;
-      }
-      if (isNaN(b)) {
-        return -1;
-      }
-      return a - b;
-    }
-
-   /**
-    * A sorter for the JavaScript object property names. Sort order: constants
-    * with numeric values sorted numerically by value then alphanumerically
-    * by name, all other constants sorted alphanumerically by name, non-
-    * constants with numeric names sorted numerically by name (ex: array
-    * indices), all other non-constants sorted alphanumerically by name.
-    *
-    * @param a
-    *        One name to compare.
-    * @param b
-    *        The other name to compare against a.
-    * @return -1 if a should come before b, 1 if b should come before a, 0 if
-    *         they are equal
-    */
-    function sortFunction(a, b) {
-      // assume capitalized non-numeric property names are constants
-      var aIsConstant = a == a.toUpperCase() && isNaN(a);
-      var bIsConstant = b == b.toUpperCase() && isNaN(b);
-      // constants come first
-      if (aIsConstant) {
-        if (bIsConstant) {
-          // both are constants. sort by numeric value, then non-numeric name
-          return sortNumeric(aObject[a], aObject[b]) || a.localeCompare(b);
-        }
-        // a is constant, b is not
-        return -1;
-      }
-      if (bIsConstant) {
-        // b is constant, a is not
-        return 1;
-      }
-      // neither are constants. go by numeric property name, then non-numeric
-      // property name
-      return sortNumeric(a, b) || a.localeCompare(b);
-    }
-    propertyNames.sort(sortFunction);
-
-    // load them into the tree
-    for (let i = 0; i < propertyNames.length; i++) {
-      try {
-        this.addTreeItem(aTreeChildren, propertyNames[i],
-                         this.unwrapObject(aObject[propertyNames[i]]),
-                         aObject);
-      }
-      catch (ex) {
-        // hide unsightly NOT YET IMPLEMENTED errors when accessing certain
-        // properties
-      }
-    }
-  },
-
-  addTreeItem:
-    function JSOVr_AddTreeItem(aTreeChildren, aName, aValue, aObject)
-  {
-    var ti = document.createElement("treeitem");
-    ti.__JSObject__ = aObject;
-    ti.__JSValue__ = aValue;
-
-    var value;
-    if (aValue === null) {
-      value = "(null)";
-    }
-    else if (aValue === undefined) {
-      value = "(undefined)";
-    }
-    else {
-      try {
-        value = aValue.toString();
-        value = value.replace(/\n|\r|\t|\v/g, " ");
-      }
-      catch (ex) {
-        value = "";
-      }
-    }
-
-    ti.setAttribute("typeOf", typeof(aValue));
-
-    if (typeof(aValue) == "object" && aValue !== null) {
-      ti.setAttribute("container", "true");
-    }
-    else if (typeof(aValue) == "string") {
-      value = "\"" + value + "\"";
-    }
-
-    var tr = document.createElement("treerow");
-    ti.appendChild(tr);
-
-    var tc = document.createElement("treecell");
-    tc.setAttribute("label", aName);
-    tr.appendChild(tc);
-    tc = document.createElement("treecell");
-    tc.setAttribute("label", value);
-    if (aValue === null) {
-      tc.setAttribute("class", "inspector-null-value-treecell");
-    }
-    tr.appendChild(tc);
-
-    aTreeChildren.appendChild(ti);
-
-    // listen for changes to open attribute
-    this.mTreeKids.addEventListener("DOMAttrModified", onTreeItemAttrModified,
-                                    false);
-
-    return ti;
-  },
-
-  openTreeItem: function JSOVr_OpenTreeItem(aItem)
-  {
-    var treechildren = aItem.getElementsByTagName("treechildren").item(0);
-    if (!treechildren) {
-      treechildren = document.createElement("treechildren");
-      this.buildPropertyTree(treechildren, aItem.__JSValue__);
-      aItem.appendChild(treechildren);
-    }
-  },
-
-  ////////////////////////////////////////////////////////////////////////////
   //// Miscellaneous Utility Methods
 
   unwrapObject: function JSOVr_UnwrapObject(aObject)
@@ -387,31 +253,358 @@ JSObjectViewer.prototype =
   }
 };
 
-function onTreeItemAttrModified(aEvent)
+//////////////////////////////////////////////////////////////////////////////
+//// JSObjectView
+
+function JSObjectView(aObject)
 {
-  if (aEvent.attrName == "open") {
-    viewer.openTreeItem(aEvent.target);
-  }
+  this.mKeys = [bundle.getString("root.title")];
+  this.mValues = [aObject];
+  this.mValueStrings = [this.jsValueToString(aObject)];
+
+  this.mLevels = [0];
+  this.mOpenStates = [false];
+
+  this.mRowCount = 1;
 }
 
-function getSelectedItem()
+JSObjectView.prototype = new inBaseTreeView();
+
+JSObjectView.prototype.mLevels = null;
+JSObjectView.prototype.mValues = null;
+JSObjectView.prototype.mValueStrings = null;
+JSObjectView.prototype.mLevels = null;
+JSObjectView.prototype.mOpenStates = null;
+
+JSObjectView.prototype.jsValueToString = function JSOV_JSValueToString(aVal)
 {
-  var tree = document.getElementById("treeJSObject");
-  if (tree.view.selection.count == 1) {
-    let minAndMax = {};
-    tree.view.selection.getRangeAt(0, minAndMax, minAndMax);
-    return tree.contentView.getItemAtIndex(minAndMax.value);
+  var str;
+  try {
+    str = String(aVal);
   }
-  return null;    
+  catch (ex) {
+    str = Object.prototype.toString.call(aVal);
+  }
+
+  if (typeof(aVal) == "string") {
+    str = "\"" + str + "\"";
+  }
+
+  return str;
+};
+
+/**
+ * Sort the keys for an object into the following order:
+ * - constants with numeric values sorted numerically by value
+ *   - sorted alphanumerically by key in the event of a tie
+ * - constants with non-numeric values sorted alphanumerically by key
+ * - other numeric key names (e.g., array indices) sorted numerically
+ * - other key names sorted alphanumerically
+ * @param aObject
+ *        The object whose keys we're sorting.
+ * @param aKeys
+ *        The list of property names of aObject being sorted.
+ */
+JSObjectView.prototype.sortKeys = function JSOV_SortKeys(aObject, aKeys)
+{
+  /**
+   * A sort comparator for numeric values. Numerics come before non-numerics.
+   * If both parameters are non-numeric, returns 0.
+   */
+  var numericSortComparator =
+    function JSOV_SortKeys_NumericSortComparator(a, b)
+  {
+    if (isNaN(a)) {
+      return isNaN(b) ? 0 : 1;
+    }
+    if (isNaN(b)) {
+      return -1;
+    }
+    return a - b;
+  };
+
+  var keySortComparator = function JSOV_SortKeys_KeySortComparator(a, b)
+  {
+    var aIsConstant = a == a.toUpperCase() && isNaN(a);
+    var bIsConstant = b == b.toUpperCase() && isNaN(b);
+    // constants come first
+    if (aIsConstant) {
+      if (bIsConstant) {
+        // both are constants. sort by numeric value, then non-numeric name
+        return numericSortComparator(aObject[a], aObject[b]) ||
+               a.localeCompare(b);
+      }
+      // a is constant, b is not
+      return -1;
+    }
+    if (bIsConstant) {
+      // b is constant, a is not
+      return 1;
+    }
+    // neither are constants. go by numeric property name, then non-numeric
+    // property name
+    return numericSortComparator(a, b) || a.localeCompare(b);
+  };
+
+  aKeys.sort(keySortComparator);
+};
+
+/**
+ * Get the number of rows that are descendants of the given row.
+ * @param aIndex
+ *        The index of the row.
+ * @return The number of descendants, as above.
+ */
+JSObjectView.prototype.getDescendantCount =
+  function JSOV_GetDescendantCount(aIndex)
+{
+  if (this.checkForBadIndex(aIndex)) {
+    return 0;
+  }
+
+  var level = this.mLevels[aIndex];
+  var currentIndex = aIndex + 1;
+  var rowCount = this.mRowCount;
+  while (this.mLevels[currentIndex] > level && currentIndex < rowCount) {
+    ++currentIndex;
+  }
+
+  return currentIndex - aIndex - 1;
+};
+
+JSObjectView.prototype.getRowObjectFromIndex =
+  function JSOV_GetRowObjectFromIndex(aIndex)
+{
+  if (this.checkForBadIndex(aIndex)) {
+    throw new RangeError("Invalid index " + aIndex);
+  }
+
+  return this.mValues[aIndex];
 }
 
-function toggleItem(aItem)
+JSObjectView.prototype.collapseRow = function JSOV_CollapseRow(aIndex)
 {
-  var tree = document.getElementById("treeJSObject");
-  var row = tree.currentView.getIndexOfItem(aItem);
-  if (row >= 0) {
-    tree.view.toggleOpenState(row);
+  var rowsDeleted = this.getDescendantCount(aIndex);
+  if (rowsDeleted) {
+    let after = aIndex + 1;
+    this.mKeys.splice(after, rowsDeleted);
+    this.mValues.splice(after, rowsDeleted);
+    this.mValueStrings.splice(after, rowsDeleted);
+    this.mOpenStates.splice(after, rowsDeleted);
+    this.mLevels.splice(after, rowsDeleted);
   }
+  return rowsDeleted;
+};
+
+JSObjectView.prototype.expandRow = function JSOV_ExpandRow(aIndex)
+{
+  var insertedKeys = [];
+  var insertedValues = [];
+  var insertedValueStrings = [];
+  var insertedOpenStates = [];
+  var insertedLevels = [];
+
+  // Get the new keys.
+  var obj = this.mValues[aIndex];
+  for (let key in obj) {
+    // Not pretty, but we need some way to weed out properties that throw.
+    // It's not as simple as just going ahead and caching the values now,
+    // because when we sort the keys, we'd lose the correspondence between
+    // array indices.
+    try {
+      let val = obj[key];
+      insertedKeys.push(key);
+    }
+    catch (ex) {
+      // Faked properties throw NOT_YET_IMPLEMENTED.  Discard them.
+    }
+  }
+  this.sortKeys(obj, insertedKeys);
+
+  // Get the new data.
+  var rowsInserted = insertedKeys.length;
+  var level = this.mLevels[aIndex] + 1;
+  for (let i = 0; i < rowsInserted; ++i) {
+    let val = viewer.unwrapObject(obj[insertedKeys[i]]);
+    insertedValues.push(val);
+    insertedValueStrings.push(this.jsValueToString(val));
+    insertedOpenStates.push(false);
+    insertedLevels.push(level);
+  }
+
+  // Splice in everything.
+  var after = aIndex + 1;
+  this.spliceFrom(this.mKeys, after, insertedKeys);
+  this.spliceFrom(this.mValues, after, insertedValues);
+  this.spliceFrom(this.mValueStrings, after, insertedValueStrings);
+  this.spliceFrom(this.mOpenStates, after, insertedOpenStates);
+  this.spliceFrom(this.mLevels, after, insertedLevels);
+
+  return rowsInserted;
+};
+
+/**
+ * Splice elements copied from one array into another at the given index.
+ * There is no way to specify that any elements should be removed.
+ * @param aDestination
+ *        The array the data should be spliced into.
+ * @param aIndex
+ *        The index into aDestination that the data should be copied to.
+ * @param aSource
+ *        The array that should be copied into aDestination at aIndex.
+ */
+JSObjectView.prototype.spliceFrom =
+  function JSOV_SpliceFrom(aDestination, aIndex, aSource)
+{
+  Array.prototype.splice.apply(aDestination, ([aIndex, 0]).concat(aSource));
+};
+
+/**
+ * Check if the purported row is outside the range of valid row indexes.
+ * @param aIndex
+ *        The index of the given row.
+ * @return true iff aIndex is outside the range
+ */
+JSObjectView.prototype.checkForBadIndex =
+  function JSOV_CheckForBadIndex(aIndex)
+{
+  if (aIndex < 0 || aIndex >= this.mRowCount) {
+    Components.utils.reportError("Bad index");
+    return true;
+  }
+
+  return false;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//// JSObjectView nsITreeView Implementation
+
+JSObjectView.prototype.toggleOpenState = function JSOV_ToggleOpenState(aIndex)
+{
+  if (this.checkForBadIndex(aIndex) || this.isContainerEmpty(aIndex)) {
+    return;
+  }
+
+  var rowCountChange = 0;
+  var isOpen = this.mOpenStates[aIndex];
+  if (isOpen) {
+    rowCountChange = -this.collapseRow(aIndex);
+  }
+  else {
+    rowCountChange = this.expandRow(aIndex);
+  }
+  this.mOpenStates[aIndex] = !isOpen;
+
+  this.mRowCount += rowCountChange;
+
+  // Notify the box object.
+  var bo = this.mTree;
+  if (bo) {
+    bo.rowCountChanged(aIndex + 1, rowCountChange);
+    bo.invalidateRow(aIndex);
+  }
+};
+
+JSObjectView.prototype.getCellText = function JSOV_GetCellText(aIndex, aCol)
+{
+  if (this.checkForBadIndex(aIndex)) {
+    return "";
+  }
+
+  switch (aCol.id) {
+    case "colProp":
+      return this.mKeys[aIndex];
+    case "colVal":
+      return this.mValueStrings[aIndex];
+  }
+  return "";
+};
+
+JSObjectView.prototype.getParentIndex = function JSOV_GetParentIndex(aIndex)
+{
+  if (this.checkForBadIndex(aIndex) || aIndex == 0) {
+    return -1;
+  }
+
+  var parentLevel = this.mLevels[aIndex] - 1;
+  for (let i = aIndex - 1; i >= 0; --i) {
+    if (this.mLevels[i] == parentLevel) {
+      return i;
+    }
+  }
+
+  Components.utils.reportError("Unrooted rows present");
+  return -1;
+};
+
+JSObjectView.prototype.hasNextSibling =
+  function JSOV_HasNextSibling(aIndex, aAfterIndex)
+{
+  if (this.checkForBadIndex(aIndex)) {
+    return false;
+  }
+
+  var level = this.mLevels[aIndex];
+  for (let i = aAfterIndex + 1, n = this.mRowCount; i < n; ++i) {
+    if (this.mLevels[i] == level) {
+      return true;
+    }
+    if (this.mLevels[i] < level) {
+      break;
+    }
+  }
+
+  return false;
+};
+
+JSObjectView.prototype.getLevel = function JSOV_GetLevel(aIndex)
+{
+  if (this.checkForBadIndex(aIndex)) {
+    return -1;
+  }
+
+  return this.mLevels[aIndex];
+};
+
+JSObjectView.prototype.isContainer = function JSOV_IsContainer(aIndex)
+{
+  if (this.checkForBadIndex(aIndex)) {
+    return false;
+  }
+
+  var val = this.mValues[aIndex];
+  switch (typeof(val)) {
+    case "object":
+    case "function":
+      // Not necessarily non-empty, but containers nonetheless.
+      return true;
+  }
+
+  return false;
+};
+
+JSObjectView.prototype.isContainerEmpty =
+  function JSOV_IsContainerEmpty(aIndex)
+{
+  if (!this.isContainer(aIndex)) {
+    return false;
+  }
+
+  var val = this.mValues[aIndex];
+  for (let key in val) {
+    return false;
+  }
+
+  return true;
+};
+
+JSObjectView.prototype.isContainerOpen = function JSOV_IsContainerOpen(aIndex)
+{
+  if (!this.isContainer(aIndex)) {
+    return false;
+  }
+
+  return this.mOpenStates[aIndex];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -419,8 +612,9 @@ function toggleItem(aItem)
 
 function cmdEditInspectInNewWindow()
 {
-  var selected = getSelectedItem();
-  this.mObject = selected && selected.__JSValue__;
+  if (viewer.getSelectedCount() == 1) {
+    this.mObject = viewer.getSelectedObject();
+  }
 }
 
 cmdEditInspectInNewWindow.prototype = new cmdEditInspectInNewWindowBase();

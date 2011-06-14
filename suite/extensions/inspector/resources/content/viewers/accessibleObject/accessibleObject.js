@@ -100,15 +100,7 @@ function AccessibleObjectViewer_initialize()
         }
       }
 
-      this.mSubject = accObject;
-      this.emptyTree(this.mTreeKids);
-      var ti = this.addTreeItem(this.mTreeKids,
-                                bundle.getString("root.title"),
-                                accObject,
-                                accObject);
-      ti.setAttribute("open", "true");
-
-      this.mObsMan.dispatchEvent("subjectChange", { subject: accObject });
+      this.setSubject(accObject);
     }
    );
 
