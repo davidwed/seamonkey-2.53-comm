@@ -104,10 +104,15 @@ JSObjectViewer.prototype =
     aObject = this.unwrapObject(aObject);
     this.mSubject = aObject;
     this.mView = new JSObjectView(aObject);
-    this.mView.toggleOpenState(0);
     this.mTree.view = this.mView;
 
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+
+    // If the user has just switched to us from another viewer in the document
+    // pane and we don't set the selection below, the object pane will
+    // continue to show whatever now-irrelevant thing it was showing before.
+    this.mView.selection.select(0);
+    this.mView.toggleOpenState(0);
   },
 
   initialize: function JSOVr_Initialize(aPane)
@@ -222,6 +227,36 @@ JSObjectViewer.prototype =
   },
 
   onTreeSelectionChange: function JSOVr_OnTreeSelectionChange()
+  {
+    // NB: This function gets called on selection *and* deselection.
+    var view = this.mView;
+    var currentIndex = view.selection.currentIndex;
+    var currentValue = view.getRowObjectFromIndex(currentIndex);
+
+    if (view.selection.isSelected(currentIndex)) {
+      this.changeSelection(currentValue);
+    }
+    // Otherwise, the row at currentIndex was deselected.  If there are other
+    // rows selected, use the nearest one for mSelection.  If not, we'll leave
+    // mSelection alone and won't dispatch any event; if there's an object
+    // panel linked to ours, just let it keep inspecting the value from the
+    // deselected row.
+    else if (this.mSelection == currentValue && view.selection.count) {
+      var nearestSelectedIndex = 
+        InsUtil.getNearestIndex(currentIndex, view.getSelectedIndices());
+      this.changeSelection(view.getRowObjectFromIndex(nearestSelectedIndex));
+    }
+
+    this.updateAllCommands();
+  },
+
+  changeSelection: function JSOVr_ChangeSelection(aVal)
+  {
+    this.mSelection = aVal;
+    this.mObsMan.dispatchEvent("selectionChange", { selection: aVal });
+  },
+
+  updateAllCommands: function JSOVr_UpdateAllCommands()
   {
     this.pane.panelset.updateAllCommands();
 

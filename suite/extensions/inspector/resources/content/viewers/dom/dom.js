@@ -668,7 +668,7 @@ DOMViewer.prototype =
              this.mDOMTree.view.selection.count) {
       // Find closest nearby selected node and use that.
       var nearestSelectedIndex =
-        this.getNearestIndex(currentIndex, this.getSelectedIndexes());
+        InsUtil.getNearestIndex(currentIndex, this.getSelectedIndexes());
       this.changeSelection(this.getNodeFromRowIndex(nearestSelectedIndex));
     }
 
@@ -695,65 +695,6 @@ DOMViewer.prototype =
         this.flashElement(this.mSelection, true);
       }
     }
-  },
-
-  /**
-   * Determine which from a list of indexes is nearest to the given index.
-   * @param aIndex
-   *        The index to search for.
-   * @param aIndexList
-   *        A sorted list of indexes to be searched.
-   * @return The index in the list closest to aIndex.  This will be aIndex
-   *         itself if it appears in the list, or -1 if the list is empty.
-   * @note
-   */
-  getNearestIndex: function DVr_GetNearestIndex(aIndex, aIndexList)
-  {
-    // Four easy cases:
-    //  - empty list
-    //  - single element list
-    //  - given index comes before the first element
-    //  - given index comes after the last element
-    if (aIndexList.length == 0) {
-      return -1;
-    }
-    var first = aIndexList[0];
-    if (aIndexList.length == 1 || aIndex <= first) {
-      return first;
-    }
-    var high = aIndexList.length - 1;
-    var last = aIndexList[high];
-    if (aIndex >= last) {
-      return last;
-    }
-  
-    var mid, low = 0;
-    while (low <= high) {
-      mid = low + Math.floor((high - low) / 2);
-      let current = aIndexList[mid];
-      if (aIndex > current) {
-        low = mid + 1;
-      }
-      else if (aIndex < current) {
-        high = mid - 1;
-      }
-      else {
-        return aIndex;
-      }
-    }
-  
-    // By handling the four easy cases above, we eliminated the possibility
-    // that low or high will be out of bounds at this point.  If aIndex had
-    // been present, it would have been sandwiched between these two values:
-    var previous = aIndexList[high];
-    var next = aIndexList[low];
-  
-    if ((aIndex - previous) < (next - aIndex)) {
-      return previous;
-    }
-    // Even if previous and next are equidistant to aIndex's position, we'll
-    // go with the one that's greater.
-    return next;
   },
 
   setInitialSelection: function DVr_SetInitialSelection(aObject)
@@ -1192,7 +1133,7 @@ DOMViewer.prototype =
     if (this.isIgnorableNode(viewerSelection)) {
       let idx = this.getRowIndexFromNode(viewerSelection);
       let nearestNonIgnorableSelectedIndex =
-        this.getNearestIndex(idx, nonIgnorableSelectedIndexes);
+        InsUtil.getNearestIndex(idx, nonIgnorableSelectedIndexes);
       viewerSelection =
         this.getNodeFromRowIndex(nearestNonIgnorableSelectedIndex);
     }
