@@ -36,21 +36,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/***************************************************************
-* ComputedStyleViewer --------------------------------------------
-*  The viewer for the computed css styles on a DOM element.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+/*****************************************************************************
+* ComputedStyleViewer --------------------------------------------------------
+*  The viewer for the computed CSS styles on a DOM element.
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   chrome://inspector/content/jsutil/xpcom/XPCU.js
-****************************************************************/
+*   chrome://inspector/content/events/ObserverManager.js
+*   chrome://inspector/content/commands/baseCommands.js
+*   chrome://inspector/content/system/clipboardFlavors.js
+*   chrome://inspector/content/xul/inBaseTreeView.js
+*****************************************************************************/
 
-//////////// global variables /////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//// Global Variables
 
 var viewer;
 
-//////////// global constants ////////////////////
-
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 window.addEventListener("load", ComputedStyleViewer_initialize, false);
 
@@ -60,63 +63,74 @@ function ComputedStyleViewer_initialize()
   viewer.initialize(parent.FrameExchange.receiveData(window));
 }
 
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //// class ComputedStyleViewer
 
 function ComputedStyleViewer()
 {
   this.mObsMan = new ObserverManager(this);
   this.mURL = window.location;
-  
+
   this.mTree = document.getElementById("olStyles");
 }
 
 //XXX Don't use anonymous functions
-ComputedStyleViewer.prototype = 
+ComputedStyleViewer.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
-  
+
   mSubject: null,
   mPane: null,
 
   ////////////////////////////////////////////////////////////////////////////
   //// interface inIViewer
 
-  get uid() { return "computedStyle" },
-  get pane() { return this.mPane },
+  get uid()
+  {
+    return "computedStyle";
+  },
 
-  get subject() { return this.mSubject },
-  set subject(aObject) 
+  get pane()
+  {
+    return this.mPane;
+  },
+
+  get subject()
+  {
+    return this.mSubject;
+  },
+
+  set subject(aObject)
   {
     this.mTreeView = new ComputedStyleView(aObject);
     this.mTree.view = this.mTreeView;
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
-  initialize: function(aPane)
+  initialize: function CSVr_Initialize(aPane)
   {
     this.mPane = aPane;
     aPane.notifyViewerReady(this);
   },
 
-  destroy: function()
+  destroy: function CSVr_Destroy()
   {
-    // We need to remove the view at this time or else it will attempt to 
-    // re-paint while the document is being deconstructed, resulting in
-    // some nasty XPConnect assertions
+    // We need to remove the view at this time or else it will attempt to
+    // re-paint while the document is being deconstructed, resulting in some
+    // nasty XPConnect assertions
     this.mTree.view = null;
   },
 
-  isCommandEnabled: function(aCommand)
+  isCommandEnabled: function CSVr_IsCommandEnabled(aCommand)
   {
     if (aCommand == "cmdEditCopy") {
       return this.mTree.view.selection.count > 0;
     }
     return false;
   },
-  
-  getCommand: function(aCommand)
+
+  getCommand: function CSVr_GetCommand(aCommand)
   {
     if (aCommand == "cmdEditCopy") {
       return new cmdEditCopy(this.mTreeView.getSelectedRowObjects());
@@ -127,13 +141,20 @@ ComputedStyleViewer.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// event dispatching
 
-  addObserver: function(aEvent, aObserver) { this.mObsMan.addObserver(aEvent, aObserver); },
-  removeObserver: function(aEvent, aObserver) { this.mObsMan.removeObserver(aEvent, aObserver); },
+  addObserver: function CSVr_AddObserver(aEvent, aObserver)
+  {
+    this.mObsMan.addObserver(aEvent, aObserver);
+  },
+
+  removeObserver: function CSVr_RemoveObserver(aEvent, aObserver)
+  {
+    this.mObsMan.removeObserver(aEvent, aObserver);
+  },
 
   ////////////////////////////////////////////////////////////////////////////
-  //// stuff
+  //// Miscellaneous
 
-  onItemSelected: function()
+  onItemSelected: function CSVr_OnItemSelected()
   {
     // This will (eventually) call isCommandEnabled on Copy
     viewer.pane.panelset.updateAllCommands();
@@ -152,27 +173,28 @@ function ComputedStyleView(aObject)
 
 ComputedStyleView.prototype = new inBaseTreeView();
 
-ComputedStyleView.prototype.getCellText = 
-function getCellText(aRow, aCol) 
+ComputedStyleView.prototype.getCellText = function CSV_GetCellText(aRow, aCol)
 {
   var prop = this.mStyleList.item(aRow);
   if (aCol.id == "olcStyleName") {
     return prop;
-  } else if (aCol.id == "olcStyleValue") {
+  }
+  else if (aCol.id == "olcStyleValue") {
     return this.mStyleList.getPropertyValue(prop);
   }
-  
+
   return null;
 }
 
 /**
-  * Returns a CSSProperty for the row in the tree corresponding to the
-  * passed index.
-  * @param aIndex index of the row in the tree
+  * Returns a CSSProperty for the row in the tree corresponding to the passed
+  * index.
+  * @param aIndex
+  *        index of the row in the tree
   * @return a CSSProperty
   */
-ComputedStyleView.prototype.getRowObjectFromIndex = 
-function getRowObjectFromIndex(aIndex)
+ComputedStyleView.prototype.getRowObjectFromIndex =
+  function CSV_GetRowObjectFromIndex(aIndex)
 {
   var prop = this.mStyleList.item(aIndex);
   return new CSSProperty(prop, this.mStyleList.getPropertyValue(prop));
