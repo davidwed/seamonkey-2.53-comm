@@ -516,7 +516,7 @@ JSObjectView.prototype.checkForBadIndex =
 
 JSObjectView.prototype.toggleOpenState = function JSOV_ToggleOpenState(aIndex)
 {
-  if (this.checkForBadIndex(aIndex) || this.isContainerEmpty(aIndex)) {
+  if (this.isContainerEmpty(aIndex)) {
     return;
   }
 
@@ -607,22 +607,14 @@ JSObjectView.prototype.isContainer = function JSOV_IsContainer(aIndex)
     return false;
   }
 
-  var val = this.mValues[aIndex];
-  switch (typeof(val)) {
-    case "object":
-    case "function":
-      // Not necessarily non-empty, but containers nonetheless.
-      return true;
-  }
-
-  return false;
+  return cmdEditInspectInNewWindowBase.isInspectable(this.mValues[aIndex]);
 };
 
 JSObjectView.prototype.isContainerEmpty =
   function JSOV_IsContainerEmpty(aIndex)
 {
   if (!this.isContainer(aIndex)) {
-    return false;
+    return true;
   }
 
   var val = this.mValues[aIndex];
