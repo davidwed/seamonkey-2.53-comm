@@ -103,8 +103,35 @@ ComputedStyleViewer.prototype =
 
   set subject(aObject)
   {
+    var bo = this.mTree.treeBoxObject;
+    var firstVisibleRow = -1;
+    var selectedIndices;
+    var currentIndex;
+    if (this.mTreeView) {
+      firstVisibleRow = bo.getFirstVisibleRow();
+      selectedIndices = this.mTreeView.getSelectedIndices();
+      currentIndex = this.mTreeView.selection.currentIndex;
+    }
+
     this.mTreeView = new ComputedStyleView(aObject);
     this.mTree.view = this.mTreeView;
+
+    if (firstVisibleRow >= 0) {
+      bo.beginUpdateBatch();
+      try {
+        bo.scrollToRow(firstVisibleRow);
+        let selection = this.mTreeView.selection;
+        for (let i = 0, n = selectedIndices.length; i < n; ++i) {
+          selection.toggleSelect(selectedIndices[i]);
+        }
+        selection.currentIndex = currentIndex;
+      }
+      catch (ex) {
+        Components.utils.reportError(ex);
+      }
+      bo.endUpdateBatch();
+    }
+
     this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
   },
 
