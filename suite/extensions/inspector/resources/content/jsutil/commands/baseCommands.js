@@ -38,10 +38,6 @@
 /*****************************************************************************
 * Base Commands --------------------------------------------------------------
 *   Transactions which can be used to implement common commands.
-*
-* TODO: Switch over transaction boilerplate throughout the codebase to use
-* inBaseCommand and move the relevant pieces from utils.js into this file.
-* bug 609789
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 *   (Other files may be necessary, depending on which base commands are used.)
