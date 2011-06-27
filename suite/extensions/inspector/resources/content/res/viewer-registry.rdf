@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
+<!DOCTYPE RDF SYSTEM "chrome://inspector/locale/viewer-registry.dtd">  
+ 
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
          xmlns:ins="http://www.mozilla.org/inspector#">
 
@@ -37,7 +39,7 @@
     <rdf:li><rdf:Description 
       ins:uid="dom"
       ins:panels="bxDocPanel"
-      ins:description="DOM Nodes"
+      ins:description="&dom.label;"
       ins:icon="chrome://inspector/content/viewers/dom/dom-icon.gif"
       ins:filter="return object instanceof Components.interfaces.nsIDOMDocument;"/>
     </rdf:li>
@@ -45,21 +47,21 @@
     <rdf:li><rdf:Description 
       ins:uid="stylesheets"
       ins:panels="bxDocPanel"
-      ins:description="Style Sheets"
+      ins:description="&stylesheets.label;"
       ins:filter="return object instanceof Components.interfaces.nsIDOMDocument;"/>
     </rdf:li>
 
     <rdf:li><rdf:Description 
       ins:uid="domNode"
       ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="DOM Node"
+      ins:description="&domNode.label;"
       ins:filter="return object instanceof Components.interfaces.nsIDOMNode;"/>
     </rdf:li>
 
     <rdf:li><rdf:Description 
       ins:uid="boxModel"
       ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="Box Model"
+      ins:description="&boxModel.label;"
       ins:filter="return object instanceof Components.interfaces.nsIDOMElement;"/>
     </rdf:li>
 
@@ -67,7 +69,7 @@
       <rdf:Description 
         ins:uid="xblBindings"
         ins:panels="bxObjectPanel bxObjPanel"
-        ins:description="XBL Bindings">
+        ins:description="&xblBindings.label;">
         <ins:filter><![CDATA[
           if (object instanceof Components.interfaces.nsIDOMElement) {
             try {
@@ -87,28 +89,28 @@
     <rdf:li><rdf:Description
       ins:uid="styleRules"
       ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="CSS Rules"
+      ins:description="&styleRules.label;"
       ins:filter="return object instanceof Components.interfaces.nsIDOMElement || object instanceof Components.interfaces.nsIDOMCSSStyleSheet;"/>
     </rdf:li>
 
     <rdf:li><rdf:Description 
       ins:uid="computedStyle"
       ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="Computed Style"
+      ins:description="&computedStyle.label;"
       ins:filter="return object instanceof Components.interfaces.nsIDOMElement;"/>
     </rdf:li>
 
     <rdf:li><rdf:Description 
       ins:uid="jsObject"
       ins:panels="bxDocPanel bxObjectPanel bxObjPanel"
-      ins:description="JavaScript Object"
+      ins:description="&jsObject.label;"
       ins:filter="return true;"/>
     </rdf:li>
 
     <rdf:li>
       <rdf:Description ins:uid="accessibleEvent"
                        ins:panels="bxObjectPanel bxObjPanel"
-                       ins:description="Accessible Event">
+                       ins:description="&accessibleEvent.label;">
         <ins:filter><![CDATA[
           if (!linkedViewer ||
               !(object instanceof Components.interfaces.nsIDOMNode))
@@ -125,7 +127,7 @@
     <rdf:li>
       <rdf:Description ins:uid="accessibleObject"
                        ins:panels="bxObjectPanel bxObjPanel"
-                       ins:description="Accessible Object">
+                       ins:description="&accessibleObject.label;">
         <ins:filter><![CDATA[
           if (("@mozilla.org/accessibleRetrieval;1" in Components.classes) &&
               object instanceof Components.interfaces.nsIAccessible) {
@@ -159,7 +161,7 @@
     <rdf:li>
       <rdf:Description ins:uid="accessibleProps"
                        ins:panels="bxObjectPanel bxObjPanel"
-                       ins:description="Accessible Properties">
+                       ins:description="&accessibleProps.label;">
         <ins:filter><![CDATA[
           if (("@mozilla.org/accessibleRetrieval;1" in Components.classes) &&
               object instanceof Components.interfaces.nsIAccessible) {
@@ -193,7 +195,7 @@
     <rdf:li>
       <rdf:Description ins:uid="accessibleRelations"
                        ins:panels="bxObjectPanel bxObjPanel"
-                       ins:description="Accessible Relations">
+                       ins:description="&accessibleRelations.label;">
         <ins:filter><![CDATA[
           if (("@mozilla.org/accessibleRetrieval;1" in Components.classes) &&
               object instanceof Components.interfaces.nsIAccessible) {
@@ -227,7 +229,7 @@
     <rdf:li>
       <rdf:Description ins:uid="accessibleEvents"
                        ins:panels="bxDocPanel"
-                       ins:description="Accessible Events">
+                       ins:description="&accessibleEvents.label;">
         <ins:filter><![CDATA[
           if (!("@mozilla.org/accessibleRetrieval;1" in Components.classes)) {
             return false;
@@ -252,7 +254,7 @@
     <rdf:li>
       <rdf:Description ins:uid="accessibleTree"
                        ins:panels="bxDocPanel"
-                       ins:description="Accessible Tree">
+                       ins:description="&accessibleTree.label;">
         <ins:filter><![CDATA[
           if (!("@mozilla.org/accessibleRetrieval;1" in Components.classes)) {
             return false;
