@@ -1,0 +1,14 @@
+<!ENTITY dom.label "Nœuds DOM">
+<!ENTITY stylesheets.label "Feuilles de style">
+<!ENTITY domNode.label "Nœud DOM">
+<!ENTITY boxModel.label "Modèle de boîte">
+<!ENTITY xblBindings.label "Liaisons XBL">
+<!ENTITY styleRules.label "Règles CSS">
+<!ENTITY computedStyle.label "Style calculé">
+<!ENTITY jsObject.label "Objet JavaScript">
+<!ENTITY accessibleEvent.label "Événement accessible">
+<!ENTITY accessibleObject.label "Objet accessible">
+<!ENTITY accessibleProps.label "Propriétés accessibles">
+<!ENTITY accessibleRelations.label "Relations accessibles">
+<!ENTITY accessibleEvents.label "Événements accessibles">
+<!ENTITY accessibleTree.label "Arbre accessible">
