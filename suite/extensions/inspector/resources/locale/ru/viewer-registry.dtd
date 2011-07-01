@@ -1,0 +1,14 @@
+<!ENTITY dom.label "Узлы DOM">
+<!ENTITY stylesheets.label "Таблицы стилей">
+<!ENTITY domNode.label "Узел DOM">
+<!ENTITY boxModel.label "Блоковая модель">
+<!ENTITY xblBindings.label "XBL-биндинги">
+<!ENTITY styleRules.label "Правила CSS">
+<!ENTITY computedStyle.label "Вычисленный стиль">
+<!ENTITY jsObject.label "Объект JavaScript">
+<!ENTITY accessibleEvent.label "Событие доступности">
+<!ENTITY accessibleObject.label "Объект доступности">
+<!ENTITY accessibleProps.label "Свойства доступности">
+<!ENTITY accessibleRelations.label "Отношения доступности">
+<!ENTITY accessibleEvents.label "События доступности">
+<!ENTITY accessibleTree.label "Дерево доступности">
