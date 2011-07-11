@@ -1,0 +1,14 @@
+<!ENTITY dom.label "DOM-Knoten">
+<!ENTITY stylesheets.label "Stylesheets">
+<!ENTITY domNode.label "DOM-Knoten">
+<!ENTITY boxModel.label "Box-Modell">
+<!ENTITY xblBindings.label "XBL-Bindings">
+<!ENTITY styleRules.label "CSS-Regeln">
+<!ENTITY computedStyle.label "Errechnete Styles">
+<!ENTITY jsObject.label "JavaScript-Objekt">
+<!ENTITY accessibleEvent.label "Accessible-Ereignis">
+<!ENTITY accessibleObject.label "Accessible-Objekt">
+<!ENTITY accessibleProps.label "Accessible-Eigenschaften">
+<!ENTITY accessibleRelations.label "Accessible-Beziehungen">
+<!ENTITY accessibleEvents.label "Accessible-Ereignisse">
+<!ENTITY accessibleTree.label "Accessible-Baum">
