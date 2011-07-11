@@ -1,0 +1,14 @@
+<!ENTITY dom.label "Uzly rozhrania DOM">
+<!ENTITY stylesheets.label "Šablóny so štýlmi">
+<!ENTITY domNode.label "Uzol rozhrania DOM">
+<!ENTITY boxModel.label "Rámčekový model">
+<!ENTITY xblBindings.label "Väzby XBL">
+<!ENTITY styleRules.label "Pravidlá CSS">
+<!ENTITY computedStyle.label "Computed Style">
+<!ENTITY jsObject.label "Objekt JavaScriptu">
+<!ENTITY accessibleEvent.label "Dostupná udalosť">
+<!ENTITY accessibleObject.label "Dostupný objekt">
+<!ENTITY accessibleProps.label "Dostupné vlastnosti">
+<!ENTITY accessibleRelations.label "Dostupné vzťahy">
+<!ENTITY accessibleEvents.label "Dostupné udalosti">
+<!ENTITY accessibleTree.label "Dostupný strom">

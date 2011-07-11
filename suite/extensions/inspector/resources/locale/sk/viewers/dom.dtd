@@ -56,13 +56,13 @@
 <!ENTITY cmdToggleAccessibleNodes.accesskey "b">
 
 <!ENTITY cmdToggleProcessingInstructions.label "Zobraziť vykonávacie inštrukcie">
-<!ENTITY cmdToggleProcessingInstructions.accesskey "Z">
+<!ENTITY cmdToggleProcessingInstructions.accesskey "k">
 
 <!ENTITY cmdToggleAttributes.label "Zobraziť atribúty">
 <!ENTITY cmdToggleAttributes.accesskey "r">
 
 <!ENTITY cmdSelectByClick.label "Vybrať prvok kliknutím">
-<!ENTITY cmdSelectByClick.accesskey "v">
+<!ENTITY cmdSelectByClick.accesskey "b">
 
 <!ENTITY ColumnsDialog.title "Stĺpce">
 
