@@ -352,7 +352,7 @@ InspectorApp.prototype =
     if (aToggleSplitter) {
       this.openSplitter("Browser", aValue);
     }
-    var cmd = document.getElementById("cmdToggleBrowser");
+    var cmd = document.getElementById("cmdToggleDocument");
     cmd.setAttribute("checked", aValue);
   },
 

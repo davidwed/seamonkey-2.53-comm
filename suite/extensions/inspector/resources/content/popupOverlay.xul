@@ -78,9 +78,9 @@
       <menupopup id="mppObjectViewerList"/>
     </menu>
     <menuitem class="menuitem-iconic" type="checkbox"
-              label="&cmdToggleBrowser.label;"
-              accesskey="&cmdToggleBrowser.accesskey;"
-              observes="cmdToggleBrowser"/>
+              label="&cmdToggleDocument.label;"
+              accesskey="&cmdToggleDocument.accesskey;"
+              observes="cmdToggleDocument"/>
     <menuseparator/>
     <menuitem id="item:flashOnSelect"
               class="menuitem-iconic"

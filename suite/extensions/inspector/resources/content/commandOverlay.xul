@@ -21,7 +21,7 @@
     <command id="cmdShowPrefsDialog"
              oncommand="inspector.showPrefsDialog();"/>
 
-    <command id="cmdToggleBrowser"
+    <command id="cmdToggleDocument"
              oncommand="inspector.toggleBrowser(true);"/>
 
     <command id="cmdFlashOnSelect"
