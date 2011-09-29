@@ -47,7 +47,6 @@ inspector.jar:
   content/inspector/ViewerRegistry.js                                   (resources/content/ViewerRegistry.js)
   content/inspector/utils.js                                            (resources/content/utils.js)
   content/inspector/hooks.js                                            (resources/content/hooks.js)
-  content/inspector/util.dtd                                            (resources/content/util.dtd)
   content/inspector/res/viewer-registry.rdf                             (resources/content/res/viewer-registry.rdf)
   content/inspector/extensions/titledSplitter.css                       (resources/content/extensions/titledSplitter.css)
   content/inspector/extensions/titledSplitter.xml                       (resources/content/extensions/titledSplitter.xml)
