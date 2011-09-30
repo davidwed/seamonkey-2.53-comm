@@ -51,8 +51,8 @@
 <!ENTITY mnDocViewerList.accesskey "d">
 <!ENTITY mnObjectViewerList.label "Przeglądarka objektów">
 <!ENTITY mnObjectViewerList.accesskey "o">
-<!ENTITY cmdToggleBrowser.label "Przeglądarka">
-<!ENTITY cmdToggleBrowser.accesskey "P">
+<!ENTITY cmdToggleDocument.label "Pokaż dokument w panelu przeglądarki">
+<!ENTITY cmdToggleDocument.accesskey "P">
 <!ENTITY cmdToggleSearch.label "Wyniki wyszukiwania">
 <!ENTITY cmdFlashOnSelect.label "Wyróżnij wybrany element mruganiem">
 <!ENTITY cmdFlashOnSelect.accesskey "y">

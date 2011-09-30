@@ -1,0 +1,14 @@
+<!ENTITY dom.label "Węzły DOM">
+<!ENTITY stylesheets.label "Arkusze stylów">
+<!ENTITY domNode.label "Węzeł DOM">
+<!ENTITY boxModel.label "Model skrzynki (Box Model)">
+<!ENTITY xblBindings.label "Wiązania XBL">
+<!ENTITY styleRules.label "Reguły CSS">
+<!ENTITY computedStyle.label "Obliczony styl">
+<!ENTITY jsObject.label "Objekt języka JavaScript">
+<!ENTITY accessibleEvent.label "Dostępne zdarzenie">
+<!ENTITY accessibleObject.label "Dostępne objekty">
+<!ENTITY accessibleProps.label "Dostępne właściwości">
+<!ENTITY accessibleRelations.label "Dostępne relacje">
+<!ENTITY accessibleEvents.label "Dostępne zdarzenia">
+<!ENTITY accessibleTree.label "Dostępne drzewo">

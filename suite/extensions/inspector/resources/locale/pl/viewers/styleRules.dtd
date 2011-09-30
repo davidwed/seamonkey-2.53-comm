@@ -48,7 +48,7 @@
 
 <!ENTITY styleRule.label "Reguła">
 <!ENTITY styleRuleURI.label "Plik">
-<!ENTITY styleRuleLineNumber.label "Linia">
+<!ENTITY styleRuleLineNumber.label "Wiersz">
 
 <!ENTITY styleRulePropPriority.label "Priorytet">
 <!ENTITY styleRulePropName.label "Właściwość">
