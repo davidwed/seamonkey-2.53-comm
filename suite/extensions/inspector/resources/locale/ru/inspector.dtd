@@ -44,8 +44,8 @@
 <!ENTITY mnDocViewerList.accesskey "д">
 <!ENTITY mnObjectViewerList.label "Просмотр объектов">
 <!ENTITY mnObjectViewerList.accesskey "о">
-<!ENTITY cmdToggleBrowser.label "Браузер">
-<!ENTITY cmdToggleBrowser.accesskey "б">
+<!ENTITY cmdToggleDocument.label "Показать документ в панели браузера">
+<!ENTITY cmdToggleDocument.accesskey "б">
 <!ENTITY cmdToggleSearch.label "Результаты поиска">
 <!ENTITY cmdFlashOnSelect.label "Подсвечивать выбранный элемент">
 <!ENTITY cmdFlashOnSelect.accesskey "ч">
