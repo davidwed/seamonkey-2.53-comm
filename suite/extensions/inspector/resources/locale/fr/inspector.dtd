@@ -51,8 +51,8 @@
 <!ENTITY mnDocViewerList.accesskey "c">
 <!ENTITY mnObjectViewerList.label "Afficher l'objet">
 <!ENTITY mnObjectViewerList.accesskey "h">
-<!ENTITY cmdToggleBrowser.label "Navigateur">
-<!ENTITY cmdToggleBrowser.accesskey "N">
+<!ENTITY cmdToggleDocument.label "Afficher le document dans le panneau de navigation">
+<!ENTITY cmdToggleDocument.accesskey "n">
 <!ENTITY cmdFlashOnSelect.label "Faire clignoter l'élément sélectionné">
 <!ENTITY cmdFlashOnSelect.accesskey "F">
 <!ENTITY cmdToggleSearch.label "Résultats de la recherche">
