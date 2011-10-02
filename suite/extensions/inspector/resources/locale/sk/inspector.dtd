@@ -51,8 +51,8 @@
   <!ENTITY mnDocViewerList.accesskey "Z">
   <!ENTITY mnObjectViewerList.label "Zobrazovač objektu">
   <!ENTITY mnObjectViewerList.accesskey "o">
-  <!ENTITY cmdToggleBrowser.label "Prehliadač">
-  <!ENTITY cmdToggleBrowser.accesskey "P">
+  <!ENTITY cmdToggleDocument.label "Zobraziť dokument v paneli Prehliadač">
+  <!ENTITY cmdToggleDocument.accesskey "P">
   <!ENTITY cmdFlashOnSelect.label "Zvýrazniť vybraný prvok">
   <!ENTITY cmdFlashOnSelect.accesskey "v">
   <!ENTITY cmdToggleSearch.label "Výsledky hľadania">
