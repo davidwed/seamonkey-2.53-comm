@@ -51,8 +51,8 @@
   <!ENTITY mnDocViewerList.accesskey "D">
   <!ENTITY mnObjectViewerList.label "Objekt-Ansicht">
   <!ENTITY mnObjectViewerList.accesskey "O">
-  <!ENTITY cmdToggleBrowser.label "Browser">
-  <!ENTITY cmdToggleBrowser.accesskey "o">
+  <!ENTITY cmdToggleDocument.label "Dokument im Browser-Bereich anzeigen">
+  <!ENTITY cmdToggleDocument.accesskey "B">
   <!ENTITY cmdToggleSearch.label "Suchergebnisse">
   <!ENTITY cmdFlashOnSelect.label "Ausgewähltes Element blinken lassen">
   <!ENTITY cmdFlashOnSelect.accesskey "w">
