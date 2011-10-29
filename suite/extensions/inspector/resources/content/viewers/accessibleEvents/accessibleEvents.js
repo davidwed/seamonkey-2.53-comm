@@ -996,7 +996,7 @@ function outputStates(aAccessible)
                                             extraStateObj.value);
 
   var list = [];
-  for (var i = 0; i < states.length; i++) {
+  for (let i = 0; i < states.length; i++) {
     list.push(states.item(i));
   }
 
@@ -1049,7 +1049,7 @@ inAccTreeView.prototype.getRowProperties =
 {
   var data = this.getDataAt(aRowIdx);
   if (data && data.properties) {
-    for (var i = 0; i < data.properties.length; i++) {
+    for (let i = 0; i < data.properties.length; i++) {
       var atom = this.createAtom(data.properties[i]);
       aProperties.AppendElement(atom);
     }
@@ -1061,7 +1061,7 @@ inAccTreeView.prototype.getCellProperties =
 {
   var data = this.getDataAt(aRowIdx);
   if (data && data.properties) {
-    for (var i = 0; i < data.properties.length; i++) {
+    for (let i = 0; i < data.properties.length; i++) {
       var atom = this.createAtom(data.properties[i]);
       aProperties.AppendElement(atom);
     }

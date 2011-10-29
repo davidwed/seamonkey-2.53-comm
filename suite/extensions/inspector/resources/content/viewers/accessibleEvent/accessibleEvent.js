@@ -182,7 +182,7 @@ AccessibleEventViewer.prototype =
           tree.setAttribute("flex", "1");
 
           var treecols = document.createElement("treecols");
-          for (var col in output.cols) {
+          for (let col in output.cols) {
             var treecol = document.createElement("treecol");
             treecol.setAttribute("id", col);
             treecol.setAttribute("label", output.cols[col].name);
