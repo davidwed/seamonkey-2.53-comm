@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <!-- ***** BEGIN LICENSE BLOCK *****
    - Version: MPL 1.1/GPL 2.0/LGPL 2.1
    -
@@ -15,11 +17,11 @@
    -
    - The Initial Developer of the Original Code is
    - Mozilla Foundation.
-   - Portions created by the Initial Developer are Copyright (C) 2007
+   - Portions created by the Initial Developer are Copyright (C) 2010
    - the Initial Developer. All Rights Reserved.
    -
    - Contributor(s):
-   -   Alexander Surkov <surkov.alexander@gmail.com>
+   -   Alexander Surkov <surkov.alexander@gmail.com> (original author)
    -
    - Alternatively, the contents of this file may be used under the terms of
    - either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,19 +37,58 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY eventList.label "Event List">
-<!ENTITY watchedEvents.label "Watched Events">
-<!ENTITY handledEvents.label "Handled events:">
-<!ENTITY eventType.label "Event Type">
-<!ENTITY eventTime.label "Time">
-<!ENTITY eventNodeName.label "Node Name">
-<!ENTITY isWatched.label "Watched">
-<!ENTITY isHandlerEnabled.label "Handler Enabled">
-<!ENTITY clearEventList.label "Clear Event List">
-<!ENTITY chooseEventsToWatch.label "Choose events to watch.">
-<!ENTITY watchAll.label "Watch All">
-<!ENTITY watchNone.label "Watch None">
-<!ENTITY editHandler.label "Edit Handler">
-<!ENTITY contextHelp.label "?">
-<!ENTITY handlerEditorNoEvent.label "Choose event type to add a handler.">
 
+<!DOCTYPE dialog [
+  <!ENTITY % dtd1 SYSTEM
+    "chrome://inspector/locale/viewers/accessibleEventsHandlerHelpDialog.dtd">
+  %dtd1;
+]>
+
+<?xml-stylesheet href="chrome://inspector/skin"?>
+
+<dialog id="winEvalJS"
+        title="&helpDialog.title;"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        buttons="accept"
+        style="width: 30em;">
+
+  <description>&general.descr;</description>
+  <description>&helpers.descr;</description>
+  <grid>
+    <columns>
+      <column/>
+      <column flex="1"/>
+    </columns>
+    <rows>
+      <row>
+        <description value="event"/>
+        <description>&event.descr;</description>
+      </row>
+      <row>
+        <description value="target"/>
+        <description>&target.descr;</description>
+      </row>
+      <row>
+        <description value="accRetrieval"/>
+        <description>&accRetrieval.descr;</description>
+      </row>
+      <row>
+        <description value="output(string)"/>
+        <description>&output.descr;</description>
+      </row>
+      <row>
+        <description value="outputRole(accessible)"/>
+        <description>&outputRole.descr;</description>
+      </row>
+      <row>
+        <description value="outputStates(accessible)"/>
+        <description>&outputStates.descr;</description>
+      </row>
+      <row>
+        <description value="outputTree(accessible, hightlightList)"/>
+        <description>&outputTree.descr;</description>
+      </row>
+    </rows>
+  </grid>
+
+</dialog>

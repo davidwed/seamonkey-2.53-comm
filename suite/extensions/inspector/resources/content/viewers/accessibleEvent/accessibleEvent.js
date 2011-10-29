@@ -56,6 +56,8 @@ const nsIAccessibleTextChangeEvent =
 const nsIAccessibleCaretMoveEvent =
   Components.interfaces.nsIAccessibleCaretMoveEvent;
 
+const nsIDOMNode = Components.interfaces.nsIDOMNode;
+
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization/Destruction
 
@@ -129,12 +131,17 @@ AccessibleEventViewer.prototype =
   {
     this.clearView();
 
-    this.mAccEventSubject = this.mSubject[" accessible event "];
+    if (!this.pane.params) {
+      return;
+    }
+
+    this.mAccEventSubject = this.pane.params.accessibleEvent;
     if (!this.mAccEventSubject)
       return;
 
     XPCU.QI(this.mAccEventSubject, nsIAccessibleEvent);
 
+    // Update accessible event properties.
     var shownPropsId = "";
     if (this.mAccEventSubject instanceof nsIAccessibleStateChangeEvent)
       shownPropsId = "stateChangeEvent";
@@ -156,6 +163,60 @@ AccessibleEventViewer.prototype =
       } else {
         propElm.parentNode.setAttribute("hidden", "true");
       }
+    }
+
+    // Update handler output.
+    var outputElm = document.getElementById("handlerOutput");
+    var outputList = this.pane.params.accessibleEventHandlerOutput;
+    if (outputList) {
+      while (outputElm.firstChild) {
+        outputElm.removeChild(outputElm.lastChild);
+      }
+
+      for (let i = 0; i < outputList.length; i++) {
+        var output = outputList[i];
+
+        // Generate a tree.
+        if (typeof output == "object" && "cols" in output && "view" in output) {
+          var tree = document.createElement("tree");
+          tree.setAttribute("flex", "1");
+
+          var treecols = document.createElement("treecols");
+          for (var col in output.cols) {
+            var treecol = document.createElement("treecol");
+            treecol.setAttribute("id", col);
+            treecol.setAttribute("label", output.cols[col].name);
+            treecol.setAttribute("flex", output.cols[col].flex);
+            if (output.cols[col].isPrimary) {
+              treecol.setAttribute("primary", "true");
+            }
+            treecol.setAttribute("persist", "width,hidden,ordinal");
+            treecols.appendChild(treecol);
+
+            var splitter = document.createElement("splitter");
+            splitter.setAttribute("class", "tree-splitter");
+            treecols.appendChild(splitter);
+          }
+          tree.appendChild(treecols);
+
+          var treechildren = document.createElement("treechildren");
+          tree.appendChild(treechildren);
+          outputElm.appendChild(tree);
+          tree.treeBoxObject.view = output.view;
+
+        }
+        else {
+          // Output text.
+          var node = document.createElement("description");
+          node.textContent = output;
+          outputElm.appendChild(node);
+        }
+      }
+
+      outputElm.parentNode.removeAttribute("hidden");
+    }
+    else {
+      outputElm.parentNode.setAttribute("hidden", "true");
     }
   },
 

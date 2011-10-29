@@ -55,11 +55,28 @@ var gBundle;
 const kObserverServiceCID = "@mozilla.org/observer-service;1";
 const kAccessibleRetrievalCID = "@mozilla.org/accessibleRetrieval;1";
 
-const nsIObserverService = Components.interfaces.nsIObserverService;
-const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
-const nsIAccessibleEvent = Components.interfaces.nsIAccessibleEvent;
-const nsIAccessNode = Components.interfaces.nsIAccessNode;
-const nsIAccessible = Components.interfaces.nsIAccessible;
+const Ci = Components.interfaces;
+const nsIObserverService = Ci.nsIObserverService;
+const nsIAccessibleRetrieval = Ci.nsIAccessibleRetrieval;
+const nsIAccessibleEvent = Ci.nsIAccessibleEvent;
+const nsIAccessNode = Ci.nsIAccessNode;
+const nsIAccessible = Ci.nsIAccessible;
+
+const gAccInterfaces =
+[
+  Ci.nsIAccessible,
+  Ci.nsIAccessibleDocument,
+  Ci.nsIAccessibleEditableText,
+  Ci.nsIAccessibleHyperLink,
+  Ci.nsIAccessibleHyperText,
+  Ci.nsIAccessibleImage,
+  Ci.nsIAccessibleSelectable,
+  Ci.nsIAccessibleTable,
+  Ci.nsIAccessibleTableCell,
+  Ci.nsIAccessibleText,
+  Ci.nsIAccessibleValue,
+  Ci.nsIAccessNode,
+];
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization
@@ -85,7 +102,6 @@ function AccessibleEventsViewer()
   this.mTree = document.getElementById("olAccessibleEvents");
   this.mOlBox = this.mTree.treeBoxObject;
 
-  this.mWatchContainer = document.getElementById("watchContainer");
   this.mWatchTree = document.getElementById("watchEventList");
   this.mWatchBox = this.mWatchTree.treeBoxObject;
 }
@@ -159,9 +175,37 @@ AccessibleEventsViewer.prototype =
   onItemSelected: function onItemSelected()
   {
     var idx = this.mTree.currentIndex;
-    this.mSelection = this.mView.getDOMNode(idx);
+    var object = this.mView.getObject(idx);
+
+    // Set subject for right panel view.
+    var subject = object.node || object.accessnode;
+    if (object.node) {
+      subject[" accessible "] = object.accessnode;
+    }
+    this.mSelection = subject;
+
+    // Set parameters for right panel view.
+    if (this.pane.panelset.panelCount > 1) {
+      this.pane.panelset.getPanel(1).params = {
+        accessibleEvent: object.event,
+        accessibleEventHandlerOutput: object.eventHandlerOutput
+      };
+    }
+
     this.mObsMan.dispatchEvent("selectionChange",
                                { selection: this.mSelection } );
+  },
+
+  onWatchViewItemSelected: function onWatchViewItemSelected()
+  {
+    this.mWatchView.updateHandlerEditor();
+    this.mWatchView.updateHandlerState();
+  },
+
+  onWatchViewHandlerStateChanged:
+    function onWatchViewHandlerStateChanged(aState)
+  {
+    this.mWatchView.updateHandlerState(aState);
   },
 
   /**
@@ -173,14 +217,6 @@ AccessibleEventsViewer.prototype =
   },
 
   /**
-   * Open the panel to choose events to watch.
-   */
-  chooseEventsToWatch: function chooseEventsToWatch()
-  {
-    this.mWatchContainer.hidden = !this.mWatchContainer.hidden;
-  },
-
-  /**
    * Start or stop to watch all events.
    *
    * @param  aDoWatch  [in] indicates whether to start or stop events watching.
@@ -188,6 +224,29 @@ AccessibleEventsViewer.prototype =
   watchAllEvents: function watchAllEvents(aDoWatch)
   {
     this.mWatchView.watchAllEvents(aDoWatch);
+  },
+
+  /**
+   * Shows context help for event handler editor.
+   */
+  showWatchViewHandlerHelp: function showWatchViewHandlerHelp()
+  {
+    openDialog("chrome://inspector/content/viewers/accessibleEvents/handlerHelpDialog.xul",
+               "_blank", "chrome,modal,centerscreen");
+  },
+
+  /**
+   * Open/hide handler editor.
+   */
+  toggleHandlerEditor: function toggleHandlerEditor(aSplitter)
+  {
+    var state = aSplitter.getAttribute("state");
+    if (state == "collapsed") {
+      aSplitter.setAttribute("state", "open");
+    }
+    else {
+      aSplitter.setAttribute("state", "collapsed");
+    }
   }
 };
 
@@ -234,6 +293,12 @@ function AccessibleEventsView(aObject, aWatchView)
 }
 
 AccessibleEventsView.prototype = new inBaseTreeView();
+
+/**
+ * Global variable used to store user's event handler output from helper
+ * functions.
+ */
+var gEventHandlerOutput = [ ];
 
 AccessibleEventsView.prototype.observe =
 function observe(aSubject, aTopic, aData)
@@ -287,11 +352,31 @@ function observe(aSubject, aTopic, aData)
   if (!this.mWatchView.isEventWatched(type))
     return;
 
+  // Execute user handlers.
+  gEventHandlerOutput = [ ];
+  var expr = this.mWatchView.getHandlerExpr(type);
+  if (expr) {
+    for (let idx = 0; idx < gAccInterfaces.length; idx++) {
+      // Accessibility interfaces implicit query.
+      accessible instanceof gAccInterfaces[idx];
+    }
+
+    try {
+      var f = Function("event", "target", expr);
+      f(event, accessible);
+    }
+    catch (ex) {
+      output(ex);
+    }
+  }
+
+  // Put event into list.
   var date = new Date();
   var node = accessnode.DOMNode;
 
   var eventObj = {
     event: event,
+    eventHandlerOutput: gEventHandlerOutput,
     accessnode: accessnode,
     node: node,
     nodename: node ? node.nodeName : "",
@@ -319,16 +404,17 @@ function clear()
   this.mTree.rowCountChanged(0, -count);
 }
 
-AccessibleEventsView.prototype.getDOMNode =
-function getDOMNode(aRow)
+/**
+ * Return object to be used as a subject for the right panel. It could be either
+ * DOM node or accessible object depending on whether accessible has a DOM node.
+ * Also the returned object has properties that can used by accessibleEvent
+ * view to represent information about accessible event and output from user
+ * defined accessible event handlers.
+ */
+AccessibleEventsView.prototype.getObject =
+function getObject(aRow)
 {
-  var event = this.mEvents[aRow].event;
-  var DOMNode = this.mEvents[aRow].node;
-  var accessNode = this.mEvents[aRow].accessnode;
-
-  DOMNode[" accessible "] = accessNode;
-  DOMNode[" accessible event "] = event;
-  return DOMNode;
+  return aRow < 0 ? null : this.mEvents[aRow];
 }
 
 AccessibleEventsView.prototype.getCellText =
@@ -397,6 +483,10 @@ function WatchAccessibleEventsListView()
       var data = this.getData(aRowIndex);
       return data.value;
     }
+    else if (aCol.id == "welIsHandlerEnabled") {
+      var data = this.getData(aRowIndex);
+      return data.isHandlerEnabled;
+    }
 
     return false;
   };
@@ -454,13 +544,17 @@ function WatchAccessibleEventsListView()
 
   this.isEditable = function watchview_isEditable(aRowIndex, aCol)
   {
-    return true;
+    if (aCol.id == "welIsWatched" ||
+        (aCol.id == "welIsHandlerEnabled" && !this.isContainer(aRowIndex))) {
+      return true;
+    }
+    return false;
   };
 
   this.setCellValue = function watchview_setCellValue(aRowIndex, aCol, aValue)
   {
     if (aCol.id == "welIsWatched") {
-      var newValue = aValue == "true" ? true : false;
+      var newValue = aValue == "true";
 
       var info = this.getInfo(aRowIndex);
       var data = info.data;
@@ -484,6 +578,10 @@ function WatchAccessibleEventsListView()
         parentData.value = false;
         this.mTree.invalidateCell(info.parentIndex, aCol);
       }
+    }
+    else if (aCol.id == "welIsHandlerEnabled") {
+      var newValue = aValue == "true";
+      this.updateHandlerState(newValue, aRowIndex);
     }
   };
 
@@ -514,6 +612,71 @@ function WatchAccessibleEventsListView()
 
     this.mTree.invalidate();
   };
+
+  this.getHandlerExpr = function watchview_getHandlerExpr(aType)
+  {
+    var data = this.mReverseData[aType];
+    if (data.isHandlerEnabled) {
+      return data.handlerSource;
+    }
+
+    return "";
+  }
+
+  /**
+   * Updates state and value of handler source editor.
+   */
+  this.updateHandlerEditor = function watchview_updateHandlerEditor()
+  {
+    var idx = this.selection.currentIndex;
+
+    if (idx == -1 || this.isContainer(idx)) {
+      this.mHandlerState.hidden = true;
+      this.mHandlerEditor.disabled = true;
+      this.mHandlerEditor.value = "";
+      this.mHandlerEditorLabel.hidden = false;
+      return;
+    }
+
+    this.mHandlerState.hidden = false;
+    this.mHandlerEditorLabel.hidden = true;
+    this.mHandlerEditor.disabled = false;
+
+    var data = this.getData(idx);
+
+    var label = gBundle.getFormattedString("handlerEditorLabel", [data.text]);
+    this.mHandlerState.label = label;
+    this.mHandlerEditor.value = data.handlerSource;
+  }
+
+  /**
+   * Updates state of handler (enabled or disabled) and UI displaying the state.
+   * @param aValue [optional]
+   *        New value of handler state column at the given row index, if
+   *        undefined then data wasn't changed, needs to update UI
+   * @param aRowIdx [optional]
+   *        The given row index, if missed then current row index is used
+   */
+  this.updateHandlerState =
+    function watchview_updateHandlerState(aValue, aRowIdx)
+  {
+    var updateData = aValue != undefined;
+    var updateCheckbox = !updateData || aRowIdx == this.selection.currentIndex;
+
+    var rowIdx = aRowIdx == undefined ? this.selection.currentIndex : aRowIdx;
+
+    var data = this.getData(rowIdx);
+
+    if (updateData) {
+      data.isHandlerEnabled = aValue;
+      var col = this.mTree.columns.getNamedColumn("welIsHandlerEnabled");
+      this.mTree.invalidateCell(rowIdx, col);
+    }
+
+    if (updateCheckbox) {
+      this.mHandlerState.checked = data.isHandlerEnabled;
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   ///// Private
@@ -588,6 +751,13 @@ function WatchAccessibleEventsListView()
       var props = gEventTypesMap[idx];
       this.registerEventType(props.group, idx, props.isIgnored);
     }
+
+    // Prepare handler source editor.
+    this.mHandlerState = document.getElementById("welHandlerState");
+    this.mHandlerEditor = document.getElementById("welHandlerEditor");
+    this.mHandlerEditorLabel = document.getElementById("welHandlerEditorLabel");
+    this.mHandlerEditor.addEventListener("input", this, false);
+    this.mHandlerEditor.disabled = true;
   };
 
   /**
@@ -598,6 +768,7 @@ function WatchAccessibleEventsListView()
     var item = {
       text: aName,
       value: true,
+      handlerSource: "",
       open: false,
       children: []
     };
@@ -616,7 +787,9 @@ function WatchAccessibleEventsListView()
 
     var item = {
       text: this.mAccService.getStringEventType(aType),
-      value: !aIgnored
+      value: !aIgnored,
+      isHandlerEnabled: false,
+      handlerSource: ""
     };
 
     var groupItem = this.mChildren[aGroup];
@@ -629,11 +802,30 @@ function WatchAccessibleEventsListView()
     this.mReverseData[aType] = item;
   };
 
+  /**
+   * Listen for 'input' event from handler source textbox to record the handler.
+   */
+  this.handleEvent = function watchview_handleEvent(aEvent)
+  {
+    if (aEvent.type != "input" || aEvent.target != this.mHandlerEditor) {
+      return;
+    }
+
+    var idx = this.selection.currentIndex;
+    var data = this.getData(idx);
+    data.handlerSource = this.mHandlerEditor.value;
+  }
+
   this.mAccService = XPCU.getService(kAccessibleRetrievalCID,
                                      nsIAccessibleRetrieval);
 
   this.mChildren = [];
   this.mReverseData = [];
+  this.mHandlers = {};
+
+  this.mHandlerState = null;
+  this.mHandlerEditor = null;
+  this.mHandlerEditorLabel = null;
 
   this.init();
 }
@@ -779,3 +971,129 @@ var gEventTypesMap =
 
   new eventProps(kDocumentEvents) // EVENT_INTERNAL_LOAD
 ];
+
+////////////////////////////////////////////////////////////////////////////////
+//// Functions and objects for usage in event handler editor.
+
+var accRetrieval = XPCU.getService(kAccessibleRetrievalCID,
+                                   nsIAccessibleRetrieval);
+
+function output(aValue)
+{
+  gEventHandlerOutput.push(aValue);
+}
+
+function outputRole(aAccessible)
+{
+  output(accRetrieval.getStringRole(aAccessible.role));
+}
+
+function outputStates(aAccessible)
+{
+  var stateObj = {}, extraStateObj = {};
+  aAccessible.getState(stateObj, extraStateObj);
+  var states = accRetrieval.getStringStates(stateObj.value,
+                                            extraStateObj.value);
+
+  var list = [];
+  for (var i = 0; i < states.length; i++) {
+    list.push(states.item(i));
+  }
+
+  output(list.join());
+}
+
+function outputTree(aAccessible, aHighlightList)
+{
+  var treeObj = {
+    cols: {
+      outputtreeRole: {
+        name: gBundle.getString("role"),
+        flex: 2,
+        isPrimary: true
+      },
+      outputtreeName: {
+        name: gBundle.getString("name"),
+        flex: 2
+      },
+      outputtreeNodename: {
+        name: gBundle.getString("nodeName"),
+        flex: 1
+      },
+      outputtreeId:{
+        name: gBundle.getString("id"),
+        flex: 1
+      }
+    },
+    view: new inAccTreeView(aAccessible, aHighlightList)
+  };
+
+  output(treeObj);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//// Private functions.
+
+function inAccTreeView(aAccessible, aHighlightList)
+{
+  inDataTreeView.call(this);
+
+  this.generateChildren(aAccessible, aHighlightList);
+}
+
+inAccTreeView.prototype = new inDataTreeView();
+
+// nsITreeView
+inAccTreeView.prototype.getRowProperties =
+  function inAccTreeView_getRowProperties(aRowIdx, aProperties)
+{
+  var data = this.getDataAt(aRowIdx);
+  if (data && data.properties) {
+    for (var i = 0; i < data.properties.length; i++) {
+      var atom = this.createAtom(data.properties[i]);
+      aProperties.AppendElement(atom);
+    }
+  }
+};
+
+inAccTreeView.prototype.getCellProperties =
+  function inAccTreeView_getCellProperties(aRowIdx, aCol, aProperties)
+{
+  var data = this.getDataAt(aRowIdx);
+  if (data && data.properties) {
+    for (var i = 0; i < data.properties.length; i++) {
+      var atom = this.createAtom(data.properties[i]);
+      aProperties.AppendElement(atom);
+    }
+  }
+};
+
+// Initialization
+inAccTreeView.prototype.generateChildren =
+  function inAccTreeView_generateChildren(aAccessible, aHighlightList, aParent)
+{
+  var data = {
+    properties: []
+  };
+
+  var accessible = XPCU.QI(aAccessible, nsIAccessNode);
+
+  // Add row and cells.
+  if (aHighlightList && aHighlightList.indexOf(aAccessible) != -1) {
+    data.properties.push("highlight");
+  }
+
+  data["outputtreeRole"] = accRetrieval.getStringRole(aAccessible.role);
+  data["outputtreeName"] = aAccessible.name;
+  data["outputtreeNodename"] = accessible.DOMNode.nodeName;
+  data["outputtreeId"] =
+    ("id" in accessible.DOMNode ? accessible.DOMNode.id : "");
+
+  var parent = this.appendChild(aParent, data);
+
+  // Add children.
+  var childCount = aAccessible.childCount;
+  for (let i = 0; i < childCount; i++) {
+    this.generateChildren(aAccessible.getChildAt(i), aHighlightList, parent);
+  }
+};

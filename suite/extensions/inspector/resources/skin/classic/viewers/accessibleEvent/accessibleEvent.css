@@ -11,15 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is mozilla.org code.
+ * The Original Code is DOM Inspector.
  *
  * The Initial Developer of the Original Code is
- * Mozilla Corporation.
- * Portions created by the Initial Developer are Copyright (C) 2009
+ * Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Alexander Surkov <surkov.alexander.com> (original author)
+ *  Alexander Surkov <surkov.alexander@gmail.com> (original author)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,18 +37,14 @@
 
 @import url("chrome://inspector/skin");
 
-treechildren::-moz-tree-checkbox {
-  list-style-image: url("chrome://global/skin/checkbox/cbox.gif");
+treechildren::-moz-tree-row(highlight) {
+  background-color: #feeecd;
 }
 
-treechildren::-moz-tree-checkbox(checked) {
-  list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
+treechildren::-moz-tree-row(selected, highlight) {
+  background-color: #c0ffff;
 }
 
-#welHandlerEditor {
-  font-family: monospace;
-}
-
-#welGrippyButton {
-  cursor: default;
+treechildren::-moz-tree-cell-text(highlight) {
+  color: black;
 }

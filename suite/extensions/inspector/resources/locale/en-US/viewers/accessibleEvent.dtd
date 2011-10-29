@@ -43,4 +43,4 @@
 <!ENTITY descIsInserted.label "Is text inserted: ">
 <!ENTITY descModifiedText.label "Modified text: ">
 <!ENTITY descCaretOffset.label "Caret offset: ">
-
+<!ENTITY descrHandlerOutput.label "Event handler output: ">

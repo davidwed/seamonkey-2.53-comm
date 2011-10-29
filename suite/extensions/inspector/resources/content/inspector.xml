@@ -432,6 +432,7 @@
       <field name="mCurrentViewer">null</field>
       <field name="mSubject">null</field>
       <field name="mParams">null</field>
+      <field name="mParamsPending">null</field>
 
       <constructor><![CDATA[
         // look for panelset parent
@@ -465,9 +466,16 @@
                 onget="return this.mSubject;"
                 onset="this.setSubject(val);"/>
 
-      <property name="params"
-                onget="return this.mParams;"
-                onset="return this.mParams = val;"/>
+      <property name="params">
+        <getter><![CDATA[
+          return this.mParams;
+        ]]></getter>
+        <setter><![CDATA[
+          // Don't let the params get nulled out before anyone gets to use them.
+          this.mParamsPending = true;
+          return this.mParams = val;
+        ]]></setter>
+      </property>
 
       <property name="title"
                 onget="return this.getAttribute('title');"
@@ -601,7 +609,13 @@
       <method name="setSubject">
         <parameter name="aObject"/>
         <body><![CDATA[
-          this.mParams = null;
+          // Check if someone wanted to pass some parameters in.
+          if (this.mParamsPending) {
+            this.mParamsPending = false;
+          }
+          else {
+            this.mParams = null;
+          }
 
           var didRebuild = false;
           var entries = this.mCachedEntries;

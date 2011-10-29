@@ -43,7 +43,8 @@
   <!ENTITY % dtd3 SYSTEM "chrome://inspector/locale/viewers/accessibleEvent.dtd"> %dtd3;
 ]>
 
-<?xml-stylesheet href="chrome://inspector/skin"?>
+<?xml-stylesheet
+    href="chrome://inspector/skin/viewers/accessibleEvent/accessibleEvent.css"?>
 
 <page id="winAccessibleEvent"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -95,5 +96,9 @@
       </row>
     </rows>
   </grid>
+  <vbox flex="1">
+    <description>&descrHandlerOutput.label;</description>
+    <vbox id="handlerOutput" flex="1"/>
+  </vbox>
 </page>
 

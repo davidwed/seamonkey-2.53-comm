@@ -112,14 +112,18 @@
                        ins:panels="bxObjectPanel bxObjPanel"
                        ins:description="&accessibleEvent.label;">
         <ins:filter><![CDATA[
-          if (!linkedViewer ||
-              !(object instanceof Components.interfaces.nsIDOMNode))
+          if (!linkedViewer || linkedViewer.uid != "accessibleEvents") {
             return false;
+          }
 
-          if (linkedViewer.uid != "accessibleEvents")
-            return false;
+          const Ci = Components.interfaces;
+          if (object instanceof Ci.nsIDOMNode ||
+              ("@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+               object instanceof Ci.nsIAccessible)) {
+            return object;
+          }
 
-          return object[" accessible event "];
+          return false;
         ]]></ins:filter>
       </rdf:Description>
     </rdf:li>
