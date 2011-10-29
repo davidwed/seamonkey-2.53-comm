@@ -234,23 +234,17 @@ AccessibleEventViewer.prototype =
 
   get state()
   {
-    var accessible = this.mAccEventSubject.accessible;
+    var state = 0, extraState = 0;
+    if (this.mAccEventSubject.isExtraState()) {
+      extraState = this.mAccEventSubject.state;
+    }
+    else {
+      state = this.mAccEventSubject.state;
+    }
 
-    var stateObj = {value: null};
-    var extStateObj = {value: null};
-
-    // Since Firefox 3.1 nsIAccessible::getFinalState has been renamed to
-    // nsIAccessible::getState.
-    if ("getState" in accessible)
-      accessible.getState(stateObj, extStateObj);
-    else
-      accessible.getFinalState(stateObj, extStateObj);
+    var states = this.mAccService.getStringStates(state, extraState);
 
     var list = [];
-
-    states = this.mAccService.getStringStates(stateObj.value,
-                                              extStateObj.value);
-
     for (var i = 0; i < states.length; i++)
       list.push(states.item(i));
     return list.join();
