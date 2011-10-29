@@ -15,11 +15,11 @@
    -
    - The Initial Developer of the Original Code is
    - Mozilla Foundation.
-   - Portions created by the Initial Developer are Copyright (C) 2007
+   - Portions created by the Initial Developer are Copyright (C) 2010
    - the Initial Developer. All Rights Reserved.
    -
    - Contributor(s):
-   -   Alexander Surkov <surkov.alexander@gmail.com>
+   -   Alexander Surkov <surkov.alexander@gmail.com> (original author)
    -   Alexander L. Slovesnik <unghost@mozilla-russia.org> (Russian translation)
    -
    - Alternatively, the contents of this file may be used under the terms of
@@ -35,18 +35,13 @@
    - the terms of any one of the MPL, the GPL or the LGPL.
    -
    - ***** END LICENSE BLOCK ***** -->
-<!ENTITY eventList.label "Список событий">
-<!ENTITY watchedEvents.label "Отслеживаемые события">
-<!ENTITY handledEvents.label "Обрабатываемые события:">
-<!ENTITY eventType.label "Тип события">
-<!ENTITY eventTime.label "Время">
-<!ENTITY eventNodeName.label "Имя узла">
-<!ENTITY isWatched.label "Отслеживается">
-<!ENTITY isHandlerEnabled.label "Обработчик включён">
-<!ENTITY clearEventList.label "Очистить список событий">
-<!ENTITY chooseEventsToWatch.label "Выберите события для отслеживания.">
-<!ENTITY watchAll.label "Отслеживать все">
-<!ENTITY watchNone.label "Не отслеживать ничего">
-<!ENTITY editHandler.label "Редактировать обработчик">
-<!ENTITY contextHelp.label "?">
-<!ENTITY handlerEditorNoEvent.label "Выберите тип события для добавления к обработчику.">
+<!ENTITY helpDialog.title "Окно справки Обработчика">
+<!ENTITY general.descr "Пишет и прикрепляет обработчик события доступности. При возникновении события, вы можете выбрать его в списке событий и увидеть результат работы обработчика в связанном окне просмотра Событий Доступности.">
+<!ENTITY helpers.descr "В редакторе обработчика можно использовать следующие объекты и функции:">
+<!ENTITY event.descr "объект события доступности">
+<!ENTITY target.descr "объект цели доступности">
+<!ENTITY accRetrieval.descr "служба доступности nsIAccessibleRetrieval">
+<!ENTITY output.descr "печатает данную строку">
+<!ENTITY outputRole.descr "печатает роль данного объекта доступности">
+<!ENTITY outputStates.descr "печатает состояния данного объекта доступности">
+<!ENTITY outputTree.descr "печатает дерево данного объекта доступности, подсвечивает доступности из данного массива">

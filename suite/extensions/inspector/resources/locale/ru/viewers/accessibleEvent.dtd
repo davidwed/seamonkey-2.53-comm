@@ -43,3 +43,4 @@
 <!ENTITY descIsInserted.label "Текст вставлен:">
 <!ENTITY descModifiedText.label "Изменённный текст:">
 <!ENTITY descCaretOffset.label "Сдвиг курсора:">
+<!ENTITY descrHandlerOutput.label "Вывод обработчика событий: ">
