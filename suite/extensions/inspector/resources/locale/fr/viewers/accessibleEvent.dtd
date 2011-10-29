@@ -43,3 +43,6 @@
 <!ENTITY descIsInserted.label "Est du texte inséré : ">
 <!ENTITY descModifiedText.label "Texte modifié : ">
 <!ENTITY descCaretOffset.label "Décalage du curseur : ">
+
+<!ENTITY descrHandlerOutput.label "Résultats de sortie du gestionnaire d'événements : ">
+
