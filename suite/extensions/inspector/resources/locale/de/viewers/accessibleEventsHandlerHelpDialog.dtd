@@ -15,11 +15,11 @@
    -
    - The Initial Developer of the Original Code is
    - Mozilla Foundation.
-   - Portions created by the Initial Developer are Copyright (C) 2007
+   - Portions created by the Initial Developer are Copyright (C) 2010
    - the Initial Developer. All Rights Reserved.
    -
    - Contributor(s):
-   -   Alexander Surkov <surkov.alexander@gmail.com>
+   -   Alexander Surkov <surkov.alexander@gmail.com> (original author)
    -
    - Alternatively, the contents of this file may be used under the terms of
    - either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,12 +35,15 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 
-<!ENTITY descIsFromUserInput.label "Kommt von Benutzereingaben:">
-<!ENTITY descState.label "Status:">
-<!ENTITY descIsEnabled.label "Statue ist aktiviert:">
-<!ENTITY descStartOffset.label "Start-Offset:">
-<!ENTITY descLength.label "Länge:">
-<!ENTITY descIsInserted.label "Text wurde eingefügt:">
-<!ENTITY descModifiedText.label "Modifizierter Text:">
-<!ENTITY descCaretOffset.label "Caret-Offset:">
-<!ENTITY descrHandlerOutput.label "Ereignis-Hanndler-Ausgabe:">
+  <!ENTITY helpDialog.title "Handler-Hilfedialog">
+
+  <!ENTITY general.descr "Einen Accessibility-Ereignis-Handler schreiben und anwenden. Wenn das Ereignis auftritt, können Sie es in der Ereignisliste auswählen und das Ergebnis der Handler-Ausführung in der verbundenen Accessible-Ereignis-Ansicht sehen.">
+  <!ENTITY helpers.descr "Die folgenden Objekte und Funktionen können innerhalb des Handler-Editors verwendet werden:">
+
+  <!ENTITY event.descr "Accessibility-Ereignis-Objekt">
+  <!ENTITY target.descr "Accessibility-Zielobjekt">
+  <!ENTITY accRetrieval.descr "nsIAccessibleRetrieval Accessibility-Service">
+  <!ENTITY output.descr "gibt die angegebene Zeichenkette aus">
+  <!ENTITY outputRole.descr "gibt die Rolle des angegebenen Accessible-Objekts aus">
+  <!ENTITY outputStates.descr "gibt Zustände des angegebenen Accessible-Objekts aus">
+  <!ENTITY outputTree.descr "gibt einen Baum für das angegebene Accessible-Objekt aus und hebt Accessibles aus dem angegebenen Array hervor">
