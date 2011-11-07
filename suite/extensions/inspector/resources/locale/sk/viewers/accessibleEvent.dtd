@@ -43,4 +43,4 @@
 <!ENTITY descIsInserted.label "Je vložený text: ">
 <!ENTITY descModifiedText.label "Upravený text: ">
 <!ENTITY descCaretOffset.label "Offset kurzora: ">
-
+<!ENTITY descrHandlerOutput.label "Výstup spracovania udalosti: ">
