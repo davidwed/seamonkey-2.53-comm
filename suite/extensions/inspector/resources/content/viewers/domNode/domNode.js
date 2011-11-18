@@ -72,6 +72,7 @@ function DOMNodeViewer()  // implements inIViewer
 
   this.mURL = window.location;
   this.mAttrTree = document.getElementById("olAttr");
+  this.mAttrGroupBox = document.getElementById("grpAttr");
 
   // prepare and attach the DOM DataSource
   this.mDOMView = XPCU.createInstance(kDOMViewCID, "inIDOMView");
@@ -193,7 +194,7 @@ DOMNodeViewer.prototype =
     }
 
     var hideAttributes = aObject.nodeType != Node.ELEMENT_NODE;
-    this.mAttrTree.hidden = hideAttributes;
+    this.mAttrGroupBox.hidden = hideAttributes;
     if (!hideAttributes && aObject != this.mDOMView.rootNode) {
       this.mDOMView.rootNode = aObject;
       this.mAttrTree.view.selection.select(-1);
