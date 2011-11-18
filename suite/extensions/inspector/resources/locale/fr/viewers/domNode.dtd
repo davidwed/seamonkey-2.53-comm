@@ -41,7 +41,8 @@
 <!ENTITY localName.label "Nom local :">
 <!ENTITY namespaceURI.label "URI de l'espace de noms :">
 <!ENTITY nodeType.label "Type du nœud :">
-<!ENTITY nodeValue.label "Valeur du du nœud :">
+<!ENTITY nodeValue.label "Valeur du nœud :">
+<!ENTITY grpAttr.label "Attributs">
 
 <!ENTITY namespaceTitle.null.label "null">
 <!ENTITY namespaceTitle.default.label "Espace de noms par défaut du document">
