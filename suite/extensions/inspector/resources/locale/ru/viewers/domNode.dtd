@@ -42,6 +42,7 @@
 <!ENTITY namespaceURI.label "URI пространства имен:">
 <!ENTITY nodeType.label "Тип узла:">
 <!ENTITY nodeValue.label "Значение узла:">
+<!ENTITY grpAttr.label "Атрибуты">
 <!ENTITY namespaceTitle.null.label "null">
 <!ENTITY namespaceTitle.default.label "Документа по умолчанию">
 <!ENTITY namespaceTitle.custom.label "Другой">
