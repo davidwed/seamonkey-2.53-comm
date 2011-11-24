@@ -42,6 +42,7 @@
 <!ENTITY namespaceURI.label "Priestor názvov URI:">
 <!ENTITY nodeType.label "Typ uzla:">
 <!ENTITY nodeValue.label "Hodnota uzla:">
+<!ENTITY grpAttr.label "Atribúty">
 
 <!ENTITY namespaceTitle.null.label "Nulový">
 <!ENTITY namespaceTitle.default.label "Predvolený pre dokument">
