@@ -42,6 +42,7 @@
 <!ENTITY namespaceURI.label "Namespace-URI:">
 <!ENTITY nodeType.label "Knoten-Typ:">
 <!ENTITY nodeValue.label "Knoten-Wert:">
+<!ENTITY grpAttr.label "Attribute">
 
 <!ENTITY namespaceTitle.null.label "null">
 <!ENTITY namespaceTitle.default.label "Dokumentstandard">
