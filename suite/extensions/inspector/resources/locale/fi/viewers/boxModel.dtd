@@ -41,3 +41,11 @@
 <!ENTITY boxMargin.label "Marginaalit">
 <!ENTITY boxBorder.label "Reunukset">
 <!ENTITY boxPadding.label "Sisennys">
+
+<!ENTITY xCoord.label "x">
+<!ENTITY yCoord.label "y">
+<!ENTITY screenXCoord.label "ruutu-x">
+<!ENTITY screenYCoord.label "ruutu-y">
+
+<!ENTITY dimensionWidth.label  "laatikon leveys">
+<!ENTITY dimensionHeight.label "laatikon korkeus">

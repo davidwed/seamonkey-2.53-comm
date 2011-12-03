@@ -17,6 +17,8 @@
   <!ENTITY mnInspectContentDocument.accesskey "T">
   <!ENTITY mnInspectChromeDocument.label "Tutki chrome-dokumentti">
   <!ENTITY mnInspectChromeDocument.accesskey "c">
+  <!ENTITY mnInspectApplicationAccessible.label "Tutki sovelluksen esteettömyysmuuttujaa">
+  <!ENTITY mnInspectApplicationAccessible.accesskey "o">
   <!ENTITY cmdEnterLocation.label "Tutki sijainti">
   <!ENTITY cmdEnterLocation.accesskey "u">
   <!ENTITY cmdEnterLocation.key "L">
@@ -45,15 +47,17 @@
 
 <!ENTITY mnView.label "Näytä">
 <!ENTITY mnView.accesskey "N">
-  <!ENTITY cmdToggleBrowser.label "Selain">
-  <!ENTITY cmdToggleBrowser.accesskey "S">
-  <!ENTITY cmdToggleSearch.label "Haun tulokset">
+  <!ENTITY mnDocViewerList.label "Dokumenttikatselin">
+  <!ENTITY mnDocViewerList.accesskey "D">
+  <!ENTITY mnObjectViewerList.label "Objektikatselin">
+  <!ENTITY mnObjectViewerList.accesskey "O">
+  <!ENTITY cmdToggleDocument.label "Näytä dokumentti selainpaneelissa">
+  <!ENTITY cmdToggleDocument.accesskey "s">
+  <!ENTITY cmdToggleSearch.label "Hakutulokset">
   <!ENTITY cmdFlashOnSelect.label "Valittu elementti vilkkuu">
   <!ENTITY cmdFlashOnSelect.accesskey "V">
 
 <!ENTITY browserPanel.label "Selain">
-
-<!ENTITY inspectNewWindow.label "Tutki uudessa ikkunassa">
 
 <!ENTITY saveCmd.key "S">
 <!ENTITY closeCmd.key "W">

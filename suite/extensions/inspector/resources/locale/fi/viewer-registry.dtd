@@ -1,0 +1,14 @@
+<!ENTITY dom.label "DOM-solmut">
+<!ENTITY stylesheets.label "Tyyliarkit">
+<!ENTITY domNode.label "DOM-solmu">
+<!ENTITY boxModel.label "Laatikkomalli">
+<!ENTITY xblBindings.label "XBL-sidonnat">
+<!ENTITY styleRules.label "CSS-säännöt">
+<!ENTITY computedStyle.label "Laskettu tyyli">
+<!ENTITY jsObject.label "JavaScript-olio">
+<!ENTITY accessibleEvent.label "Esteettömyystapahtuma">
+<!ENTITY accessibleObject.label "Esteettömyysolio">
+<!ENTITY accessibleProps.label "Esteettömyysominaisuudet">
+<!ENTITY accessibleRelations.label "Esteettömyyssuhteet">
+<!ENTITY accessibleEvents.label "Esteettömyystapahtumat">
+<!ENTITY accessibleTree.label "Esteettömyyspuu">

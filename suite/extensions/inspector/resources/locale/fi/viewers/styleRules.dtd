@@ -42,8 +42,6 @@
 <!ENTITY newRules.label "Uusi">
 <!ENTITY deleteSelectedRules.label "Poista">
 <!ENTITY disableSelectedRules.label "Poista käytöstä">
-<!ENTITY copySelectedFileURI.label "Kopioi osoite">
-<!ENTITY viewSelectedFileURI.label "Näytä tiedosto">
 
 <!-- LOCALIZATION NOTE: DO NOT LOCALIZE "!important" since it is a CSS API -->
 <!ENTITY toggleSelectedImportant.label "Aseta/poista !important">

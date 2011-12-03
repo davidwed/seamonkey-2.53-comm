@@ -14,3 +14,10 @@
 <!ENTITY mnEditEdit.accesskey "M">
 <!ENTITY mnEditDelete.label "Poista">
 <!ENTITY mnEditDelete.accesskey "o">
+<!ENTITY mnEditInspectInNewWindow.label "Tutki uudessa ikkunassa">
+<!ENTITY mnEditInspectInNewWindow.accesskey "d">
+<!ENTITY mnEditInspectInNewWindow.key "I">
+<!ENTITY mnEditCopyFileURI.label "Kopioi URI">
+<!ENTITY mnEditCopyFileURI.accesskey "U">
+<!ENTITY mnEditViewFileURI.label "Näytä tiedosto">
+<!ENTITY mnEditViewFileURI.accesskey "N">

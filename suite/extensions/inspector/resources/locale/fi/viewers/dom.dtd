@@ -77,8 +77,6 @@
   <!ENTITY cmdBlink.accesskey "E">
   <!ENTITY cmdInspectBrowser.label "Tutki sisällettyä dokumenttia">
   <!ENTITY cmdInspectBrowser.accesskey "e">
-  <!ENTITY cmdInspectInNewWindow.label "Tutki uudessa ikkunassa">
-  <!ENTITY cmdInspectInNewWindow.accesskey "u">
 
   <!ENTITY cmdShowPseudoClasses.label "Aseta pseudoluokkia…">
   <!ENTITY cmdShowPseudoClasses.accesskey "s">
