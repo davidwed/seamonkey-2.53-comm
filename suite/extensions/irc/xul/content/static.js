@@ -41,11 +41,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const __cz_version   = "0.9.87";
+const __cz_version   = "0.9.88";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.87";
+const __cz_locale    = "0.9.88";
 
 var warn;
 var ASSERT;
@@ -781,14 +781,24 @@ function processStartupScripts()
     var baseURL = client.iosvc.newURI(basePath, null, null);
     for (var i = 0; i < scripts.length; ++i)
     {
-        var url = client.iosvc.newURI(scripts[i], null, baseURL);
+        try
+        {
+            var url = client.iosvc.newURI(scripts[i], null, baseURL);
+            var path = getFileFromURLSpec(url.spec);
+        }
+        catch(ex)
+        {
+            var params = ["initialScripts", scripts[i]];
+            display(getMsg(MSG_ERR_INVALID_PREF, params), MT_ERROR);
+            dd(formatException(ex));
+            continue;
+        }
+
         if (url.scheme != "file" && url.scheme != "chrome")
         {
             display(getMsg(MSG_ERR_INVALID_SCHEME, scripts[i]), MT_ERROR);
             continue;
         }
-
-        var path = getFileFromURLSpec(url.spec);
 
         if (!path.exists())
         {
@@ -2809,7 +2819,7 @@ function setCurrentObject (obj)
 function checkScroll(frame)
 {
     var window = getContentWindow(frame);
-    if (!window || !("document" in window) || !("body" in window.document))
+    if (!window || !window.document || !window.document.body)
         return false;
 
     return (window.document.body.clientHeight - window.innerHeight -
@@ -2819,7 +2829,10 @@ function checkScroll(frame)
 function scrollDown(frame, force)
 {
     var window = getContentWindow(frame);
-    if (window && (force || checkScroll(frame)))
+    if (!window || !window.document || !window.document.body)
+        return;
+
+    if (force || checkScroll(frame))
         window.scrollTo(0, window.document.body.clientHeight);
 }
 
@@ -3232,6 +3245,18 @@ function client_securitychange (webProgress, request, state)
 client.installPlugin =
 function cli_installPlugin(name, source)
 {
+    function checkPluginInstalled(name, path)
+    {
+        var installed = path.exists();
+        for (var i = 0; i < client.plugins.length; i++)
+            installed |= (client.plugins[i].id == name);
+
+        if (installed)
+        {
+            display(MSG_INSTALL_PLUGIN_ERR_ALREADY_INST, MT_ERROR);
+            throw CZ_PI_ABORT;
+        }
+    };
     function getZipEntry(reader, entryEnum)
     {
         // nsIZipReader was rewritten...
@@ -3372,12 +3397,8 @@ function cli_installPlugin(name, source)
             }
 
             dest.append(name);
+            checkPluginInstalled(name, dest);
 
-            if (dest.exists())
-            {
-                display(MSG_INSTALL_PLUGIN_ERR_ALREADY_INST, MT_ERROR);
-                throw CZ_PI_ABORT;
-            }
             dest.create(DIRECTORY_TYPE, 0700);
 
             // Actually extract files...
@@ -3456,11 +3477,8 @@ function cli_installPlugin(name, source)
             }
 
             dest.append(name);
+            checkPluginInstalled(name, dest);
 
-            if (dest.exists()) {
-                display(MSG_INSTALL_PLUGIN_ERR_ALREADY_INST, MT_ERROR);
-                throw CZ_PI_ABORT;
-            }
             dest.create(DIRECTORY_TYPE, 0700);
 
             dest.append("init.js");
@@ -4637,6 +4655,19 @@ function __display(message, msgtype, sourceObj, destObj)
         me = this.me;
     else if (o.server && "me" in o.server)
         me = o.server.me;
+
+    /* Allow for matching (but not identical) user objects here. This tends to
+     * happen with bouncers and proxies, when they send channel messages
+     * pretending to be from the user; the sourceObj is a CIRCChanUser
+     * instead of a CIRCUser so doesn't == 'me'.
+     */
+    if (me)
+    {
+        if (sourceObj && (sourceObj.canonicalName == me.canonicalName))
+            sourceObj = me;
+        if (destObj && (destObj.canonicalName == me.canonicalName))
+            destObj = me;
+    }
 
     // Let callers get away with "ME!" and we have to substitute here.
     if (sourceObj == "ME!")
