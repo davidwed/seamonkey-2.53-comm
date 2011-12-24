@@ -7,6 +7,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>inspector@mozilla.org</em:id>
     <em:version>@DOMi_VERSION@</em:version>
+    <em:unpack>true</em:unpack>
 
     <em:targetApplication>
       <!-- Firefox -->
