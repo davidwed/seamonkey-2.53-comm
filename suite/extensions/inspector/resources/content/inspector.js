@@ -223,10 +223,10 @@ InspectorApp.prototype =
 
     if (this.mInitTarget) {
       if (this.mInitTarget.nodeType == Node.DOCUMENT_NODE) {
-        this.setTargetDocument(this.mInitTarget);
+        this.setTargetDocument(this.mInitTarget, false);
       }
       else if (this.mInitTarget.nodeType == Node.ELEMENT_NODE) {
-        this.setTargetDocument(this.mInitTarget.ownerDocument);
+        this.setTargetDocument(this.mInitTarget.ownerDocument, false);
         this.mDocPanel.params = this.mInitTarget;
       }
       this.mInitTarget = null;
@@ -583,11 +583,20 @@ InspectorApp.prototype =
 
   setTargetWindow: function IA_SetTargetWindow(aWindow)
   {
-    this.setTargetDocument(aWindow.document);
+    this.setTargetDocument(aWindow.document, true);
   },
 
-  setTargetDocument: function IA_SetTargetDocument(aDoc)
+  setTargetDocument: function IA_SetTargetDocument(aDoc, aIsInternal)
   {
+    var cmd = document.getElementById("cmdToggleDocument");
+
+    if (aIsInternal == undefined) {
+      aIsInternal = false;
+    }
+
+    cmd.setAttribute("disabled", !aIsInternal);
+    this.setBrowser(aIsInternal, true);
+
     this.mDocPanel.subject = aDoc;
   },
 

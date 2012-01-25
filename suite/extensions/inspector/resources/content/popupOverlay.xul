@@ -80,7 +80,7 @@
     <menuitem class="menuitem-iconic" type="checkbox"
               label="&cmdToggleDocument.label;"
               accesskey="&cmdToggleDocument.accesskey;"
-              observes="cmdToggleDocument"/>
+              observes="cmdToggleDocument" disabled="true"/> 
     <menuseparator/>
     <menuitem id="item:flashOnSelect"
               class="menuitem-iconic"
