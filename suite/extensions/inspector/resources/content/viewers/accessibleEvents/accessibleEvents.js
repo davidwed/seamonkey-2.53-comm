@@ -384,13 +384,23 @@ function observe(aSubject, aTopic, aData)
   // Put event into list.
   var date = new Date();
   var node = accessnode.DOMNode;
+  var role = "", name = "";
+  try {
+    // may fail prior Gecko 2.0
+    role = this.mAccService.getStringRole(accessible.role);
+    name = accessible.name;
+  } catch(e) {
+  }
 
   var eventObj = {
     event: event,
     eventHandlerOutput: gEventHandlerOutput,
     accessnode: accessnode,
     node: node,
+    id: node.id || "",
     nodename: node ? node.nodeName : "",
+    name: name,
+    role: role,
     type: this.mAccService.getStringEventType(type),
     time: date.toLocaleTimeString()
   };
@@ -437,6 +447,12 @@ function getCellText(aRow, aCol)
     return this.mEvents[aRow].time;
   if (aCol.id == "olcEventTargetNodeName")
     return this.mEvents[aRow].nodename;
+  if (aCol.id == "olcEventTargetNodeID")
+    return this.mEvents[aRow].id;
+  if (aCol.id == "olcEventTargetRole")
+    return this.mEvents[aRow].role;
+  if (aCol.id == "olcEventTargetName")
+    return this.mEvents[aRow].name;
   return "";
 }
 

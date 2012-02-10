@@ -40,7 +40,10 @@
 <!ENTITY handledEvents.label "Handled events:">
 <!ENTITY eventType.label "Event Type">
 <!ENTITY eventTime.label "Time">
-<!ENTITY eventNodeName.label "Node Name">
+<!ENTITY eventTargetNodeName.label "Node Name">
+<!ENTITY eventTargetNodeID.label "ID">
+<!ENTITY eventTargetRole.label "Role">
+<!ENTITY eventTargetName.label "Name">
 <!ENTITY isWatched.label "Watched">
 <!ENTITY isHandlerEnabled.label "Handler Enabled">
 <!ENTITY clearEventList.label "Clear Event List">
