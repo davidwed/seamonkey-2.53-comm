@@ -86,42 +86,27 @@
     <rows>
       <row>
         <description>&descRole.label;</description>
-        <description prop="role"/>
+        <textbox prop="role" readonly="true" class="plain"/>
       </row>
       <row>
         <description>&descName.label;</description>
-        <description prop="name"/>
+        <textbox prop="name" readonly="true" class="plain"/>
       </row>
       <row>
         <description>&descDescription.label;</description>
-        <description prop="description"/>
+        <textbox prop="description" readonly="true" class="plain"/>
       </row>
       <row>
         <description>&descValue.label;</description>
-        <description prop="value"/>
+        <textbox prop="value" readonly="true" class="plain"/>
       </row>
       <row>
         <description>&descState.label;</description>
-        <description prop="state"/>
+        <textbox prop="state" readonly="true" class="plain"/>
       </row>
       <row>
         <description>&descBounds.label;</description>
-        <grid>
-          <columns>
-            <column/>
-            <column/>
-            <column/>
-            <column/>
-          </columns>
-          <rows>
-            <row>
-              <description id="bounds-x"/>
-              <description id="bounds-y"/>
-              <description id="bounds-width"/>
-              <description id="bounds-height"/>
-            </row>
-          </rows>
-        </grid>
+        <textbox prop="bounds" readonly="true" class="plain"/>
       </row>
     </rows>
   </grid>

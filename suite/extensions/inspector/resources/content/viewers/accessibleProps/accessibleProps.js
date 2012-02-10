@@ -193,26 +193,10 @@ AccessiblePropsViewer.prototype =
       }
 
       if (value instanceof Array)
-        containers[i].textContent = value.join(", ");
+        containers[i].value = value.join(", ");
       else
-        containers[i].textContent = value;
+        containers[i].value = value;
     }
-
-    // accessible bounds
-    var x = { value: 0 };
-    var y = { value: 0 };
-    var width = {value: 0 };
-    var height = {value: 0 };
-    this.mAccSubject.getBounds(x, y, width, height);
-
-    document.getElementById("bounds-x").textContent =
-      gBundle.getFormattedString("accBoundsX", [x.value]);
-    document.getElementById("bounds-y").textContent =
-      gBundle.getFormattedString("accBoundsY", [y.value]);
-    document.getElementById("bounds-width").textContent =
-      gBundle.getFormattedString("accBoundsWidth", [width.value]);
-    document.getElementById("bounds-height").textContent =
-      gBundle.getFormattedString("accBoundsHeight", [height.value]);
 
     this.mPropViewerMgr.updateViews(this.mAccSubject);
   },
@@ -269,6 +253,19 @@ AccessiblePropsViewer.prototype =
     for (var i = 0; i < states.length; i++)
       list.push(states.item(i));
     return list;
+  },
+
+  get bounds()
+  {
+    var x = { value: 0 };
+    var y = { value: 0 };
+    var width = { value: 0 };
+    var height = { value: 0 };
+    this.mAccSubject.getBounds(x, y, width, height);
+
+    return gBundle.getFormattedString("accBounds",
+                                      [x.value, y.value,
+                                       width.value, height.value]);
   }
 };
 
