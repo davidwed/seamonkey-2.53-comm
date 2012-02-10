@@ -44,6 +44,7 @@
   <!ENTITY target.descr "objet cible d'accessibilité">
   <!ENTITY accRetrieval.descr "service d'accessibilité nsIAccessibleRetrieval">
   <!ENTITY output.descr "imprimer la chaîne donnée">
+  <!ENTITY outputAttrs.descr "imprimer les attributs de l'objet d'accessibilité donné">
   <!ENTITY outputRole.descr "imprimer le rôle de l'objet d'accessibilité donné">
   <!ENTITY outputStates.descr "imprimer les états de l'objet d'accessibilité donné">
   <!ENTITY outputTree.descr "imprimer l'arbre de l'objet d'accessibilité donné, en mettant en valeur les éléments d'accessibilité du tableau donné">
