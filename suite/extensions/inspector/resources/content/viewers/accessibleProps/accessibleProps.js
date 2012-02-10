@@ -61,9 +61,18 @@ const kAccessibleRetrievalCID = "@mozilla.org/accessibleRetrieval;1";
 
 const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
 const nsIAccessible = Components.interfaces.nsIAccessible;
-const nsIAccessNode = Components.interfaces.nsIAccessNode;
 
 const nsIPropertyElement = Components.interfaces.nsIPropertyElement;
+
+/**
+ * QI nsIAccessNode interface if any, used for compatibility with Gecko versions
+ * prior to Gecko13.
+ */
+function QIAccessNode(aAccessible)
+{
+  return "nsIAccessNode" in Components.interfaces ?
+    XPCU.QI(aAccessible, Components.interfaces.nsIAccessNode) : aAccessible;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization/Destruction

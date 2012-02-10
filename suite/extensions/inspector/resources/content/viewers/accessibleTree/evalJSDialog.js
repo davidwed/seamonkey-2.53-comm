@@ -82,9 +82,12 @@ var gAccInterfaces =
   Ci.nsIAccessibleTable,
   Ci.nsIAccessibleTableCell,
   Ci.nsIAccessibleText,
-  Ci.nsIAccessibleValue,
-  Ci.nsIAccessNode,
+  Ci.nsIAccessibleValue
 ];
+
+// Used for compatibility with Gecko versions prior to Gecko13.
+if ("nsIAccessNode" in Ci)
+  gAccInterfaces.push(Ci.nsIAccessNode);
 
 function output(aValue)
 {

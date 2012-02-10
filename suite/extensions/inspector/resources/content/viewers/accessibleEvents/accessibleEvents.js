@@ -59,7 +59,6 @@ const Ci = Components.interfaces;
 const nsIObserverService = Ci.nsIObserverService;
 const nsIAccessibleRetrieval = Ci.nsIAccessibleRetrieval;
 const nsIAccessibleEvent = Ci.nsIAccessibleEvent;
-const nsIAccessNode = Ci.nsIAccessNode;
 const nsIAccessible = Ci.nsIAccessible;
 
 const gAccInterfaces =
@@ -74,9 +73,21 @@ const gAccInterfaces =
   Ci.nsIAccessibleTable,
   Ci.nsIAccessibleTableCell,
   Ci.nsIAccessibleText,
-  Ci.nsIAccessibleValue,
-  Ci.nsIAccessNode,
+  Ci.nsIAccessibleValue
 ];
+
+if ("nsIAccessNode" in Ci)
+  gAccInterfaces.push(Ci.nsIAccessNode);
+
+/**
+ * QI nsIAccessNode interface if any, used for compatibility with Gecko versions
+ * prior to Gecko13.
+ */
+function QIAccessNode(aAccessible)
+{
+  return "nsIAccessNode" in Ci ?
+    XPCU.QI(aAccessible, Ci.nsIAccessNode) : aAccessible;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization
@@ -267,7 +278,7 @@ function AccessibleEventsView(aObject, aWatchView)
 
   this.canSkipTreeTraversal = false;
   this.mDOMIRootDocumentAccessible = null;
-  var acc = XPCU.QI(this.mAccService.getAccessibleFor(document), nsIAccessNode);
+  var acc = QIAccessNode(this.mAccService.getAccessibleFor(document));
   if ("rootDocument" in acc) {
     this.mDOMIRootDocumentAccessible = acc.rootDocument;
     this.mApplicationAccessible = this.mDOMIRootDocumentAccessible.parent;
@@ -308,7 +319,7 @@ function observe(aSubject, aTopic, aData)
   if (!accessible)
     return;
 
-  var accessnode = XPCU.QI(accessible, nsIAccessNode);
+  var accessnode = QIAccessNode(accessible);
 
   // Ignore events on this DOM Inspector to avoid a mess (Gecko 2.0).
   if (accessnode.rootDocument &&
@@ -1076,7 +1087,7 @@ inAccTreeView.prototype.generateChildren =
     properties: []
   };
 
-  var accessible = XPCU.QI(aAccessible, nsIAccessNode);
+  var accessible = QIAccessNode(aAccessible);
 
   // Add row and cells.
   if (aHighlightList && aHighlightList.indexOf(aAccessible) != -1) {

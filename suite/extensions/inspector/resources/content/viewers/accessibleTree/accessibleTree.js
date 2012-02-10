@@ -63,9 +63,18 @@ const nsIObserverService = Components.interfaces.nsIObserverService;
 const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
 const nsIAccessibleEvent = Components.interfaces.nsIAccessibleEvent;
 const nsIAccessible = Components.interfaces.nsIAccessible;
-const nsIAccessNode = Components.interfaces.nsIAccessNode;
 
 const nsIDOMNode = Components.interfaces.nsIDOMNode;
+
+/**
+ * QI nsIAccessNode interface if any, used for compatibility with Gecko versions
+ * prior to Gecko13.
+ */
+function QIAccessNode(aAccessible)
+{
+  return "nsIAccessNode" in Components.interfaces ?
+    XPCU.QI(aAccessible, Components.interfaces.nsIAccessNode) : aAccessible;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization
@@ -454,7 +463,7 @@ function rowToNode(aRow)
 inAccTreeView.prototype.getDOMNodeFor =
 function getDOMNodeFor(aAccessible)
 {
-  var accessNode = XPCU.QI(aAccessible, nsIAccessNode);
+  var accessNode = QIAccessNode(aAccessible);
   var DOMNode = accessNode.DOMNode;
   if (!DOMNode) {
     return null;

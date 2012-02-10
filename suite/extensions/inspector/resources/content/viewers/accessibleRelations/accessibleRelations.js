@@ -56,8 +56,12 @@ const kAccessibleRetrievalCID = "@mozilla.org/accessibleRetrieval;1";
 
 const nsIAccessibleRetrieval = Components.interfaces.nsIAccessibleRetrieval;
 const nsIAccessibleRelation = Components.interfaces.nsIAccessibleRelation;
-const nsIAccessNode = Components.interfaces.nsIAccessNode;
 const nsIAccessible = Components.interfaces.nsIAccessible;
+
+/**
+ * Used for compatibility with Gecko versions prior to Gecko13.
+ */
+const nsIAccessNode = Components.interfaces.nsIAccessNode || nsIAccessible;
 
 ///////////////////////////////////////////////////////////////////////////////
 //// Initialization

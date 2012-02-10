@@ -521,7 +521,7 @@ TableCellTreeView.prototype.getPropertyName =
 TableCellTreeView.prototype.getDOMNode =
   function TableCellTreeView_getDOMNode(aRow)
 {
-  var accessNode = XPCU.QI(this.getAccessible(aRow), nsIAccessNode);
+  var accessNode = QIAccessNode(this.getAccessible(aRow));
   if (!accessNode)
     return null;
 
