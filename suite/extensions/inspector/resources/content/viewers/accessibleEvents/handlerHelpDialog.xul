@@ -77,6 +77,10 @@
         <description>&output.descr;</description>
       </row>
       <row>
+        <description value="outputAttrs(accessible)"/>
+        <description>&outputAttrs.descr;</description>
+      </row>
+      <row>
         <description value="outputRole(accessible)"/>
         <description>&outputRole.descr;</description>
       </row>

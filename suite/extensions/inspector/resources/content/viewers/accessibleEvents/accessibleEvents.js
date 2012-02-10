@@ -60,6 +60,7 @@ const nsIObserverService = Ci.nsIObserverService;
 const nsIAccessibleRetrieval = Ci.nsIAccessibleRetrieval;
 const nsIAccessibleEvent = Ci.nsIAccessibleEvent;
 const nsIAccessible = Ci.nsIAccessible;
+const nsIPropertyElement = Ci.nsIPropertyElement;
 
 const gAccInterfaces =
 [
@@ -1028,6 +1029,22 @@ function outputStates(aAccessible)
   }
 
   output(list.join());
+}
+
+function outputAttrs(aAccessible)
+{
+  var str = "";
+  var attrs = aAccessible.attributes;
+  if (attrs) {
+    var enumerate = attrs.enumerate();
+    while (enumerate.hasMoreElements()) {
+      var prop = XPCU.QI(enumerate.getNext(), nsIPropertyElement);
+      str += prop.key + ": " + prop.value + "; ";
+    }
+
+    if (str)
+      output(str);
+  }
 }
 
 function outputTree(aAccessible, aHighlightList)
