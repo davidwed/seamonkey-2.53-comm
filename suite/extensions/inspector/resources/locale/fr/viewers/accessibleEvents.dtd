@@ -40,7 +40,10 @@
 <!ENTITY handledEvents.label "Événements gérés :">
 <!ENTITY eventType.label "Type d'événement">
 <!ENTITY eventTime.label "Heure">
-<!ENTITY eventNodeName.label "Nom du nœud">
+<!ENTITY eventTargetNodeName.label "Nom du nœud">
+<!ENTITY eventTargetNodeID.label "ID">
+<!ENTITY eventTargetRole.label "Rôle">
+<!ENTITY eventTargetName.label "Nom">
 <!ENTITY isWatched.label "Observé">
 <!ENTITY isHandlerEnabled.label "Gestionnaire activé">
 <!ENTITY clearEventList.label "Effacer la liste des événements">
