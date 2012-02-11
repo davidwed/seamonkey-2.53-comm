@@ -40,7 +40,10 @@
 <!ENTITY handledEvents.label "Обрабатываемые события:">
 <!ENTITY eventType.label "Тип события">
 <!ENTITY eventTime.label "Время">
-<!ENTITY eventNodeName.label "Имя узла">
+<!ENTITY eventTargetNodeName.label "Имя узла">
+<!ENTITY eventTargetNodeID.label "ID">
+<!ENTITY eventTargetRole.label "Роль">
+<!ENTITY eventTargetName.label "Имя">
 <!ENTITY isWatched.label "Отслеживается">
 <!ENTITY isHandlerEnabled.label "Обработчик включён">
 <!ENTITY clearEventList.label "Очистить список событий">
