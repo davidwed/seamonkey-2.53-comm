@@ -42,6 +42,7 @@
 <!ENTITY target.descr "объект цели доступности">
 <!ENTITY accRetrieval.descr "служба доступности nsIAccessibleRetrieval">
 <!ENTITY output.descr "печатает данную строку">
+<!ENTITY outputAttrs.descr "печатает атрибуты объекта данного объекта доступности">
 <!ENTITY outputRole.descr "печатает роль данного объекта доступности">
 <!ENTITY outputStates.descr "печатает состояния данного объекта доступности">
 <!ENTITY outputTree.descr "печатает дерево данного объекта доступности, подсвечивает доступности из данного массива">
