@@ -785,6 +785,7 @@ function WatchAccessibleEventsListView()
     this.mHandlerEditor = document.getElementById("welHandlerEditor");
     this.mHandlerEditorLabel = document.getElementById("welHandlerEditorLabel");
     this.mHandlerEditor.addEventListener("input", this, false);
+    this.mHandlerEditor.addEventListener("change", this, false);
     this.mHandlerEditor.disabled = true;
   };
 
@@ -835,13 +836,24 @@ function WatchAccessibleEventsListView()
    */
   this.handleEvent = function watchview_handleEvent(aEvent)
   {
-    if (aEvent.type != "input" || aEvent.target != this.mHandlerEditor) {
+    if (aEvent.target != this.mHandlerEditor) {
       return;
     }
 
-    var idx = this.selection.currentIndex;
-    var data = this.getData(idx);
-    data.handlerSource = this.mHandlerEditor.value;
+    switch (aEvent.type) {
+      // Enable/disable event handler automatically (enabled event handler is
+      // activated on blur).
+      case "input":
+        var isEnabled = this.mHandlerEditor.value != "";
+        this.updateHandlerState(isEnabled, this.selection.currentIndex);
+        break;
+
+      // Activate event handler when input is finished.
+      case "change":
+        var data = this.getData(this.selection.currentIndex);
+        data.handlerSource = this.mHandlerEditor.value;
+        break;
+    }
   }
 
   this.mAccService = XPCU.getService(kAccessibleRetrievalCID,
