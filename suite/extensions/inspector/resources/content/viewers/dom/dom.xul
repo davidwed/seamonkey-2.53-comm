@@ -74,7 +74,8 @@
     <menupopup id="ppDOMContext"
                onpopupshowing="viewer.onPopupShowing(event.target)">
       <menuitem id="mnEditInspectInNewWindow"/>
-      <menuitem label="&cmdInspectBrowser.label;"
+      <menuitem id="mnInspectBrowser"
+                label="&cmdInspectBrowser.label;"
                 accesskey="&cmdInspectBrowser.accesskey;"
                 checkvalid="true"
                 command="cmdInspectBrowser"/>
@@ -140,15 +141,18 @@
       </menu>
       <menuitem id="mnEditDelete"/>
       <menuseparator/>
-      <menuitem label="&cmdCopyXML.label;"
+      <menuitem id="mnCopyXML"
+                label="&cmdCopyXML.label;"
                 accesskey="&cmdCopyXML.accesskey;"
                 command="cmdCopyXML"/>
       <menuseparator/>
-      <menuitem label="&cmdBlink.label;"
+      <menuitem id="mnBlink"
+                label="&cmdBlink.label;"
                 accesskey="&cmdBlink.accesskey;"
                 checkvalid="true"
                 command="cmdBlink"/>
-      <menuitem label="&cmdShowPseudoClasses.label;"
+      <menuitem id="mnShowPseudoClasses"
+                label="&cmdShowPseudoClasses.label;"
                 accesskey="&cmdShowPseudoClasses.accesskey;"
                 command="cmdShowPseudoClasses"/>
     </menupopup>
