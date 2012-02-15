@@ -43,9 +43,9 @@
               accesskey="&mnInspectApplicationAccessible.accesskey;"/>
     <menuitem label="&cmdEnterLocation.label;"
               accesskey="&cmdEnterLocation.accesskey;"
-              observes="cmdEnterLocation"/>
+              id="mnEnterLocation" observes="cmdEnterLocation"/>
     <menuitem label="&cmdClose.label;" accesskey="&cmdClose.accesskey;"
-              observes="cmdClose" key="key_closeInspector"/>
+              id="mnClose" observes="cmdClose" key="key_closeInspector"/>
     <menuseparator/>
     <menuitem label="&cmdSave.label;" accesskey="&cmdSave.accesskey;"
               observes="cmdSave" key="key_saveInspector" id="mi-save"/>
@@ -65,19 +65,22 @@
   </menupopup>
 
   <menupopup id="mppView">
-    <menu label="&mnDocViewerList.label;"
+    <menu id="mnDocViewerList"
+          label="&mnDocViewerList.label;"
           accesskey="&mnDocViewerList.accesskey;"
           oncommand="inspector.onViewerListCommand(event.target);"
           disabled="true">
       <menupopup id="mppDocViewerList"/>
     </menu>
-    <menu label="&mnObjectViewerList.label;"
+    <menu id="mnObjectViewerList"
+          label="&mnObjectViewerList.label;"
           accesskey="&mnObjectViewerList.accesskey;"
           oncommand="inspector.onViewerListCommand(event.target);"
           disabled="true">
       <menupopup id="mppObjectViewerList"/>
     </menu>
     <menuitem class="menuitem-iconic" type="checkbox"
+              id="item:toggleDocument"
               label="&cmdToggleDocument.label;"
               accesskey="&cmdToggleDocument.accesskey;"
               observes="cmdToggleDocument" disabled="true"/> 
