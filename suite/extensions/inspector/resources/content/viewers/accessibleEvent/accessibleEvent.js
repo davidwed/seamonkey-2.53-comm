@@ -180,6 +180,7 @@ AccessibleEventViewer.prototype =
         if (typeof output == "object" && "cols" in output && "view" in output) {
           var tree = document.createElement("tree");
           tree.setAttribute("flex", "1");
+          tree.setAttribute("treelines", "true");
 
           var treecols = document.createElement("treecols");
           for (let col in output.cols) {

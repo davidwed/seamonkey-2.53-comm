@@ -116,6 +116,7 @@ inDataTreeView.prototype.hasNextSibling =
     return false;
   }
 
+  var lastIdx = row.node.parent.children.length - 1;
   return row.node.parent.children[lastIdx] != row.node;
 };
 
