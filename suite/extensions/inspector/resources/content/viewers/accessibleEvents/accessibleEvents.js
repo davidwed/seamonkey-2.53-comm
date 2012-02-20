@@ -1092,7 +1092,10 @@ function inAccTreeView(aAccessible, aHighlightList)
 {
   inDataTreeView.call(this);
 
-  this.generateChildren(aAccessible, aHighlightList);
+  var list = this.generateChildren(aAccessible, aHighlightList);
+  if (list) {
+    this.expandNodes(list);
+  }
 }
 
 inAccTreeView.prototype = new inDataTreeView();
@@ -1133,7 +1136,9 @@ inAccTreeView.prototype.generateChildren =
   var accessible = QIAccessNode(aAccessible);
 
   // Add row and cells.
-  if (aHighlightList && aHighlightList.indexOf(aAccessible) != -1) {
+  var isHighlighted =
+    aHighlightList && aHighlightList.indexOf(aAccessible) != -1;
+  if (isHighlighted) {
     data.properties.push("highlight");
   }
 
@@ -1144,10 +1149,17 @@ inAccTreeView.prototype.generateChildren =
     ("id" in accessible.DOMNode ? accessible.DOMNode.id : "");
 
   var parent = this.appendChild(aParent, data);
+  var nodesToExpand = null;
 
   // Add children.
   var childCount = aAccessible.childCount;
   for (let i = 0; i < childCount; i++) {
-    this.generateChildren(aAccessible.getChildAt(i), aHighlightList, parent);
+    var list =
+      this.generateChildren(aAccessible.getChildAt(i), aHighlightList, parent);
+    if (list) {
+      nodesToExpand = list.concat(nodesToExpand || []);
+    }
   }
+
+  return nodesToExpand ? nodesToExpand.concat(parent) : isHighlighted && [];
 };

@@ -130,10 +130,10 @@ inDataTreeView.prototype.toggleOpenState =
 
   var oldCount = this.rowCount;
   if (row.isOpen) {
-    this.collapseNode(aRowIdx);
+    this.collapseRowAt(aRowIdx);
   }
   else {
-    this.expandNode(aRowIdx);
+    this.expandRowAt(aRowIdx);
   }
 
   this.mTree.invalidateRow(aRowIdx);
@@ -161,17 +161,35 @@ inDataTreeView.prototype.appendChild =
   return node;
 };
 
+/**
+ * Expand nodes from the given list. The caller should ensure that every node
+ * to expand precedes its ancestors in the list, in other words the list should
+ * be in reverse order, and include all ancestor nodes.
+ */
+inDataTreeView.prototype.expandNodes =
+  function inDataTreeView_expandNodes(aNodes)
+{
+  var node = aNodes.pop();
+  for (let rowIdx = 0; node && rowIdx < this.mRows.length; rowIdx++) {
+    if (this.getRowAt(rowIdx).node == node) {
+      this.expandRowAt(rowIdx);
+      node = aNodes.pop();
+    }
+  }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //// inDataTreeView. Tree utils.
 
 /**
  * Expands a tree node on the given row.
  */
-inDataTreeView.prototype.expandNode =
-  function inDataTreeView_expandNode(aRowIdx)
+inDataTreeView.prototype.expandRowAt =
+  function inDataTreeView_expandRowAt(aRowIdx)
 {
   var row = this.getRowAt(aRowIdx);
-  if (!row) {
+  if (!row || row.isOpen) {
     return;
   }
 
@@ -192,11 +210,11 @@ inDataTreeView.prototype.expandNode =
 /**
  * Collapse a tree node on the given row.
  */
-inDataTreeView.prototype.collapseNode =
-  function inDataTreeView_collapseNode(aRowIdx)
+inDataTreeView.prototype.collapseRowAt =
+  function inDataTreeView_collapseRowAt(aRowIdx)
 {
   var row = this.getRowAt(aRowIdx);
-  if (!row) {
+  if (!row || !row.isOpen) {
     return;
   }
 
