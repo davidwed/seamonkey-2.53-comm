@@ -785,7 +785,6 @@ function WatchAccessibleEventsListView()
     this.mHandlerEditor = document.getElementById("welHandlerEditor");
     this.mHandlerEditorLabel = document.getElementById("welHandlerEditorLabel");
     this.mHandlerEditor.addEventListener("input", this, false);
-    this.mHandlerEditor.addEventListener("change", this, false);
     this.mHandlerEditor.disabled = true;
   };
 
@@ -841,16 +840,15 @@ function WatchAccessibleEventsListView()
     }
 
     switch (aEvent.type) {
-      // Enable/disable event handler automatically (enabled event handler is
-      // activated on blur).
       case "input":
-        var isEnabled = this.mHandlerEditor.value != "";
-        this.updateHandlerState(isEnabled, this.selection.currentIndex);
-        break;
+        var idx = this.selection.currentIndex;
 
-      // Activate event handler when input is finished.
-      case "change":
-        var data = this.getData(this.selection.currentIndex);
+        // Enable/disable event handler automatically.
+        var isEnabled = this.mHandlerEditor.value != "";
+        this.updateHandlerState(isEnabled, idx);
+
+        // Update event handler code.
+        var data = this.getData(idx);
         data.handlerSource = this.mHandlerEditor.value;
         break;
     }
