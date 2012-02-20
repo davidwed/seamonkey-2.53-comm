@@ -92,6 +92,10 @@
         <description value="outputTree(accessible, hightlightList)"/>
         <description>&outputTree.descr;</description>
       </row>
+      <row>
+        <description value="outputDOMAttrs(accessible)"/>
+        <description>&outputDOMAttrs.descr;</description>
+      </row>
     </rows>
   </grid>
 

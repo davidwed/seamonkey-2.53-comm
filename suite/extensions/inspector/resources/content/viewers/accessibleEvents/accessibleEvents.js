@@ -1085,6 +1085,16 @@ function outputTree(aAccessible, aHighlightList)
   output(treeObj);
 }
 
+function outputDOMAttrs(aAccessible)
+{
+  var DOMNode = QIAccessNode(aAccessible).DOMNode;
+  var DOMAttributes = DOMNode.attributes;
+  for (let i = 0; i < DOMAttributes.length; i++) {
+    var DOMAttribute = DOMAttributes.item(i);
+    output(DOMAttribute.name + ": " + DOMAttribute.value);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Private functions.
 
