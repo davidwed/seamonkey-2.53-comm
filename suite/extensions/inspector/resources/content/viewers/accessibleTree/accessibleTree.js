@@ -168,7 +168,7 @@ AccessibleTreeViewer.prototype =
     var sel = this.getSelectedAccessible();
     if (sel) {
       var win = openDialog("chrome://inspector/content/viewers/accessibleTree/evalJSDialog.xul", 
-                           "_blank", "chrome,resizable=yes", sel);
+                           "_blank", "chrome,resizable=yes", sel, this.mView);
     }
   },
 
@@ -334,6 +334,22 @@ function toggleOpenState(aRow)
   this.mTree.rowCountChanged(aRow + 1, this.rowCount - oldCount);
 }
 
+inAccTreeView.prototype.getRowProperties =
+function getRowProperties(aRowIdx, aProperties)
+{
+  var node = this.rowToNode(aRowIdx);
+  if (node && node.highlighted) {
+    let atom = this.createAtom("highlight");
+    aProperties.AppendElement(atom);
+  }
+}
+
+inAccTreeView.prototype.getCellProperties =
+function getCellProperties(aRowIdx, aCol, aProperties)
+{
+  this.getRowProperties(aRowIdx, aProperties);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //// inAccTreeView. Public.
 
@@ -398,6 +414,68 @@ function collapseNode(aRow)
 
   node.isOpen = false;
 }
+
+/**
+ * Expand the tree and highlight accessibles in the given subtree that comply
+ * to filter function.
+ *
+ * @param aRoot - the root accessible of subtree to search in
+ * @param aFilterFunc - a function that returns true if the passed accessible
+                        complies to search criteria.
+ */
+inAccTreeView.prototype.search =
+function search(aRoot, aFilterFunc)
+{
+  QIAccessNode(aRoot);
+  if (aFilterFunc(aRoot)) {
+    let chain = [];
+    let parent = aRoot;
+    do {
+      chain.push(parent);
+      if (parent == aRoot.document)
+        break;
+
+      parent = parent.parent;
+    } while (parent);
+
+    let current = chain.pop();
+    for (let idx = 0; idx < this.mNodes.length; idx++) {
+      let node = this.mNodes[idx];
+      if (node.accessible == current) {
+        if (chain.length == 0) {
+          node.highlighted = true;
+          this.mTree.invalidateRow(idx);
+        } else {
+          if (!node.isOpen)
+            this.toggleOpenState(idx);
+
+          current = chain.pop();
+        }
+      }
+    }
+  }
+
+  var count = aRoot.childCount;
+  for (let idx = 0; idx < count; idx++) {
+    let child = aRoot.getChildAt(idx);
+    this.search(child, aFilterFunc);
+  }
+}
+
+/**
+ * Clear search results.
+ */
+inAccTreeView.prototype.clearSearch =
+function clearSearch()
+{
+  for (let idx = 0; idx < this.mNodes.length; idx++) {
+    if (this.mNodes[idx].highlighted) {
+      this.mNodes[idx].highlighted = false;
+      this.mTree.invalidateRow(idx);
+    }
+  }
+}
+
 
 /**
  * Create a tree node.
@@ -493,8 +571,8 @@ function getObject(aRow)
  * Return accessible of the tree node pointed by the given
  * row index.
  *
- * @param aRow  The row index to get the accessible from.
- * @returns     The accessible for the given index.
+ * @param aRow - the row index to get the accessible from.
+ * @returns the accessible for the given index.
  */
 inAccTreeView.prototype.getAccessible =
 function getAccessible(aRow)

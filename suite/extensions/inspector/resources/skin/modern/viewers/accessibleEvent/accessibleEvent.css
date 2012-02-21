@@ -35,16 +35,4 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-@import url("chrome://inspector/skin");
-
-treechildren::-moz-tree-row(highlight) {
-  background-color: #feeecd;
-}
-
-treechildren::-moz-tree-row(selected, highlight) {
-  background-color: #c0ffff;
-}
-
-treechildren::-moz-tree-cell-text(highlight) {
-  color: black;
-}
+@import url("chrome://inspector/skin/viewers/accessibleTree/accessibleTree.css");

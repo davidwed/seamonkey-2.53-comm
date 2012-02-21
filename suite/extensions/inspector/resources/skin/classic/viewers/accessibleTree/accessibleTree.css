@@ -11,15 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is mozilla.org code.
+ * The Original Code is DOM Inspector.
  *
  * The Initial Developer of the Original Code is
  * Mozilla Foundation.
- * Portions created by the Initial Developer are Copyright (C) 2008
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Alexander Surkov <surkov.alexander@gmail.com> (original author)
+ *  Alexander Surkov <surkov.alexander@gmail.com> (original author)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,68 +34,17 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
-var gAcc = window.arguments[0];
-var gTreeView = window.arguments[1];
 
-var gInputArea = null;
-var gOutputArea = null;
+@import url("chrome://inspector/skin");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
-function load()
-{
-  gInputArea = document.getElementById("JSInputArea");
-  gOutputArea = document.getElementById("JSOutputArea");
+treechildren::-moz-tree-row(highlight) {
+  background-color: #feeecd;
 }
 
-function closeDialog()
-{
-  gTreeView.clearSearch();
-}
- 
-function execute()
-{
-  if (!gAcc)
-    return;
-
-  for (var idx = 0; idx < gAccInterfaces.length; idx++) {
-    if (gAcc instanceof gAccInterfaces[idx])
-      gAcc.QueryInterface(gAccInterfaces[idx]);
-  }
-
-  gOutputArea.value = "";
-
-  var expr = gInputArea.value;
-  try {
-    var f = Function("accessible", "tree", expr);
-    var result = f(gAcc, gTreeView);
-  } catch (ex) {
-      output(ex);
-  }
+treechildren::-moz-tree-row(selected, highlight) {
+  background-color: #c0ffff;
 }
 
-var gAccInterfaces =
-[
-  Ci.nsIAccessible,
-  Ci.nsIAccessibleDocument,
-  Ci.nsIAccessibleEditableText,
-  Ci.nsIAccessibleHyperLink,
-  Ci.nsIAccessibleHyperText,
-  Ci.nsIAccessibleImage,
-  Ci.nsIAccessibleSelectable,
-  Ci.nsIAccessibleTable,
-  Ci.nsIAccessibleTableCell,
-  Ci.nsIAccessibleText,
-  Ci.nsIAccessibleValue
-];
-
-// Used for compatibility with Gecko versions prior to Gecko13.
-if ("nsIAccessNode" in Ci)
-  gAccInterfaces.push(Ci.nsIAccessNode);
-
-function output(aValue)
-{
-  gOutputArea.value += aValue;
+treechildren::-moz-tree-cell-text(highlight) {
+  color: black;
 }

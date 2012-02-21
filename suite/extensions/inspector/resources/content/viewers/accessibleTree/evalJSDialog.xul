@@ -51,7 +51,8 @@
         buttonaccesskeyextra1="&btnEvaluateJS.accesskey;"
         ondialogextra1="return execute();"
         style="width: 30em;"
-        onload="load();">
+        onload="load();"
+        ondialogaccept="closeDialog();">
 
   <script type="application/javascript"
           src="chrome://inspector/content/viewers/accessibleTree/evalJSDialog.js"/>
