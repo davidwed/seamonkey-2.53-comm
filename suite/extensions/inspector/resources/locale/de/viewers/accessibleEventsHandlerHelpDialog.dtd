@@ -44,6 +44,8 @@
   <!ENTITY target.descr "Accessibility-Zielobjekt">
   <!ENTITY accRetrieval.descr "nsIAccessibleRetrieval Accessibility-Service">
   <!ENTITY output.descr "gibt die angegebene Zeichenkette aus">
+  <!ENTITY outputAttrs.descr "gibt die Objekt-Attribute des gegebenen Accessible-Objekts aus">
   <!ENTITY outputRole.descr "gibt die Rolle des angegebenen Accessible-Objekts aus">
   <!ENTITY outputStates.descr "gibt Zustände des angegebenen Accessible-Objekts aus">
   <!ENTITY outputTree.descr "gibt einen Baum für das angegebene Accessible-Objekt aus und hebt Accessibles aus dem angegebenen Array hervor">
+  <!ENTITY outputDOMAttrs.descr "gibt die DOM-Attribute des gegebenen Accessible-Objekts aus">
