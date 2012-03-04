@@ -40,7 +40,10 @@
 <!ENTITY handledEvents.label "Spracované udalosti:">
 <!ENTITY eventType.label "Typ udalosti">
 <!ENTITY eventTime.label "Čas">
-<!ENTITY eventNodeName.label "Názov uzla">
+<!ENTITY eventTargetNodeName.label "Názov uzla">
+<!ENTITY eventTargetNodeID.label "ID">
+<!ENTITY eventTargetRole.label "Úloha">
+<!ENTITY eventTargetName.label "Názov">
 <!ENTITY isWatched.label "Sledovaný">
 <!ENTITY isHandlerEnabled.label "Spracovanie povolené">
 <!ENTITY clearEventList.label "Vymazať zoznam udalostí">

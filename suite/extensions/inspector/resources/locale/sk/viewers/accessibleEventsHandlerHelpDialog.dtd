@@ -44,6 +44,8 @@
   <!ENTITY target.descr "cieľový dostupný objekt">
   <!ENTITY accRetrieval.descr "služba dostupnosti nsIAccessibleRetrieval">
   <!ENTITY output.descr "vypíše zadaný reťazec">
+  <!ENTITY outputAttrs.descr "vypíše atribúty zadaného dostupného objektu">
   <!ENTITY outputRole.descr "vypíše rolu zadaného dostupného objektu">
   <!ENTITY outputStates.descr "vypíše stav zadaného dostupného objektu">
   <!ENTITY outputTree.descr "vypíše strom pre zadaný dostupný objekt, zvýrazní dostupné objekty zo zadaného poľa">
+  <!ENTITY outputDOMAttrs.descr "vypíše atribúty DOM zadaného dostupného objektu">
