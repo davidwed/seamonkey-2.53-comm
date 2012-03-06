@@ -1,3 +1,7 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
 <!ENTITY Inspector.title "DOM 查看器">
 <!ENTITY browserPanel.label "浏览器">
 <!ENTITY btnFind.tooltip "找到一个节点查看其id，tag，或者属性">
