@@ -7,12 +7,13 @@
 <!ENTITY namespaceURI.label "Namnområdes-URI:">
 <!ENTITY nodeType.label "Nodtyp:">
 <!ENTITY nodeValue.label "Nodvärde:">
+<!ENTITY grpAttr.label "Attribut">
 
 <!ENTITY namespaceTitle.null.label "null">
 <!ENTITY namespaceTitle.default.label "Dokumentstandard">
 <!ENTITY namespaceTitle.custom.label "Eget">
 
-<!-- LOCALIZATION NOTE: The following entities are names of W3C specifications.
+<!-- LOCALIZATION NOTE: Följande entities are names of W3C specifications.
                         Please consult http://www.w3.org/Consortium/Translation/
                         for appropriate translation or leave unchanged. -->
 <!ENTITY namespaceTitle.XMLNS.label "XMLNS">

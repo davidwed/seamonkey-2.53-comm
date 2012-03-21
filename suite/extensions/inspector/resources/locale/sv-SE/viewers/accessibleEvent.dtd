@@ -10,4 +10,4 @@
 <!ENTITY descIsInserted.label "Infogad text: ">
 <!ENTITY descModifiedText.label "Ändrad text: ">
 <!ENTITY descCaretOffset.label "Textmarkörförskjutning: ">
-
+<!ENTITY descrHandlerOutput.label "Händelsehanterarutdata: ">

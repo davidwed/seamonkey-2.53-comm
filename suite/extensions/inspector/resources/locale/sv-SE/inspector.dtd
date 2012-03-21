@@ -55,8 +55,8 @@
   <!ENTITY mnDocViewerList.accesskey "D">
   <!ENTITY mnObjectViewerList.label "Objektgranskare">
   <!ENTITY mnObjectViewerList.accesskey "O">
-  <!ENTITY cmdToggleBrowser.label "Webbläsare">
-  <!ENTITY cmdToggleBrowser.accesskey "B">
+  <!ENTITY cmdToggleDocument.label "Visa dokument i webbläsarruta">
+  <!ENTITY cmdToggleDocument.accesskey "b">
   <!ENTITY cmdToggleSearch.label "Sökresultat">
   <!ENTITY cmdFlashOnSelect.label "Blinka markerat element">
   <!ENTITY cmdFlashOnSelect.accesskey "n">
