@@ -47,12 +47,22 @@ PseudoClassDialog.prototype =
   
   initialize: function()
   {
-    var state = this.mDOMUtils.getContentState(this.mSubject);
-    
-    for (var key in gCheckBoxIds) {
-      if (gCheckBoxIds[key] & state) {
+    if ("hasPseudoClassLock" in this.mDOMUtils) {
+      for (var key in gCheckBoxIds) {
         var cbx = document.getElementById(key);
-        cbx.setAttribute("checked", "true");
+        if (this.mDOMUtils.hasPseudoClassLock(this.mSubject, cbx.label)) {
+          cbx.setAttribute("checked", "true");
+        }
+      }
+    }
+    else {
+      var state = this.mDOMUtils.getContentState(this.mSubject);
+
+      for (var key in gCheckBoxIds) {
+        if (gCheckBoxIds[key] & state) {
+          var cbx = document.getElementById(key);
+          cbx.setAttribute("checked", "true");
+        }
       }
     }
   },
@@ -64,10 +74,22 @@ PseudoClassDialog.prototype =
     
     for (var key in gCheckBoxIds) {
       var cbx = document.getElementById(key);
-      if (cbx.checked) 
-        this.mDOMUtils.setContentState(el, gCheckBoxIds[key]);
-      else
-        this.mDOMUtils.setContentState(root, gCheckBoxIds[key]);
+      if (cbx.checked) {
+        if ("addPseudoClassLock" in this.mDOMUtils) {
+          this.mDOMUtils.addPseudoClassLock(el, cbx.label);
+        }
+        else {
+          this.mDOMUtils.setContentState(el, gCheckBoxIds[key]);
+        }
+      }
+      else {
+        if ("removePseudoClassLock" in this.mDOMUtils) {
+          this.mDOMUtils.removePseudoClassLock(el, cbx.label);
+        }
+        else {
+          this.mDOMUtils.setContentState(root, gCheckBoxIds[key]);
+        }
+      }
     }
   }
   
