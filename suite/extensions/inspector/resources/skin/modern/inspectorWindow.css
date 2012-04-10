@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 @import url("chrome://inspector/skin");
+@import url("chrome://navigator/skin");
+@import url("chrome://browser/skin");
 
 #tbxInsToolbox {
   border-bottom: none;
@@ -10,10 +12,6 @@
 
 #bxURLBar {
   padding: 2px;
-}
-
-#imgURLBarIcon {
-  list-style-image: url("chrome://communicator/skin/bookmarks/bookmark-item.gif");
 }
 
 #bxSearch {
