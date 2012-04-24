@@ -50,6 +50,7 @@
           <!-- request both autocomplete implementations for compatibility -->
           <textbox id="tfURLBar" type="autocomplete" flex="1"
             searchSessions="history" timeout="50" maxrows="6" class="padded"
+            placeholder="&cmdEnterLocation.label;"
             autocompletesearch="history file" observes="cmdGotoURL">
             <image id="imgURLBarIcon" class="bookmark-item"/>
           </textbox>
