@@ -9,6 +9,7 @@
 <!ENTITY xblBindings.label "XBL-биндинги">
 <!ENTITY styleRules.label "Правила CSS">
 <!ENTITY computedStyle.label "Вычисленный стиль">
+<!ENTITY usedFontFaces.label "Используемые Font Faces">
 <!ENTITY jsObject.label "Объект JavaScript">
 <!ENTITY accessibleEvent.label "Событие доступности">
 <!ENTITY accessibleObject.label "Объект доступности">
