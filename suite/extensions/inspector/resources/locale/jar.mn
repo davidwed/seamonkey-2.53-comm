@@ -27,5 +27,6 @@ inspector.jar:
 * locale/@AB_CD@/inspector/viewers/xblBindings.dtd                        (@AB_CD@/viewers/xblBindings.dtd)
 * locale/@AB_CD@/inspector/viewers/boxModel.dtd                           (@AB_CD@/viewers/boxModel.dtd)
 * locale/@AB_CD@/inspector/viewers/computedStyle.dtd                      (@AB_CD@/viewers/computedStyle.dtd)
+* locale/@AB_CD@/inspector/viewers/usedFontFaces.dtd                      (@AB_CD@/viewers/usedFontFaces.dtd)
 * locale/@AB_CD@/inspector/viewers/jsObject.dtd                           (@AB_CD@/viewers/jsObject.dtd)
 * locale/@AB_CD@/inspector/inspector.properties                           (@AB_CD@/inspector.properties)

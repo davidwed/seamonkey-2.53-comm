@@ -9,6 +9,7 @@
 <!ENTITY xblBindings.label "XBL Bindings">
 <!ENTITY styleRules.label "CSS Rules">
 <!ENTITY computedStyle.label "Computed Style">
+<!ENTITY usedFontFaces.label "Used Font Faces">
 <!ENTITY jsObject.label "JavaScript Object">
 <!ENTITY accessibleEvent.label "Accessible Event">
 <!ENTITY accessibleObject.label "Accessible Object">

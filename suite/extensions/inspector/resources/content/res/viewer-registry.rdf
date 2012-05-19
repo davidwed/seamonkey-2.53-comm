@@ -105,6 +105,19 @@
     </rdf:li>
 
     <rdf:li><rdf:Description 
+      ins:uid="usedFontFaces"
+      ins:panels="bxObjectPanel bxObjPanel"
+      ins:description="&usedFontFaces.label;">
+        <ins:filter><![CDATA[
+          // XXX getUsedFontFaces really works on a Range,
+          // but to avoid bug 166749 we permit any Node.
+          return object instanceof Components.interfaces.nsIDOMNode &&
+            "getUsedFontFaces" in XPCU.getService("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
+        ]]></ins:filter>
+      </rdf:Description>
+    </rdf:li>
+
+    <rdf:li><rdf:Description
       ins:uid="jsObject"
       ins:panels="bxDocPanel bxObjectPanel bxObjPanel"
       ins:description="&jsObject.label;"

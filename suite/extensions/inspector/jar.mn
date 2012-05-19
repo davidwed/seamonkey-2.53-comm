@@ -93,6 +93,8 @@ inspector.jar:
   content/inspector/viewers/accessibleTree/evalJSDialog.xul             (resources/content/viewers/accessibleTree/evalJSDialog.xul)
   content/inspector/viewers/computedStyle/computedStyle.js              (resources/content/viewers/computedStyle/computedStyle.js)
   content/inspector/viewers/computedStyle/computedStyle.xul             (resources/content/viewers/computedStyle/computedStyle.xul)
+  content/inspector/viewers/usedFontFaces/usedFontFaces.js              (resources/content/viewers/usedFontFaces/usedFontFaces.js)
+  content/inspector/viewers/usedFontFaces/usedFontFaces.xul             (resources/content/viewers/usedFontFaces/usedFontFaces.xul)
   content/inspector/viewers/dom/FindDialog.js                           (resources/content/viewers/dom/FindDialog.js)
   content/inspector/viewers/dom/columnsDialog.js                        (resources/content/viewers/dom/columnsDialog.js)
   content/inspector/viewers/dom/columnsDialog.xul                       (resources/content/viewers/dom/columnsDialog.xul)
