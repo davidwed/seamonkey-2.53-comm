@@ -59,7 +59,12 @@ JSObjectViewer.prototype =
 
   set subject(aObject)
   {
-    this.setSubject(aObject);
+    var object =
+      "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+      aObject instanceof Components.interfaces.nsIAccessible ?
+      aObject.DOMNode : aObject;
+
+    this.setSubject(object);
   },
 
   // The accessibleObject viewer extends JSObjectViewer.  This method is here
@@ -68,12 +73,11 @@ JSObjectViewer.prototype =
   // overriding with its own subject setter.
   setSubject: function JSOVr_SetSubject(aObject)
   {
-    aObject = this.unwrapObject(aObject);
-    this.mSubject = aObject;
-    this.mView = new JSObjectView(aObject);
+    this.mSubject = this.unwrapObject(aObject);
+    this.mView = new JSObjectView(this.mSubject);
     this.mTree.view = this.mView;
 
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
 
     // If the user has just switched to us from another viewer in the document
     // pane and we don't set the selection below, the object pane will

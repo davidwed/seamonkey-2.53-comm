@@ -145,17 +145,10 @@ AccessibleRelationsViewer.prototype =
 ///////////////////////////////////////////////////////////////////////////////
 //// AccessibleRelationsView
 
-function AccessibleRelationsView(aNode)
+function AccessibleRelationsView(aObject)
 {
-  this.mNode = aNode;
-
-  this.mAccessible = aNode instanceof nsIAccessible ?
-    aNode : aNode[" accessible "];
-
-  if (this.mAccessible)
-    XPCU.QI(this.mAccessible, nsIAccessible);
-  else
-    this.mAccessible = gAccService.getAccessibleFor(aNode);
+  this.mAccessible = aObject instanceof nsIAccessible ?
+    aObject : gAccService.getAccessibleFor(aObject);
 
   this.mRelations = this.mAccessible.getRelations();
 }
@@ -239,12 +232,7 @@ AccessibleTargetsView.prototype.getDOMNode =
 function getDOMNode(aRow)
 {
   var accessNode = this.mTargets.queryElementAt(aRow, nsIAccessNode);
-  if (!accessNode)
-    return null;
-
-  var DOMNode = accessNode.DOMNode;
-  DOMNode[" accessible "] = accessNode;
-  return DOMNode;
+  return accessNode && accessNode.DOMNode;
 }
 
 AccessibleTargetsView.prototype.getSelectedDOMNode =

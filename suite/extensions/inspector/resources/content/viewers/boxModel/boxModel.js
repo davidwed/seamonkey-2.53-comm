@@ -54,9 +54,10 @@ BoxModelViewer.prototype =
   get subject() { return this.mSubject },
   set subject(aObject) 
   {
-    this.mSubject = aObject;
+    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
+      aObject : aObject.DOMNode;
     this.showStats();
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
   },
 
   initialize: function(aPane)

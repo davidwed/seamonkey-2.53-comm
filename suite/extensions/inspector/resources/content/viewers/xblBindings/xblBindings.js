@@ -100,13 +100,14 @@ XBLBindingsViewer.prototype =
 
   set subject(aObject)
   {
-    this.mSubject = aObject;
+    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
+      aObject : aObject.DOMNode;
 
     this.populateBindings();
 
     this.displayBinding(this.mBindingsList.value);
 
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
   },
 
   initialize: function XBLBVr_Initialize(aPane)

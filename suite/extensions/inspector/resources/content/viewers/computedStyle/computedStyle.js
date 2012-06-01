@@ -69,6 +69,9 @@ ComputedStyleViewer.prototype =
 
   set subject(aObject)
   {
+    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
+      aObject : aObject.DOMNode;
+
     var bo = this.mTree.treeBoxObject;
     var firstVisibleRow = -1;
     var selectedIndices;
@@ -79,7 +82,7 @@ ComputedStyleViewer.prototype =
       currentIndex = this.mTreeView.selection.currentIndex;
     }
 
-    this.mTreeView = new ComputedStyleView(aObject);
+    this.mTreeView = new ComputedStyleView(this.mSubject);
     this.mTree.view = this.mTreeView;
 
     if (firstVisibleRow >= 0) {
@@ -98,7 +101,7 @@ ComputedStyleViewer.prototype =
       bo.endUpdateBatch();
     }
 
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
   },
 
   initialize: function CSVr_Initialize(aPane)

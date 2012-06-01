@@ -55,18 +55,31 @@
       ins:filter="return object instanceof Components.interfaces.nsIDOMDocument;"/>
     </rdf:li>
 
-    <rdf:li><rdf:Description 
-      ins:uid="domNode"
-      ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="&domNode.label;"
-      ins:filter="return object instanceof Components.interfaces.nsIDOMNode;"/>
+    <rdf:li>
+      <rdf:Description
+        ins:uid="domNode"
+        ins:panels="bxObjectPanel bxObjPanel"
+        ins:description="&domNode.label;">
+        <ins:filter><![CDATA[
+          return object instanceof Components.interfaces.nsIDOMNode ||
+            "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+            object instanceof Components.interfaces.nsIAccessible;
+        ]]></ins:filter>
+      </rdf:Description>
     </rdf:li>
 
-    <rdf:li><rdf:Description 
-      ins:uid="boxModel"
-      ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="&boxModel.label;"
-      ins:filter="return object instanceof Components.interfaces.nsIDOMElement;"/>
+    <rdf:li>
+      <rdf:Description
+        ins:uid="boxModel"
+        ins:panels="bxObjectPanel bxObjPanel"
+        ins:description="&boxModel.label;">
+        <ins:filter><![CDATA[
+          return object instanceof Components.interfaces.nsIDOMElement ||
+            "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+            object instanceof Components.interfaces.nsIAccessible &&
+            object.DOMNode instanceof Components.interfaces.nsIDOMElement;
+        ]]></ins:filter>
+      </rdf:Description>
     </rdf:li>
 
     <rdf:li>
@@ -75,33 +88,53 @@
         ins:panels="bxObjectPanel bxObjPanel"
         ins:description="&xblBindings.label;">
         <ins:filter><![CDATA[
-          if (object instanceof Components.interfaces.nsIDOMElement) {
+          var node =
+            "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+            object instanceof Components.interfaces.nsIAccessible ?
+            object.DOMNode : object;
+
+          if (node instanceof Components.interfaces.nsIDOMElement) {
             try {
               var urls =
                 Components.classes["@mozilla.org/inspector/dom-utils;1"].
                   getService(Components.interfaces["inIDOMUtils"]).
-                    getBindingURLs(object);
+                  getBindingURLs(node);
               return urls && urls.length;
             }
             catch (e) { }
           }
           return false;
-        ]]> </ins:filter>
+        ]]></ins:filter>
       </rdf:Description>
     </rdf:li>
 
-    <rdf:li><rdf:Description
-      ins:uid="styleRules"
-      ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="&styleRules.label;"
-      ins:filter="return object instanceof Components.interfaces.nsIDOMElement || object instanceof Components.interfaces.nsIDOMCSSStyleSheet;"/>
+    <rdf:li>
+      <rdf:Description
+        ins:uid="styleRules"
+        ins:panels="bxObjectPanel bxObjPanel"
+        ins:description="&styleRules.label;">
+      <ins:filter><![CDATA[
+        return object instanceof Components.interfaces.nsIDOMElement ||
+          object instanceof Components.interfaces.nsIDOMCSSStyleSheet ||
+          "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+          object instanceof Components.interfaces.nsIAccessible &&
+          object.DOMNode instanceof Components.interfaces.nsIDOMElement;
+      ]]></ins:filter>
+      </rdf:Description>
     </rdf:li>
 
-    <rdf:li><rdf:Description 
-      ins:uid="computedStyle"
-      ins:panels="bxObjectPanel bxObjPanel"
-      ins:description="&computedStyle.label;"
-      ins:filter="return object instanceof Components.interfaces.nsIDOMElement;"/>
+    <rdf:li>
+      <rdf:Description
+        ins:uid="computedStyle"
+        ins:panels="bxObjectPanel bxObjPanel"
+        ins:description="&computedStyle.label;">
+        <ins:filter><![CDATA[
+          return object instanceof Components.interfaces.nsIDOMElement ||
+            "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+            object instanceof Components.interfaces.nsIAccessible &&
+            object.DOMNode instanceof Components.interfaces.nsIDOMElement;
+        ]]></ins:filter>
+      </rdf:Description>
     </rdf:li>
 
     <rdf:li><rdf:Description 
@@ -111,7 +144,9 @@
         <ins:filter><![CDATA[
           // XXX getUsedFontFaces really works on a Range,
           // but to avoid bug 166749 we permit any Node.
-          return object instanceof Components.interfaces.nsIDOMNode &&
+          return (object instanceof Components.interfaces.nsIDOMNode ||
+                  "@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+                  object instanceof Components.interfaces.nsIAccessible) &&
             "getUsedFontFaces" in XPCU.getService("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
         ]]></ins:filter>
       </rdf:Description>

@@ -157,11 +157,7 @@ AccessibleEventsViewer.prototype =
     var object = this.mView.getObject(idx);
 
     // Set subject for right panel view.
-    var subject = object.node || object.accessnode;
-    if (object.node) {
-      subject[" accessible "] = object.accessnode;
-    }
-    this.mSelection = subject;
+    this.mSelection = object.accessnode;
 
     // Set parameters for right panel view.
     if (this.pane.panelset.panelCount > 1) {

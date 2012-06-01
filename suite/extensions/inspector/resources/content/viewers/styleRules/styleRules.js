@@ -88,9 +88,10 @@ StyleRulesViewer.prototype =
 
   set subject(aObject)
   {
-    this.mSubject = aObject;
+    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
+      aObject : aObject.DOMNode;
     // update the rule tree
-    this.mRuleView = new StyleRuleView(aObject);
+    this.mRuleView = new StyleRuleView(this.mSubject);
     this.mRuleBoxObject.view = this.mRuleView;
     // clear the props tree
     this.mPropsTree.disabled = true;
@@ -98,7 +99,7 @@ StyleRulesViewer.prototype =
     this.mPropsView = null;
     this.mPropsBoxObject.view = null;
 
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
   },
 
   initialize: function SRVr_Initialize(aPane)

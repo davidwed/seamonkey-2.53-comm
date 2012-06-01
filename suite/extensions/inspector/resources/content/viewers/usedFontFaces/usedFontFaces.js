@@ -70,9 +70,11 @@ UsedFontFacesViewer.prototype =
 
   set subject(aObject)
   {
-    this.mTreeView = new UsedFontFacesView(aObject);
+    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
+      aObject : aObject.DOMNode;
+    this.mTreeView = new UsedFontFacesView(this.mSubject);
     this.mTree.view = this.mTreeView;
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
   },
 
   initialize: function UFFVr_Initialize(aPane)

@@ -132,18 +132,8 @@ AccessiblePropsViewer.prototype =
   {
     this.clearView();
 
-    try {
-      this.mAccSubject = this.mSubject instanceof nsIAccessible ?
-        this.mSubject : this.mSubject[" accessible "];
-
-      if (this.mAccSubject)
-        XPCU.QI(this.mAccSubject, nsIAccessible);
-      else
-        this.mAccSubject = gAccService.getAccessibleFor(this.mSubject);
-    } catch(e) {
-      dump("Failed to get accessible object for node.");
-      return;
-    }
+    this.mAccSubject = this.mSubject instanceof nsIAccessible ?
+      this.mSubject : gAccService.getAccessibleFor(this.mSubject);
 
     // accessible properties.
     var propContainer = document.getElementById("mainPropContainer");

@@ -148,10 +148,12 @@ AccessibleTreeViewer.prototype =
     this.mObsMan.dispatchEvent("selectionChange",
                                { selection: this.mSelection } );
 
-    if (this.mSelection && this.mSelection instanceof nsIDOMNode &&
-        this.mSelection.nodeType == nsIDOMNode.ELEMENT_NODE) {
-      var flasher = this.mPane.panelset.flasher;
-      flasher.flashElementOnSelect(this.mSelection);
+    if (this.mSelection) {
+      var node = this.mSelection.DOMNode;
+      if (node.nodeType == nsIDOMNode.ELEMENT_NODE) {
+        var flasher = this.mPane.panelset.flasher;
+        flasher.flashElementOnSelect(node);
+      }
     }
 
     viewer.pane.panelset.updateAllCommands();
@@ -221,7 +223,7 @@ function getCellText(aRow, aCol)
     return accessible.name;
 
   if (aCol.id == "olcNodeName") {
-    var node = this.getDOMNodeFor(accessible);
+    var node = QIAccessNode(accessible).DOMNode;
     return node ? node.nodeName : "";
   }
 
@@ -501,24 +503,6 @@ function rowToNode(aRow)
 //// inAccTreeView. Accessibility utils.
 
 /**
- * Return DOM node for the given accessible.
- *
- * @param aAccessible - an accessible object.
- */
-inAccTreeView.prototype.getDOMNodeFor =
-function getDOMNodeFor(aAccessible)
-{
-  var accessNode = QIAccessNode(aAccessible);
-  var DOMNode = accessNode.DOMNode;
-  if (!DOMNode) {
-    return null;
-  }
-
-  DOMNode[" accessible "] = aAccessible;
-  return DOMNode;
-}
-
-/**
  * Return DOM node for an accessible or accessible if there is no associated
  * DOM node by the tree node pointed by the given row index.
  *
@@ -528,10 +512,7 @@ inAccTreeView.prototype.getObject =
 function getObject(aRow)
 {
   var node = this.mNodes[aRow];
-  if (!node)
-    return null;
-
-  return this.getDOMNodeFor(node.accessible) || node.accessible;
+  return node && QIAccessNode(node.accessible);
 }
 
 /**

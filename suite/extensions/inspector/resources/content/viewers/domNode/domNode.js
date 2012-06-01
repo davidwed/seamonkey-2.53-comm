@@ -134,10 +134,11 @@ DOMNodeViewer.prototype =
     // let's fire it. this won't do anything if it wasn't actually changed
     viewer.pane.panelset.execCommand('cmdEditTextValue');
 
-    this.mSubject = aObject;
+    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
+      aObject : aObject.DOMNode;
     var deck = document.getElementById("dkContent");
 
-    switch (aObject.nodeType) {
+    switch (this.mSubject.nodeType) {
       // things with useful nodeValues
       case Node.TEXT_NODE:
       case Node.CDATA_SECTION_NODE:
@@ -145,7 +146,7 @@ DOMNodeViewer.prototype =
       case Node.PROCESSING_INSTRUCTION_NODE:
         deck.selectedIndex = 1;
         var txb = document.getElementById("txbTextNodeValue").value =
-                  aObject.nodeValue;
+                  this.mSubject.nodeValue;
         break;
       //XXX this view is designed for elements, write a more useful one for
       // document nodes, etc.
@@ -153,19 +154,19 @@ DOMNodeViewer.prototype =
         var bundle = this.pane.panelset.stringBundle;
         deck.selectedIndex = 0;
 
-        this.setTextValue("localName", aObject.localName);
-        this.setTextValue("nodeType", bundle.getString(aObject.nodeType));
-        this.setTextValue("namespace", aObject.namespaceURI);
+        this.setTextValue("localName", this.mSubject.localName);
+        this.setTextValue("nodeType", bundle.getString(this.mSubject.nodeType));
+        this.setTextValue("namespace", this.mSubject.namespaceURI);
     }
 
-    var hideAttributes = aObject.nodeType != Node.ELEMENT_NODE;
+    var hideAttributes = this.mSubject.nodeType != Node.ELEMENT_NODE;
     this.mAttrGroupBox.hidden = hideAttributes;
-    if (!hideAttributes && aObject != this.mDOMView.rootNode) {
-      this.mDOMView.rootNode = aObject;
+    if (!hideAttributes && this.mSubject != this.mDOMView.rootNode) {
+      this.mDOMView.rootNode = this.mSubject;
       this.mAttrTree.view.selection.select(-1);
     }
 
-    this.mObsMan.dispatchEvent("subjectChange", { subject: aObject });
+    this.mObsMan.dispatchEvent("subjectChange", { subject: this.mSubject });
   },
 
   // methods

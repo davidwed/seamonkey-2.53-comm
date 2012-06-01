@@ -489,10 +489,5 @@ TableCellTreeView.prototype.getDOMNode =
   function TableCellTreeView_getDOMNode(aRow)
 {
   var accessNode = QIAccessNode(this.getAccessible(aRow));
-  if (!accessNode)
-    return null;
-
-  var DOMNode = accessNode.DOMNode;
-  DOMNode[" accessible "] = accessNode;
-  return DOMNode;
+  return accessNode && accessNode.DOMNode;
 }
