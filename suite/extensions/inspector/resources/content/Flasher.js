@@ -22,7 +22,7 @@ var gFlasherRegistry = [];
 function Flasher(aColor, aThickness, aDuration, aSpeed, aInvert)
 {
   this.mShell = XPCU.getService("@mozilla.org/inspector/flasher;1", "inIFlasher");
-  this.mShell.color = aColor;
+  this.color = aColor;
   this.mShell.thickness = aThickness;
   this.mShell.invert = aInvert;
   this.duration = aDuration;
@@ -60,7 +60,16 @@ Flasher.prototype =
   },
 
   get color() { return this.mShell.color; },
-  set color(aVal) { return this.mShell.color = aVal; },
+  set color(aVal)
+  {
+    try {
+      this.mShell.color = aVal;
+    }
+    catch (e) { // Catch exception in case aVal is an invalid or empty value.
+      Components.utils.reportError(e);
+    }
+    return aVal;
+  },
 
   get thickness() { return this.mShell.thickness; },
   set thickness(aVal) { this.mShell.thickness = aVal; },
