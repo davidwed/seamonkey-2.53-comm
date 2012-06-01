@@ -292,33 +292,26 @@ function observe(aSubject, aTopic, aData)
   }
 
   // Ignore events having target not in subtree of currently inspected
-  // accessible.
+  // document accessible.
   if (!this.canSkipTreeTraversal) {
-    var parentAccessible = accessible;
-    while (parentAccessible) {
-      // The target accessible is inspected accessible or its child.
-      if (parentAccessible == this.mAccessible) {
+    var parentDocAccessible = accessible.document;
+    while (true) {
+      // The target accessible is inspected document accessible or its child.
+      if (parentDocAccessible == this.mAccessible) {
         break;
       }
 
       // Ignore events on this DOM inspector to avoid a mess.
-      if (parentAccessible == this.mDOMIRootDocumentAccessible) {
+      if (parentDocAccessible == this.mDOMIRootDocumentAccessible) {
         return;
       }
 
-      try {
-        parentAccessible = parentAccessible.parent;
-
-        // Ignore events that aren't in subtree of inspected accessible.
-        if (!parentAccessible) {
-          return;
-        }
-      } catch (e) {
-        // Accessibles on hide events are unattached from tree and parent throws
-        // an exception, we should dump all of them not depending on document they
-        // used to be until we have better approach.
-        break;
+      // Ignore events that aren't in subtree of inspected accessible.
+      if (!parentDocAccessible.parent || !parentDocAccessible.parent.document) {
+        return;
       }
+
+      parentDocAccessible = parentDocAccessible.parent.document;
     }
   }
 
