@@ -183,6 +183,13 @@ AccessibleEventsViewer.prototype =
     this.mWatchView.updateHandlerState(aState);
   },
 
+  onWatchViewKeyPressed: function onWatchViewKeyPressed(aEvent)
+  {
+    // SPACE key was pressed. Toggle the row's Watched column tick.
+    if (aEvent.charCode == KeyEvent.DOM_VK_SPACE)
+      this.mWatchView.toggleEventWatched();
+  },
+
   /**
    * Clear the list of handled events.
    */
@@ -605,6 +612,16 @@ function WatchAccessibleEventsListView()
     }
 
     return "";
+  }
+
+  this.toggleEventWatched = function watchview_toggleEventWatched()
+  {
+    var idx = this.selection.currentIndex;
+    var colWatched = this.mTree.columns.welIsWatched;
+    var newValue = !this.getCellValue(idx, colWatched);
+
+    // setCellValue() needs the new value to be passed as a string.
+    this.setCellValue(idx, colWatched, newValue.toString());
   }
 
   /**
