@@ -645,13 +645,13 @@ nsMsgIncomingServer::ToString(nsAString& aResult)
   return NS_OK;
 }
 
-NS_IMETHODIMP nsMsgIncomingServer::SetPassword(const nsACString& aPassword)
+NS_IMETHODIMP nsMsgIncomingServer::SetPassword(const nsAString& aPassword)
 {
   m_password = aPassword;
   return NS_OK;
 }
 
-NS_IMETHODIMP nsMsgIncomingServer::GetPassword(nsACString& aPassword)
+NS_IMETHODIMP nsMsgIncomingServer::GetPassword(nsAString& aPassword)
 {
   aPassword = m_password;
   return NS_OK;
@@ -720,7 +720,7 @@ nsresult nsMsgIncomingServer::GetPasswordWithoutUI()
         rv = logins[i]->GetPassword(password);
         NS_ENSURE_SUCCESS(rv, rv);
 
-        m_password = NS_LossyConvertUTF16toASCII(password);
+        m_password = password;
         break;
       }
     }
@@ -733,7 +733,7 @@ NS_IMETHODIMP
 nsMsgIncomingServer::GetPasswordWithUI(const nsAString& aPromptMessage, const
                                        nsAString& aPromptTitle,
                                        nsIMsgWindow* aMsgWindow,
-                                       nsACString& aPassword)
+                                       nsAString& aPassword)
 {
   nsresult rv = NS_OK;
 
@@ -788,7 +788,7 @@ nsMsgIncomingServer::GetPasswordWithUI(const nsAString& aPromptMessage, const
       // and getter_Copies.
       char16_t *uniPassword = nullptr;
       if (!aPassword.IsEmpty())
-        uniPassword = ToNewUnicode(NS_ConvertASCIItoUTF16(aPassword));
+        uniPassword = ToNewUnicode(aPassword);
 
       bool okayValue = true;
       rv = dialog->PromptPassword(PromiseFlatString(aPromptTitle).get(),
@@ -796,8 +796,6 @@ nsMsgIncomingServer::GetPasswordWithUI(const nsAString& aPromptMessage, const
                                   NS_ConvertASCIItoUTF16(serverUri).get(),
                                   nsIAuthPrompt::SAVE_PASSWORD_PERMANENTLY,
                                   &uniPassword, &okayValue);
-      nsAutoString uniPasswordAdopted;
-      uniPasswordAdopted.Adopt(uniPassword);
       NS_ENSURE_SUCCESS(rv, rv);
 
       if (!okayValue) // if the user pressed cancel, just return an empty string;
@@ -807,8 +805,10 @@ nsMsgIncomingServer::GetPasswordWithUI(const nsAString& aPromptMessage, const
       }
 
       // we got a password back...so remember it
-      rv = SetPassword(NS_LossyConvertUTF16toASCII(uniPasswordAdopted));
+      rv = SetPassword(nsDependentString(uniPassword));
       NS_ENSURE_SUCCESS(rv, rv);
+
+      PR_FREEIF(uniPassword);
     } // if we got a prompt dialog
     else
       return NS_ERROR_FAILURE;
@@ -867,7 +867,7 @@ nsMsgIncomingServer::ForgetPassword()
   }
   NS_FREE_XPCOM_ISUPPORTS_POINTER_ARRAY(count, logins);
 
-  return SetPassword(EmptyCString());
+  return SetPassword(EmptyString());
 }
 
 NS_IMETHODIMP

@@ -1097,8 +1097,8 @@ nsMsgCompose::Initialize(nsIMsgComposeParams *aParams,
   if(externalSendListener)
     AddMsgSendListener( externalSendListener );
 
-  nsCString smtpPassword;
-  aParams->GetSmtpPassword(getter_Copies(smtpPassword));
+  nsString smtpPassword;
+  aParams->GetSmtpPassword(smtpPassword);
   mSmtpPassword = smtpPassword;
 
   aParams->GetHtmlToQuote(mHtmlToQuote);
@@ -1273,7 +1273,7 @@ nsMsgCompose::SendMsgToServer(MSG_DeliverMode deliverMode, nsIMsgIdentity *ident
                     m_window,
                     mProgress,
                     sendListener,
-                    mSmtpPassword.get(),
+                    mSmtpPassword,
                     mOriginalMsgURI,
                     mType);
     }

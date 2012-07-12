@@ -3018,7 +3018,7 @@ nsMsgComposeAndSend::Init(
               const nsACString &attachment1_body,
               nsIArray *attachments,
               nsIArray *preloaded_attachments,
-              const char *password,
+              const nsAString &password,
               const nsACString &aOriginalMsgURI,
               MSG_ComposeType aType)
 {
@@ -3410,7 +3410,7 @@ nsMsgComposeAndSend::DeliverFileAsMail()
 
     nsCOMPtr<nsIURI> runningUrl;
     rv = smtpService->SendMailMessage(mTempFile, buf, mUserIdentity,
-                                      mSmtpPassword.get(), deliveryListener, msgStatus,
+                                      mSmtpPassword, deliveryListener, msgStatus,
                                       callbacks, mCompFields->GetDSN(),
                                       getter_AddRefs(runningUrl),
                                       getter_AddRefs(mRunningRequest));
@@ -4128,7 +4128,7 @@ nsMsgComposeAndSend::CreateAndSendMessage(
               mozIDOMWindowProxy                *parentWindow,
               nsIMsgProgress                    *progress,
               nsIMsgSendListener                *aListener,
-              const char                        *password,
+              const nsAString                   &password,
               const nsACString                  &aOriginalMsgURI,
               MSG_ComposeType                   aType
               )
@@ -4188,7 +4188,7 @@ nsMsgComposeAndSend::CreateRFC822Message(
             aMsgType,
             aMsgBody,
             nullptr, aAttachments,
-            nullptr, EmptyCString(), nsIMsgCompType::New);
+            EmptyString(), EmptyCString(), nsIMsgCompType::New);
 
   if (NS_FAILED(rv) && mSendReport)
     mSendReport->SetError(nsIMsgSendReport::process_Current, rv, false);
@@ -4208,7 +4208,7 @@ nsMsgComposeAndSend::SendMessageFile(
               nsIMsgDBHdr                       *msgToReplace,
               nsIMsgSendListener                *aListener,
               nsIMsgStatusFeedback              *aStatusFeedback,
-              const char                        *password
+              const char16_t                    *password
               )
 {
   NS_ENSURE_ARG_POINTER(fields);
@@ -4242,7 +4242,8 @@ nsMsgComposeAndSend::SendMessageFile(
             digest_p, false, mode, msgToReplace,
             nullptr, EmptyCString(),
             nullptr, nullptr,
-            password, EmptyCString(), nsIMsgCompType::New);
+            password ? nsDependentString(password) : EmptyString(),
+            EmptyCString(), nsIMsgCompType::New);
 
   if (NS_SUCCEEDED(rv))
     rv = DeliverMessage();
