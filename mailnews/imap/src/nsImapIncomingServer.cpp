@@ -959,7 +959,7 @@ NS_IMETHODIMP nsImapIncomingServer::ResetConnection(const nsACString& folderName
 NS_IMETHODIMP
 nsImapIncomingServer::PerformExpand(nsIMsgWindow *aMsgWindow)
 {
-  nsCString password;
+  nsString password;
   nsresult rv;
   rv = GetPassword(password);
   NS_ENSURE_SUCCESS(rv, rv);
@@ -2158,7 +2158,7 @@ NS_IMETHODIMP nsImapIncomingServer::ForgetPassword()
 NS_IMETHODIMP
 nsImapIncomingServer::AsyncGetPassword(nsIImapProtocol *aProtocol,
                                        bool aNewPasswordRequested,
-                                       nsACString &aPassword)
+                                       nsAString &aPassword)
 {
   if (m_password.IsEmpty())
   {
@@ -2184,7 +2184,7 @@ nsImapIncomingServer::AsyncGetPassword(nsIImapProtocol *aProtocol,
 
 NS_IMETHODIMP
 nsImapIncomingServer::PromptPassword(nsIMsgWindow *aMsgWindow,
-                                     nsACString &aPassword)
+                                     nsAString &aPassword)
 {
   nsString passwordTitle;
   GetImapStringByName("imapEnterPasswordPromptTitle", passwordTitle);
@@ -3350,7 +3350,7 @@ nsImapIncomingServer::GetServerKey(nsACString &aServerKey)
 }
 
 NS_IMETHODIMP
-nsImapIncomingServer::GetServerPassword(nsACString &aPassword)
+nsImapIncomingServer::GetServerPassword(nsAString &aPassword)
 {
   return GetPassword(aPassword);
 }
