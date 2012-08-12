@@ -7,6 +7,7 @@
 <!ENTITY namespaceURI.label "URI przestrzeni nazw:">
 <!ENTITY nodeType.label "Typ węzła:">
 <!ENTITY nodeValue.label "Wartość węzła:">
+<!ENTITY grpAttr.label "Atrybuty">
 
 <!ENTITY namespaceTitle.null.label "null">
 <!ENTITY namespaceTitle.default.label "Domyślna dokumentu">

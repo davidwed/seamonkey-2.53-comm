@@ -15,6 +15,7 @@ ALL_LOCALES = \
 	de \
 	en-GB \
 	en-US \
+	pl \
 	ru \
 	sk \
 	$(NULL)

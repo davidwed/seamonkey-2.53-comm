@@ -10,4 +10,4 @@
 <!ENTITY descIsInserted.label "Tekst wstawiony: ">
 <!ENTITY descModifiedText.label "Tekst zmodyfikowany: ">
 <!ENTITY descCaretOffset.label "Offset kursora: ">
-
+<!ENTITY descrHandlerOutput.label "Obszar wyjściowy uchwytu zdarzeń: ">
