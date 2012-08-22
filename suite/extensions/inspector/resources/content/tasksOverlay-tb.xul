@@ -48,4 +48,10 @@
               command="Tasks:Inspector"/>
   </menupopup>
 
+  <menupopup id="appmenu_taskPopup">
+    <menuitem id="appmenu_inspector" label="&inspectorTaskCmd.label;"
+              insertafter="appmenu_javascriptConsole"
+              command="Tasks:Inspector"/>
+  </menupopup>
+
 </overlay>
