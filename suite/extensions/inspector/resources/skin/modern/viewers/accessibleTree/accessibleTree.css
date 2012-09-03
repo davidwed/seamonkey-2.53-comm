@@ -15,3 +15,8 @@ treechildren::-moz-tree-row(selected, highlight) {
 treechildren::-moz-tree-cell-text(highlight) {
   color: black;
 }
+
+treechildren::-moz-tree-cell-text(grayout) {
+  color: gray;
+  font-weight: bold;
+}

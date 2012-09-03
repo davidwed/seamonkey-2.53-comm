@@ -277,9 +277,10 @@ function AccessibleEventsView(aObject, aWatchView)
 AccessibleEventsView.prototype = new inBaseTreeView();
 
 /**
- * Global variable used to store user's event handler output from helper
- * functions.
+ * Global variables used to store event object and user's event handler output
+ * from helper functions.
  */
+var gEvent = null;
 var gEventHandlerOutput = [ ];
 
 AccessibleEventsView.prototype.observe =
@@ -328,6 +329,7 @@ function observe(aSubject, aTopic, aData)
     return;
 
   // Execute user handlers.
+  gEvent = event;
   gEventHandlerOutput = [ ];
   var expr = this.mWatchView.getHandlerExpr(type);
   if (expr) {
@@ -1110,7 +1112,8 @@ inAccTreeView.prototype.getCellProperties =
 
 // Initialization
 inAccTreeView.prototype.generateChildren =
-  function inAccTreeView_generateChildren(aAccessible, aHighlightList, aParent)
+  function inAccTreeView_generateChildren(aAccessible, aHighlightList, aParent,
+                                          aIsUnattached)
 {
   var data = {
     properties: []
@@ -1118,13 +1121,19 @@ inAccTreeView.prototype.generateChildren =
 
   var accessible = QIAccessNode(aAccessible);
 
-  // Add row and cells.
+  // Highlight the row for accessible from the list.
   var isHighlighted =
     aHighlightList && aHighlightList.indexOf(aAccessible) != -1;
   if (isHighlighted) {
     data.properties.push("highlight");
   }
 
+  // Gray out the row for accessible unattached from the tree.
+  if (aIsUnattached) {
+    data.properties.push("grayout");
+  }
+
+  // Add cells data.
   data["outputtreeRole"] = accRetrieval.getStringRole(aAccessible.role);
   data["outputtreeName"] = aAccessible.name;
   data["outputtreeNodename"] = accessible.DOMNode.nodeName;
@@ -1134,11 +1143,55 @@ inAccTreeView.prototype.generateChildren =
   var parent = this.appendChild(aParent, data);
   var nodesToExpand = null;
 
+  // Insert highlighted row for target of handled hide event if it's specified
+  // in the list (works for Gecko versions higher 13).
+  var containsUnattached = false;
+  var accBeforeUnattached = null;
+  if ("nsIAccessibleHideEvent" in Ci &&
+      gEvent instanceof Ci.nsIAccessibleHideEvent &&
+      gEvent.targetParent == aAccessible) {
+    containsUnattached = true;
+    try {
+      if (gEvent.targetNextSibling.parent == aAccessible) {
+        accBeforeUnattached = gEvent.targetNextSibling;
+      }
+    } catch (e) {
+    }
+    try {
+      if (!accBeforeUnattached &&
+          gEvent.targetPrevSibling.parent == aAccessible) {
+        accBeforeUnattached = gEvent.targetPrevSibling.nextSibling;
+      }
+    } catch (e) {
+    }
+  }
+
   // Add children.
   var childCount = aAccessible.childCount;
   for (let i = 0; i < childCount; i++) {
+    var child = aAccessible.getChildAt(i);
+
+    // Add unattached child before current child.
+    if (accBeforeUnattached == child) {
+      var list =
+        this.generateChildren(gEvent.accessible, aHighlightList, parent, true);
+      if (list) {
+        nodesToExpand = list.concat(nodesToExpand || []);
+      }
+    }
+
     var list =
-      this.generateChildren(aAccessible.getChildAt(i), aHighlightList, parent);
+      this.generateChildren(child, aHighlightList, parent);
+    if (list) {
+      nodesToExpand = list.concat(nodesToExpand || []);
+    }
+  }
+
+  // Put unattached child as last child of the parent, we don't have good guess
+  // about its hierarchy position.
+  if (containsUnattached && !accBeforeUnattached) {
+    var list =
+      this.generateChildren(gEvent.accessible, aHighlightList, parent, true);
     if (list) {
       nodesToExpand = list.concat(nodesToExpand || []);
     }
