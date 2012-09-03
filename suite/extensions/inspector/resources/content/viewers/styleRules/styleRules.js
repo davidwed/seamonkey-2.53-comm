@@ -88,8 +88,11 @@ StyleRulesViewer.prototype =
 
   set subject(aObject)
   {
-    this.mSubject = aObject instanceof Components.interfaces.nsIDOMNode ?
-      aObject : aObject.DOMNode;
+    this.mSubject =
+      ("@mozilla.org/accessibleRetrieval;1" in Components.classes &&
+       aObject instanceof Components.interfaces.nsIAccessible) ?
+      aObject.DOMNode : aObject;
+
     // update the rule tree
     this.mRuleView = new StyleRuleView(this.mSubject);
     this.mRuleBoxObject.view = this.mRuleView;
