@@ -66,3 +66,24 @@ function output(aValue)
 {
   gOutputArea.value += aValue;
 }
+
+function outputTextAttrs(aAccessible, aOffset)
+{
+  if (aAccessible instanceof Ci.nsIAccessibleText) {
+    var startOffsetObj = {}, endOffsetObj = {};
+    var attrs = aAccessible.getTextAttributes(false, aOffset,
+                                              startOffsetObj, endOffsetObj);
+    if (attrs) {
+      var str = "Start offset: " + startOffsetObj.value;
+      str += ", end offset: " + endOffsetObj.value + "\nText attributes:\n";
+
+      var enumerator = attrs.enumerate();
+      while (enumerator.hasMoreElements()) {
+        var prop = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
+        str += "\t" + prop.key + ": " + prop.value + ";\n";
+      }
+
+      output(str);
+    }
+  }
+}
