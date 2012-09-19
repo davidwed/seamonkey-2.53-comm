@@ -128,7 +128,6 @@ function initMenus()
         [
          ["join"],
          // Planned future menu items, not implemented yet.
-         //["attach"],
          //["-"],
          //["manage-networks"],
          ["-"],
@@ -410,6 +409,8 @@ function initMenus()
          ["delete-view", {visibleif: "!" + ChannelActive + " and !" + DCCActive}],
          ["disconnect",  {visibleif: NetConnected}],
          ["reconnect",   {visibleif: NetDisconnected}],
+         ["-"],
+         ["rename"],
          ["-"],
          ["toggle-text-dir"]
         ]

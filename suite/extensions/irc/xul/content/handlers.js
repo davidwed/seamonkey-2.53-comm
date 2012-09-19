@@ -123,25 +123,22 @@ function onUnload()
      * errors are disregarded as there's nothing we can do at this point.
      * Wipe the plugin list afterwards for safety.
      */
-    for (var i = 0; i < client.plugins.length; ++i)
+    for (var k in client.plugins)
     {
-        if ((client.plugins[i].API > 0) && client.plugins[i].enabled)
+        if ((client.plugins[k].API > 0) && client.plugins[k].enabled)
         {
             try
             {
-                client.plugins[i].disable();
+                client.plugins[k].disable();
             }
             catch(ex) {}
         }
     }
-    client.plugins = new Array();
+    client.plugins = new Object();
 
     // Close all dialogs.
-    for (var net in client.networks)
-    {
-        if ("joinDialog" in client.networks[net])
-            client.networks[net].joinDialog.close();
-    }
+    if ("joinDialog" in client)
+        client.joinDialog.close();
     if ("configWindow" in client)
         client.configWindow.close();
     if ("installPluginDialog" in client)
@@ -1153,8 +1150,7 @@ function my_showtonet (e)
 
             // Update everything.
             // Welcome to history.
-            if (client.globalHistory)
-                client.globalHistory.addPage(this.getURL());
+            addURLToHistory(this.getURL());
             updateTitle(this);
             this.updateHeader();
             client.updateHeader();
@@ -2374,7 +2370,7 @@ function net_autoperform()
 {
     if (("autoPerformSent" in this) && (this.autoPerformSent == false))
     {
-        var cmdary = this.prefs["autoperform"];
+        var cmdary = client.prefs["autoperform.network"].concat(this.prefs["autoperform"]);
         for (var i = 0; i < cmdary.length; ++i)
         {
             if (cmdary[i][0] == "/")
@@ -2627,8 +2623,7 @@ function my_cjoin (e)
          */
         if (this.prefs["conference.enabled"])
             this.display(MSG_CONF_MODE_STAYON);
-        if (client.globalHistory)
-            client.globalHistory.addPage(this.getURL());
+        addURLToHistory(this.getURL());
 
         if ("joinTimer" in this)
         {
@@ -2643,6 +2638,8 @@ function my_cjoin (e)
          */
         if (e.channel.unicodeName[0] == "!")
             dispatch("set-current-view", { view: e.channel });
+
+        this.doAutoPerform();
     }
     else
     {
@@ -2872,6 +2869,19 @@ function my_cquit (e)
     this.removeFromList(e.user);
 
     this.updateHeader();
+}
+
+CIRCChannel.prototype.doAutoPerform =
+function my_cautoperform()
+{
+    var cmdary = client.prefs["autoperform.channel"].concat(this.prefs["autoperform"]);
+    for (var i = 0; i < cmdary.length; ++i)
+    {
+        if (cmdary[i][0] == "/")
+            this.dispatch(cmdary[i].substr(1));
+        else
+            this.dispatch(cmdary[i]);
+    }
 }
 
 CIRCChannel.prototype._clearUserList =
@@ -3128,6 +3138,19 @@ function my_dccreject(e)
     //e.set = "dcc-file";
     //e.destObject = f;
     //e.destMethod = "onGotReject";
+}
+
+CIRCUser.prototype.doAutoPerform =
+function my_autoperform()
+{
+    var cmdary = client.prefs["autoperform.user"].concat(this.prefs["autoperform"]);
+    for (var i = 0; i < cmdary.length; ++i)
+    {
+        if (cmdary[i][0] == "/")
+            this.dispatch(cmdary[i].substr(1));
+        else
+            this.dispatch(cmdary[i]);
+    }
 }
 
 CIRCDCCChat.prototype.onInit =

@@ -96,13 +96,13 @@ function initCommands()
          ["input-text-direction", cmdInputTextDirection,                     0],
          ["install-plugin",    cmdInstallPlugin,                   CMD_CONSOLE],
          ["invite",            cmdInvite,           CMD_NEED_SRV | CMD_CONSOLE],
-         ["join",              cmdJoin,             CMD_NEED_SRV | CMD_CONSOLE],
+         ["join",              cmdJoin,                            CMD_CONSOLE],
          ["join-charset",      cmdJoin,             CMD_NEED_SRV | CMD_CONSOLE],
          ["jump-to-anchor",    cmdJumpToAnchor,                   CMD_NEED_NET],
          ["kick",              cmdKick,            CMD_NEED_CHAN | CMD_CONSOLE],
          ["kick-ban",          cmdKick,            CMD_NEED_CHAN | CMD_CONSOLE],
          ["knock",             cmdKnock,            CMD_NEED_SRV | CMD_CONSOLE],
-         ["leave",             cmdLeave,           CMD_NEED_CHAN | CMD_CONSOLE],
+         ["leave",             cmdLeave,            CMD_NEED_SRV | CMD_CONSOLE],
          ["links",             cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["list",              cmdList,             CMD_NEED_SRV | CMD_CONSOLE],
          ["list-plugins",      cmdListPlugins,                     CMD_CONSOLE],
@@ -133,6 +133,7 @@ function initCommands()
          ["query",             cmdQuery,            CMD_NEED_SRV | CMD_CONSOLE],
          ["quit",              cmdQuit,                            CMD_CONSOLE],
          ["quote",             cmdQuote,            CMD_NEED_NET | CMD_CONSOLE],
+         ["rename",            cmdRename,                          CMD_CONSOLE],
          ["reload-plugin",     cmdReload,                          CMD_CONSOLE],
          ["rlist",             cmdRlist,            CMD_NEED_SRV | CMD_CONSOLE],
          ["reconnect",         cmdReconnect,        CMD_NEED_NET | CMD_CONSOLE],
@@ -763,7 +764,7 @@ function dispatchCommand (command, e, flags)
 /* parse function for <plugin> parameters */
 function parsePlugin(e, name)
 {
-    var ary = e.unparsedData.match (/(?:(\d+)|(\S+))(?:\s+(.*))?$/);
+    var ary = e.unparsedData.match(/(?:(\S+))(?:\s+(.*))?$/);
     if (!ary)
         return false;
 
@@ -771,21 +772,13 @@ function parsePlugin(e, name)
 
     if (ary[1])
     {
-        var i = parseInt(ary[1]);
-        if (!(i in client.plugins))
-            return false;
-
-        plugin = client.plugins[i];
-    }
-    else
-    {
-        plugin = getPluginById(ary[2]);
+        plugin = getPluginById(ary[1]);
         if (!plugin)
             return false;
 
     }
 
-    e.unparsedData = arrayHasElementAt(ary, 3) ? ary[3] : "";
+    e.unparsedData = ary[2] || "";
     e[name] = plugin;
     return true;
 }
@@ -1684,6 +1677,22 @@ function cmdRejoin(e)
     e.channel.join(e.channel.mode.key);
 }
 
+function cmdRename(e)
+{
+    var tab = getTabForObject(e.sourceObject);
+    if (!tab) {
+        feedback(e, getMsg(MSG_ERR_INTERNAL_DISPATCH, "rename"));
+        return;
+    }
+    var label = e.label || prompt(MSG_TAB_NAME_PROMPT, tab.label);
+    if (!label) {
+        return;
+    }
+    tab.label = label;
+    tab.setAttribute("tooltiptext", e.sourceObject.unicodeName);
+}
+
+
 function cmdTogglePref (e)
 {
     var state = !client.prefs[e.prefName];
@@ -1958,15 +1967,12 @@ function cmdListPlugins(e)
         return;
     }
 
-    if (client.plugins.length > 0)
-    {
-        for (var i = 0; i < client.plugins.length; ++i)
-            listPlugin(client.plugins[i], i);
-    }
-    else
-    {
+    var i = 0;
+    for (var k in client.plugins)
+        listPlugin(client.plugins[k], i++);
+
+    if (i == 0)
         display(MSG_NO_PLUGINS);
-    }
 }
 
 function cmdRlist(e)
@@ -2302,12 +2308,16 @@ function cmdJoin(e)
     if ((!e.hasOwnProperty("channelName") || !e.channelName) &&
         !e.channelToJoin)
     {
-        if (e.network.joinDialog)
-            return e.network.joinDialog.focus();
+        if (client.joinDialog)
+        {
+            client.joinDialog.setNetwork(e.network);
+            client.joinDialog.focus();
+            return;
+        }
 
         window.openDialog("chrome://chatzilla/content/channels.xul", "",
                           "resizable=yes",
-                          { client: client, network: e.network,
+                          { client: client, network: e.network || null,
                             opener: window });
         return null;
     }
@@ -2381,6 +2391,13 @@ function cmdLeave(e)
 
     if (e.hasOwnProperty("channelName"))
     {
+        if (!e.channelName)
+        {
+            // No channel specified and command not sent from a channel view
+            display(getMsg(MSG_ERR_NEED_CHANNEL, e.command.name), MT_ERROR);
+            return;
+        }
+
         if (arrayIndexOf(e.server.channelTypes, e.channelName[0]) == -1)
         {
             // No valid prefix character. Check they really meant a channel...
@@ -2473,11 +2490,10 @@ function cmdLoad(e)
     {
         var oldPlugin;
 
-        var i = getPluginIndexByURL(url);
-        if (i == -1)
-            return -1;
+        var oldPlugin = getPluginByURL(url);
+        if (!oldPlugin)
+            return;
 
-        oldPlugin = client.plugins[i];
         if (oldPlugin.enabled)
         {
             if (oldPlugin.API > 0)
@@ -2503,8 +2519,6 @@ function cmdLoad(e)
             }
             display(getMsg(MSG_PLUGIN_DISABLED, oldPlugin.id));
         }
-
-        return i;
     }
 
     if (!e.scope)
@@ -2525,10 +2539,7 @@ function cmdLoad(e)
     {
         var rvStr;
         var rv = rvStr = client.load(e.url, e.scope);
-        var index = removeOldPlugin(e.url);
-
-        if (index == null)
-            return null;
+        removeOldPlugin(e.url);
 
         if ("init" in plugin)
         {
@@ -2577,15 +2588,15 @@ function cmdLoad(e)
         if (typeof rv == "function")
             rvStr = "function";
 
-        if (index != -1)
-            client.plugins[index] = plugin;
-        else
-            index = client.plugins.push(plugin) - 1;
+        if (!plugin.id)
+            plugin.id = 'plugin' + randomString(8);
+
+        client.plugins[plugin.id] = plugin;
 
         feedback(e, getMsg(MSG_SUBSCRIPT_LOADED, [e.url, rvStr]), MT_INFO);
 
         if ((plugin.API > 0) && plugin.prefs["enabled"])
-            dispatch("enable-plugin " + index);
+            dispatch("enable-plugin " + plugin.id);
         return {rv: rv};
     }
     catch (ex)

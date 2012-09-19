@@ -4,11 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const __cz_version   = "0.9.88.2";
+const __cz_version   = "0.9.89";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.88";
+const __cz_locale    = "0.9.89";
 
 var warn;
 var ASSERT;
@@ -179,6 +179,7 @@ function init()
     client.ceip.logEvent({type: "client", event: "start"});
 
     setTimeout("dispatch('focus-input')", 0);
+    setTimeout(processStartupAutoperform, 0);
     setTimeout(processStartupURLs, 0);
 }
 
@@ -211,10 +212,8 @@ function initStatic()
 
     try
     {
-        const nsIGlobalHistory = Components.interfaces.nsIGlobalHistory;
-        const GHIST_CONTRACTID = "@mozilla.org/browser/global-history;1";
-        client.globalHistory =
-            Components.classes[GHIST_CONTRACTID].getService(nsIGlobalHistory);
+        const GHIST_CONTRACTID = "@mozilla.org/browser/global-history;2";
+        client.globalHistory = getService(GHIST_CONTRACTID, "nsIGlobalHistory2");
     }
     catch (ex)
     {
@@ -738,7 +737,7 @@ function importFromFrame(method)
 
 function processStartupScripts()
 {
-    client.plugins = new Array();
+    client.plugins = new Object();
     var scripts = client.prefs["initialScripts"];
     var basePath = getURLSpecFromFile(client.prefs["profilePath"]); 
     var baseURL = client.iosvc.newURI(basePath, null, null);
@@ -808,50 +807,33 @@ function loadLocalFile(localFile)
 
 function getPluginById(id)
 {
-    for (var i = 0; i < client.plugins.length; ++i)
-    {
-        if (client.plugins[i].id == id)
-            return client.plugins[i];
-
-    }
-
-    return null;
+    return client.plugins[id] || null;
 }
 
-function getPluginIndexById(id)
-{
-    for (var i = 0; i < client.plugins.length; ++i)
-    {
-        if (client.plugins[i].id == id)
-            return i;
-
-    }
-
-    return -1;
-}
 
 function getPluginByURL(url)
 {
-    for (var i = 0; i < client.plugins.length; ++i)
+    for (var k in client.plugins)
     {
-        if (client.plugins[i].url == url)
-            return client.plugins[i];
+        if (client.plugins[k].url == url)
+            return client.plugins[k];
 
     }
 
     return null;
 }
 
-function getPluginIndexByURL(url)
+
+function processStartupAutoperform()
 {
-    for (var i = 0; i < client.plugins.length; ++i)
+    var cmdary = client.prefs["autoperform.client"];
+    for (var i = 0; i < cmdary.length; ++i)
     {
-        if (client.plugins[i].url == url)
-            return i;
-
+        if (cmdary[i][0] == "/")
+            client.dispatch(cmdary[i].substr(1));
+        else
+            client.dispatch(cmdary[i]);
     }
-
-    return -1;
 }
 
 function processStartupURLs()
@@ -932,6 +914,17 @@ function openStartupURLs()
 function destroy()
 {
     destroyPrefs();
+}
+
+
+function addURLToHistory(url, referer)
+{
+    if (client.globalHistory)
+    {
+        referer = referer ? client.iosvc.newURI(referer, "UTF-8", null) : null;
+        url = client.iosvc.newURI(url, "UTF-8", null);
+        client.globalHistory.addURI(url, false, true, referer);
+    }
 }
 
 function addStatusMessage(message)
@@ -1533,8 +1526,7 @@ function mainStep()
 function openQueryTab(server, nick)
 {
     var user = server.addUser(nick);
-    if (client.globalHistory)
-        client.globalHistory.addPage(user.getURL());
+    addURLToHistory(user.getURL());
     if (!("messages" in user))
     {
         var value = "";
@@ -1564,8 +1556,9 @@ function openQueryTab(server, nick)
         }
 
         dispatch("create-tab-for-view", { view: user });
+
+        user.doAutoPerform();
     }
-    user.whois();
     return user;
 }
 
@@ -1636,7 +1629,7 @@ function getObjectDetails (obj, rv)
         case "IRCUser":
             rv.viewType = MSG_USER;
             rv.user = obj;
-            rv.userName = obj.unicodeName;
+            rv.userName = rv.nickname = obj.unicodeName;
             rv.server = rv.user.parent;
             rv.network = rv.server.parent;
             break;
@@ -1644,7 +1637,7 @@ function getObjectDetails (obj, rv)
         case "IRCChanUser":
             rv.viewType = MSG_USER;
             rv.user = obj;
-            rv.userName = obj.unicodeName;
+            rv.userName = rv.nickname = obj.unicodeName;
             rv.channel = rv.user.parent;
             rv.server = rv.channel.parent;
             rv.network = rv.server.parent;
@@ -1773,62 +1766,89 @@ function doCommandWithParams(command, params)
     }
 }
 
-var testURLs =
-    ["irc:", "irc://", "irc:///", "irc:///help", "irc:///help,needkey",
-    "irc://irc.foo.org", "irc://foo:6666",
-    "irc://foo", "irc://irc.foo.org/", "irc://foo:6666/", "irc://foo/",
-    "irc://irc.foo.org/,needpass", "irc://foo/,isserver",
-    "irc://moznet/,isserver", "irc://moznet/",
-    "irc://foo/chatzilla", "irc://foo/chatzilla/",
+var testURLs = [
+    "irc:",
+    "irc://",
+    "irc://foo",
+    "irc://foo/",
+    "irc://foo/,isserver",
+    "irc://foo/chatzilla",
+    "irc://foo/chatzilla/",
+    "irc://foo:6666",
+    "irc://foo:6666/",
+    "irc://irc.foo.org",
+    "irc://irc.foo.org/",
+    "irc://irc.foo.org/,needpass",
     "irc://irc.foo.org/?msg=hello%20there",
     "irc://irc.foo.org/?msg=hello%20there&ignorethis",
     "irc://irc.foo.org/%23mozilla,needkey?msg=hello%20there&ignorethis",
-    "invalids",
-    "irc://irc.foo.org/,isnick"];
+    "irc://moznet/",
+    "irc://moznet/,isserver",
+    "irc://[fe80::5d49:767b:4b68:1b17]",
+    "irc://[fe80::5d49:767b:4b68:1b17]/",
+    "irc://[fe80::5d49:767b:4b68:1b17]:6666",
+    "irc://[fe80::5d49:767b:4b68:1b17]:6666/"
+];
+
+var testFailURLs = [
+    "irc:///",
+    "irc:///help",
+    "irc:///help,needkey",
+    "irc://irc.foo.org/,isnick",
+    "invalids"
+];
 
 function doURLTest()
 {
-    for (var u in testURLs)
+    var passed = 0, total = testURLs.length + testFailURLs.length;
+    for (var i = 0; i < testURLs.length; i++)
     {
-        dd("testing url \"" + testURLs[u] + "\"");
-        var o = parseIRCURL(testURLs[u]);
+        var o = parseIRCURL(testURLs[i]);
         if (!o)
-            dd("PARSE FAILED!");
+            display("Parse of '" + testURLs[i] + "' failed.", MT_ERROR);
         else
-            dd(dumpObjectTree(o));
-        dd("---");
+            passed++;
     }
+    for (var i = 0; i < testFailURLs.length; i++)
+    {
+        var o = parseIRCURL(testFailURLs[i]);
+        if (o)
+            display("Parse of '" + testFailURLs[i] + "' unexpectedly succeeded.", MT_ERROR);
+        else
+            passed++;
+    }
+    display("Passed " + passed + " out of " + total + " tests (" +
+            passed / total * 100 + "%).", MT_INFO);
 }
 
-var testIRCURLObjects =
-    [
-     [{}, "irc://"],
-     [{host: "undernet"},                                    "irc://undernet/"],
-     [{host: "irc.undernet.org"},                    "irc://irc.undernet.org/"],
-     [{host: "irc.undernet.org", isserver: true},    "irc://irc.undernet.org/"],
-     [{host: "undernet", isserver: true},           "irc://undernet/,isserver"],
-     [{host: "irc.undernet.org", port: 6667},        "irc://irc.undernet.org/"],
-     [{host: "irc.undernet.org", port: 1},         "irc://irc.undernet.org:1/"],
-     [{host: "irc.undernet.org", port: 1, scheme: "ircs"},
-                                                  "ircs://irc.undernet.org:1/"],
-     [{host: "irc.undernet.org", port: 9999, scheme: "ircs"},
-                                                    "ircs://irc.undernet.org/"],
-     [{host: "undernet", needpass: true},           "irc://undernet/,needpass"],
-     [{host: "undernet", pass: "cz"},                "irc://undernet/?pass=cz"],
-     [{host: "undernet", charset: "utf-8"},    "irc://undernet/?charset=utf-8"],
-     [{host: "undernet", target: "#foo"},              "irc://undernet/%23foo"],
-     [{host: "undernet", target: "#foo", needkey: true},
-                                               "irc://undernet/%23foo,needkey"],
-     [{host: "undernet", target: "John", isnick: true},
-                                                  "irc://undernet/John,isnick"],
-     [{host: "undernet", target: "#foo", key: "cz"},
-                                                "irc://undernet/%23foo?key=cz"],
-     [{host: "undernet", charset: "utf-8"},    "irc://undernet/?charset=utf-8"],
-     [{host: "undernet", target: "John", msg: "spam!"},
-                                             "irc://undernet/John?msg=spam%21"],
-     [{host: "undernet", target: "foo", isnick: true, msg: "spam!", pass: "cz"},
-                               "irc://undernet/foo,isnick?msg=spam%21&pass=cz"]
-    ];
+var testIRCURLObjects = [
+    [{}, "irc://"],
+    [{host: "undernet"},                                    "irc://undernet/"],
+    [{host: "irc.undernet.org"},                    "irc://irc.undernet.org/"],
+    [{host: "irc.undernet.org", isserver: true},    "irc://irc.undernet.org/"],
+    [{host: "undernet", isserver: true},           "irc://undernet/,isserver"],
+    [{host: "irc.undernet.org", port: 6667},        "irc://irc.undernet.org/"],
+    [{host: "irc.undernet.org", port: 1},         "irc://irc.undernet.org:1/"],
+    [{host: "irc.undernet.org", port: 1, scheme: "ircs"},
+                                                 "ircs://irc.undernet.org:1/"],
+    [{host: "irc.undernet.org", port: 9999, scheme: "ircs"},
+                                                   "ircs://irc.undernet.org/"],
+    [{host: "undernet", needpass: true},           "irc://undernet/,needpass"],
+    [{host: "undernet", pass: "cz"},                "irc://undernet/?pass=cz"],
+    [{host: "undernet", charset: "utf-8"},    "irc://undernet/?charset=utf-8"],
+    [{host: "undernet", target: "#foo"},              "irc://undernet/%23foo"],
+    [{host: "undernet", target: "#foo", needkey: true},
+                                              "irc://undernet/%23foo,needkey"],
+    [{host: "undernet", target: "John", isnick: true},
+                                                 "irc://undernet/John,isnick"],
+    [{host: "undernet", target: "#foo", key: "cz"},
+                                               "irc://undernet/%23foo?key=cz"],
+    [{host: "undernet", charset: "utf-8"},    "irc://undernet/?charset=utf-8"],
+    [{host: "undernet", target: "John", msg: "spam!"},
+                                            "irc://undernet/John?msg=spam%21"],
+    [{host: "undernet", target: "foo", isnick: true, msg: "spam!", pass: "cz"},
+                              "irc://undernet/foo,isnick?msg=spam%21&pass=cz"]
+];
 
 function doObjectURLtest()
 {
@@ -3211,8 +3231,7 @@ function cli_installPlugin(name, source)
     function checkPluginInstalled(name, path)
     {
         var installed = path.exists();
-        for (var i = 0; i < client.plugins.length; i++)
-            installed |= (client.plugins[i].id == name);
+        installed |= (name in client.plugins);
 
         if (installed)
         {
@@ -4146,7 +4165,7 @@ function c_checkURLScheme(url)
                 client.schemes[c.substr(len)] = true;
         }
     }
-    return (url in client.schemes);
+    return (url.toLowerCase() in client.schemes);
 }
 
 client.adoptNode =
