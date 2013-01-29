@@ -102,7 +102,7 @@ function initCommands()
          ["kick",              cmdKick,            CMD_NEED_CHAN | CMD_CONSOLE],
          ["kick-ban",          cmdKick,            CMD_NEED_CHAN | CMD_CONSOLE],
          ["knock",             cmdKnock,            CMD_NEED_SRV | CMD_CONSOLE],
-         ["leave",             cmdLeave,            CMD_NEED_SRV | CMD_CONSOLE],
+         ["leave",             cmdLeave,            CMD_NEED_NET | CMD_CONSOLE],
          ["links",             cmdSimpleCommand,    CMD_NEED_SRV | CMD_CONSOLE],
          ["list",              cmdList,             CMD_NEED_SRV | CMD_CONSOLE],
          ["list-plugins",      cmdListPlugins,                     CMD_CONSOLE],
@@ -1113,7 +1113,9 @@ function cmdDelayed(e)
 {
     function _dispatch()
     {
-        dispatch(e.rest, null, e.isInteractive);
+        // Clear inputData so that commands without arguments work properly
+        e.inputData = "";
+        dispatch(e.rest, e, e.isInteractive);
     }
     setTimeout(_dispatch, e.delay * 1000);
 }
@@ -2385,7 +2387,7 @@ function cmdLeave(e)
 {
     if (!e.server)
     {
-        display(MSG_ERR_IMPROPER_VIEW, MT_ERROR);
+        display(getMsg(MSG_ERR_IMPROPER_VIEW, e.command.name), MT_ERROR);
         return;
     }
 
@@ -3745,7 +3747,7 @@ function cmdDoCommand(e)
     {
         // open Mozilla/SeaMonkey preferences
         const PREF_URL = 'chrome://chatzilla/content/pref-irc.xul';
-        if (goPreferences.arity == 1) // SeaMonkey 2.x
+        if (goPreferences.length == 1) // SeaMonkey 2.x
             goPreferences('navigator_pane');
         else // Mozilla, SeaMonkey 1.x, etc.
             goPreferences('navigator', PREF_URL, 'navigator');
