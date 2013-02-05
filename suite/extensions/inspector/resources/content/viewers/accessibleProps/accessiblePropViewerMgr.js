@@ -200,7 +200,9 @@ function actionViewer()
   {
     this.mAccessible = aAccessible;
 
-    let count = aAccessible.numActions;
+    // nsIAccessible::numActions was renamed to actionCount in Mozilla 15.
+    let count = ("actionCount" in aAccessible) ?
+      aAccessible.actionCount : aAccessible.numActions;
     if (!count)
       return false;
 
