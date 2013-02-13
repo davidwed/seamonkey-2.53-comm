@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //// Global
 
+const nsIAccessibleText = Components.interfaces.nsIAccessibleText;
 const nsIAccessibleTableCell = Components.interfaces.nsIAccessibleTableCell;
 
 
@@ -112,6 +113,7 @@ function accessiblePropViewerMgr(aPaneElm)
   this.viewers = {
     "attributes": new attributesViewer(),
     "actions": new actionViewer(),
+    "textattrs": new textAttrsViewer(),
     "tablecell": new tableCellViewer()
   };
 
@@ -186,7 +188,7 @@ function attributesViewer()
 
 
 /**
- * Action proeprty view.
+ * Action property view.
  */
 function actionViewer()
 {
@@ -289,6 +291,128 @@ function actionViewer()
 
   this.mActionItemContainer = document.getElementById("actionItemContainer");
   this.mDefaultActionItem = document.getElementById("actionItem");
+}
+
+
+/**
+ * Text attributes property view.
+ */
+function textAttrsViewer()
+{
+  /**
+   * Updates the view for the given accessible.
+   */
+  this.update = function textAttrsViewer_update(aAccessible)
+  {
+    if (!(aAccessible instanceof nsIAccessibleText))
+      return false;
+
+    // Default text attributes.
+    this.addAttributes(aAccessible.defaultTextAttributes,
+                       "textAttrs:default:treeBody");
+
+    // Generate text ranges.
+    var length = aAccessible.characterCount;
+    var offset = 0;
+    while (offset < length) {
+      const kHTMLNS = "http://www.w3.org/1999/xhtml";
+      var textRangeElm = document.createElementNS(kHTMLNS, "span");
+      textRangeElm.setAttribute("class", "textAttrsTextRange");
+
+      var endOffset = { };
+
+      textRangeElm.textAttrs =
+        aAccessible.getTextAttributes(false, offset, { }, endOffset);
+      textRangeElm.startOffset = offset;
+      textRangeElm.endOffset = endOffset.value;
+
+      var text = aAccessible.getText(offset, endOffset.value);
+      textRangeElm.textContent = text;
+
+      textRangeElm.addEventListener("focus", this, false);
+      textRangeElm.setAttribute("tabindex", 0);
+
+      document.getElementById("textAttrs:content").appendChild(textRangeElm);
+
+      offset = endOffset.value;
+    }
+
+    return true;
+  }
+
+  /**
+   * Clear the view's data.
+   */
+  this.clear = function textAttrsViewer_clear()
+  {
+    var content = document.getElementById("textAttrs:content");
+    while (content.hasChildNodes()) {
+      content.removeChild(content.lastChild);
+    }
+
+    var treeBody = document.getElementById("textAttrs:default:treeBody");
+    while (treeBody.hasChildNodes()) {
+      treeBody.removeChild(treeBody.lastChild);
+    }
+
+    document.getElementById("textAttrs:startOffset").textContent = "";
+    document.getElementById("textAttrs:endOffset").textContent = "";
+
+    treeBody = document.getElementById("textAttrs:treeBody");
+    while (treeBody.hasChildNodes()) {
+      treeBody.removeChild(treeBody.lastChild);
+    }
+  }
+
+  this.handleEvent = function textAttrsViewer_handleEvent(aEvent)
+  {
+    var treeBody = document.getElementById("textAttrs:treeBody");
+    while (treeBody.hasChildNodes()) {
+      treeBody.removeChild(treeBody.lastChild);
+    }
+
+    if (this.mLastElm) {
+      this.mLastElm.removeAttribute("selected");
+    }
+
+    this.mLastElm = aEvent.target;
+    this.mLastElm.setAttribute("selected", "true");
+
+    document.getElementById("textAttrs:startOffset").textContent =
+      this.mLastElm.startOffset;
+    document.getElementById("textAttrs:endOffset").textContent =
+      this.mLastElm.endOffset;
+
+    this.addAttributes(this.mLastElm.textAttrs, "textAttrs:treeBody");
+  }
+
+  this.addAttributes = function textAttrsViewer_addAttributes(aTextAttrs,
+                                                              aTreeID)
+  {
+    var enumerate = aTextAttrs.enumerate();
+    while (enumerate.hasMoreElements()) {
+      var prop = XPCU.QI(enumerate.getNext(), nsIPropertyElement);
+
+      var treeBody = document.getElementById(aTreeID);
+
+      var ti = document.createElement("treeitem");
+      var tr = document.createElement("treerow");
+
+      var tc = document.createElement("treecell");
+      tc.setAttribute("label", prop.key);
+      tr.appendChild(tc);
+
+      tc = document.createElement("treecell");
+      tc.setAttribute("label", prop.value);
+      tr.appendChild(tc);
+
+      ti.appendChild(tr);
+
+      treeBody.appendChild(ti);
+    }
+  }
+
+  this.mLastElm = null;
 }
 
 

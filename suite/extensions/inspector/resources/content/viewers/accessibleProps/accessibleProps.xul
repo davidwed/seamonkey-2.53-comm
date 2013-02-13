@@ -9,7 +9,8 @@
   <!ENTITY % dtd2 SYSTEM "chrome://inspector/locale/viewers/accessibleProps.dtd"> %dtd2;
 ]>
 
-<?xml-stylesheet href="chrome://inspector/skin"?>
+<?xml-stylesheet href="chrome://inspector/skin/viewers/accessibleProps/accessibleProps.css"?>
+
 <?xul-overlay href="chrome://inspector/content/editingOverlay.xul"?>
 
 <page id="winAccessibleProps"
@@ -81,6 +82,7 @@
     <tabs>
       <tab id="tab_attributes" label="&tabAttrs.label;"/>
       <tab id="tab_actions" label="&tabActions.label;"/>
+      <tab id="tab_textattrs" label="&tabTextAttrs.label;"/>
       <tab id="tab_tablecell" label="&tabTableCell.label;"/>
     </tabs>
     <tabpanels flex="1">
@@ -123,6 +125,38 @@
             </row>
           </rows>
         </grid>
+      </vbox>
+
+      <!-- Text attributes -->
+      <vbox id="textAttrsTabPanel">
+        <label control="textAttrs:default:tree"
+               value="&descDefaultAttrs.label;"/>
+        <tree flex="1" id="textAttrs:default:tree">
+          <treecols>
+            <treecol label="&colAttrName.label;" flex="2"/>
+            <splitter class="tree-splitter"/>
+            <treecol label="&colAttrValue.label;" flex="4"/>
+          </treecols>
+          <treechildren id="textAttrs:default:treeBody"/>
+        </tree>
+
+        <description id="textAttrs:content"/>
+
+        <hbox>
+          <description>&descStartOffset.label;</description>
+          <description id="textAttrs:startOffset"/>
+          <description>&descEndOffset.label;</description>
+          <description id="textAttrs:endOffset"/>
+        </hbox>
+
+        <tree flex="1" id="textAttrs:tree">
+          <treecols>
+            <treecol label="&colAttrName.label;" flex="2"/>
+            <splitter class="tree-splitter"/>
+            <treecol label="&colAttrValue.label;" flex="4"/>
+          </treecols>
+          <treechildren id="textAttrs:treeBody"/>
+        </tree>
       </vbox>
 
       <!-- Table cell properties tab panel -->
