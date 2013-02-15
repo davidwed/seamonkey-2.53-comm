@@ -14,6 +14,10 @@
 <!ENTITY tabActions.label "Akcie">
 <!ENTITY descKeyBindings.label "Kláv. skratky:">
 <!ENTITY descInvoke.label "Vyvolať">
+<!ENTITY tabTextAttrs.label "Textové atribúty">
+<!ENTITY descDefaultAttrs.label "Predvolené atribúty:">
+<!ENTITY descStartOffset.label "Začiatočný offset:">
+<!ENTITY descEndOffset.label "Koncový offset:">
 <!ENTITY tabTableCell.label "Bunka tabuľky">
 <!ENTITY descColumnIdx.label "Index stĺpca:">
 <!ENTITY descRowIdx.label "Index riadka:">
