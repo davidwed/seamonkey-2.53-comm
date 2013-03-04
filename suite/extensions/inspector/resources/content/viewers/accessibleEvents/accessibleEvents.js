@@ -1091,23 +1091,22 @@ inAccTreeView.prototype.getRowProperties =
 {
   var data = this.getDataAt(aRowIdx);
   if (data && data.properties) {
+    if (!aProperties)
+      return data.properties.join(" ");
+
     for (let i = 0; i < data.properties.length; i++) {
       var atom = this.createAtom(data.properties[i]);
       aProperties.AppendElement(atom);
     }
   }
+
+  return "";
 };
 
 inAccTreeView.prototype.getCellProperties =
   function inAccTreeView_getCellProperties(aRowIdx, aCol, aProperties)
 {
-  var data = this.getDataAt(aRowIdx);
-  if (data && data.properties) {
-    for (let i = 0; i < data.properties.length; i++) {
-      var atom = this.createAtom(data.properties[i]);
-      aProperties.AppendElement(atom);
-    }
-  }
+  return this.getRowProperties(aRowIdx, aProperties);
 };
 
 // Initialization

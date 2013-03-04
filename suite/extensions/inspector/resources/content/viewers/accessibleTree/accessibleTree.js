@@ -308,15 +308,20 @@ function getRowProperties(aRowIdx, aProperties)
 {
   var node = this.rowToNode(aRowIdx);
   if (node && node.highlighted) {
+    if (!aProperties)
+      return "highlight";
+
     let atom = this.createAtom("highlight");
     aProperties.AppendElement(atom);
   }
+
+  return "";
 }
 
 inAccTreeView.prototype.getCellProperties =
 function getCellProperties(aRowIdx, aCol, aProperties)
 {
-  this.getRowProperties(aRowIdx, aProperties);
+  return this.getRowProperties(aRowIdx, aProperties);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

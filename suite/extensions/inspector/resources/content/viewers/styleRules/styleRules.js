@@ -583,9 +583,14 @@ StylePropsView.prototype.getCellProperties =
   if (aCol.id == "olcPropPriority") {
     var prop = this.mDec.item(aRow);
     if (this.mDec.getPropertyPriority(prop) == "important") {
+      if (!aProperties)
+        return "important";
+
       aProperties.AppendElement(this.createAtom("important"));
     }
   }
+
+  return "";
 }
 
 StylePropsView.prototype.getCellText = function SPV_GetCellText(aRow, aCol)
