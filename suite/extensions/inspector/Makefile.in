@@ -11,7 +11,6 @@ VPATH = @srcdir@
 
 include $(DEPTH)/config/autoconf.mk
 
-MODULE = inspector
 DOMi_VERSION = 2.0.15pre
 
 XPI_NAME               = inspector
