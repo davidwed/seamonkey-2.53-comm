@@ -13,6 +13,10 @@
 <!ENTITY tabActions.label "Actions">
 <!ENTITY descKeyBindings.label "Key bindings:">
 <!ENTITY descInvoke.label "Invoke">
+<!ENTITY tabTextAttrs.label "Text attributes">
+<!ENTITY descDefaultAttrs.label "Default attributes:">
+<!ENTITY descStartOffset.label "Start offset:">
+<!ENTITY descEndOffset.label "End offset:">
 <!ENTITY tabTableCell.label "Table cell">
 <!ENTITY descColumnIdx.label "Column index:">
 <!ENTITY descRowIdx.label "Row index:">
