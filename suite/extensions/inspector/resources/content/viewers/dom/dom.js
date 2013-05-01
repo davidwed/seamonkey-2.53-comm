@@ -924,23 +924,15 @@ DOMViewer.prototype =
   {
     var re = new RegExp(this.mFindParams[0], "i");
 
-    var node = aWalker.currentNode;
-    if (!node) {
-      return false;
-    }
-
-    if (node.nodeType != Components.interfaces.nsIDOMNode.ELEMENT_NODE) {
-      return false;
-    }
-
-    for (var i = 0; i < node.attributes.length; i++) {
-      var attr = node.attributes[i];
-      if (attr.isId && re.test(attr.nodeValue)) {
-        return true;
-      }
-    }
-
-    return false;
+    // NB: In HTML getAttribute can return null, so we have to check that it's
+    // actually set; if we don't and the search string is "null", implicit
+    // toString conversion means that we'll match on every element without an
+    // ID.  Additionally, for elements without an ID, getAttribute returns an
+    // empty string in XUL (bug 232598), so our check must handle that...
+    return aWalker.currentNode &&
+           aWalker.currentNode.nodeType == nsIDOMNode.ELEMENT_NODE &&
+           aWalker.currentNode.hasAttribute("id") &&
+           re.test(aWalker.currentNode.getAttribute("id"));
   },
 
   doFindElementsByTagName: function DVr_DoFindElementsByTagName(aWalker)
