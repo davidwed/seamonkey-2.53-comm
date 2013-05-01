@@ -958,9 +958,8 @@ DOMViewer.prototype =
 
     return aWalker.currentNode &&
            aWalker.currentNode.nodeType == nsIDOMNode.ELEMENT_NODE &&
-           (this.mFindParams[1] == "" ?
-             aWalker.currentNode.hasAttribute(this.mFindParams[0]) :
-             re.test(aWalker.currentNode.getAttribute(this.mFindParams[0])));
+           aWalker.currentNode.hasAttribute(this.mFindParams[0]) &&
+           re.test(aWalker.currentNode.getAttribute(this.mFindParams[0]));
   },
 
   /**
