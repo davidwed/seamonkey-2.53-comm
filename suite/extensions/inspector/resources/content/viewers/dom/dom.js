@@ -987,7 +987,7 @@ DOMViewer.prototype =
       if (!aAugment && !aNoSelect) {
         bx.view.selection.select(-1);
       }
-      return;
+      return -1;
     }
 
     // Keep searching until a pre-created ancestor is found, and then open
