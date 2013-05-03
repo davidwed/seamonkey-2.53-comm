@@ -358,7 +358,7 @@ InspectorApp.prototype =
                             "nsIDocumentEncoder");
       encoder.init(doc, doc.contentType, encoder.OutputRaw);
       encoder.setCharset(doc.characterSet);
-      fos.init(picker.file, flags, 0666, 0);
+      fos.init(picker.file, flags, -1, 0);
       try {
         encoder.encodeToStream(fos);
       }
@@ -369,7 +369,7 @@ InspectorApp.prototype =
     else {
       var serializer = XPCU.createInstance(kSerializerContractID,
                                           "nsIDOMSerializer");
-      fos.init(picker.file, flags, 0666, 0);
+      fos.init(picker.file, flags, -1, 0);
       try {
         serializer.serializeToStream(doc, fos);
       }
