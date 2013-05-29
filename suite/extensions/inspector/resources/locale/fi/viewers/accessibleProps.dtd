@@ -13,6 +13,10 @@
 <!ENTITY tabActions.label "Toiminnot">
 <!ENTITY descKeyBindings.label "Näppäinsidonnat:">
 <!ENTITY descInvoke.label "Kutsu">
+<!ENTITY tabTextAttrs.label "Tekstiattribuutit">
+<!ENTITY descDefaultAttrs.label "Oletusattribuutit:">
+<!ENTITY descStartOffset.label "Aloitusetäisyys:">
+<!ENTITY descEndOffset.label "Lopetusetäisyys:">
 <!ENTITY tabTableCell.label "Taulukon solu">
 <!ENTITY descColumnIdx.label "Sarakeindeksi:">
 <!ENTITY descRowIdx.label "Rivi-indeksi:">
