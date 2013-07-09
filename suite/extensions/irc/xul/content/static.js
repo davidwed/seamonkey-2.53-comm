@@ -4,11 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const __cz_version   = "0.9.90";
+const __cz_version   = "0.9.90.1";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.90";
+const __cz_locale    = "0.9.90.1";
 
 var warn;
 var ASSERT;
@@ -1615,6 +1615,8 @@ function getObjectDetails (obj, rv)
     rv.channel = null;
     rv.server = null;
     rv.network = null;
+    if (window && window.content && window.content.getSelection() != "")
+        rv.selectedText = window.content.getSelection();
 
     switch (obj.TYPE)
     {
@@ -2342,7 +2344,7 @@ client.idleObserver = {
             client.dispatch("idle-away", {reason: client.prefs["awayIdleMsg"]});
             client.isIdleAway = true;
         }
-        else if ((topic == "back") && client.isIdleAway)
+        else if ((topic == "back" || topic == "active") && client.isIdleAway)
         {
             client.dispatch("idle-back");
             client.isIdleAway = false;
@@ -2416,6 +2418,7 @@ function updateAppMotif(motifURL)
         else
         {
             node.data = dataStr;
+            document.insertBefore(node, node.nextSibling);
         }
     }
     catch (ex)
@@ -3776,38 +3779,52 @@ function updateTabAttributes()
 // Properties getter for user list tree view
 function ul_getrowprops(index, properties)
 {
-    if ((index < 0) || (index >= this.childData.childData.length) ||
-        !properties)
+    if ((index < 0) || (index >= this.childData.childData.length))
     {
-        return;
+        return "";
     }
 
     // See bug 432482 - work around Gecko deficiency.
     if (!this.selection.isSelected(index))
+    {
+        if (!properties)
+            return "unselected";
+
         properties.AppendElement(client.atomCache["unselected"]);
+    }
+
+    return "";
 }
 
 // Properties getter for user list tree view
 function ul_getcellprops(index, column, properties)
 {
-    if ((index < 0) || (index >= this.childData.childData.length) ||
-        !properties)
+    if ((index < 0) || (index >= this.childData.childData.length))
     {
-        return;
+        return "";
     }
+
+    var resultProps = [];
 
     // See bug 432482 - work around Gecko deficiency.
     if (!this.selection.isSelected(index))
-        properties.AppendElement(client.atomCache["unselected"]);
+        resultProps.push("unselected");
 
     var userObj = this.childData.childData[index]._userObj;
 
-    properties.AppendElement(client.atomCache["voice-" + userObj.isVoice]);
-    properties.AppendElement(client.atomCache["op-" + userObj.isOp]);
-    properties.AppendElement(client.atomCache["halfop-" + userObj.isHalfOp]);
-    properties.AppendElement(client.atomCache["admin-" + userObj.isAdmin]);
-    properties.AppendElement(client.atomCache["founder-" + userObj.isFounder]);
-    properties.AppendElement(client.atomCache["away-" + userObj.isAway]);
+    resultProps.push("voice-" + userObj.isVoice);
+    resultProps.push("op-" + userObj.isOp);
+    resultProps.push("halfop-" + userObj.isHalfOp);
+    resultProps.push("admin-" + userObj.isAdmin);
+    resultProps.push("founder-" + userObj.isFounder);
+    resultProps.push("away-" + userObj.isAway);
+
+    if (!properties)
+        return resultProps.join(" ");
+
+    resultProps.forEach(function (element) {
+        properties.AppendElement(client.atomCache[element]);
+    });
 }
 
 var contentDropObserver = new Object();
@@ -3815,7 +3832,7 @@ var contentDropObserver = new Object();
 contentDropObserver.onDragOver =
 function cdnd_dover(aEvent, aFlavour, aDragSession)
 {
-    if (aEvent.getPreventDefault())
+    if (isDefaultPrevented(aEvent))
         return;
 
     if (aDragSession.sourceDocument == aEvent.view.document)
@@ -3879,7 +3896,7 @@ var tabsDropObserver = new Object();
 tabsDropObserver.canDrop =
 function tabdnd_candrop(aEvent, aDragSession)
 {
-    if (aEvent.getPreventDefault())
+    if (isDefaultPrevented(aEvent))
         return false;
 
     // See comment above |var tabsDropObserver|.
@@ -3895,7 +3912,7 @@ function tabdnd_candrop(aEvent, aDragSession)
 tabsDropObserver.onDragOver =
 function tabdnd_dover(aEvent, aFlavour, aDragSession)
 {
-    if (aEvent.getPreventDefault())
+    if (isDefaultPrevented(aEvent))
         return;
 
     // See comment above |var tabsDropObserver|.
@@ -3937,7 +3954,7 @@ function tabdnd_dover(aEvent, aFlavour, aDragSession)
 tabsDropObserver.onDragExit =
 function tabdnd_dexit(aEvent, aDragSession)
 {
-    if (aEvent.getPreventDefault())
+    if (isDefaultPrevented(aEvent))
         return;
 
     /* We've either stopped being part of a drag operation, or the dragging is
