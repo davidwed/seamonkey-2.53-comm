@@ -203,7 +203,9 @@ AccessibleEventViewer.prototype =
   get state()
   {
     var state = 0, extraState = 0;
-    if (this.mAccEventSubject.isExtraState()) {
+    var isExtraState = typeof this.mAccEventSubject.isExtraState == "function" ?
+      this.mAccEventSubject.isExtraState() : this.mAccEventSubject.isExtraState;
+    if (isExtraState) {
       extraState = this.mAccEventSubject.state;
     }
     else {
@@ -220,7 +222,8 @@ AccessibleEventViewer.prototype =
 
   get isEnabled()
   {
-    return this.mAccEventSubject.isEnabled();
+    return typeof this.mAccEventSubject.isEnabled == "function" ?
+      this.mAccEventSubject.isEnabled() : this.mAccEventSubject.isEnabled;
   },
 
   get startOffset()
@@ -235,7 +238,8 @@ AccessibleEventViewer.prototype =
 
   get isInserted()
   {
-    return this.mAccEventSubject.isInserted();
+    return typeof this.mAccEventSubject.isInserted == "function" ?
+      this.mAccEventSubject.isInserted() : this.mAccEventSubject.isInserted;
   },
 
   get modifiedText()
