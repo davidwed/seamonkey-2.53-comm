@@ -13,6 +13,10 @@
 <!ENTITY tabActions.label "Czynności">
 <!ENTITY descKeyBindings.label "Zawiązane klucze:">
 <!ENTITY descInvoke.label "Uruchom">
+<!ENTITY tabTextAttrs.label "Atrybuty tekstu">
+<!ENTITY descDefaultAttrs.label "Domyślne atrybuty:">
+<!ENTITY descStartOffset.label "Offset początkowy:">
+<!ENTITY descEndOffset.label "Offset końcowy:">
 <!ENTITY tabTableCell.label "Komórka tabeli">
 <!ENTITY descColumnIdx.label "Indeks kolumny:">
 <!ENTITY descRowIdx.label "Indeks wiersza:">

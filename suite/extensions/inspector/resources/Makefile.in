@@ -14,6 +14,7 @@ include $(DEPTH)/config/autoconf.mk
 ALL_LOCALES = \
 	en-GB \
 	en-US \
+	pl \
 	ru \
 	sk \
 	$(NULL)
