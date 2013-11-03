@@ -13,6 +13,10 @@
 <!ENTITY tabActions.label "Aktionen">
 <!ENTITY descKeyBindings.label "Tastenzuordnungen:">
 <!ENTITY descInvoke.label "Aufrufen">
+<!ENTITY tabTextAttrs.label "Textattribute:">
+<!ENTITY descDefaultAttrs.label "Standardattribute:">
+<!ENTITY descStartOffset.label "Start-Offset:">
+<!ENTITY descEndOffset.label "End-Offset:">
 <!ENTITY tabTableCell.label "Tabellenzelle">
 <!ENTITY descColumnIdx.label "Spaltenindex:">
 <!ENTITY descRowIdx.label "Zeilenindex:">
