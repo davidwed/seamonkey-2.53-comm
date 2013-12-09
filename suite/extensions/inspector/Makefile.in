@@ -15,7 +15,6 @@ DOMi_VERSION = 2.0.15pre
 
 XPI_NAME               = inspector
 USE_EXTENSION_MANIFEST = 1
-NO_JAR_AUTO_REG        = 1
 INSTALL_EXTENSION_ID   = inspector@mozilla.org
 XPI_PKGNAME            = inspector-$(DOMi_VERSION)
 
