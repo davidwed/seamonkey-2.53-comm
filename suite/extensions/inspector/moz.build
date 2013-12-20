@@ -10,3 +10,5 @@ DIRS += [
 
 XPI_NAME = 'inspector'
 export('XPI_NAME')
+
+JAR_MANIFESTS += ['jar.mn']

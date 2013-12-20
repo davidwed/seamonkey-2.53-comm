@@ -11,7 +11,9 @@ VPATH=@srcdir@
 
 include $(DEPTH)/config/autoconf.mk
 
+EXTERNALLY_MANAGED_MAKE_FILE := 1
 STANDALONE_MAKEFILE := 1
+JAR_MANIFEST := $(srcdir)/jar.mn
 
 XPI_NAME               = inspector
 USE_EXTENSION_MANIFEST = 1
