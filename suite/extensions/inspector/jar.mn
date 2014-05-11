@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 inspector.jar:
-% content inspector %content/inspector/ xpcnativewrappers=no
+% content inspector %content/inspector/
 % overlay chrome://inspector/content/inspector.xul chrome://communicator/content/utilityOverlay.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 % overlay chrome://inspector/content/inspector.xul chrome://communicator/content/tasksOverlay.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 % overlay chrome://communicator/content/tasksOverlay.xul chrome://inspector/content/tasksOverlay.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}

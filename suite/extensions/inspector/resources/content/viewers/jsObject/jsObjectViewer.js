@@ -251,8 +251,7 @@ JSObjectViewer.prototype =
   unwrapObject: function JSOVr_UnwrapObject(aObject)
   {
     /* unwrap() throws for primitive values, so don't call it for those */
-    if (typeof(aObject) === "object" && aObject &&
-        "unwrap" in XPCNativeWrapper) {
+    if (typeof(aObject) === "object" && aObject) {
       aObject = XPCNativeWrapper.unwrap(aObject);
     }
     return aObject;
