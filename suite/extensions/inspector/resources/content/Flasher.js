@@ -12,14 +12,160 @@
 
 //////////// global variables /////////////////////
 
-var gFlasherRegistry = [];
-
 //////////// global constants ////////////////////
+
+const HIGHLIGHTED_PSEUDO_CLASS = ":-moz-devtools-highlighted";
+const INVERT = "filter: url(\"data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='invert'><feColorMatrix in='SourceGraphic' type='matrix' values='-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0'/></filter></svg>%23invert\") !important; "
 
 ////////////////////////////////////////////////////////////////////////////
 //// class Flasher
 
 function Flasher(aColor, aThickness, aDuration, aSpeed, aInvert)
+{
+  document.querySelector(HIGHLIGHTED_PSEUDO_CLASS);
+  this.mIOService = XPCU.getService("@mozilla.org/network/io-service;1", "nsIIOService");
+  this.mDOMUtils = XPCU.getService("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
+  this.mShell = XPCU.getService("@mozilla.org/inspector/flasher;1", "inIFlasher") || this.mDOMUtils;
+  this.color = aColor;
+  this.thickness = aThickness;
+  this.invert = aInvert;
+  this.duration = aDuration;
+  this.mSpeed = aSpeed;
+}
+
+Flasher.prototype =
+{
+  ////////////////////////////////////////////////////////////////////////////
+  //// Initialization
+
+  mFlashTimeout: null,
+  mElement: null,
+  mRegistryId: null,
+  mFlashes: 0,
+  mStartTime: 0,
+  mDOMUtils: null,
+  mWinUtils: null,
+  mStyleURI: null,
+  mColor: "#000000",
+  mInvert: false,
+  mThickness: 0,
+  mDuration: 0,
+  mSpeed: 0,
+
+  ////////////////////////////////////////////////////////////////////////////
+  //// Properties
+
+  get flashing() { return this.mFlashTimeout != null; },
+
+  get element() { return this.mElement; },
+  set element(val)
+  {
+    if (val && val.nodeType == Node.ELEMENT_NODE) {
+      this.mElement = val;
+      this.mShell.scrollElementIntoView(val);
+      this.mWinUtils = val.ownerDocument.defaultView
+                          .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                          .getInterface(Components.interfaces.nsIDOMWindowUtils);
+    } else {
+      throw "Invalid node type.";
+    }
+  },
+
+  get color() { return this.mColor; },
+  set color(aVal)
+  {
+    var spacer = document.createElement("spacer");
+    spacer.style.color = aVal;
+    if (spacer.style.color) {
+      this.mStyleURI = null;
+      this.mColor = aVal;
+    }
+    return aVal;
+  },
+
+  get thickness() { return this.mThickness | 0; },
+  set thickness(aVal) { this.mStyleURI = null; return this.mThickness = aVal; },
+
+  get duration() { return this.mDuration; },
+  set duration(aVal) { this.mDuration = aVal; },
+
+  get speed() { return this.mSpeed; },
+  set speed(aVal) { this.mSpeed = aVal; },
+
+  get invert() { return !!this.mInvert; },
+  set invert(aVal) { this.mStyleURI = null; return this.mInvert = aVal; },
+
+  // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  // :::::::::::::::::::: Methods ::::::::::::::::::::::::::::
+  // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  start: function(aDuration, aSpeed, aHold)
+  {
+    if (!this.mStyleURI) {
+      var styleURI = "data:text/css;charset=utf-8," + HIGHLIGHTED_PSEUDO_CLASS +
+                     " { outline: " + this.thickness + "px solid " +
+                     encodeURIComponent(this.color) +
+                     " !important; outline-offset: " + -this.thickness +
+                     "px !important; " + (this.invert ? INVERT : "") + "}";
+      this.mStyleURI = this.mIOService.newURI(styleURI, null, null);
+    }
+
+    this.mWinUtils.loadSheet(this.mStyleURI, this.mWinUtils.AGENT_SHEET);
+    this.mUDuration = aDuration ? aDuration * 1000 : this.mDuration;
+    this.mUSpeed = aSpeed ? aSpeed : this.mSpeed;
+    this.mHold = aHold;
+    this.mFlashes = 0;
+    this.mStartTime = Date.now();
+    this.doFlash();
+  },
+
+  doFlash: function()
+  {
+    if (this.mHold || this.mFlashes & 1) {
+      this.paintOn();
+    } else {
+      this.paintOff();
+    }
+    this.mFlashes++;
+
+    if (this.mUDuration < 0 || Date.now() - this.mStartTime < this.mUDuration) {
+      this.mFlashTimeout = window.setTimeout(this.timeout, this.mUSpeed, this);
+    } else {
+      this.stop();
+    }
+  },
+
+  timeout: function(self)
+  {
+    self.doFlash();
+  },
+
+  stop: function()
+  {
+    if (this.flashing) {
+      this.mWinUtils.removeSheet(this.mStyleURI, this.mWinUtils.AGENT_SHEET);
+      window.clearTimeout(this.mFlashTimeout);
+      this.mFlashTimeout = null;
+      this.paintOff();
+    }
+  },
+
+  paintOn: function()
+  {
+    this.mDOMUtils.addPseudoClassLock(this.mElement, HIGHLIGHTED_PSEUDO_CLASS);
+  },
+
+  paintOff: function()
+  {
+    this.mDOMUtils.removePseudoClassLock(this.mElement, HIGHLIGHTED_PSEUDO_CLASS);
+  }
+
+};
+
+////////////////////////////////////////////////////////////////////////////
+//// class LegacyFlasher
+
+function LegacyFlasher(aColor, aThickness, aDuration, aSpeed, aInvert)
 {
   this.mShell = XPCU.getService("@mozilla.org/inspector/flasher;1", "inIFlasher");
   this.color = aColor;
@@ -27,11 +173,9 @@ function Flasher(aColor, aThickness, aDuration, aSpeed, aInvert)
   this.mShell.invert = aInvert;
   this.duration = aDuration;
   this.mSpeed = aSpeed;
-  
-  this.register();
 }
 
-Flasher.prototype = 
+LegacyFlasher.prototype =
 {
   ////////////////////////////////////////////////////////////////////////////
   //// Initialization
@@ -87,13 +231,6 @@ Flasher.prototype =
   // :::::::::::::::::::: Methods ::::::::::::::::::::::::::::
   // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-  register: function()
-  {
-    var length = gFlasherRegistry.length;
-    gFlasherRegistry[length] = this;
-    this.mRegistryId = length;
-  },
-
   start: function(aDuration, aSpeed, aHold)
   {
     this.mUDuration = aDuration ? aDuration*1000 : this.mDuration;
@@ -114,11 +251,16 @@ Flasher.prototype =
     this.mFlashes++;
 
     if (this.mUDuration < 0 || new Date() - this.mStartTime < this.mUDuration) {
-      this.mFlashTimeout = window.setTimeout("gFlasherRegistry["+this.mRegistryId+"].doFlash()", this.mUSpeed);
+      this.mFlashTimeout = window.setTimeout(this.timeout, this.mUSpeed, this);
     } else {
       this.stop();
     }
-},
+  },
+
+  timeout: function(self)
+  {
+    self.doFlash();
+  },
 
   stop: function()
   {
@@ -202,8 +344,13 @@ DOMIFlasher.prototype =
 
   init: function DOMIFlasher_init()
   {
-    this.mFlasher = new Flasher(this.color, this.thickness, this.duration,
-                                this.speed, this.invert);
+    try {
+      this.mFlasher = new Flasher(this.color, this.thickness, this.duration,
+                                  this.speed, this.invert);
+    } catch (e) {
+      this.mFlasher = new LegacyFlasher(this.color, this.thickness,
+                                        this.duration, this.speed, this.invert);
+    }
 
     PrefUtils.addObserver("inspector.blink.", this);
 
