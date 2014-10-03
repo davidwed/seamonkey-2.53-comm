@@ -77,6 +77,8 @@ function initHandlers()
     node.addEventListener("dblclick", onSecurityIconDblClick, false);
     node = document.getElementById("logging-status");
     node.addEventListener("click", onLoggingIconClick, false);
+    node = document.getElementById("alert-status");
+    node.addEventListener("click", onAlertIconClick, false);
 
     window.onkeypress = onWindowKeyPress;
 
@@ -290,6 +292,15 @@ function onLoggingIconClick(e)
 {
     if (e.button == 0)
         client.currentObject.dispatch("log", { state: "toggle" });
+}
+
+function onAlertIconClick(e)
+{
+    if (e.button == 0)
+    {
+        client.prefs["alert.globalEnabled"] = !client.prefs["alert.globalEnabled"];
+        updateAlertIcon();
+    }
 }
 
 function onMultilineInputKeyPress (e)
@@ -1125,7 +1136,6 @@ CIRCNetwork.prototype.on254 = /* channels found (in params[2]) */
 CIRCNetwork.prototype.on255 = /* link info */
 CIRCNetwork.prototype.on265 = /* local user details */
 CIRCNetwork.prototype.on266 = /* global user details */
-CIRCNetwork.prototype.on290 = /* CAPAB Response */
 CIRCNetwork.prototype.on375 = /* start of MOTD */
 CIRCNetwork.prototype.on372 = /* MOTD line */
 CIRCNetwork.prototype.on376 = /* end of MOTD */
@@ -2343,6 +2353,28 @@ CIRCNetwork.prototype.on421 =
 function my_421(e)
 {
     this.display(getMsg(MSG_IRC_421, e.decodeParam(2)), MT_ERROR);
+    return true;
+}
+
+/* cap reply */
+CIRCNetwork.prototype.onCap =
+function my_cap(e)
+{
+    if (e.params[2] == "LS")
+    {
+        display(getMsg(MSG_CAPS_LIST, keys(e.server.caps).join(MSG_COMMASP)));
+    }
+    else if (e.params[2] == "ACK")
+    {
+        if (e.capEnabled)
+            display(getMsg(MSG_CAPS_ON, e.cap));
+        else
+            display(getMsg(MSG_CAPS_OFF, e.cap));
+    }
+    else if (e.params[2] == "NAK")
+    {
+        display(getMsg(MSG_CAPS_ERROR, e.cap));
+    }
     return true;
 }
 

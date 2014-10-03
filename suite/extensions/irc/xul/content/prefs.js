@@ -97,6 +97,17 @@ function initPrefs()
     var prefs =
         [
          ["activityFlashDelay", 200,      "hidden"],
+         ["alert.overlapDelay", 50,       "hidden"],
+         ["alert.floodDensity", 290,      "hidden"],
+         ["alert.floodDispersion", 200,   "hidden"],
+         ["alert.enabled",      true,     ".palert"],
+         ["alert.globalEnabled", true,    "global.palertconfig"],
+         ["alert.clickable",    true,     "hidden"],
+         ["alert.nonFocusedOnly", true,   "global.palertconfig"],
+         ["alert.channel.event", false,   ".palert"],
+         ["alert.channel.chat", false,    ".palert"],
+         ["alert.channel.stalk", true,    ".palert"],
+         ["alert.user.chat",    true,     ".palert"],
          ["aliases",            [],       "lists.aliases"],
          ["autoAwayCap",        300,      "global"],
          ["autoAwayPeriod",     2,        "appearance.misc"],
@@ -109,6 +120,7 @@ function initPrefs()
          ["awayIdleMsg",        "",       ".ident"],
          ["awayIdleTime",       0,        ".ident"],
          ["awayNick",           "",       ".ident"],
+         ["bugKeyword",         "bug",    "appearance.misc"],
          ["bugURL",           "https://bugzilla.mozilla.org/show_bug.cgi?id=%s",
                                           "appearance.misc"],
          ["bugURL.comment",     "#c%s",   "appearance.misc"],
@@ -216,16 +228,17 @@ function initPrefs()
          // Event == "Superfluous" activity.
          // Stalk == "Attention" activity.
          // Start == When view it opened.
-         ["sound.channel.chat",  "",          "global.soundEvts"],
-         ["sound.channel.event", "",          "global.soundEvts"],
-         ["sound.channel.stalk", "beep",      "global.soundEvts"],
-         ["sound.channel.start", "",          "global.soundEvts"],
+         ["sound.channel.chat",  "",          ".soundEvts"],
+         ["sound.channel.event", "",          ".soundEvts"],
+         ["sound.channel.stalk", "beep",      ".soundEvts"],
+         ["sound.channel.start", "",          ".soundEvts"],
          ["sound.enabled",       true,        "global.sounds"],
          ["sound.overlapDelay",  2000,        "global.sounds"],
-         ["sound.user.stalk",    "beep",      "global.soundEvts"],
-         ["sound.user.start",    "beep beep", "global.soundEvts"],
+         ["sound.user.stalk",    "beep",      ".soundEvts"],
+         ["sound.user.start",    "beep beep", ".soundEvts"],
          ["stalkWholeWords",    true,     "lists.stalkWords"],
          ["stalkWords",         [],       "lists.stalkWords"],
+         ["tabLabel",           "",       "hidden"],
          ["tabGotoKeyModifiers", 0,       "hidden"],
          ["timestamps",         false,    "appearance.timestamps"],
          ["timestamps.display", "[%H:%M]", "appearance.timestamps"],
@@ -399,6 +412,11 @@ function getNetworkPrefManager(network)
 
     var prefs =
         [
+         ["alert.enabled",      defer,     ".palert"],
+         ["alert.channel.event",defer,     ".palert"],
+         ["alert.channel.chat", defer,     ".palert"],
+         ["alert.channel.stalk",defer,     ".palert"],
+         ["alert.user.chat",    defer,     ".palert"],
          ["autoAwayPeriod",   defer, "appearance.misc"],
          ["autoperform",      [],    "lists.autoperform"],
          ["autoRejoin",       defer, ".connect"],
@@ -431,6 +449,13 @@ function getNetworkPrefManager(network)
          ["outputWindowURL",  defer, "hidden"],
          ["proxy.typeOverride", defer, ".connect"],
          ["reconnect",        defer, ".connect"],
+         ["sound.channel.chat",  defer, ".soundEvts"],
+         ["sound.channel.event", defer, ".soundEvts"],
+         ["sound.channel.stalk", defer, ".soundEvts"],
+         ["sound.channel.start", defer, ".soundEvts"],
+         ["sound.user.stalk",    defer, ".soundEvts"],
+         ["sound.user.start",    defer, ".soundEvts"],
+         ["tabLabel",         "",     "hidden"],
          ["timestamps",         defer, "appearance.timestamps"],
          ["timestamps.display", defer, "appearance.timestamps"],
          ["timestamps.log",     defer, "hidden"],
@@ -500,6 +525,10 @@ function getChannelPrefManager(channel)
 
     var prefs =
         [
+         ["alert.enabled",      defer,     ".palert"],
+         ["alert.channel.event",defer,     ".palert"],
+         ["alert.channel.chat", defer,     ".palert"],
+         ["alert.channel.stalk",defer,     ".palert"],
          ["autoperform",      [],    "lists.autoperform"],
          ["autoRejoin",       defer, ".connect"],
          ["bugURL",           defer, "appearance.misc"],
@@ -517,6 +546,11 @@ function getChannelPrefManager(channel)
          ["logFileName",      makeLogNameChannel, "hidden"],
          ["motif.current",    defer, "appearance.motif"],
          ["outputWindowURL",  defer, "hidden"],
+         ["sound.channel.chat",  defer, ".soundEvts"],
+         ["sound.channel.event", defer, ".soundEvts"],
+         ["sound.channel.stalk", defer, ".soundEvts"],
+         ["sound.channel.start", defer, ".soundEvts"],
+         ["tabLabel",         "",    "hidden"],
          ["timestamps",         defer, "appearance.timestamps"],
          ["timestamps.display", defer, "appearance.timestamps"],
          ["timestamps.log",     defer, "hidden"]
@@ -560,6 +594,8 @@ function getUserPrefManager(user)
 
     var prefs =
         [
+         ["alert.enabled",      defer,     ".palert"],
+         ["alert.user.chat",    defer,     ".palert"],
          ["autoperform",      [],    "lists.autoperform"],
          ["charset",          defer, ".connect"],
          ["collapseActions",  defer, "appearance.misc"],
@@ -572,6 +608,9 @@ function getUserPrefManager(user)
          ["logFileName",      makeLogNameUser, "hidden"],
          ["motif.current",    defer, "appearance.motif"],
          ["outputWindowURL",  defer, "hidden"],
+         ["sound.user.stalk",    defer, ".soundEvts"],
+         ["sound.user.start",    defer, ".soundEvts"],
+         ["tabLabel",         "",    "hidden"],
          ["timestamps",         defer, "appearance.timestamps"],
          ["timestamps.display", defer, "appearance.timestamps"],
          ["timestamps.log",     defer, "hidden"]
@@ -608,6 +647,8 @@ function getDCCUserPrefManager(user)
 
     var prefs =
         [
+         ["alert.enabled",      defer,     ".palert"],
+         ["alert.user.chat",    defer,     ".palert"],
          ["charset",          defer, ".connect"],
          ["collapseMsgs",     defer, "appearance.misc"],
          ["displayHeader",    client.prefs["dccUserHeader"], "appearance.misc"],
@@ -618,6 +659,7 @@ function getDCCUserPrefManager(user)
          ["logFileName",      makeLogNameUser, "hidden"],
          ["motif.current",    defer, "appearance.motif"],
          ["outputWindowURL",  defer, "hidden"],
+         ["tabLabel",         "",    "hidden"],
          ["timestamps",         defer, "appearance.timestamps"],
          ["timestamps.display", defer, "appearance.timestamps"],
          ["timestamps.log",     defer, "hidden"]
@@ -655,6 +697,11 @@ function onPrefChanged(prefName, newValue, oldValue)
         case "awayIdleTime":
             uninitIdleAutoAway(oldValue);
             initIdleAutoAway(newValue);
+            break;
+
+        case "bugKeyword":
+            client.munger.delRule("bugzilla-link");
+            addBugzillaLinkMungerRule(newValue, 10, 10);
             break;
 
         case "channelMaxLines":
@@ -771,6 +818,10 @@ function onPrefChanged(prefName, newValue, oldValue)
             client.dispatch("sync-header");
             break;
 
+        case "tabLabel":
+            onTabLabelUpdate(client, newValue);
+            break;
+
         case "timestamps":
         case "timestamps.display":
         case "collapseActions":
@@ -780,6 +831,20 @@ function onPrefChanged(prefName, newValue, oldValue)
 
         case "log":
             client.dispatch("sync-log");
+            break;
+
+        case "alert.globalEnabled":
+            updateAlertIcon();
+            break;
+
+        case "alert.floodDensity":
+            if (client.alert && client.alert.floodProtector)
+                client.alert.floodProtector.floodDensity = newValue;
+            break;
+
+        case "alert.floodDispersion":
+            if (client.alert && client.alert.floodProtector)
+                client.alert.floodProtector.floodDispersion = newValue;
             break;
 
         case "aliases":
@@ -873,6 +938,10 @@ function onNetworkPrefChanged(network, prefName, newValue, oldValue)
             network.dispatch("sync-header");
             break;
 
+        case "tabLabel":
+            onTabLabelUpdate(network, newValue);
+            break;
+
         case "timestamps":
         case "timestamps.display":
         case "collapseActions":
@@ -942,6 +1011,10 @@ function onChannelPrefChanged(channel, prefName, newValue, oldValue)
             channel.dispatch("sync-header");
             break;
 
+        case "tabLabel":
+            onTabLabelUpdate(channel, newValue);
+            break;
+
         case "timestamps":
         case "timestamps.display":
         case "collapseActions":
@@ -992,6 +1065,10 @@ function onUserPrefChanged(user, prefName, newValue, oldValue)
             user.dispatch("sync-header");
             break;
 
+        case "tabLabel":
+            onTabLabelUpdate(user, newValue);
+            break;
+
         case "timestamps":
         case "timestamps.display":
         case "collapseActions":
@@ -1037,6 +1114,10 @@ function onDCCUserPrefChanged(user, prefName, newValue, oldValue)
 
             case "displayHeader":
                 view.dispatch("sync-header");
+                break;
+
+            case "tabLabel":
+                onTabLabelUpdate(user, newValue);
                 break;
 
             case "timestamps":
@@ -1105,3 +1186,14 @@ function updateAliases()
         }
     }
 }
+
+function onTabLabelUpdate(sourceObject, newValue)
+{
+    var tab = getTabForObject(sourceObject);
+    if (tab)
+    {
+        tab.label = newValue || sourceObject.viewName;
+        tab.setAttribute("tooltiptext", sourceObject.viewName);
+    }
+}
+

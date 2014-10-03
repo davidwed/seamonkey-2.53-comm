@@ -10,19 +10,20 @@ srcdir=@srcdir@
 VPATH=@srcdir@
 relativesrcdir = extensions/irc/locales
 
+EXTERNALLY_MANAGED_MAKE_FILE := 1
+STANDALONE_MAKEFILE := 1
+JAR_MANIFEST := $(srcdir)/jar.mn
+
 CHATZILLA_VERSION=$(shell grep "const __cz_version" "$(srcdir)/../xul/content/static.js" | sed "s|.*\"\([^\"]\{1,\}\)\".*|\1|")
 CHATZILLA_BASE_VERSION=$(shell echo "$(CHATZILLA_VERSION)" | sed "s|\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*|\1|")
 
 XPI_NAME               = chatzilla
 USE_EXTENSION_MANIFEST = 1
-NO_JAR_AUTO_REG        = 1
 INSTALL_EXTENSION_ID   = {59c81df5-4b7a-477b-912d-4e0fdf64e5f2}
 XPI_PKGNAME            = chatzilla-$(CHATZILLA_VERSION)
 
 # include config.mk before we override the AB_CD var it sets
 include $(topsrcdir)/config/config.mk
-
-STANDALONE_MAKEFILE := 1
 
 # if the wanted language is not in all-locales, fall back to en-US
 ifeq (,$(filter $(AB_CD),$(shell cat $(srcdir)/all-locales)))
@@ -44,7 +45,7 @@ XULAPP_DEFINES = \
     $(NULL)
 endif
 
-DEFINES += -DINSTALL_EXTENSION_ID=$(INSTALL_EXTENSION_ID)
+DEFINES += -DINSTALL_EXTENSION_ID="$(INSTALL_EXTENSION_ID)"
 DEFINES += -DCHATZILLA_VERSION=$(CHATZILLA_VERSION)
 DEFINES += -DCHATZILLA_BASE_VERSION=$(CHATZILLA_BASE_VERSION)
 
