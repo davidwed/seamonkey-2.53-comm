@@ -7,7 +7,7 @@
 <!ENTITY descValue.label "Wartość:">
 <!ENTITY descState.label "Stan:">
 <!ENTITY descBounds.label "Granice:">
-<!ENTITY tabAttrs.label "Atrybuty objektu">
+<!ENTITY tabAttrs.label "Atrybuty obiektu">
 <!ENTITY colAttrName.label "Nazwa">
 <!ENTITY colAttrValue.label "Wartość">
 <!ENTITY tabActions.label "Czynności">

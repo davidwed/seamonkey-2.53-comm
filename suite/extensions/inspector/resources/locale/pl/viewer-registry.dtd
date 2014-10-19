@@ -10,9 +10,9 @@
 <!ENTITY styleRules.label "Reguły CSS">
 <!ENTITY computedStyle.label "Obliczony styl">
 <!ENTITY usedFontFaces.label "Użyte kroje czcionek">
-<!ENTITY jsObject.label "Objekt języka JavaScript">
+<!ENTITY jsObject.label "Obiekt języka JavaScript">
 <!ENTITY accessibleEvent.label "Dostępne zdarzenie">
-<!ENTITY accessibleObject.label "Dostępne objekty">
+<!ENTITY accessibleObject.label "Dostępne obiekty">
 <!ENTITY accessibleProps.label "Dostępne właściwości">
 <!ENTITY accessibleRelations.label "Dostępne relacje">
 <!ENTITY accessibleEvents.label "Dostępne zdarzenia">

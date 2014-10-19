@@ -53,7 +53,7 @@
 <!ENTITY mnView.accesskey "W">
 <!ENTITY mnDocViewerList.label "Przeglądarka dokumentów">
 <!ENTITY mnDocViewerList.accesskey "d">
-<!ENTITY mnObjectViewerList.label "Przeglądarka objektów">
+<!ENTITY mnObjectViewerList.label "Przeglądarka obiektów">
 <!ENTITY mnObjectViewerList.accesskey "o">
 <!ENTITY cmdToggleDocument.label "Pokaż dokument w panelu przeglądarki">
 <!ENTITY cmdToggleDocument.accesskey "P">
