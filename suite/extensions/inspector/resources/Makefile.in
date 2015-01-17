@@ -13,6 +13,7 @@ include $(DEPTH)/config/autoconf.mk
 
 ALL_LOCALES = \
 	de \
+	el \
 	en-GB \
 	en-US \
 	pl \

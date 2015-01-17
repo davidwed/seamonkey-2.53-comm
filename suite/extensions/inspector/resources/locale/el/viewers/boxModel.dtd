@@ -7,3 +7,11 @@
 <!ENTITY boxMargin.label "Περιθώριο">
 <!ENTITY boxBorder.label "Περίγραμμα">
 <!ENTITY boxPadding.label "Γέμισμα">
+
+<!ENTITY xCoord.label "χ">
+<!ENTITY yCoord.label "ψ">
+<!ENTITY screenXCoord.label "οθόνη χ">
+<!ENTITY screenYCoord.label "οθόνη ψ">
+
+<!ENTITY dimensionWidth.label  "πλάτος πλαισίου">
+<!ENTITY dimensionHeight.label "ύψος πλαισίου">

@@ -3,11 +3,14 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <!ENTITY jsCopyValue.label "Αντιγραφή τιμής">
-<!ENTITY jsEval.label "Εκτίμηση Javascript...">
+<!ENTITY jsEval.label "Εκτίμηση JavaScript…">
 
 <!ENTITY jsProperty.label "Ιδιότητα">
 <!ENTITY jsValue.label "Τιμή">
 
-<!ENTITY jsEval.desc "Εισάγετε μια έκφραση javascript.  Η μεταβλητή &quot;target&quot; είναι το αντικείμενο που έχει επιλεχθεί.  Όποια τιμή επιστρέφετε θα εμφανίζεται στο Javascript Object Viewer.">
-
+<!ENTITY evaluateDialog.title "Εκτίμηση έκφρασης">
+<!ENTITY jsEval.desc "Εισάγετε μια έκφραση JavaScript.  Η μεταβλητή «target» είναι η ιδιότητα που είναι επιλεγμένη αυτήν τη στιγμή.">
 <!ENTITY jsExecute.label "Εκτέλεση">
+<!ENTITY inspectReturn.label "Επιθεώρηση επιστροφής…">
+<!ENTITY inspectReturnNew.label "σε νέο παράθυρο">
+<!ENTITY inspectReturnExisting.label "στο υπάρχον παράθυρο">
