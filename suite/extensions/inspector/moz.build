@@ -12,3 +12,7 @@ XPI_NAME = 'inspector'
 export('XPI_NAME')
 
 JAR_MANIFESTS += ['jar.mn']
+
+JS_PREFERENCE_FILES += [
+    'resources/content/prefs/inspector.js',
+]
