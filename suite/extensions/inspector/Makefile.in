@@ -17,6 +17,7 @@ XPI_NAME               = inspector
 USE_EXTENSION_MANIFEST = 1
 INSTALL_EXTENSION_ID   = inspector@mozilla.org
 XPI_PKGNAME            = inspector-$(DOMi_VERSION)
+NO_JS_MANIFEST         = 1
 
 DIST_FILES = install.rdf
 
