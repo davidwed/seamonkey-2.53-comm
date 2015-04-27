@@ -16,7 +16,6 @@ STANDALONE_MAKEFILE := 1
 JAR_MANIFEST := $(srcdir)/jar.mn
 
 XPI_NAME               = inspector
-USE_EXTENSION_MANIFEST = 1
 
 DEFINES += -DAB_CD=$(AB_CD)
 
