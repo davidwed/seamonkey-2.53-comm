@@ -19,9 +19,7 @@ XPI_PKGNAME            = inspector-$(DOMi_VERSION)
 
 DIST_FILES = install.rdf
 
-XULAPP_DEFINES = \
-  -DDOMi_VERSION=$(DOMi_VERSION) \
-  $(NULL)
+DEFINES += -DDOMi_VERSION=$(DOMi_VERSION)
 
 include $(topsrcdir)/config/rules.mk
 
