@@ -13,6 +13,10 @@
 <!ENTITY tabActions.label "Åtgärder">
 <!ENTITY descKeyBindings.label "Nyckelbindningar:">
 <!ENTITY descInvoke.label "Anropa">
+<!ENTITY tabTextAttrs.label "Textattribut">
+<!ENTITY descDefaultAttrs.label "Standardattribut:">
+<!ENTITY descStartOffset.label "Startavstånd:">
+<!ENTITY descEndOffset.label "Slutavstånd:">
 <!ENTITY tabTableCell.label "Tabellcell">
 <!ENTITY descColumnIdx.label "Kolumnindex:">
 <!ENTITY descRowIdx.label "Radindex:">
