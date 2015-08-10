@@ -2233,7 +2233,7 @@ function cmdGotoURL(e)
         ((action == "goto-url-newtab") && !browserWin) ||
         ((action == "goto-url") && !browserWin) ||
         ((action == "goto-url") && browserWin &&
-         (location.href.indexOf("chrome://chatzilla/content/") == 0)))
+         (location.indexOf("chrome://chatzilla/content/") == 0)))
     {
         try
         {
@@ -3979,7 +3979,10 @@ function cmdFont(e)
                     break;
 
                 default:
-                    val = Number(val);
+                    if (isNaN(val))
+                        val = 0;
+                    else
+                        val = Number(val);
             }
             // Save the new value.
             view.prefs[pref] = val;

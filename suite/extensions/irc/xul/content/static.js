@@ -4,11 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const __cz_version   = "0.9.91.1";
+const __cz_version   = "0.9.92";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
-const __cz_locale    = "0.9.91";
+const __cz_locale    = "0.9.92";
 
 var warn;
 var ASSERT;
@@ -3089,7 +3089,7 @@ function replaceColorCodes(msg)
     // to prevent munging the URLs resulting in broken links. Leave codes at
     // the start of the URL alone.
     msg = msg.replace(new RegExp(client.linkRE.source, "g"), function(url, _foo, scheme) {
-        if (!client.checkURLScheme(scheme))
+        if (scheme && !client.checkURLScheme(scheme))
             return url;
         return url.replace(/%[BC][0-9A-Fa-f]/g, function(hex, index) {
             // as JS does not support lookbehind and we don't want to consume the
@@ -4324,6 +4324,12 @@ function cli_load(url, scope)
         var cls;
         if ((cls = Components.classes[LOADER_CTRID]))
             client._loader = cls.getService(mozIJSSubScriptLoader);
+    }
+
+    if (client._loader.loadSubScriptWithOptions)
+    {
+        var opts = {target: scope, ignoreCache: true};
+        return client._loader.loadSubScriptWithOptions(url, opts);
     }
 
     return client._loader.loadSubScript(url, scope);
