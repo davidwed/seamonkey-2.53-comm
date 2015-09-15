@@ -16,7 +16,6 @@ DOMi_VERSION = 2.0.17pre
 XPI_NAME               = inspector
 INSTALL_EXTENSION_ID   = inspector@mozilla.org
 XPI_PKGNAME            = inspector-$(DOMi_VERSION)
-NO_JS_MANIFEST         = 1
 
 DIST_FILES = install.rdf
 
