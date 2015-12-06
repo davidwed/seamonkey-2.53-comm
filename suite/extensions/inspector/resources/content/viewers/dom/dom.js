@@ -1586,7 +1586,7 @@ DOMViewer.prototype =
       var min = {};
       var max = {};
       selection.getRangeAt(i, min, max);
-      for (let j = min.value, max = max.value; j <= max; ++j) {
+      for (let j = min.value; j <= max.value; ++j) {
         indexes.push(j);
       }
     }
