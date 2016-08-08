@@ -61,7 +61,7 @@ ColumnsDialog.prototype =
     // bug 56270 - dragSession.sourceDocument is null --
     // causes me to code this very temporary, very nasty hack
     // to make sure I get notified when a column is dropped
-    opener.viewer.mDOMTree.onClientDrop = ColumnsDialogDragDropOut;
+    opener.viewer.mDOMTree.onClientDrop = ColumnsDialogDropOut;
     
     this.buildContents();
     
@@ -152,7 +152,7 @@ ColumnsDialog.prototype =
   ////////////////////////////////////////////////////////////////////////////
   //// Drag and Drop
 
-  onDragGesture: function(aEvent)
+  onDragStart: function(aEvent)
   {
     var box = this.getBoxTarget(aEvent.target);
     this.setDraggingBox(box);
@@ -166,7 +166,7 @@ ColumnsDialog.prototype =
     return false;
   },
   
-  onDragDropOut: function()
+  onDropOut: function()
   {
     var box = document.getElementById("bxColumns");
     var value =  this.mDraggingBox._ColValue;
@@ -174,7 +174,7 @@ ColumnsDialog.prototype =
     this.removeItem(value);
   },
   
-  onDragDropIn: function(aEvent)
+  onDropIn: function(aEvent)
   {
     var data = DNDUtils.getData("TreeBuilder/column-remove", 0);
     var string = XPCU.QI(data, "nsISupportsString");
@@ -213,7 +213,7 @@ ColumnsDialog.prototype =
 
 };
 
-function ColumnsDialogDragDropOut()
+function ColumnsDialogDropOut()
 {
-  dialog.onDragDropOut();
+  dialog.onDropOut();
 }

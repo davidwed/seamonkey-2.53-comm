@@ -248,8 +248,8 @@ inTreeBuilder.prototype =
       this.addDNDListener(this.mTree, "ondragenter");
       this.addDNDListener(this.mTree, "ondragover");
       this.addDNDListener(this.mTree, "ondragexit");
-      this.addDNDListener(this.mTree, "ondraggesture");
-      this.addDNDListener(this.mTree, "ondragdrop");
+      this.addDNDListener(this.mTree, "ondragstart");
+      this.addDNDListener(this.mTree, "ondrop");
     }
   },
 
@@ -276,7 +276,7 @@ inTreeBuilder.prototype =
   {
   },
 
-  onDragDrop: function(aEvent)
+  onDrop: function(aEvent)
   {
     this.markColumnInsert(null);
     var dragService = XPCU.getService("@mozilla.org/widget/dragservice;1", "nsIDragService");
@@ -364,7 +364,7 @@ inTreeBuilder.prototype =
 
   //// for drag-n-drop removal/arrangement of columns
 
-  onDragGesture: function(aEvent)
+  onDragStart: function(aEvent)
   {
     var target = aEvent.target;
     if (target.parentNode == this.mTree) {
@@ -382,14 +382,14 @@ inTreeBuilder.prototype =
   {
     aBox._treeBuilderDropTarget = this;
     this.addDNDListener(aBox, "ondragover", "Target");
-    this.addDNDListener(aBox, "ondragdrop", "Target");
+    this.addDNDListener(aBox, "ondrop", "Target");
   },
 
   removeColumnDropTarget: function(aBox)
   {
     aBox._treeBuilderDropTarget = this;
     this.removeDNDListener(aBox, "ondragover", "Target");
-    this.removeDNDListener(aBox, "ondragdrop", "Target");
+    this.removeDNDListener(aBox, "ondrop", "Target");
   },
 
   onDragOverTarget: function(aBox, aEvent)
@@ -397,7 +397,7 @@ inTreeBuilder.prototype =
     DNDUtils.checkCanDrop("TreeBuilder/column-remove");
   },
 
-  onDragDropTarget: function(aBox, aEvent)
+  onDropTarget: function(aBox, aEvent)
   {
     this.removeColumn(this.mColumnDragging);
     this.build();
@@ -600,9 +600,9 @@ inTreeBuilder.prototype =
 
 };
 
-function inTreeBuilder_ondraggesture(aTree, aEvent)
+function inTreeBuilder_ondragstart(aTree, aEvent)
 {
-  return aTree._treeBuilder.onDragGesture(aEvent);
+  return aTree._treeBuilder.onDragStart(aEvent);
 }
 
 function inTreeBuilder_ondragenter(aTree, aEvent)
@@ -620,9 +620,9 @@ function inTreeBuilder_ondragexit(aTree, aEvent)
   return aTree._treeBuilder.onDragExit(aEvent);
 }
 
-function inTreeBuilder_ondragdrop(aTree, aEvent)
+function inTreeBuilder_ondrop(aTree, aEvent)
 {
-  return aTree._treeBuilder.onDragDrop(aEvent);
+  return aTree._treeBuilder.onDrop(aEvent);
 }
 
 function inTreeBuilder_ondragover_Target(aBox, aEvent)
@@ -630,7 +630,7 @@ function inTreeBuilder_ondragover_Target(aBox, aEvent)
   return aBox._treeBuilderDropTarget.onDragOverTarget(aBox, aEvent);
 }
 
-function inTreeBuilder_ondragdrop_Target(aBox, aEvent)
+function inTreeBuilder_ondrop_Target(aBox, aEvent)
 {
-  return aBox._treeBuilderDropTarget.onDragDropTarget(aBox, aEvent);
+  return aBox._treeBuilderDropTarget.onDropTarget(aBox, aEvent);
 }
