@@ -2,90 +2,84 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
+<!DOCTYPE html>
 <html>
-    <head>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-      <style type="text/css">
-        [hidden="true"] {
-          display: none;
-        }
+  <head>
+    <meta charset="utf-8">
+    <style type="text/css">
+      [hidden="true"] {
+        display: none;
+      }
 
-        .header-outer {
-          position: fixed;
-          top: 0px;
-          left: 0px;
-          right: 0px;
-          margin: 0px;
-          padding: 0px;
-        }
+      .header-outer {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        margin: 0px;
+        padding: 0px;
+      }
 
-        .header {
-          background-color: white;
-          color: black;
-          margin: 2px;
-          border: 1px black solid;
-        }
+      .header {
+        background-color: white;
+        color: black;
+        margin: 2px;
+        border: 1px black solid;
+      }
 
-        .h-table,
-        #net-url,
-        #ch-url,
-        #dcc-chat-title {
-          width: 100%;
-        }
+      .h-table,
+      #net-url,
+      #ch-url,
+      #dcc-chat-title {
+        width: 100%;
+      }
 
-        #splash {
-          font-size: 24pt;
-          font-weight: bold;
-          text-align: center;
-        }
+      #splash {
+        font-size: 24pt;
+        font-weight: bold;
+        text-align: center;
+      }
 
-        #cli-version-container {
-          text-align: center;
-          width: 100%;
-        }
+      #cli-version-container {
+        text-align: center;
+        width: 100%;
+      }
 
-        #usr-descnodes,
-        #ch-topicnodes {
-          line-height: 110%;
-        }
+      #usr-descnodes,
+      #ch-topicnodes {
+        line-height: 110%;
+      }
 
-        #ch-usercount,
-        #ch-modestr,
-        #net-lag,
-        #dcc-file-progress {
-          white-space: nowrap;
-        }
+      #ch-usercount,
+      #ch-modestr,
+      #net-lag,
+      #dcc-file-progress {
+        white-space: nowrap;
+      }
 
-        .label {
-          font-weight: bold;
-          text-align: right;
-          vertical-align: top;
-          white-space: nowrap;
-          padding-right: 0.5em;
-        }
+      .label {
+        font-weight: bold;
+        text-align: right;
+        vertical-align: top;
+        white-space: nowrap;
+        padding-right: 0.5em;
+      }
 
-        .value {
-          vertical-align: top;
-          padding-right: 1em;
-        }
+      .value {
+        vertical-align: top;
+        padding-right: 1em;
+      }
 
-        #usr-title,
-        #usr-descnodes {
-          text-align: center;
-        }
-        
-        .crop-right {
-        }
-        
-      </style>
+      #usr-title,
+      #usr-descnodes {
+        text-align: center;
+      }
+    </style>
 
-      <script type="application/x-javascript" src="chrome://chatzilla/content/output-window.js"></script>
-    </head>
+    <script type="application/x-javascript" src="chrome://chatzilla/content/output-window.js"></script>
+  </head>
 
-  <body class="chatzilla-body" onresize="onResize();">
+  <body class="chatzilla-body">
 
     <div class="header-outer">
 
@@ -151,7 +145,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <div class="header" id="usr-container" hidden="true">
         <table class="h-table">
           <tbody>
@@ -208,7 +202,7 @@
     </div>
 
     <div id="messages-outer" hidden="true">
-      <div id="splash"></div>
+      <div id="splash-wrapper"><div id="splash"></div></div>
       <div id="output"></div>
     </div>
   </body>

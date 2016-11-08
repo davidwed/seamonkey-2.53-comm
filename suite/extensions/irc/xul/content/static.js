@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const __cz_version   = "0.9.92";
+const __cz_version   = "0.9.93";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
@@ -147,6 +147,16 @@ function init()
     client.display(MSG_WELCOME, "HELLO");
     client.dispatch("set-current-view", { view: client });
 
+    /*
+     * Due to Firefox 44 changes regarding ES6 lexical scope, these 'const'
+     * items are no longer accessible from the global object ('window') but
+     * are required by the output window. The compromise is to copy them on
+     * to the global object so they can be used.
+     */
+    window.__cz_version = __cz_version;
+    window.__cz_condition = __cz_condition;
+    window.NET_CONNECTING = NET_CONNECTING;
+
     importFromFrame("updateHeader");
     importFromFrame("setHeaderState");
     importFromFrame("changeCSS");
@@ -160,8 +170,6 @@ function init()
 
     client.commandManager.installKeys(document);
     createMenus();
-
-    initIcons();
 
     client.busy = false;
     updateProgress();
@@ -197,7 +205,7 @@ function initStatic()
     {
         dd("IO service failed to initialize: " + ex);
     }
-    
+
     try
     {
         const nsISound = Components.interfaces.nsISound;
@@ -278,14 +286,14 @@ function initStatic()
                  "unselected"];
     for (var i = 0; i < atoms.length; i++)
         client.atomCache[atoms[i]] = atomSvc.getAtom(atoms[i]);
-    
+
     if (client.prefs["showModeSymbols"])
         setListMode("symbol");
     else
         setListMode("graphic");
 
     var tree = document.getElementById('user-list');
-    tree.setAttribute("ondraggesture",
+    tree.setAttribute("ondragstart",
                       "nsDragAndDrop.startDrag(event, userlistDNDObserver);");
 
     setDebugMode(client.prefs["debugMode"]);
@@ -495,9 +503,6 @@ function initApplicationCompatibility()
 
     // Set up simple host and platform information.
     client.host = "Unknown";
-    // Do we need to copy the icons? (not necessary on Gecko 1.8 and onwards,
-    // and install.js does it for us on SeaMonkey)
-    client.hostCompat.needToCopyIcons = false;
 
     var app = getService("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
     // nsIXULAppInfo wasn't implemented before 1.8...
@@ -527,23 +532,9 @@ function initApplicationCompatibility()
                 client.host = ""; // Unknown host, show an error later.
         }
     }
-    else if ("getBrowserURL" in window)
+    else
     {
-        var url = getBrowserURL();
-        if (url == "chrome://navigator/content/navigator.xul")
-        {
-            client.host = "Mozilla";
-        }
-        else if (url == "chrome://browser/content/browser.xul")
-        {
-            client.hostCompat.needToCopyIcons = true;
-            client.host = "Firefox";
-        }
-        else
-        {
-            client.host = ""; // We don't know this host. Show an error later.
-            client.unknownUID = url;
-        }
+        client.host = ""; // We don't know this host. Show an error later.
     }
 
     client.platform = "Unknown";
@@ -567,58 +558,6 @@ function initApplicationCompatibility()
         client.lineEnd = "\r\n";
     else
         client.lineEnd = "\n";
-}
-
-function initIcons()
-{
-    // Make sure we got the ChatZilla icon(s) in place first.
-    const iconName = "chatzilla-window";
-    const suffixes = [".ico", ".xpm", "16.xpm"];
-
-    /* when installing on Mozilla, the XPI has the power to put the icons where
-     * they are needed - in older versions of Firefox, it doesn't.
-     */
-    if (!client.hostCompat.needToCopyIcons)
-        return;
-
-    var sourceDir = getSpecialDirectory("ProfD");
-    sourceDir.append("extensions");
-    sourceDir.append("{" + __cz_guid + "}");
-    sourceDir.append("chrome");
-    sourceDir.append("icons");
-    sourceDir.append("default");
-
-    var destDir = getSpecialDirectory("AChrom");
-    destDir.append("icons");
-    destDir.append("default");
-    if (!destDir.exists())
-    {
-        try
-        {
-            mkdir(destDir);
-        }
-        catch(ex)
-        {
-            return;
-        }
-    }
-
-    for (var i = 0; i < suffixes.length; i++)
-    {
-        var iconDest = destDir.clone();
-        iconDest.append(iconName + suffixes[i]);
-        var iconSrc = sourceDir.clone();
-        iconSrc.append(iconName + suffixes[i]);
-
-        if (iconSrc.exists() && !iconDest.exists())
-        {
-            try
-            {
-                iconSrc.copyTo(iconDest.parent, iconDest.leafName);
-            }
-            catch(ex){}
-        }
-    }
 }
 
 function initInstrumentation()
@@ -760,7 +699,7 @@ function processStartupScripts()
 {
     client.plugins = new Object();
     var scripts = client.prefs["initialScripts"];
-    var basePath = getURLSpecFromFile(client.prefs["profilePath"]); 
+    var basePath = getURLSpecFromFile(client.prefs["profilePath"]);
     var baseURL = client.iosvc.newURI(basePath, null, null);
     for (var i = 0; i < scripts.length; ++i)
     {
@@ -2438,7 +2377,7 @@ function updateAppMotif(motifURL)
 
     motifURL = motifURL.replace(/"/g, "%22");
     var dataStr = "href=\"" + motifURL + "\" name=\"dyn-motif\"";
-    try 
+    try
     {
         // No dynamic style node yet.
         if (!node)
@@ -3098,7 +3037,7 @@ function replaceColorCodes(msg)
             return (needPercent ? "" : "%") + hex;
         });
     });
-    
+
     // mIRC codes: underline, bold, Original (reset), colors, reverse colors.
     msg = msg.replace(/(^|[^%])%U/g, "$1\x1f");
     msg = msg.replace(/(^|[^%])%B/g, "$1\x02");
@@ -3198,7 +3137,6 @@ function client_statechange (webProgress, request, stateFlags, status)
                 if (!("_called_initOutputWindow" in cwin))
                 {
                     cwin._called_initOutputWindow = true;
-                    cwin.getMsg = getMsg;
                     cwin.initOutputWindow(client, frame.source, onMessageViewClick);
                     cwin.changeCSS(frame.source.getFontCSS("data"), "cz-fonts");
                     scrollDown(frame, true);
@@ -3211,7 +3149,7 @@ function client_statechange (webProgress, request, stateFlags, status)
             {
                 // This should totally never ever happen. It will if we get in a
                 // fight with xpcnativewrappers, though. Oops:
-                dd("Couldn't find a content window or its initOutputWindow " + 
+                dd("Couldn't find a content window or its initOutputWindow " +
                    "function. This is BAD!");
             }
         }
@@ -3230,7 +3168,7 @@ function client_statechange (webProgress, request, stateFlags, status)
                 //dd("scrollDown(" + frame.source.getURL() + ")");
             }
         }
-    
+
     }
 }
 
@@ -3326,7 +3264,7 @@ function cli_installPlugin(name, source)
     }
     catch (ex)
     {
-        display(getMSg(MSG_INSTALL_PLUGIN_ERR_CHECK_SD, ex), MT_ERROR);
+        display(getMsg(MSG_INSTALL_PLUGIN_ERR_CHECK_SD, ex), MT_ERROR);
         return;
     }
 
@@ -3341,7 +3279,7 @@ function cli_installPlugin(name, source)
                                       "nsIZipReader");
             // Gah at changing APIs:
             if ("init" in zipReader)
-            {   
+            {
                 zipReader.init(source);
                 zipReader.open();
             }
@@ -3394,6 +3332,7 @@ function cli_installPlugin(name, source)
             var initJSFile = getTempFile(client.prefs["profilePath"],
                                          "install-plugin.temp");
             zipReader.extract(initPath, initJSFile);
+            initJSFile.permissions = 438; // 0666
             var initJSFileH = fopen(initJSFile, "<");
             var initJSData = initJSFileH.read();
             initJSFileH.close();
@@ -3441,6 +3380,7 @@ function cli_installPlugin(name, source)
                         destInit = zipFile;
 
                     zipReader.extract(itemName, zipFile);
+                    zipFile.permissions = 438; // 0666
                 }
             }
 
@@ -3515,7 +3455,7 @@ function cli_installPlugin(name, source)
         {
             if (ex != CZ_PI_ABORT)
             {
-                display(getMSg(MSG_INSTALL_PLUGIN_ERR_INSTALLING, ex),
+                display(getMsg(MSG_INSTALL_PLUGIN_ERR_INSTALLING, ex),
                         MT_ERROR);
             }
         }
@@ -3667,7 +3607,7 @@ function getTabForObject(source, create)
             createMessages(source);
 
         tb = document.createElement("tab");
-        tb.setAttribute("ondraggesture",
+        tb.setAttribute("ondragstart",
                         "nsDragAndDrop.startDrag(event, tabDNDObserver);");
         tb.setAttribute("href", source.getURL());
         tb.setAttribute("name", source.unicodeName);
@@ -3697,9 +3637,9 @@ function getTabForObject(source, create)
         browser.setAttribute("ondragover",
                              "nsDragAndDrop.dragOver(event, " +
                              "contentDropObserver);");
-        browser.setAttribute("ondragdrop",
+        browser.setAttribute("ondrop",
                              "nsDragAndDrop.drop(event, contentDropObserver);");
-        browser.setAttribute("ondraggesture",
+        browser.setAttribute("ondragstart",
                              "nsDragAndDrop.startDrag(event, " +
                              "contentAreaDNDObserver);");
         browser.source = source;
@@ -3903,11 +3843,11 @@ function cdnd_gsf()
  * XXX: Some of the code below has to work around specific limitations in how
  * the nsDragAndDrop.js wrapper works. The wrapper greatly simplifies the DnD
  * code, though, so it's still worth using.
- * 
+ *
  * XXX: canDrop checks if there is a supported flavour of data because
  * nsDragAndDrop does not. This will prevent the drag service from thinking
  * we accept any old data when we don't.
- * 
+ *
  * XXX: nsDragAndDrop.checkCanDrop does this:
  *     mDragSession.canDrop = mDragSession.sourceNode != aEvent.target;
  *     mDragSession.canDrop &= aDragDropObserver.canDrop(...);
@@ -3917,7 +3857,7 @@ function cdnd_gsf()
  * it can't be dropped, luckily). As a result, after nsDragAndDrop has called
  * canDrop and onDragOver, the drag service's canDrop value is true iff there
  * is a supported flavour.
- * 
+ *
  * XXX: onDrop is the only place which checks we're getting an IRC URL, as
  * accessing the drag data at any other time is both tedious and could
  * significantly impact the performance of the drag (getting the data can be
@@ -4649,7 +4589,7 @@ function this_getFontCSS(format)
     else
         fs = "font-size: medium;";
 
-    css = "body.chatzilla-body { " + fs + fn + " }";
+    css = ".chatzilla-body { " + fs + fn + " }";
 
     if (format == "data")
         return "data:text/css," + encodeURIComponent(css);
@@ -4739,7 +4679,7 @@ function __display(message, msgtype, sourceObj, destObj)
         else
             toAttr = destObj.viewName;
     }
-        
+
     // Is the message 'to' or 'from' somewhere other than this view
     var toOther = ((sourceObj == me) && destObj && (destObj != this));
     var fromOther = (toUser && (destObj == me) && (sourceObj != this) &&
@@ -5113,7 +5053,7 @@ function __display(message, msgtype, sourceObj, destObj)
                              "ERROR");
         }
     }
-    
+
     /* We want to show alerts if they're from a non-current view (optional),
     * or we don't have focus at all.
     */
@@ -5788,21 +5728,21 @@ function showEventAlerts (type, event, message, nick, o, thisp, msgtype)
     // Converts .TYPE values into the event object names.
     // IRCChannel => channel, IRCUser => user, etc.
     type = type.replace(/^IRC/i,'').toLowerCase();
-  
+
     var source = type;
     // DCC Chat sessions should act just like user views.
     if (type == "dccchat") type = "user";
-  
+
     var ev = type + "." + event;
     if (!(("alert."+ev) in thisp.prefs))
         return;
     if (!thisp.prefs["alert."+ev])
         return;
-  
+
     client.alert.floodProtector.request();
     if (ev in client.alert.alertList)
         return;
-  
+
     client.alert.floodProtector.accept();
     if(client.prefs['alert.overlapDelay'] > 0)
     {
@@ -5810,11 +5750,11 @@ function showEventAlerts (type, event, message, nick, o, thisp, msgtype)
         setTimeout(toasterPopupOverlapDelayReset,
             client.prefs['alert.overlapDelay'], ev);
     }
-  
+
     var clickable = client.prefs['alert.clickable'];
     var tabId = clickable ? getTabForObject(thisp,false).id : "";
     var listener = clickable ? alertClickerObserver : null;
-  
+
     message = removeColorCodes(message);
     if (nick)
     {
@@ -5836,7 +5776,7 @@ function showEventAlerts (type, event, message, nick, o, thisp, msgtype)
     {
         source = o.network.viewName;
     }
-  
+
     // We can't be sure if it is a MAC OS X and Growl is now turned off or not
     try
     {

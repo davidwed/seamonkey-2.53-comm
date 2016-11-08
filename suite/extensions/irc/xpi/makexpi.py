@@ -21,6 +21,10 @@ from os.path import join as joinpath
 
 # Set up settings and paths for finding files.
 pwd = os.path.dirname(__file__)
+
+ffversion = '45.*'
+smversion = '2.42.*'
+
 if pwd == '':
     pwd = os.getcwd()
 else:
@@ -42,7 +46,7 @@ def getenv(var, default, dir=False, check=False):
         if check and not os.path.isdir(value):
             print 'ERROR: Directory %s not found.' % value
             sys.exit(1)
-    
+
     return value
 
 
@@ -65,7 +69,7 @@ from JarMaker import JarMaker
 def echo(str):
     """
     print a string without a newline or trailing space
-    
+
     generally used in place of "echo -n" from the original code
     """
     sys.stdout.write(str)
@@ -73,7 +77,7 @@ def echo(str):
 def rm(path):
     """
     remove file or directory, recurses on directory
-    
+
     This will fail silently if the file is not found
     but any other exceptions will be raised
     """
@@ -118,7 +122,7 @@ def sed((pattern, replacement), input, output):
 def zip(filename, source_dir, include=None, exclude=None):
     """
     create a zip file of a directory's contents
-    
+
     include and exclude are filtering functions, they will
     be passed the basename of each file in the directory
     and should either return true or false if the file
@@ -151,7 +155,7 @@ def locale():
     """
     check arguments for locale or return None
     """
-    locale_pattern = re.compile(r'\w{1,3}-\w{1,3}')
+    locale_pattern = re.compile(r'^[a-z]{1,3}(?:-[A-Z]{1,3}(?:-[a-z]{1,3})?)?$')
     for arg in sys.argv:
         locale_match = locale_pattern.match(arg)
         if locale_match is not None:
@@ -322,7 +326,7 @@ def do_clean():
 def do_build_base():
     print 'Beginning build of ChatZilla %s...' % version
     xpiname = check_xpiname('chatzilla-%s.xpi' % version)
-    
+
     progress_echo('  Checking XPI structure')
     progress_mkdir(xpiroot)
     progress_mkdir(joinpath(xpiroot, 'chrome'))
@@ -330,25 +334,18 @@ def do_build_base():
     progress_mkdir(joinpath(xpiroot, 'chrome', 'icons', 'default'))
     progress_mkdir(joinpath(xpiroot, 'components'))
     print '            done'
-    
+
     progress_echo('  Checking JAR structure')
     progress_mkdir(jarroot)
     print '                done'
-    
-    progress_echo('  Updating Firefox Extension files')
-    progress_preprocess(joinpath(xpifiles, 'install.rdf'), joinpath(xpiroot, 'install.rdf'), {'CHATZILLA_VERSION': version})
+
+    progress_echo('  Updating extension files')
+    progress_preprocess(joinpath(xpifiles, 'install.rdf'), joinpath(xpiroot, 'install.rdf'), {'CHATZILLA_VERSION': version, 'FIREFOX_MAXVERSION': ffversion, 'SEAMONKEY_MAXVERSION': smversion})
     progress_copy(joinpath(xpifiles, 'chatzilla-window.ico'), joinpath(xpiroot, 'chrome', 'icons', 'default', 'chatzilla-window.ico'))
     progress_copy(joinpath(xpifiles, 'chatzilla-window.xpm'), joinpath(xpiroot, 'chrome', 'icons', 'default', 'chatzilla-window.xpm'))
     progress_copy(joinpath(xpifiles, 'chatzilla-window16.xpm'), joinpath(xpiroot, 'chrome', 'icons', 'default', 'chatzilla-window16.xpm'))
     print '   done'
-    
-    progress_echo('  Updating Mozilla Extension files')
-    progress_sed(joinpath(xpifiles, 'install.js'), joinpath(xpiroot, 'install.js'), ('@REVISION@', version))
-    progress_move(joinpath(fedir, 'xul', 'content', 'contents.rdf'), joinpath(fedir, 'xul', 'content', 'contents.rdf.in'))
-    progress_sed(joinpath(fedir, 'xul', 'content', 'contents.rdf.in'), joinpath(fedir, 'xul', 'content', 'contents.rdf'), (r'chrome:displayName="[^\"]+"', r'chrome:displayName="ChatZilla %s"' % version))
-    progress_rm(joinpath(fedir, 'xul', 'content', 'contents.rdf.in'))
-    print '   done'
-    
+
     progress_echo('  Constructing JAR package')
     jm = progress_jarmaker()
     progress_jarmaker_make(jm, joinpath(fedir, 'jar.mn'), fedir)
@@ -360,7 +357,7 @@ def do_build_base():
     progress_jarmaker_make(jm, joinpath(localedir, 'jar.mn.pp'), localedir, [joinpath(localedir, 'en-US')])
     progress_rm(joinpath(localedir, 'jar.mn.pp'))
     print '        done'
-    
+
     progress_echo('  Constructing XPI package')
     progress_copy(joinpath(jarroot, 'chatzilla.jar'), joinpath(xpiroot, 'chrome'))
     progress_copy(joinpath(fedir, 'js', 'lib', 'chatzilla-service.js'), joinpath(xpiroot, 'components'))
@@ -369,35 +366,30 @@ def do_build_base():
     progress_chmod(joinpath(xpiroot, 'components', 'chatzilla-service.js'), 0664)
     progress_zip(xpiroot, joinpath(pwd, xpiname))
     print '         done'
-    
+
     print 'Build of ChatZilla %s... ALL DONE' % version
 
 
 def do_build_locale():
     print 'Beginning build of %s locale for ChatZilla %s...' % (locale, version)
     xpiname = check_xpiname('chatzilla-%s.%s.xpi' % (version, locale))
-    
+
     progress_echo('  Checking XPI structure')
     progress_mkdir(xpiroot)
     progress_mkdir(joinpath(xpiroot, 'chrome'))
     print '               done'
-    
+
     progress_echo('  Checking JAR structure')
     progress_mkdir(jarroot)
     print '                done'
-    
-    progress_echo('  Updating Firefox Extension files')
-    progress_preprocess([joinpath(localedir, locale, 'defines.inc'), joinpath(localedir, 'generic', 'install.rdf')], joinpath(xpiroot, 'install.rdf.pp'), {'CHATZILLA_VERSION': version, 'CHATZILLA_BASE_VERSION': version, 'AB_CD': locale, 'INSTALL_EXTENSION_ID': 'langpack-%s@chatzilla.mozilla.org' % locale, 'MOZ_LANG_TITLE': locale})
+
+    progress_echo('  Updating extension files')
+    progress_preprocess([joinpath(localedir, locale, 'defines.inc'), joinpath(localedir, 'generic', 'install.rdf')], joinpath(xpiroot, 'install.rdf.pp'),
+             {'IRC_STANDALONE_BUILD': '1', 'CHATZILLA_VERSION': version, 'CHATZILLA_BASE_VERSION': version, 'AB_CD': locale, 'INSTALL_EXTENSION_ID': 'langpack-%s@chatzilla.mozilla.org' % locale, 'MOZ_LANG_TITLE': locale, 'FIREFOX_MAXVERSION': ffversion, 'SEAMONKEY_MAXVERSION': smversion})
     progress_sed(joinpath(xpiroot, 'install.rdf.pp'), joinpath(xpiroot, 'install.rdf'), ('chatzilla.jar', 'chatzilla-%s.jar' % locale))
     progress_rm(joinpath(xpiroot, 'install.rdf.pp'))
     print '    done'
-    
-    progress_echo('  Updating Mozilla Extension files')
-    progress_preprocess([joinpath(localedir, locale, 'defines.inc'), joinpath(localedir, 'generic', 'install.js')], joinpath(xpiroot, 'install.js.pp'), {'CHATZILLA_VERSION': version, 'AB_CD': locale, 'MOZ_LANG_TITLE': locale})
-    progress_sed(joinpath(xpiroot, 'install.js.pp'), joinpath(xpiroot, 'install.js'), ('chatzilla.jar', 'chatzilla-%s.jar' % locale))
-    progress_rm(joinpath(xpiroot, 'install.js.pp'))
-    print '    done'
-    
+
     progress_echo('  Constructing JAR package')
     jm = progress_jarmaker()
     progress_preprocess(joinpath(localedir, 'jar.mn'), joinpath(localedir, 'jar.mn.pp'), {'AB_CD': locale})
@@ -406,7 +398,7 @@ def do_build_locale():
     progress_rm(joinpath(localedir, 'jar.mn.pp'))
     progress_move(joinpath(jarroot, 'chatzilla.jar'), joinpath(jarroot, 'chatzilla-%s.jar' % locale))
     print '          done'
-    
+
     progress_echo('  Constructing XPI package')
     progress_copy(joinpath(jarroot, 'chatzilla-%s.jar' % locale), joinpath(xpiroot, 'chrome'))
     progress_sed(joinpath(jarroot, '..', 'chrome.manifest'), joinpath(xpiroot, 'chrome.manifest'), ('chatzilla.jar', 'chatzilla-%s.jar' % locale))
@@ -414,7 +406,7 @@ def do_build_locale():
     progress_chmod(joinpath(xpiroot, 'chrome', 'chatzilla-%s.jar' % locale), 0664)
     progress_zip(xpiroot, joinpath(pwd, xpiname))
     print '          done'
-    
+
     print 'Build of %s locale for ChatZilla %s... ALL DONE' % (locale, version)
 
 

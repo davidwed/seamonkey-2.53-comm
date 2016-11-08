@@ -1327,9 +1327,7 @@ function cmdNetwork(e)
 
 function cmdNetworks(e)
 {
-    var span = document.createElementNS(XHTML_NS, "html:span");
-
-    span.appendChild(newInlineText(MSG_NETWORKS_HEADA));
+    var wrapper = newInlineText(MSG_NETWORKS_HEADA);
 
     var netnames = keys(client.networks).sort();
     var lastname = netnames[netnames.length - 1];
@@ -1337,7 +1335,6 @@ function cmdNetworks(e)
     for (var n in netnames)
     {
         var net = client.networks[netnames[n]];
-        var a = document.createElementNS(XHTML_NS, "html:a");
         /* Test for an all-SSL network */
         var isSecure = true;
         for (var s in client.networks[netnames[n]].serverList)
@@ -1348,18 +1345,20 @@ function cmdNetworks(e)
                 break;
             }
         }
-        a.setAttribute("class", "chatzilla-link");
-        a.setAttribute("href", (isSecure ? "ircs://" : "irc://") + net.canonicalName);
-        var t = newInlineText(net.unicodeName);
-        a.appendChild(t);
-        span.appendChild(a);
+
+        var linkData = {
+            "data": net.unicodeName,
+            "href": (isSecure ? "ircs://" : "irc://") + net.canonicalName
+        };
+        wrapper.appendChild(newInlineText(linkData, "chatzilla-link", "a"));
+
         if (netnames[n] != lastname)
-            span.appendChild(newInlineText (MSG_COMMASP));
+            wrapper.appendChild(document.createTextNode(MSG_COMMASP));
     }
 
-    span.appendChild(newInlineText(MSG_NETWORKS_HEADB));
+    wrapper.appendChild(document.createTextNode(MSG_NETWORKS_HEADB));
 
-    display(span, MT_INFO);
+    display(wrapper, MT_INFO);
 }
 
 function cmdServer(e)
@@ -3805,8 +3804,16 @@ function cmdDoCommand(e)
     }
     else if (e.cmdName == "cmd_chatzillaPrefs")
     {
-        window.openDialog('chrome://chatzilla/content/config.xul', '',
-                          'chrome,resizable,dialog=no', window);
+        var prefWin = getWindowByType("irc:chatzilla:config");
+        if (!prefWin)
+        {
+            window.openDialog('chrome://chatzilla/content/config.xul', '',
+                              'chrome,resizable,dialog=no', window);
+        }
+        else
+        {
+            prefWin.focus();
+        }
     }
     else if (e.cmdName == "cmd_selectAll")
     {
@@ -4530,7 +4537,7 @@ function cmdInstallPlugin(e)
 
             ctx.outFile = getTempFile(client.prefs["profilePath"], tempName);
             ctx.outFileH = fopen(ctx.outFile, ">");
-        }, 
+        },
         onDataAvailable: function _onDataAvailable(request, context, stream,
                                                    offset, count)
         {
@@ -4542,7 +4549,7 @@ function cmdInstallPlugin(e)
         onStopRequest: function _onStopRequest(request, context, statusCode)
         {
             ctx.outFileH.close();
- 
+
             if (statusCode == 0)
             {
                 client.installPlugin(e.name, ctx.outFile);
@@ -4678,12 +4685,12 @@ function cmdWebSearch(e)
     const SEARCH_SVC = "@mozilla.org/browser/search-service;1";
     var nibss = getService(SEARCH_SVC, "nsIBrowserSearchService");
     var engine = nibss.currentEngine;
-    
+
     if (client.prefs["websearch.url"])
     {
         searchText = encodeURIComponent(searchText).replace(/%20/g, "+");
         var baseURL = client.prefs["websearch.url"];
-        
+
         if (baseURL.indexOf("%s") != -1)
             searchURL = baseURL.replace(/%s/g, searchText);
         else
