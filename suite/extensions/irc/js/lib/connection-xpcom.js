@@ -580,7 +580,15 @@ function bc_saread (observer)
     {
         var cls = Components.classes["@mozilla.org/network/input-stream-pump;1"];
         var pump = cls.createInstance(Components.interfaces.nsIInputStreamPump);
-        pump.init(this._inputStream, -1, -1, 0, 0, false);
+        // Account for Bug 1402888 which removed the startOffset and readLimit
+        // parameters from init.
+        if (pump.init.length > 5)
+        {
+            pump.init(this._inputStream, -1, -1, 0, 0, false);
+        } else
+        {
+            pump.init(this._inputStream, 0, 0, false);
+        }
         pump.asyncRead(new StreamListener(observer), this);
     }
 }

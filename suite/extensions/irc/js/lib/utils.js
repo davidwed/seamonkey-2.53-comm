@@ -524,6 +524,20 @@ function getWindowByType (windowType)
     return windowManager.getMostRecentWindow(windowType);
 }
 
+function toOpenWindowByType(inType, url, features)
+{
+    var topWindow = getWindowByType(inType);
+
+    if (typeof features == "undefined")
+        features = "chrome,extrachrome,menubar,resizable," +
+                   "scrollbars,status,toolbar";
+
+    if (topWindow)
+        topWindow.focus();
+    else
+        window.open(url, "_blank", features);
+}
+
 function renameProperty (obj, oldname, newname)
 {
 
@@ -991,7 +1005,7 @@ function getFileFromURLSpec(url)
      */
     if ("initFileFromURLSpec" in service)
     {
-        var file = newObject("@mozilla.org/file/local;1", "nsILocalFile");
+        var file = newObject("@mozilla.org/file/local;1", "nsIFile");
         service.initFileFromURLSpec(file, url);
         return file;
     }
@@ -1010,12 +1024,12 @@ function getURLSpecFromFile (file)
     const LOCALFILE_CTRID = "@mozilla.org/file/local;1";
 
     const nsIIOService = Components.interfaces.nsIIOService;
-    const nsILocalFile = Components.interfaces.nsILocalFile;
+    const nsIFile = Components.interfaces.nsIFile;
 
     if (typeof file == "string")
     {
         var fileObj =
-            Components.classes[LOCALFILE_CTRID].createInstance(nsILocalFile);
+            Components.classes[LOCALFILE_CTRID].createInstance(nsIFile);
         fileObj.initWithPath(file);
         file = fileObj;
     }
@@ -1489,7 +1503,7 @@ function srGetStrBundle(path)
         }
     }
 
-    strBundle = strBundleService.createBundle(path); 
+    strBundle = strBundleService.createBundle(path);
     if (!strBundle)
         dump("\n--** strBundle createInstance failed **--\n");
 

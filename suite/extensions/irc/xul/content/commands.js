@@ -223,6 +223,10 @@ function initCommands()
          ["statusbar",        "toggle-ui status",                  CMD_CONSOLE],
          ["header",           "toggle-ui header",                  CMD_CONSOLE],
 
+         ["add-ons",           cmdAddons,                                    0],
+         ["jsconsole",         cmdJSConsole,                                 0],
+         ["about-config",      cmdAboutConfig,                               0],
+
          // text-direction aliases
          ["rtl",              "text-direction rtl",                CMD_CONSOLE],
          ["ltr",              "text-direction ltr",                CMD_CONSOLE],
@@ -4122,7 +4126,7 @@ function cmdDCCSend(e)
     }
     else
     {
-        // Wrap in try/catch because nsILocalFile creation throws a freaking
+        // Wrap in try/catch because nsIFile creation throws a freaking
         // error if it doesn't get a FULL path.
         try
         {
@@ -4132,7 +4136,7 @@ function cmdDCCSend(e)
         {
             // Ok, try user's home directory.
             var fl = Components.classes[DIRSVC_CID].getService(nsIProperties);
-            file = fl.get("Home", Components.interfaces.nsILocalFile);
+            file = fl.get("Home", Components.interfaces.nsIFile);
 
             // Another freaking try/catch wrapper.
             try
@@ -4706,4 +4710,21 @@ function cmdWebSearch(e)
         searchURL = "https://www.google.com/search?q=" + searchText;
     }
     dispatch(client.prefs["messages.click"], {url: searchURL});
+}
+
+function cmdAddons(e)
+{
+    toOpenWindowByType("Addons:Manager",
+                       "chrome://mozapps/content/extensions/extensions.xul");
+}
+
+function cmdJSConsole(e)
+{
+    toOpenWindowByType("global:console", "chrome://global/content/console.xul");
+}
+
+function cmdAboutConfig(e)
+{
+    toOpenWindowByType("Preferences:ConfigManager",
+                       "chrome://global/content/config.xul");
 }

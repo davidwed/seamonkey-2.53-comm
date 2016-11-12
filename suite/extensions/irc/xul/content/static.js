@@ -4,7 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const __cz_version   = "0.9.93";
+Components.utils.import("resource://gre/modules/Services.jsm");
+
+const __cz_version   = "0.9.94";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
@@ -248,21 +250,44 @@ function initStatic()
 
     try
     {
-        const nsISDateFormat = Components.interfaces.nsIScriptableDateFormat;
-        const DTFMT_CID = "@mozilla.org/intl/scriptabledateformat;1";
-        client.dtFormatter =
-            Components.classes[DTFMT_CID].createInstance(nsISDateFormat);
+        // nsIScriptableDateFormat was removed from Gecko 57
+        // The replacement function was not available in a stable version
+        // prior to Gecko 56.
+        if (Services.vc.compare(Services.appinfo.platformVersion, "56.0") < 0)
+        {
+            const nsISDateFormat = Components.interfaces.nsIScriptableDateFormat;
+            const DTFMT_CID = "@mozilla.org/intl/scriptabledateformat;1";
+            client.dtFormatter =
+                Components.classes[DTFMT_CID].createInstance(nsISDateFormat);
 
-        // Mmmm, fun. This ONLY affects the ChatZilla window, don't worry!
-        Date.prototype.toStringInt = Date.prototype.toString;
-        Date.prototype.toString = function() {
-            var dtf = client.dtFormatter;
-            return dtf.FormatDateTime("", dtf.dateFormatLong,
-                                      dtf.timeFormatSeconds,
-                                      this.getFullYear(), this.getMonth() + 1,
-                                      this.getDate(), this.getHours(),
-                                      this.getMinutes(), this.getSeconds()
-                                     );
+            // Mmmm, fun. This ONLY affects the ChatZilla window, don't worry!
+            Date.prototype.toStringInt = Date.prototype.toString;
+            Date.prototype.toString = function() {
+                var dtf = client.dtFormatter;
+                return dtf.FormatDateTime("", dtf.dateFormatLong,
+                                          dtf.timeFormatSeconds,
+                                          this.getFullYear(), this.getMonth() + 1,
+                                          this.getDate(), this.getHours(),
+                                          this.getMinutes(), this.getSeconds()
+                                         );
+            }
+        }
+        else
+        {
+            if (Services.vc.compare(Services.appinfo.platformVersion, "59.0") < 0) {
+                client.dtFormatter = Services.intl.createDateTimeFormat(
+                    undefined, { dateStyle: "full", timeStyle: "long" });
+            }
+            else {
+                client.dtFormatter = new Services.intl.DateTimeFormat(
+                    undefined, { dateStyle: "full", timeStyle: "long" });
+            }
+
+            // Mmmm, fun. This ONLY affects the ChatZilla window, don't worry!
+            Date.prototype.toStringInt = Date.prototype.toString;
+            Date.prototype.toString = function() {
+                return client.dtFormatter.format(this);
+            }
         }
     }
     catch (ex)
@@ -277,15 +302,18 @@ function initStatic()
     updateSpellcheck(client.prefs["inputSpellcheck"]);
 
     // Initialize userlist stuff
-    // cache all the atoms to stop us crossing XPCOM boundaries *all the time*
-    client.atomCache = new Object();
-    var atomSvc = getService("@mozilla.org/atom-service;1", "nsIAtomService");
-    var atoms = ["founder-true", "founder-false", "admin-true", "admin-false",
-                 "op-true", "op-false", "halfop-true", "halfop-false",
-                 "voice-true", "voice-false", "away-true", "away-false",
-                 "unselected"];
-    for (var i = 0; i < atoms.length; i++)
-        client.atomCache[atoms[i]] = atomSvc.getAtom(atoms[i]);
+
+    if (Services.vc.compare(Services.appinfo.platformVersion, "22.0") < 0) {
+        // cache all the atoms to stop us crossing XPCOM boundaries *all the time*
+        client.atomCache = new Object();
+        var atomSvc = getService("@mozilla.org/atom-service;1", "nsIAtomService");
+        var atoms = ["founder-true", "founder-false", "admin-true", "admin-false",
+                     "op-true", "op-false", "halfop-true", "halfop-false",
+                     "voice-true", "voice-false", "away-true", "away-false",
+                     "unselected"];
+        for (var i = 0; i < atoms.length; i++)
+            client.atomCache[atoms[i]] = atomSvc.getAtom(atoms[i]);
+    }
 
     if (client.prefs["showModeSymbols"])
         setListMode("symbol");
@@ -752,7 +780,7 @@ function loadPluginDirectory(localPath, recurse)
     while (enumer.hasMoreElements())
     {
         var entry = enumer.getNext();
-        entry = entry.QueryInterface(Components.interfaces.nsILocalFile);
+        entry = entry.QueryInterface(Components.interfaces.nsIFile);
         if (entry.isDirectory())
             loadPluginDirectory(entry, recurse - 1);
     }

@@ -22,9 +22,9 @@ const IRCPROT_HANDLER_CONTRACTID =
     "@mozilla.org/network/protocol;1?name=irc";
 const IRCSPROT_HANDLER_CONTRACTID =
     "@mozilla.org/network/protocol;1?name=ircs";
-const IRCPROT_HANDLER_CID =
+this.IRCPROT_HANDLER_CID =
     Components.ID("{f21c35f4-1dd1-11b2-a503-9bf8a539ea39}");
-const IRCSPROT_HANDLER_CID =
+this.IRCSPROT_HANDLER_CID =
     Components.ID("{f21c35f4-1dd1-11b2-a503-9bf8a539ea3a}");
 
 const IRC_MIMETYPE = "application/x-irc";
@@ -73,13 +73,20 @@ IRCProtocolHandler.prototype =
 
     newURI(spec, charset, baseURI)
     {
-        const cls = Cc[STANDARDURL_CONTRACTID];
-        const url = cls.createInstance(Ci.nsIStandardURL);
         const port = this.isSecure ? 9999 : 6667;
 
-        url.init(Ci.nsIStandardURL.URLTYPE_STANDARD, port, spec, charset, baseURI);
+        if (!Cc.hasOwnProperty("@mozilla.org/network/standard-url-mutator;1")) {
+            const cls = Cc[STANDARDURL_CONTRACTID];
+            const url = cls.createInstance(Ci.nsIStandardURL);
 
-        return url.QueryInterface(Ci.nsIURI);
+            url.init(Ci.nsIStandardURL.URLTYPE_STANDARD, port, spec, charset, baseURI);
+
+            return url.QueryInterface(Ci.nsIURI);
+        }
+        return Cc["@mozilla.org/network/standard-url-mutator;1"]
+                 .createInstance(Ci.nsIStandardURLMutator)
+                 .init(Ci.nsIStandardURL.URLTYPE_STANDARD, port, spec, charset, baseURI)
+                 .finalize();
     },
 
     newChannel(URI)
@@ -93,7 +100,7 @@ IRCProtocolHandler.prototype =
 };
 
 
-const IRCProtocolHandlerFactory =
+this.IRCProtocolHandlerFactory =
 {
     createInstance(outer, iid)
     {
@@ -111,7 +118,7 @@ const IRCProtocolHandlerFactory =
 };
 
 
-const IRCSProtocolHandlerFactory =
+this.IRCSProtocolHandlerFactory =
 {
     createInstance(outer, iid)
     {
@@ -207,7 +214,7 @@ BogusChannel.prototype =
 };
 
 
-const ChatZillaProtocols =
+this.ChatZillaProtocols =
 {
     init()
     {

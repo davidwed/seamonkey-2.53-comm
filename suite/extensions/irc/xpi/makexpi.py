@@ -22,8 +22,8 @@ from os.path import join as joinpath
 # Set up settings and paths for finding files.
 pwd = os.path.dirname(__file__)
 
-ffversion = '45.*'
-smversion = '2.42.*'
+ffversion = '56.*'
+smversion = '2.57.*'
 
 if pwd == '':
     pwd = os.getcwd()
