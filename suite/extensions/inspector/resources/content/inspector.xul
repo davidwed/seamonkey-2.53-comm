@@ -14,24 +14,22 @@
 <?xul-overlay href="chrome://inspector/content/keysetOverlay.xul"?>
 <?xul-overlay href="chrome://inspector/content/statusbarOverlay.xul"?>
 
-<?xul-overlay href="chrome://global/content/globalOverlay.xul"?>
-
 <?xml-stylesheet href="chrome://inspector/skin/inspectorWindow.css"?>
 
 <window id="winInspectorMain" title="&Inspector.title;"
         width="640" height="480"
         persist="screenX screenY width height sizemode"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+
   <stringbundleset id="stringbundleset">
-    <stringbundle id="inspector-bundle" 
+    <stringbundle id="inspector-bundle"
                   src="chrome://inspector/locale/inspector.properties"/>
   </stringbundleset>
   <popupset id="aTooltipSet"/>
-  
+
   <popupset id="ppsGlobalPopupset"/>
   <popupset id="ppsViewerPopupset"/>
-  
+
   <keyset id="ksGlobalKeyset"/>
   <commandset id="cmdsGlobalCommands"/>
 
