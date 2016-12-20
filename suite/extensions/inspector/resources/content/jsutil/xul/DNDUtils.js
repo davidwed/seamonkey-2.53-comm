@@ -23,16 +23,16 @@ var DNDUtils =
   invokeSession: function(aTarget, aTypes, aValues)
   {
     var transData, trans, supports;
-    var transArray = XPCU.createInstance("@mozilla.org/supports-array;1", "nsISupportsArray");
+    let transArray = XPCU.createInstance("@mozilla.org/array;1", "nsIMutableArray");
     for (var i = 0; i < aTypes.length; ++i) {
       transData = this.createTransferableData(aValues[i]);
       trans = XPCU.createInstance("@mozilla.org/widget/transferable;1", "nsITransferable");
       trans.addDataFlavor(aTypes[i]);
       trans.setTransferData (aTypes[i], transData.data, transData.size);
       supports = trans.QueryInterface(Components.interfaces.nsISupports);
-      transArray.AppendElement(supports);
+      transArray.appendElement(supports, /* weak */ false);
     }
-    
+
     var nsIDragService = Components.interfaces.nsIDragService;
     var dragService = XPCU.getService("@mozilla.org/widget/dragservice;1", "nsIDragService");
     dragService.invokeDragSession(aTarget, transArray, null, nsIDragService.DRAGDROP_ACTION_MOVE);
