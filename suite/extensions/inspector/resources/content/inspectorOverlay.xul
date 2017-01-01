@@ -51,7 +51,7 @@
         label="&browserPanel.label;" collapse="after"/>
 
     <hbox id="bxBrowser" flex="1">
-      <browser id="ifBrowser" type="content-primary"
+      <browser id="ifBrowser" type="content" primary="true"
                disablehistory="true" disablesecurity="true"
                flex="1" src="about:blank"/>
     </hbox>
