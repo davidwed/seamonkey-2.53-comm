@@ -194,7 +194,7 @@ function openPrefsFromAccountManager(aTBPaneId, aTBTabId, aTBOtherArgs, aSMPaneI
  */
 function accountNameExists(aAccountName, aAccountKey)
 {
-  for (let account in fixIterator(MailServices.accounts.accounts,
+  for (let account of fixIterator(MailServices.accounts.accounts,
                                   Ci.nsIMsgAccount))
   {
     if (account.key != aAccountKey && account.incomingServer &&
