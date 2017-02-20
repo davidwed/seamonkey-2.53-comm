@@ -10,7 +10,7 @@ var autoJoinPref = "autoJoin";
 var joinChat = {
   onload: function jc_onload() {
     var accountList = document.getElementById("accountlist");
-    for (let acc in fixIterator(Services.accounts.getAccounts())) {
+    for (let acc of fixIterator(Services.accounts.getAccounts())) {
       if (!acc.connected || !acc.canJoinChat)
         continue;
       var proto = acc.protocol;
@@ -43,7 +43,7 @@ var joinChat = {
       !(protoId == "prpl-irc" || protoId == "prpl-jabber" ||
       protoId == "prpl-gtalk");
 
-    for (let field in fixIterator(acc.getChatRoomFields())) {
+    for (let field of fixIterator(acc.getChatRoomFields())) {
       let row = document.createElement("row");
 
       let label = document.createElement("label");
