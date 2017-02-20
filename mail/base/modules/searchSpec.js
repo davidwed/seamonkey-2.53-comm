@@ -155,7 +155,7 @@ SearchSpec.prototype = {
                                                                    aCloneTerms){
     let iTerm = 0, term;
     let outTerms = aCloneTerms ? [] : aTerms;
-    for (term in fixIterator(aTerms, Ci.nsIMsgSearchTerm)) {
+    for (term of fixIterator(aTerms, Ci.nsIMsgSearchTerm)) {
       if (aCloneTerms) {
         let cloneTerm = this.session.createTerm();
         cloneTerm.value = term.value;
@@ -202,7 +202,7 @@ SearchSpec.prototype = {
     let term;
     let outTerms = aCloneTerms ? [] : aTerms;
     let inGroup = false;
-    for (term in fixIterator(aTerms, Ci.nsIMsgSearchTerm)) {
+    for (term of fixIterator(aTerms, Ci.nsIMsgSearchTerm)) {
       // If we're in a group, all that is forbidden is the creation of new
       // groups.
       if (inGroup) {
@@ -364,7 +364,7 @@ SearchSpec.prototype = {
 
     // -- apply terms
     if (this._virtualFolderTerms) {
-      for (let term in fixIterator(this._virtualFolderTerms,
+      for (let term of fixIterator(this._virtualFolderTerms,
                                    nsIMsgSearchTerm)) {
         if (term.attrib == nsMsgSearchAttrib.Body)
           haveBodyTerm = true;
@@ -373,7 +373,7 @@ SearchSpec.prototype = {
     }
 
     if (this._viewTerms) {
-      for (let term in fixIterator(this._viewTerms,
+      for (let term of fixIterator(this._viewTerms,
                                    nsIMsgSearchTerm)) {
         if (term.attrib == nsMsgSearchAttrib.Body)
           haveBodyTerm = true;
@@ -382,7 +382,7 @@ SearchSpec.prototype = {
     }
 
     if (this._userTerms) {
-      for (let term in fixIterator(this._userTerms,
+      for (let term of fixIterator(this._userTerms,
                                    nsIMsgSearchTerm)) {
         if (term.attrib == nsMsgSearchAttrib.Body)
           haveBodyTerm = true;
@@ -429,7 +429,7 @@ SearchSpec.prototype = {
         let offlineValidityTable = validityManager.getTable(offlineScope);
         let offlineAvailable = true;
         let onlineAvailable = true;
-        for (let term in fixIterator(session.searchTerms,
+        for (let term of fixIterator(session.searchTerms,
                                      nsIMsgSearchTerm)) {
           if (!term.matchAll) {
             // for custom terms, we need to getAvailable from the custom term
@@ -470,7 +470,7 @@ SearchSpec.prototype = {
 
     let s = '';
 
-    for (let term in fixIterator(aSearchTerms, nsIMsgSearchTerm)) {
+    for (let term of fixIterator(aSearchTerms, nsIMsgSearchTerm)) {
       s += '      ' + term.termAsString + '\n';
     }
 
