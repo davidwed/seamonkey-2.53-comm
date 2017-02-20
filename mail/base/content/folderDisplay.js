@@ -2162,7 +2162,7 @@ FolderDisplayWidget.prototype = {
 
         const nsIMsgIdentity = Ci.nsIMsgIdentity;
         let allEnabled = undefined;
-        for (let identity in fixIterator(serverIdentities, nsIMsgIdentity)) {
+        for (let identity of fixIterator(serverIdentities, nsIMsgIdentity)) {
           if (allEnabled === undefined) {
             allEnabled = identity.archiveEnabled;
           }
