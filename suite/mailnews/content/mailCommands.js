@@ -40,8 +40,8 @@ function getBestIdentity(identities, optionalHint)
     let hints = optionalHint.toLowerCase().split(",");
 
     for (let i = 0 ; i < hints.length; i++) {
-      for (let identity in fixIterator(identities,
-                  Ci.nsIMsgIdentity)) {
+      for (let identity of fixIterator(identities,
+                                       Ci.nsIMsgIdentity)) {
         if (!identity.email)
           continue;
         if (hints[i].trim() == identity.email.toLowerCase() ||
@@ -82,8 +82,8 @@ function GetIdentityForHeader(aMsgHdr, aType)
     // Reverse the array so that the last delivered-to header will show at front.
     deliveredTos.reverse();
     for (let i = 0; i < deliveredTos.length; i++) {
-      for (let identity in fixIterator(accountManager.allIdentities,
-                                  Ci.nsIMsgIdentity)) {
+      for (let identity of fixIterator(accountManager.allIdentities,
+                                       Ci.nsIMsgIdentity)) {
         if (!identity.email)
           continue;
         // If the deliver-to header contains the defined identity, that's it.
