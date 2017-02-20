@@ -4047,7 +4047,7 @@ function AttachFile()
     let file;
     let attachments = [];
 
-    for (file in fixIterator(fp.files, Ci.nsIFile))
+    for (file of fixIterator(fp.files, Ci.nsIFile))
       attachments.push(FileToAttachment(file));
 
     AddAttachments(attachments);
@@ -4090,7 +4090,7 @@ function AddAttachments(aAttachments, aCallback)
                            .createInstance(Ci.nsIMutableArray);
   let items = [];
 
-  for (let attachment in fixIterator(aAttachments,
+  for (let attachment of fixIterator(aAttachments,
                                      Ci.nsIMsgAttachment)) {
     if (!(attachment && attachment.url) ||
         DuplicateFileAlreadyAttached(attachment.url))
@@ -4494,7 +4494,7 @@ function DetermineConvertibility()
 function hideIrrelevantAddressingOptions(aAccountKey)
 {
   let hideNews = true;
-  for (let account in fixIterator(MailServices.accounts.accounts,
+  for (let account of fixIterator(MailServices.accounts.accounts,
                                   Ci.nsIMsgAccount)) {
     if (account.incomingServer.type == "nntp")
       hideNews = false;
