@@ -299,7 +299,7 @@ function toggleOffline()
 {
     let offline = document.getElementById("offline.folders").checked;
     let allFolders = gIncomingServer.rootFolder.descendants;
-    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder)) {
+    for (let folder of fixIterator(allFolders, Ci.nsIMsgFolder)) {
       if (offline)
         folder.setFlag(Ci.nsMsgFolderFlags.Offline);
       else
@@ -311,7 +311,7 @@ function collectOfflineFolders()
 {
     let offlineFolderMap = {};
     let allFolders = gIncomingServer.rootFolder.descendants;
-    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder))
+    for (let folder of fixIterator(allFolders, Ci.nsIMsgFolder))
       offlineFolderMap[folder.folderURL] = folder.getFlag(Ci.nsMsgFolderFlags.Offline);
 
     return offlineFolderMap;
@@ -320,7 +320,7 @@ function collectOfflineFolders()
 function restoreOfflineFolders(offlineFolderMap)
 {
     let allFolders = gIncomingServer.rootFolder.descendants;
-    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder)) {
+    for (let folder of fixIterator(allFolders, Ci.nsIMsgFolder)) {
       if (offlineFolderMap[folder.folderURL])
         folder.setFlag(Ci.nsMsgFolderFlags.Offline);
       else
