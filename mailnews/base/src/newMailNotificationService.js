@@ -138,7 +138,7 @@ NewMailNotificationService.prototype = {
     }
 
     let allFolders = folder.descendants;
-    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder)) {
+    for (let folder of fixIterator(allFolders, Ci.nsIMsgFolder)) {
       if (this.confirmShouldCount(folder)) {
         let count = folder.getNumUnread(false);
         this._log.debug("NMNS_countUnread: folder " + folder.URI + ", " + count + " unread");
@@ -231,7 +231,7 @@ NewMailNotificationService.prototype = {
           newCount += folderNew;
       }
 
-      for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder)) {
+      for (let folder of fixIterator(allFolders, Ci.nsIMsgFolder)) {
         if (this.confirmShouldCount(folder)) {
           let folderNew = folder.getNumNewMessages(false);
           this._log.debug("NMNS_biffStateChanged: folder " + folder.URI + " new messages: " + folderNew);
