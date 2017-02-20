@@ -1100,7 +1100,7 @@ var gFolderTreeView = {
 
   _subFoldersWithStringProperty: function ftv_subFoldersWithStringProperty(folder, folders, aFolderName, deep)
   {
-    for (let child in fixIterator(folder.subFolders, Ci.nsIMsgFolder)) {
+    for (let child of fixIterator(folder.subFolders, Ci.nsIMsgFolder)) {
       // if the folder selection is based on a string property, use that
       if (aFolderName == getSmartFolderName(child)) {
         folders.push(child);
@@ -1130,7 +1130,7 @@ var gFolderTreeView = {
     for (let acct of accounts) {
       let foldersWithFlag = acct.incomingServer.rootFolder.getFoldersWithFlags(aFolderFlag);
       if (foldersWithFlag.length > 0) {
-        for (let folderWithFlag in fixIterator(foldersWithFlag,
+        for (let folderWithFlag of fixIterator(foldersWithFlag,
                                                Ci.nsIMsgFolder)) {
           folders.push(folderWithFlag);
           // Add sub-folders of Sent and Archive to the result.
@@ -2000,7 +2000,7 @@ var gFolderTreeView = {
   get _enumerateFolders() {
     let folders = [];
 
-    for (let server in fixIterator(MailServices.accounts.allServers, Ci.nsIMsgIncomingServer)) {
+    for (let server of fixIterator(MailServices.accounts.allServers, Ci.nsIMsgIncomingServer)) {
       // Skip deferred accounts
       if (server instanceof Ci.nsIPop3IncomingServer &&
           server.deferredToAccount)
@@ -2021,7 +2021,7 @@ var gFolderTreeView = {
    * @param folders  the array to add the folders to.
    */
   addSubFolders : function ftv_addSubFolders (folder, folders) {
-    for (let f in fixIterator(folder.subFolders, Ci.nsIMsgFolder)) {
+    for (let f of fixIterator(folder.subFolders, Ci.nsIMsgFolder)) {
       folders.push(f);
       this.addSubFolders(f, folders);
     }
@@ -2404,7 +2404,7 @@ ftvItem.prototype = {
       this._children = [];
       // Out of all children, only keep those that match the _folderFilter
       // and those that contain such children.
-      for (let folder in iter) {
+      for (let folder of iter) {
         if (!this._folderFilter || this._folderFilter(folder)) {
           this._children.push(new ftvItem(folder, this._folderFilter));
         }
@@ -2811,13 +2811,13 @@ ftv_SmartItem.prototype = {
     if (!this._children) {
       this._children = [];
       let iter = fixIterator(this._folder.subFolders, Ci.nsIMsgFolder);
-      for (let folder in iter) {
+      for (let folder of iter) {
         if (!smartMode.isSmartFolder(folder)) {
           this._children.push(new ftv_SmartItem(folder));
         }
         else if (folder.flags & nsMsgFolderFlags.Inbox) {
           let subIter = fixIterator(folder.subFolders, Ci.nsIMsgFolder);
-          for (let subfolder in subIter) {
+          for (let subfolder of subIter) {
             if (!smartMode.isSmartFolder(subfolder))
               this._children.push(new ftv_SmartItem(subfolder));
           }
