@@ -1510,13 +1510,13 @@ function attachToCloud(aProvider)
   let files = [];
 
   fp.appendFilters(nsIFilePicker.filterAll);
-  if (fp.show() == nsIFilePicker.returnOK)
-  {
-    if (!fp.files)
+  fp.open(rv => {
+    if (rv != nsIFilePicker.returnOK || !fp.files) {
       return;
+    }
 
     let files = Array.from(fixIterator(fp.files,
-                             Ci.nsILocalFile))
+                           Ci.nsIFile))
     let attachments = files.map(f => FileToAttachment(f));
 
     let i = 0;
@@ -1533,7 +1533,7 @@ function attachToCloud(aProvider)
 
     dispatchAttachmentBucketEvent("attachments-uploading", attachments);
     SetLastAttachDirectory(files[files.length-1]);
-  }
+  });
 }
 
 /**
@@ -4040,19 +4040,19 @@ function AttachFile()
     fp.displayDirectory = lastDirectory;
 
   fp.appendFilters(nsIFilePicker.filterAll);
-  if (fp.show() == nsIFilePicker.returnOK)
-  {
-    if (!fp.files)
+  fp.open(rv => {
+    if (rv != Ci.nsIFilePicker.returnOK || !fp.file) {
       return;
+    }
     let file;
     let attachments = [];
 
-    for (file in fixIterator(fp.files, Ci.nsILocalFile))
+    for (file in fixIterator(fp.files, Ci.nsIFile))
       attachments.push(FileToAttachment(file));
 
     AddAttachments(attachments);
     SetLastAttachDirectory(file);
-  }
+  });
 }
 
 /**
