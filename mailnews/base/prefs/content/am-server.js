@@ -303,8 +303,12 @@ function BrowseForNewsrc()
 
   fp.appendFilters(nsIFilePicker.filterAll);
 
-  if (fp.show() != nsIFilePicker.returnCancel)
+  fp.open(rv => {
+    if (rv != nsIFilePicker.returnOK || !fp.file) {
+      return;
+    }
     newsrcTextBox.value = fp.file.path;
+  });
 }
 
 function setupImapDeleteUI(aServerId)
