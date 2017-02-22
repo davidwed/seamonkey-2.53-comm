@@ -1017,13 +1017,14 @@ function browsePhoto() {
   fp.appendFilters(nsIFilePicker.filterImages);
   fp.appendFilters(nsIFilePicker.filterAll);
 
-  if (fp.show() == nsIFilePicker.returnOK) {
+  fp.open(rv => {
+    if (rv != nsIFilePicker.returnOK) {
+      return;
+    }
     document.getElementById("PhotoFile").file = fp.file;
     let photoType = document.getElementById("FilePhotoType").value;
     onSwitchPhotoType(photoType);
-    return true;
-  }
-  return false;
+  });
 }
 
 /* A photo handler defines the behaviour of the contact editor
