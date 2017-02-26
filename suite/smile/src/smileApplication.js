@@ -722,7 +722,7 @@ var ApplicationFactory = {
   }
 };
 
-#include ../../../mozilla/toolkit/components/exthelper/extApplication.js
+#include ../../../../toolkit/components/exthelper/extApplication.js
 
 //=================================================
 // Application constructor
