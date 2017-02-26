@@ -3,14 +3,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+source ${_topsrcdir}/$MOZ_BUILD_APP/../comm-confvars.sh
+
 MOZ_APP_BASENAME=SeaMonkey
 MOZ_APP_VENDOR=Mozilla
 MOZ_APP_NAME=seamonkey
 MOZ_APP_DISPLAYNAME=SeaMonkey
 MOZ_COMPOSER=1
 MOZ_SUITE=1
-MOZ_BRANDING_DIRECTORY=suite/branding/seamonkey
-MOZ_OFFICIAL_BRANDING_DIRECTORY=suite/branding/seamonkey
+MOZ_BRANDING_DIRECTORY=$commreltopsrcdir/suite/branding/seamonkey
+MOZ_OFFICIAL_BRANDING_DIRECTORY=$commreltopsrcdir/suite/branding/seamonkey
 
 MOZ_UPDATER=1
 # This should usually be the same as the value MAR_CHANNEL_ID.
@@ -46,4 +48,4 @@ MOZ_DEVTOOLS=all
 # Bundled extensions Lightning
 MOZ_CALENDAR=1
 
-NSS_EXTRA_SYMBOLS_FILE=${_topsrcdir}/../mailnews/nss-extra.symbols
+NSS_EXTRA_SYMBOLS_FILE=../comm/mailnews/nss-extra.symbols

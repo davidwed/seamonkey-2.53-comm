@@ -6,7 +6,7 @@ dist_dest   = $(DIST)/$(MOZ_MACBUNDLE_NAME)
 
 AB_CD = $(MOZ_UI_LOCALE)
 
-LICENSE_TXT_FILE = $(topsrcdir)/suite/installer/license.txt
+LICENSE_TXT_FILE = $(commtopsrcdir)/suite/installer/license.txt
 
 # Build a binary bootstrapping with XRE_main
 
@@ -22,7 +22,7 @@ endif
 # shouldn't get 755 perms need $(IFLAGS1) for either way of calling nsinstall.
 NSDISTMODE = copy
 
-include $(topsrcdir)/config/config.mk
+include $(moztopsrcdir)/config/config.mk
 
 # If we are trying to show an error dialog about the lack of SSE2 support,
 # make sure that code itself doesn't use SSE2.
@@ -39,7 +39,7 @@ ifeq ($(OS_ARCH),WINNT)
 EXTRA_DEPS += seamonkey.exe.manifest
 endif
 
-include $(topsrcdir)/config/rules.mk
+include $(moztopsrcdir)/config/rules.mk
 
 # channel-prefs.js is handled separate from other prefs due to bug 756325.
 libs:: $(srcdir)/profile/channel-prefs.js
