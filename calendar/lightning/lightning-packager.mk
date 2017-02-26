@@ -17,7 +17,7 @@
 #   LIGHTNING_VERSION = 2.2  # Will be used to replace the Thunderbird version
 #   						 # in POST_UPLOAD_CMD
 
-include $(MOZILLA_SRCDIR)/toolkit/mozapps/installer/package-name.mk
+include $(moztopsrcdir)/toolkit/mozapps/installer/package-name.mk
 
 XPI_STAGE_PATH = $(DIST)/xpi-stage
 _ABS_XPI_STAGE_PATH = $(ABS_DIST)/xpi-stage
@@ -49,7 +49,7 @@ langpack-en-US:
 merge-%: AB_CD=$*
 merge-%:
 	$(RM) -rf $(REAL_LOCALE_MERGEDIR)/calendar
-	$(MOZILLA_SRCDIR)/mach compare-locales \
+	$(moztopsrcdir)/mach compare-locales \
 	    --merge $(REAL_LOCALE_MERGEDIR)/.. \
 	    $(commtopsrcdir)/calendar/locales/l10n.toml \
 	    $(L10NBASEDIR) \

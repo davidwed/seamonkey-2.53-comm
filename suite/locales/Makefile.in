@@ -2,9 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-include $(topsrcdir)/config/config.mk
+include $(moztopsrcdir)/config/config.mk
 
-_ABS_SRCDIR := $(abspath $(topsrcdir))
+_ABS_SRCDIR := $(abspath $(commtopsrcdir))
 
 SUBMAKEFILES += \
 	$(DEPTH)/$(MOZ_BRANDING_DIRECTORY)/Makefile \
@@ -34,7 +34,7 @@ MOZ_PKG_MAC_ICON=$(ABS_DIST)/branding/disk.icns
 MOZ_PKG_MAC_EXTRA=--symlink '/Applications:/ '
 endif
 
-MOZ_SFX_PACKAGE=$(topsrcdir)/other-licenses/7zstub/seamonkey/7zSD.sfx
+MOZ_SFX_PACKAGE=$(commtopsrcdir)/other-licenses/7zstub/seamonkey/7zSD.sfx
 
 NON_OMNIJAR_FILES = \
 	defaults/messenger/mailViews.dat \
@@ -63,9 +63,9 @@ libs:: searchplugins
 # Currently not set in SeaMonkey.
 DIST_SUBDIRS = $(DIST_SUBDIR)
 
-include $(topsrcdir)/config/rules.mk
+include $(moztopsrcdir)/config/rules.mk
 
-include $(topsrcdir)/mozilla/toolkit/locales/l10n.mk
+include $(moztopsrcdir)/toolkit/locales/l10n.mk
 
 $(list-json): $(call mkdir_deps,$(SEARCHPLUGINS_PATH)) $(if $(IS_LANGUAGE_REPACK),FORCE)
 	$(call py_action,generate_searchjson,$(srcdir)/search/list.json $(AB_CD) $(list-json))
@@ -185,13 +185,13 @@ endif
 
 ident:
 	@printf 'comm_revision '
-	@$(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py \
+	@$(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py \
 	    $(STAGEDIST)/application.ini App SourceStamp
 	@printf 'moz_revision '
-	@$(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py \
+	@$(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py \
 	    $(STAGEDIST)/platform.ini Build SourceStamp
 	@printf 'buildid '
-	@$(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py \
+	@$(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py \
 	    $(STAGEDIST)/application.ini App BuildID
 
 ifdef MOZ_IRC
@@ -202,7 +202,7 @@ distribution:
 	$(MAKE) -C $(DEPTH)/tools/update-packaging complete-patch PKG_INST_PATH=
 	$(foreach locale,$(SHIPPED_LOCALES),$(MAKE) -C $(DEPTH)/suite/locales/ installers-$(locale) MOZ_MAKE_COMPLETE_MAR=1 ;)
 
-SHIPPED_LOCALES_FILE = $(topsrcdir)/suite/locales/shipped-locales
+SHIPPED_LOCALES_FILE = $(commtopsrcdir)/suite/locales/shipped-locales
 ifeq ($(OS_ARCH), WINNT)
 SHIPPED_FILTER = -e linux -e osx
 else ifeq ($(OS_ARCH), Darwin)
