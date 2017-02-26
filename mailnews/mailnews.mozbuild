@@ -4,10 +4,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 if CONFIG['MOZ_MORK']:
-    DIRS += ['/db']
+    DIRS += ['/%s/db' % CONFIG['commreltopsrcdir']]
 
 DIRS += [
-    '/ldap',
-    '/ldap/xpcom',
-    '/mailnews',
+    '/%s/ldap' % CONFIG['commreltopsrcdir'],
+    '/%s/ldap/xpcom' % CONFIG['commreltopsrcdir'],
+    '/%s/mailnews' % CONFIG['commreltopsrcdir'],
 ]
