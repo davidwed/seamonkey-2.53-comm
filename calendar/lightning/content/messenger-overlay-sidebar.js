@@ -358,7 +358,7 @@ window.addEventListener("load", (e) => {
     tabmail.registerTabType(calendarTabType);
     tabmail.registerTabType(calendarItemTabType);
     tabmail.registerTabMonitor(calendarTabMonitor);
-}, false);
+});
 
 
 function ltnOnLoad(event) {
@@ -372,7 +372,7 @@ function ltnOnLoad(event) {
     commonInitCalendar();
 
     // Add an unload function to the window so we don't leak any listeners
-    window.addEventListener("unload", ltnFinish, false);
+    window.addEventListener("unload", ltnFinish);
 
     // Set up invitations manager
     scheduleInvitationsUpdate(FIRST_DELAY_STARTUP);
@@ -385,8 +385,7 @@ function ltnOnLoad(event) {
 
     let mailContextPopup = document.getElementById("mailContext");
     if (mailContextPopup) {
-        mailContextPopup.addEventListener("popupshowing",
-                                          gCalSetupMailContext.popup, false);
+        mailContextPopup.addEventListener("popupshowing", gCalSetupMailContext.popup);
     }
 
     // Setup customizeDone handlers for our toolbars
@@ -544,14 +543,17 @@ function refreshUIBits() {
         // views when will be displayed.
         let currView = currentView();
         currView.goToDay();
-        ["day-view",
-         "week-view",
-         "multiweek-view",
-         "month-view"].forEach((view) => {
-             if (view != currView.id) {
-                 document.getElementById(view).mToggleStatus = -1;
-             }
-         });
+        let views = [
+            "day-view",
+            "week-view",
+            "multiweek-view",
+            "month-view"
+        ];
+        for (let view of views) {
+            if (view != currView.id) {
+                document.getElementById(view).mToggleStatus = -1;
+            }
+        }
 
         if (!TodayPane.showsToday()) {
             TodayPane.setDay(cal.now());
@@ -631,8 +633,7 @@ function ltnFinish() {
     // Remove listener for mailContext.
     let mailContextPopup = document.getElementById("mailContext");
     if (mailContextPopup) {
-        mailContextPopup.removeEventListener("popupshowing",
-                                             gCalSetupMailContext.popup, false);
+        mailContextPopup.removeEventListener("popupshowing", gCalSetupMailContext.popup);
     }
 
     // Common finish steps
