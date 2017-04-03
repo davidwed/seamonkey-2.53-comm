@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 Cu.import("resource:///modules/editorUtilities.jsm");
+Cu.import("resource://services-common/async.js");
 Cu.import("resource://gre/modules/AppConstants.jsm");
 
 /* Main Composer window UI control */
