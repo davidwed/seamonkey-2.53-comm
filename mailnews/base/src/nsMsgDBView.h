@@ -538,9 +538,9 @@ protected:
   static nsresult   InitDisplayFormats();
 
 private:
-  static nsDateFormatSelector  m_dateFormatDefault;
-  static nsDateFormatSelector  m_dateFormatThisWeek;
-  static nsDateFormatSelector  m_dateFormatToday;
+  static mozilla::nsDateFormatSelector  m_dateFormatDefault;
+  static mozilla::nsDateFormatSelector  m_dateFormatThisWeek;
+  static mozilla::nsDateFormatSelector  m_dateFormatToday;
   bool ServerSupportsFilterAfterTheFact();
 
   nsresult PerformActionsOnJunkMsgs(bool msgsAreJunk);

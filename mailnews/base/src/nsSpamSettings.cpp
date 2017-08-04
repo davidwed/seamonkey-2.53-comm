@@ -648,8 +648,8 @@ NS_IMETHODIMP nsSpamSettings::LogJunkHit(nsIMsgDBHdr *aMsgHdr, bool aMoveMessage
   PRExplodedTime exploded;
   PR_ExplodeTime(date, PR_LocalTimeParameters, &exploded);
 
-  mozilla::DateTimeFormat::FormatPRExplodedTime(kDateFormatShort,
-                                                kTimeFormatSeconds,
+  mozilla::DateTimeFormat::FormatPRExplodedTime(mozilla::kDateFormatShort,
+                                                mozilla::kTimeFormatSeconds,
                                                 &exploded,
                                                 dateValue);
 
@@ -720,8 +720,8 @@ NS_IMETHODIMP nsSpamSettings::LogJunkString(const char *string)
   PRExplodedTime exploded;
   PR_ExplodeTime(PR_Now(), PR_LocalTimeParameters, &exploded);
 
-  mozilla::DateTimeFormat::FormatPRExplodedTime(kDateFormatShort,
-                                                kTimeFormatSeconds,
+  mozilla::DateTimeFormat::FormatPRExplodedTime(mozilla::kDateFormatShort,
+                                                mozilla::kTimeFormatSeconds,
                                                 &exploded,
                                                 dateValue);
 
