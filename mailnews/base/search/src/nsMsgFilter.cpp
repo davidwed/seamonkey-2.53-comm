@@ -514,8 +514,8 @@ nsMsgFilter::LogRuleHitGeneric(nsIMsgRuleAction *aFilterAction,
     PRExplodedTime exploded;
     PR_ExplodeTime(date, PR_LocalTimeParameters, &exploded);
 
-    mozilla::DateTimeFormat::FormatPRExplodedTime(kDateFormatShort,
-                                                  kTimeFormatSeconds,
+    mozilla::DateTimeFormat::FormatPRExplodedTime(mozilla::kDateFormatShort,
+                                                  mozilla::kTimeFormatSeconds,
                                                   &exploded,
                                                   dateValue);
 
