@@ -780,9 +780,8 @@ nsWindowsShellService::SetDesktopBackground(nsIDOMElement* aElement,
 
   // e.g. "Desktop Background.bmp"
   nsString fileLeafName;
-  rv = shellBundle->GetStringFromName
-                      ("desktopBackgroundLeafNameWin",
-                       getter_Copies(fileLeafName));
+  rv = shellBundle->GetStringFromName("desktopBackgroundLeafNameWin",
+                                      fileLeafName);
   NS_ENSURE_SUCCESS(rv, rv);
 
   // get the profile root directory
