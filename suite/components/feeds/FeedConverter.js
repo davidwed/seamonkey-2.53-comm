@@ -115,7 +115,6 @@ FeedConverter.prototype = {
      Ci.nsIRequestObserver,
      Ci.nsISupports]),
   classID: Components.ID("{88592f45-3866-4c8e-9d8a-ab58b290fcf7}"),
-  implementationLanguage: Ci.nsIProgrammingLanguage.JAVASCRIPT,
 
   /**
    * See nsIStreamConverter.idl
@@ -455,8 +454,7 @@ FeedResultService.prototype = {
 
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIFeedResultService,
                                          Ci.nsISupports]),
-  classID: Components.ID("{e5b05e9d-f037-48e4-b9a4-b99476582927}"),
-  implementationLanguage: Ci.nsIProgrammingLanguage.JAVASCRIPT
+  classID: Components.ID("{e5b05e9d-f037-48e4-b9a4-b99476582927}")
 };
 
 var components = [FeedConverter,
