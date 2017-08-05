@@ -195,7 +195,6 @@ ClassInfo.prototype = {
   getHelperForLanguage: language => null,
   contractID: null,
   classID: null,
-  implementationLanguage: Ci.nsIProgrammingLanguage.JAVASCRIPT,
   flags: 0
 };
 
