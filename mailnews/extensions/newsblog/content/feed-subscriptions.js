@@ -2542,7 +2542,7 @@ var FeedSubscriptions = {
  * Import opml file into a feed account.  Used by the Subscribe dialog and
  * the Import wizard.
  *
- * @param  nsILocalFile aFile           - the opml file.
+ * @param  nsIFile aFile                - the opml file.
  * @param  nsIMsgIncomingServer aServer - the account server.
  * @param  func aCallback               - callback function.
  *
