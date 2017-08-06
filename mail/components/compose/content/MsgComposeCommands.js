@@ -2528,9 +2528,9 @@ function ComposeStartup(aParams)
         composeFields.newshost = args.newshost;
       if (args.message) {
         let msgFile = Cc["@mozilla.org/file/local;1"]
-                        .createInstance(Ci.nsILocalFile);
+                        .createInstance(Ci.nsIFile);
         if (OS.Path.dirname(args.message) == ".") {
-          let workingDir = Services.dirsvc.get("CurWorkD", Ci.nsILocalFile);
+          let workingDir = Services.dirsvc.get("CurWorkD", Ci.nsIFile);
           args.message = OS.Path.join(workingDir.path, OS.Path.basename(args.message));
         }
         msgFile.initWithPath(args.message);
@@ -4012,7 +4012,7 @@ function GetLastAttachDirectory()
   return lastDirectory;
 }
 
-// attachedLocalFile must be a nsILocalFile
+// attachedLocalFile must be a nsIFile
 function SetLastAttachDirectory(attachedLocalFile)
 {
   try {
@@ -4056,9 +4056,9 @@ function AttachFile()
 }
 
 /**
- * Convert an nsILocalFile instance into an nsIMsgAttachment.
+ * Convert an nsIFile instance into an nsIMsgAttachment.
  *
- * @param file the nsILocalFile
+ * @param file the nsIFile
  * @return an attachment pointing to the file
  */
 function FileToAttachment(file)
