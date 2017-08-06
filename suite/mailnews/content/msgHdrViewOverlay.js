@@ -1969,7 +1969,7 @@ nsFlavorDataProvider.prototype =
       // now get the destination file location from kFilePromiseDirectoryMime
       var dirPrimitive = {};
       aTransferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
-      var destDirectory = dirPrimitive.value.QueryInterface(Ci.nsILocalFile);
+      var destDirectory = dirPrimitive.value.QueryInterface(Ci.nsIFile);
 
       // now save the attachment to the specified location
       // XXX: we need more information than just the attachment url to save it, fortunately, we have an array
