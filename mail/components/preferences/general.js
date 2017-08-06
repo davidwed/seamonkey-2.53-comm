@@ -76,7 +76,7 @@ var gGeneralPane = {
 
   convertURLToLocalFile: function(aFileURL)
   {
-    // convert the file url into a nsILocalFile
+    // convert the file url into a nsIFile
     if (aFileURL)
     {
       return Services.io

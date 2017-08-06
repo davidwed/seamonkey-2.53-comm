@@ -175,8 +175,7 @@ function GetLocalizedStringPref(aPrefName, aDefaultValue)
 function GetLocalFilePref(aName)
 {
   try {
-    return Services.prefs.getComplexValue(aName,
-               Ci.nsILocalFile);
+    return Services.prefs.getComplexValue(aName, Ci.nsIFile);
   } catch (e) {}
   return null;
 }
@@ -186,7 +185,7 @@ function GetLocalFilePref(aName)
   */
 function GetDesktopFolder()
 {
-  return Services.dirsvc.get("Desk", Ci.nsILocalFile);
+  return Services.dirsvc.get("Desk", Ci.nsIFile);
 }
 
 /**
@@ -1906,7 +1905,7 @@ function GetFileFromString(aString)
                       .createInstance(Ci.nsICommandLine);
   let uri = commandLine.resolveURI(aString);
   return uri instanceof Ci.nsIFileURL ?
-         uri.file.QueryInterface(Ci.nsILocalFile) : null;
+         uri.file.QueryInterface(Ci.nsIFile) : null;
 }
 
 function CopyImage()
