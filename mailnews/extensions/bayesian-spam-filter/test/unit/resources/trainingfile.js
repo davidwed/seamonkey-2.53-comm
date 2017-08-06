@@ -29,7 +29,7 @@ function TrainingData() {
 
   function getJunkStatFile() {
     var sBaseDir = Services.dirsvc.get("ProfD", Ci.nsIFile);
-    var CFileByFile = new CC("@mozilla.org/file/local;1", "nsILocalFile", "initWithFile");
+    var CFileByFile = new CC("@mozilla.org/file/local;1", "nsIFile", "initWithFile");
     var oFile = new CFileByFile(sBaseDir);
     oFile.append("training.dat");
     return oFile;

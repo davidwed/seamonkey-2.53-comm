@@ -363,7 +363,7 @@ FeedResultService.prototype = {
     switch (handler) {
     case "client":
       var clientApp = Services.prefs.getComplexValue(getPrefAppForType(feedType),
-                                                     Ci.nsILocalFile);
+                                                     Ci.nsIFile);
 
       // For the benefit of applications that might know how to deal with more
       // URLs than just feeds, send feed: URLs in the following format:
