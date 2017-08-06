@@ -781,7 +781,7 @@ FeedWriter.prototype = {
         try {
           this._selectedApp =
             Services.prefs.getComplexValue(getPrefAppForType(feedType),
-                                           Ci.nsILocalFile);
+                                           Ci.nsIFile);
         }
         catch(ex) {
           this._selectedApp = null;
@@ -847,7 +847,7 @@ FeedWriter.prototype = {
     menuItem.setAttribute("handlerType", "client");
     try {
       this._selectedApp = Services.prefs.getComplexValue(getPrefAppForType(feedType),
-                                                         Ci.nsILocalFile);
+                                                         Ci.nsIFile);
 
       if (this._selectedApp.exists())
         this._initMenuItemWithFile(menuItem, this._selectedApp);
