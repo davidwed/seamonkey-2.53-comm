@@ -318,7 +318,7 @@ calCalendarManager.prototype = {
     },
 
     checkAndMigrateDB: function() {
-        let storageSdb = Services.dirsvc.get("ProfD", Components.interfaces.nsILocalFile);
+        let storageSdb = Services.dirsvc.get("ProfD", Components.interfaces.nsIFile);
         storageSdb.append("storage.sdb");
         let db = Services.storage.openDatabase(storageSdb);
 

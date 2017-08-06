@@ -56,7 +56,7 @@ const PREF_HIDE_PLUGINS_WITHOUT_EXTENSIONS =
  * - the URL of the currently selected web service used to read feeds
  *
  * browser.feeds.handlers.application
- * - nsILocalFile, stores the current client-side feed reading app if one has
+ * - nsIFile, stores the current client-side feed reading app if one has
  *   been chosen
  */
 const PREF_FEED_SELECTED_APP    = "browser.feeds.handlers.application";
@@ -1229,8 +1229,7 @@ var gApplicationsPane = {
   },
 
   _isValidHandlerExecutable(aExecutable) {
-    var file = Services.dirsvc.get("XREExeF",
-                                   Ci.nsILocalFile);
+    var file = Services.dirsvc.get("XREExeF", Ci.nsIFile);
     return aExecutable &&
            aExecutable.exists() &&
            aExecutable.isExecutable() &&

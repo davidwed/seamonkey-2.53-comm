@@ -1656,7 +1656,7 @@ async function SaveDocument(aSaveAs, aSaveCopy, aMimeType)
       if (docURI.schemeIs("file"))
       {
         var fileHandler = GetFileProtocolHandler();
-        tempLocalFile = fileHandler.getFileFromURLSpec(urlstring).QueryInterface(Ci.nsILocalFile);
+        tempLocalFile = fileHandler.getFileFromURLSpec(urlstring).QueryInterface(Ci.nsIFile);
       }
     }
 
@@ -1713,7 +1713,7 @@ async function SaveDocument(aSaveAs, aSaveCopy, aMimeType)
     try {
       if (doUpdateURI)
       {
-         // If a local file, we must create a new uri from nsILocalFile
+         // If a local file, we must create a new uri from nsIFile
         if (tempLocalFile)
           docURI = GetFileProtocolHandler().newFileURI(tempLocalFile);
 
