@@ -7,12 +7,12 @@ function test() {
 
   var file = Cc["@mozilla.org/file/directory_service;1"]
                .getService(Ci.nsIProperties)
-               .get("TmpD", Ci.nsILocalFile);
+               .get("TmpD", Ci.nsIFile);
   file.append("346337_test1.file");
   let filePath1 = file.path;
   file = Cc["@mozilla.org/file/directory_service;1"]
              .getService(Ci.nsIProperties)
-             .get("TmpD", Ci.nsILocalFile);
+             .get("TmpD", Ci.nsIFile);
   file.append("346337_test2.file");
   let filePath2 = file.path;
 

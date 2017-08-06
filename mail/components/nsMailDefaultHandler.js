@@ -395,7 +395,7 @@ var nsMailDefaultHandler = {
         let attachment = Cc["@mozilla.org/messengercompose/attachment;1"]
                            .createInstance(Ci.nsIMsgAttachment);
         let localFile = Cc["@mozilla.org/file/local;1"]
-                          .createInstance(Ci.nsILocalFile);
+                          .createInstance(Ci.nsIFile);
         let fileHandler = Services.io.getProtocolHandler("file")
                                      .QueryInterface(Ci.nsIFileProtocolHandler);
 
