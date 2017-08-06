@@ -440,7 +440,7 @@ SuiteGlue.prototype = {
       // Migrate remote content exceptions for email addresses which are
       // encoded as chrome URIs.
       let permissionsDB =
-        Services.dirsvc.get("ProfD", Ci.nsILocalFile);
+        Services.dirsvc.get("ProfD", Ci.nsIFile);
       permissionsDB.append("permissions.sqlite");
       let db = Services.storage.openDatabase(permissionsDB);
 
@@ -546,7 +546,7 @@ SuiteGlue.prototype = {
   _copyDefaultProfileFiles: function()
   {
     // Copy default chrome example files if they do not exist in the current profile.
-    var profileDir = Services.dirsvc.get("ProfD", Ci.nsILocalFile);
+    var profileDir = Services.dirsvc.get("ProfD", Ci.nsIFile);
     profileDir.append("chrome");
 
     // The chrome directory in the current/new profile already exists so no copying.
@@ -1198,13 +1198,13 @@ SuiteGlue.prototype = {
 
     try {
       Services.prefs.setComplexValue("browser.download.lastDir",
-                                     Ci.nsILocalFile,
+                                     Ci.nsIFile,
                                      Services.prefs.getComplexValue("browser.download.dir",
-                                                                    Ci.nsILocalFile));
+                                                                    Ci.nsIFile));
     } catch (ex) {
       // Ensure that even if we don't end up migrating to a lastDir that we
       // don't attempt another update. This will throw when QI'ed to
-      // nsILocalFile, but it does fallback gracefully.
+      // nsIFile, but it does fallback gracefully.
       Services.prefs.setCharPref("browser.download.lastDir", "");
     }
 
