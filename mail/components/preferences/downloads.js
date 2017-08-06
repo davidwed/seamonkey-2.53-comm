@@ -13,7 +13,6 @@ var gDownloadDirSection = {
     var title = bundlePreferences.getString("chooseAttachmentsFolderTitle");
     fp.init(window, title, nsIFilePicker.modeGetFolder);
 
-    const nsILocalFile = Ci.nsIFile;
     var customDirPref = document.getElementById("browser.download.dir");
     if (customDirPref.value)
       fp.displayDirectory = customDirPref.value;
@@ -23,7 +22,7 @@ var gDownloadDirSection = {
         return;
       }
 
-      let file = fp.file.QueryInterface(nsIFile);
+      let file = fp.file.QueryInterface(Ci.nsIFile);
       let currentDirPref = document.getElementById("browser.download.downloadDir");
       customDirPref.value = currentDirPref.value = file;
       let folderListPref = document.getElementById("browser.download.folderList");
@@ -82,7 +81,7 @@ var gDownloadDirSection = {
   _getDownloadsFolder: function (aFolder)
   {
     let dir = Services.dirsvc.get(this._getSpecialFolderKey(aFolder),
-                                  Ci.nsILocalFile);
+                                  Ci.nsIFile);
     if (aFolder != "Desktop")
       dir.append("My Downloads");
 

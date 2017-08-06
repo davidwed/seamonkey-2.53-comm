@@ -252,7 +252,7 @@ var runFile = function(w) {
  var getFile = function(path){
    //define the file interface
    var file = Cc["@mozilla.org/file/local;1"]
-                .createInstance(Ci.nsILocalFile);
+                .createInstance(Ci.nsIFile);
    //point it at the file we want to get at
    file.initWithPath(path);
    // define file stream interfaces
