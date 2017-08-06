@@ -290,7 +290,7 @@ var gDataMigrator = {
 
         // Look in our current profile directory, in case we're upgrading in
         // place
-        let profileDir = this.dirService.get("ProfD", Components.interfaces.nsILocalFile);
+        let profileDir = this.dirService.get("ProfD", Components.interfaces.nsIFile);
         profileDir.append("Calendar");
         if (profileDir.exists()) {
             migLOG("Found old extension directory in current app");

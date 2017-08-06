@@ -2399,15 +2399,15 @@ function MsgComposeCloseWindow()
     window.close();
 }
 
-// attachedLocalFile must be a nsILocalFile
+// attachedLocalFile must be a nsIFile
 function SetLastAttachDirectory(attachedLocalFile)
 {
   try {
     var file = attachedLocalFile.QueryInterface(Ci.nsIFile);
-    var parent = file.parent.QueryInterface(Ci.nsILocalFile);
+    var parent = file.parent.QueryInterface(Ci.nsIFile);
 
     Services.prefs.setComplexValue(kComposeAttachDirPrefName,
-                                   Ci.nsILocalFile, parent);
+                                   Ci.nsIFile, parent);
   }
   catch (ex) {
     dump("error: SetLastAttachDirectory failed: " + ex + "\n");
@@ -2451,7 +2451,7 @@ function AttachFiles(attachments)
   var firstAttachedFile = null;
 
   while (attachments.hasMoreElements()) {
-    var currentFile = attachments.getNext().QueryInterface(Ci.nsILocalFile);
+    var currentFile = attachments.getNext().QueryInterface(Ci.nsIFile);
 
     if (!firstAttachedFile) {
       firstAttachedFile = currentFile;

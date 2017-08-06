@@ -320,7 +320,7 @@ var MailMigrator = {
       // encoded as chrome URIs.
       if (currentUIVersion < 14) {
         let permissionsDB =
-          Services.dirsvc.get("ProfD",Ci.nsILocalFile);
+          Services.dirsvc.get("ProfD", Ci.nsIFile);
         permissionsDB.append("permissions.sqlite");
         let db = Services.storage.openDatabase(permissionsDB);
 
