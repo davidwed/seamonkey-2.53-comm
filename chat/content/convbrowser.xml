@@ -1294,10 +1294,10 @@
             event.preventDefault();
             event.stopPropagation();
 
-            // loadUrl can throw if the default browser is misconfigured.
+            // loadURI can throw if the default browser is misconfigured.
             Cc["@mozilla.org/uriloader/external-protocol-service;1"]
               .getService(Ci.nsIExternalProtocolService)
-              .loadUrl(uri);
+              .loadURI(uri);
           }
         ]]>
       </handler>
