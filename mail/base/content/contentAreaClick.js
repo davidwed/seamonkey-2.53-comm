@@ -192,7 +192,7 @@ function openLinkExternally(url)
 
   Cc["@mozilla.org/uriloader/external-protocol-service;1"]
     .getService(Ci.nsIExternalProtocolService)
-    .loadUrl(uri);
+    .loadURI(uri);
 }
 
 /**
