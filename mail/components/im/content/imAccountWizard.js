@@ -410,6 +410,6 @@ var accountWizard = {
   openURL: function (aURL) {
     Cc["@mozilla.org/uriloader/external-protocol-service;1"]
       .getService(Ci.nsIExternalProtocolService)
-      .loadUrl(Services.io.newURI(aURL));
+      .loadURI(Services.io.newURI(aURL));
   }
 };
