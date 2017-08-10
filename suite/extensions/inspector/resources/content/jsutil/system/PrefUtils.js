@@ -32,7 +32,7 @@ var PrefUtils =
   {
     if (!this.mPrefs) this.init();
 
-    var pbi = XPCU.QI(this.mPrefs, "nsIPrefBranch2");
+    var pbi = XPCU.QI(this.mPrefs, "nsIPrefBranch");
     if (pbi)
       pbi.addObserver(aDomain, aFunction, false);
   },
@@ -41,7 +41,7 @@ var PrefUtils =
   {
     if (!this.mPrefs) this.init();
 
-    var pbi = XPCU.QI(this.mPrefs, "nsIPrefBranch2");
+    var pbi = XPCU.QI(this.mPrefs, "nsIPrefBranch");
     if (pbi)
       pbi.removeObserver(aDomain, aFunction);
   },
