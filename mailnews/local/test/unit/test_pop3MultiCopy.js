@@ -6,7 +6,6 @@
  */
 
 load("../../../resources/POP3pump.js");
-Cu.import("resource://gre/modules/Promise.jsm");
 Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 var testSubjects = ["[Bug 397009] A filter will let me tag, but not untag",
