@@ -2,7 +2,6 @@
 // a way that the xpcshell test suite can understand.
 
 Cu.import("resource://gre/modules/osfile.jsm");
-Cu.import("resource://gre/modules/Promise.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/Task.jsm");
 Cu.import("resource://testing-common/Assert.jsm");
