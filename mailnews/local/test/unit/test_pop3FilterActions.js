@@ -9,7 +9,6 @@
 
 load("../../../resources/POP3pump.js");
 Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/Promise.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
