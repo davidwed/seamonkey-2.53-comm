@@ -1,7 +1,6 @@
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource:///modules/mailServices.js");
 Cu.import("resource:///modules/IOUtils.js");
-Cu.import("resource://gre/modules/Promise.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://testing-common/mailnews/mailTestUtils.js");
 Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
