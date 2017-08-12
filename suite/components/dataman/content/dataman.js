@@ -2693,8 +2693,7 @@ var gStorage = {
           testHost = "http://" + testHost;
         let uri = Services.io.newURI(testHost);
         let principal = gLocSvc.ssm.getCodebasePrincipal(uri);
-        let storage = gLocSvc.domstoremgr
-                             .getLocalStorageForPrincipal(principal, "");
+        let storage = gLocSvc.domstoremgr.createStorage(null, principal, "");
         storage.clear();
         break;
       case "indexedDB":
