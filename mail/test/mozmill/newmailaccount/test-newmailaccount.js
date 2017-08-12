@@ -1201,11 +1201,10 @@ function test_search_button_disabled_if_no_query_on_init() {
   // We have to do a little bit of gymnastics to access the local storage
   // for the accountProvisioner dialog...
   let url = "chrome://content/messenger/accountProvisionerStorage/accountProvisioner";
-  let dsm = Services.domStorageManager;
 
   let uri = Services.io.newURI(url);
   let principal = Services.scriptSecurityManager.createCodebasePrincipal(uri, {});
-  let storage = dsm.getLocalStorageForPrincipal(principal, url);
+  let storage = Services.domStorageManager.createStorage(null, principal, url);
 
   // Ok, got it. Now let's blank out the name.
   storage.setItem("name", "");
