@@ -18,7 +18,7 @@ ChromeUtils.defineModuleGetter(this, "ScratchpadManager","resource://devtools/cl
 Object.defineProperty(this, "HUDService", {
   get: function HUDService_getter() {
     let devtools = ChromeUtils.import("resource://devtools/shared/Loader.jsm", {}).devtools;
-    return devtools.require("devtools/client/webconsole/hudservice");
+    return devtools.require("devtools/client/webconsole/hudservice").HUDService;
   },
   configurable: true,
   enumerable: true
