@@ -83,8 +83,11 @@ function fillMailContextMenu(event)
   // Show "Edit Draft Message" menus only in a drafts folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_editDraftMsg",
                              Ci.nsMsgFolderFlags.Drafts);
-  // Show "New Message from Template" menus only in a templates folder; otherwise hide them.
+  // Show "New Message from Template" and "Edit Template" menus only in a
+  // templates folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_newMsgFromTemplate",
+                             Ci.nsMsgFolderFlags.Templates);
+  showCommandInSpecialFolder("cmd_editTemplateMsg",
                              Ci.nsMsgFolderFlags.Templates);
 
   gContextMenu = new nsContextMenu(event.target, event.shiftKey);
