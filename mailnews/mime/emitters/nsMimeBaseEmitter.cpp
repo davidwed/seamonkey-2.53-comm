@@ -776,7 +776,7 @@ nsMimeBaseEmitter::GetLocalizedDateString(const char * dateString)
 nsresult
 nsMimeBaseEmitter::WriteHeaderFieldHTML(const char *field, const char *value)
 {
-  char *newValue = nullptr;
+  nsCString newValue;
   char *i18nValue = nullptr;
 
   if ( (!field) || (!value) )
@@ -806,18 +806,18 @@ nsMimeBaseEmitter::WriteHeaderFieldHTML(const char *field, const char *value)
     nsresult rv = mUnicodeConverter->DecodeMimeHeaderToUTF8(
       nsDependentCString(i18nValue), nullptr, false, true, tValue);
     if (NS_SUCCEEDED(rv) && !tValue.IsEmpty())
-      newValue = MsgEscapeHTML(tValue.get());
+      nsAppendEscapedHTML(tValue, newValue);
     else
-      newValue = MsgEscapeHTML(i18nValue);
+      nsAppendEscapedHTML(nsDependentCString(i18nValue), newValue);
   }
   else
   {
-    newValue = MsgEscapeHTML(i18nValue);
+    nsAppendEscapedHTML(nsDependentCString(i18nValue), newValue);
   }
 
   free(i18nValue);
 
-  if (!newValue)
+  if (newValue.IsEmpty())
     return NS_OK;
 
   mHTMLHeaders.Append("<tr>");
@@ -858,7 +858,6 @@ nsMimeBaseEmitter::WriteHeaderFieldHTML(const char *field, const char *value)
 
   mHTMLHeaders.Append("</tr>");
 
-  PR_FREEIF(newValue);
   return NS_OK;
 }
 
@@ -876,7 +875,7 @@ nsMimeBaseEmitter::WriteHeaderFieldHTMLPrefix(const nsACString &name)
     if (!name.IsEmpty()) {
       mHTMLHeaders.Append("<legend class=\"mimeAttachmentHeaderName\">");
       nsCString escapedName;
-      escapedName.Adopt(MsgEscapeHTML(nsCString(name).get()));
+      nsAppendEscapedHTML(name, escapedName);
       mHTMLHeaders.Append(escapedName);
       mHTMLHeaders.Append("</legend>");
     }
