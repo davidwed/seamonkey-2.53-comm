@@ -39,10 +39,7 @@ var gMessageInBody = "an HTML message";
 
 // various object references
 var gDbService = Cc["@mozilla.org/msgDatabase/msgDBService;1"]
-                             .getService(Ci.nsIMsgDBService);
-var kDeleteOrMoveMsgCompleted = Cc["@mozilla.org/atom-service;1"]
-                                    .getService(Ci.nsIAtomService)
-                                    .getAtom("DeleteOrMoveMsgCompleted");
+                   .getService(Ci.nsIMsgDBService);
 
 // Definition of tests. The test function name is the filter action
 // being tested, with "Body" appended to tests that use delayed
