@@ -540,7 +540,7 @@ nsMsgComposeAndSend::GatherMimeAttachments()
 
     nsAutoCString tempURL;
     rv = NS_GetURLSpecFromFile(mHTMLFile, tempURL);
-    if (NS_FAILED(rv) || NS_FAILED(nsMsgNewURL(getter_AddRefs(m_plaintext->mURL), tempURL.get())))
+    if (NS_FAILED(rv) || NS_FAILED(nsMsgNewURL(getter_AddRefs(m_plaintext->mURL), tempURL)))
     {
       m_plaintext = nullptr;
       goto FAILMEM;
@@ -1304,7 +1304,7 @@ nsMsgComposeAndSend::GetEmbeddedObjectInfo(nsIDOMNode *node, nsMsgAttachmentData
     {
       nsAutoCString turlC;
       CopyUTF16toUTF8(tUrl, turlC);
-      if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC.get())))
+      if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC)))
         return NS_OK;
     }
     isImage = true;
@@ -1322,7 +1322,7 @@ nsMsgComposeAndSend::GetEmbeddedObjectInfo(nsIDOMNode *node, nsMsgAttachmentData
 
     nsAutoCString turlC;
     CopyUTF16toUTF8(tUrl, turlC);
-    if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC.get())))
+    if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC)))
     {
       // Well, the first time failed...which means we probably didn't get
       // the full path name...
@@ -1353,7 +1353,7 @@ nsMsgComposeAndSend::GetEmbeddedObjectInfo(nsIDOMNode *node, nsMsgAttachmentData
           workURL.SetLength(loc+1);
         workURL.Append(tUrl);
         NS_ConvertUTF16toUTF8 workurlC(workURL);
-        if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), workurlC.get())))
+        if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), workurlC)))
           return NS_OK; // Continue and send it without this image.
       }
     }
@@ -1376,7 +1376,7 @@ nsMsgComposeAndSend::GetEmbeddedObjectInfo(nsIDOMNode *node, nsMsgAttachmentData
       return NS_OK;
     nsAutoCString turlC;
     CopyUTF16toUTF8(tUrl, turlC);
-    if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC.get())))
+    if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC)))
       return NS_OK;
   }
   else if (anchor)
@@ -1393,7 +1393,7 @@ nsMsgComposeAndSend::GetEmbeddedObjectInfo(nsIDOMNode *node, nsMsgAttachmentData
     CopyUTF16toUTF8(tUrl, turlC);
     // This can fail since the URL might not be recognised, for example:
     // <a href="skype:some-name?call" title="Skype">Some Name</a>
-    if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC.get())))
+    if (NS_FAILED(nsMsgNewURL(getter_AddRefs(attachment->m_url), turlC)))
       return NS_OK;
     rv = anchor->GetName(tName);
     NS_ENSURE_SUCCESS(rv, rv);
@@ -2035,7 +2035,7 @@ nsMsgComposeAndSend::AddCompFieldLocalAttachments()
           //
           m_attachments[newLoc]->mDeleteFile = false;
 
-          nsMsgNewURL(getter_AddRefs(m_attachments[newLoc]->mURL), url.get());
+          nsMsgNewURL(getter_AddRefs(m_attachments[newLoc]->mURL), url);
 
           if (m_attachments[newLoc]->mTmpFile)
           {
@@ -2217,7 +2217,7 @@ nsMsgComposeAndSend::AddCompFieldRemoteAttachments(uint32_t   aStartLocation,
           m_attachments[newLoc]->SetMimeDeliveryState(this);
 
           if (!isAMessageAttachment)
-            nsMsgNewURL(getter_AddRefs(m_attachments[newLoc]->mURL), url.get());
+            nsMsgNewURL(getter_AddRefs(m_attachments[newLoc]->mURL), url);
 
           m_attachments[newLoc]->m_encoding = ENCODING_7BIT;
 
