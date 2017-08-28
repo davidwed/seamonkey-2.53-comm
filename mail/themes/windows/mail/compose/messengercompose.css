@@ -800,7 +800,11 @@ toolbar[brighttext] #button-print {
   color: #888a85;
 }
 
-#attachmentNotificationBox > notification .messageImage {
+#attachmentNotificationBox b {
+  font-weight: bold;
+}
+
+#attachmentNotificationBox > notification[image="null"] .messageImage {
   width: 18px;
   height: 18px;
 }
@@ -974,7 +978,7 @@ treechildren::-moz-tree-image(subscribed-news) {
                     rgba(255, 255, 255, 0));
   }
 
-  #attachmentNotificationBox > notification .messageImage {
+  #attachmentNotificationBox > notification[image="null"] .messageImage {
     background-image: url(chrome://messenger/skin/messengercompose/compose-toolbar.svg#attach);
   }
 }
@@ -1021,7 +1025,7 @@ treechildren::-moz-tree-image(subscribed-news) {
     list-style-image: url("chrome://messenger/skin/icons/dropmarker.svg#win8");
   }
 
-  #attachmentNotificationBox > notification .messageImage {
+  #attachmentNotificationBox > notification[image="null"] .messageImage {
     background-image: url(chrome://messenger/skin/messengercompose/compose-toolbar.svg#attach-flat);
   }
 }
