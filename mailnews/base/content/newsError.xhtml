@@ -38,7 +38,7 @@
         let uri = document.documentURI;
         let query = uri.slice(uri.indexOf("?")+1);
         let params = {};
-        for (let [,piece] in Iterator(query.split("&"))) {
+        for (let piece of query.split("&")) {
           let [key, value] = piece.split("=");
           params[key] = decodeURIComponent(value);
         }
