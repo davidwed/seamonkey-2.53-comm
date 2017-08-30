@@ -4041,9 +4041,9 @@ function AttachFile()
 
   fp.appendFilters(nsIFilePicker.filterAll);
   fp.open(rv => {
-    if (rv != Ci.nsIFilePicker.returnOK || !fp.file) {
+    if (rv != Ci.nsIFilePicker.returnOK || !fp.files)
       return;
-    }
+
     let file;
     let attachments = [];
 
