@@ -200,7 +200,7 @@ Bridge.prototype.execFunction = function (uuid, func, args) {
 var backstage = this;
 
 function Session (transport) {
-  this.transpart = transport;
+  this.transpart = transport;  // XXX Unused, needed to hold reference? Note the typo.
   this.sandbox = Cu.Sandbox(backstage, { wantGlobalProperties: ["ChromeUtils"] });
   this.sandbox.bridge = new Bridge(this);
   this.sandbox.openPreferences = hwindow.openPreferences;
@@ -260,7 +260,7 @@ Session.prototype.onOutput = function(string) {
 Session.prototype.onQuit = function() {
   this.instream.close();
   this.outstream.close();
-  sessions.remove(this.session);
+  sessions.remove(this);
 };
 Session.prototype.encodeOut = function (obj) {
   try {
@@ -293,8 +293,7 @@ var sessions = {
         return this._list[index];
     },
     quit: function() {
-        this._list.forEach(
-            function(session) { session.quit; });
+        this._list.forEach(function(session) { session.onQuit(); });
         this._list.splice(0, this._list.length);
     }
 };
@@ -322,7 +321,7 @@ Server.prototype.onStopListening = function (serv, status) {
 // Stub function
 }
 Server.prototype.onSocketAccepted = function (serv, transport) {
-  var session = new Session(transport)
+  let session = new Session(transport);
   sessions.add(session);
 }
 
