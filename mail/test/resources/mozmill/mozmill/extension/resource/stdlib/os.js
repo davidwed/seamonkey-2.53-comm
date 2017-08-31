@@ -78,9 +78,6 @@ function abspath (rel, file) {
 
 function getPlatform () {
   var xulRuntime = Cc["@mozilla.org/xre/app-info;1"]
-                   .getService(Ci.nsIXULRuntime);
-  mPlatform = xulRuntime.OS.toLowerCase();
-  return mPlatform;
+                     .getService(Ci.nsIXULRuntime);
+  return xulRuntime.OS.toLowerCase();
 }
-
-
