@@ -3536,7 +3536,7 @@ nsImapProtocol::FetchMessage(const nsCString &messageIds,
         GetArbitraryHeadersToDownload(arbitraryHeaders);
         for (uint32_t i = 0; i < mCustomDBHeaders.Length(); i++)
         {
-          if (arbitraryHeaders.Find(mCustomDBHeaders[i], CaseInsensitiveCompare) == kNotFound)
+          if (arbitraryHeaders.Find(mCustomDBHeaders[i], /* ignoreCase = */ true) == kNotFound)
           {
             if (!arbitraryHeaders.IsEmpty())
               arbitraryHeaders.Append(' ');
@@ -3545,7 +3545,7 @@ nsImapProtocol::FetchMessage(const nsCString &messageIds,
         }
         for (uint32_t i = 0; i < mCustomHeaders.Length(); i++)
         {
-           if (arbitraryHeaders.Find(mCustomHeaders[i], CaseInsensitiveCompare) == kNotFound)
+           if (arbitraryHeaders.Find(mCustomHeaders[i], /* ignoreCase = */ true) == kNotFound)
           {
             if (!arbitraryHeaders.IsEmpty())
               arbitraryHeaders.Append(' ');
@@ -5025,7 +5025,7 @@ nsImapProtocol::DiscoverMailboxSpec(nsImapMailboxSpec * adoptedBoxSpec)
 
         // Don't set the Trash flag if not using the Trash model
         if (GetDeleteIsMoveToTrash() && !onlineTrashFolderExists &&
-            adoptedBoxSpec->mAllocatedPathName.Find(m_trashFolderName, CaseInsensitiveCompare) != -1)
+            adoptedBoxSpec->mAllocatedPathName.Find(m_trashFolderName, /* ignoreCase = */ true) != -1)
         {
           bool trashExists = false;
           nsCString trashMatch(CreatePossibleTrashName(nsPrefix));
@@ -7764,10 +7764,10 @@ nsCString nsImapProtocol::CreatePossibleTrashName(const char *prefix)
 bool nsImapProtocol::GetListSubscribedIsBrokenOnServer()
 {
   // This is a workaround for an issue with LIST(SUBSCRIBED) crashing older versions of Zimbra
-  if (GetServerStateParser().GetServerID().Find("\"NAME\" \"Zimbra\"", CaseInsensitiveCompare) != kNotFound) {
+  if (GetServerStateParser().GetServerID().Find("\"NAME\" \"Zimbra\"", /* ignoreCase = */ true) != kNotFound) {
     nsCString serverID(GetServerStateParser().GetServerID());
-    int start = serverID.Find("\"VERSION\" \"", CaseInsensitiveCompare) + 11;
-    int length = serverID.Find("\" ", CaseInsensitiveCompare, start);
+    int start = serverID.Find("\"VERSION\" \"", /* ignoreCase = */ true) + 11;
+    int length = serverID.Find("\" ", true, start);
     const nsDependentCSubstring serverVersionSubstring = Substring(serverID, start, length);
     nsCString serverVersionStr(serverVersionSubstring);
     Version serverVersion(serverVersionStr.get());
@@ -7810,7 +7810,7 @@ bool nsImapProtocol::IsExtraSelectNeeded()
       nsAutoCString unescapedString;
       MsgUnescapeString(forceSelectStringsArray[j], 0, unescapedString);
       if (GetServerStateParser().GetServerID()
-          .Find(unescapedString, CaseInsensitiveCompare) == kNotFound)
+          .Find(unescapedString, /* ignoreCase = */ true) == kNotFound)
       {
         retVal = false;
         break;
