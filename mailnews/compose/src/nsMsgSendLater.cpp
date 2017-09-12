@@ -463,7 +463,7 @@ SendOperationListener::OnStopSending(const char *aMsgID, nsresult aStatus, const
                                      nsIFile *returnFile)
 {
   if (mSendLater && !mSendLater->OnSendStepFinished(aStatus))
-      NS_RELEASE(mSendLater);
+    mSendLater = nullptr;
 
   return NS_OK;
 }
@@ -502,7 +502,7 @@ SendOperationListener::OnStopCopy(nsresult aStatus)
   if (mSendLater)
   {
     mSendLater->OnCopyStepFinished(aStatus);
-    NS_RELEASE(mSendLater);
+    mSendLater = nullptr;
   }
 
   return NS_OK;
@@ -566,13 +566,8 @@ nsMsgSendLater::CompleteMailFileSend()
 #endif
 
   // Create the listener for the send operation...
-  SendOperationListener *sendListener = new SendOperationListener(this);
-  if (!sendListener)
-    return NS_ERROR_OUT_OF_MEMORY;
+  RefPtr<SendOperationListener> sendListener = new SendOperationListener(this);
 
-  NS_ADDREF(sendListener);
-
-  NS_ADDREF(this);  //TODO: We should remove this!!!
   rv = pMsgSend->SendMessageFile(identity,
                                  mAccountKey,
                                  compFields, // nsIMsgCompFields *fields,
@@ -584,7 +579,6 @@ nsMsgSendLater::CompleteMailFileSend()
                                  sendListener,
                                  mFeedback,
                                  nullptr);
-  NS_RELEASE(sendListener);
   return rv;
 }
 
@@ -665,15 +659,12 @@ nsMsgSendLater::StartNextMailFileSend(nsresult prevStatus)
 
   // Now, get our stream listener interface and plug it into the DisplayMessage
   // operation
-  AddRef();
 
   nsCOMPtr<nsIURI> dummyNull;
   rv = messageService->DisplayMessage(messageURI.get(),
                                       static_cast<nsIStreamListener*>(this),
                                       nullptr, nullptr, nullptr,
                                       getter_AddRefs(dummyNull));
-
-  Release();
 
   return rv;
 }
