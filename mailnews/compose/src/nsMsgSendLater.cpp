@@ -1455,7 +1455,7 @@ nsMsgSendLater::GetIdentityFromKey(const char *aKey, nsIMsgIdentity  **aIdentity
         lookupIdentity->GetKey(key);
         if (key.Equals(aKey))
         {
-          NS_IF_ADDREF(*aIdentity = lookupIdentity);
+          lookupIdentity.forget(aIdentity);
           return NS_OK;
         }
       }
