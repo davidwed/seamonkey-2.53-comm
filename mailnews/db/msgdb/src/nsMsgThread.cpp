@@ -611,7 +611,7 @@ protected:
 
   nsIMdbTableRowCursor*   mRowCursor;
   nsCOMPtr<nsIMsgDBHdr>  mResultHdr;
-  nsMsgThread*            mThread;
+  RefPtr<nsMsgThread>     mThread;
   nsMsgKey                mThreadParentKey;
   nsMsgKey                mFirstMsgKey;
   int32_t                 mChildIndex;
@@ -685,13 +685,10 @@ nsMsgThreadEnumerator::nsMsgThreadEnumerator(nsMsgThread *thread, nsMsgKey start
     }
   }
 #endif
-
-  NS_ADDREF(thread);
 }
 
 nsMsgThreadEnumerator::~nsMsgThreadEnumerator()
 {
-    NS_RELEASE(mThread);
 }
 
 NS_IMPL_ISUPPORTS(nsMsgThreadEnumerator, nsISimpleEnumerator)
