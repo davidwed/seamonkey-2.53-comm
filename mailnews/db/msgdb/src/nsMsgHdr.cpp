@@ -661,8 +661,7 @@ NS_IMETHODIMP nsMsgHdr::GetFolder(nsIMsgFolder **result)
 
   if (m_mdb && m_mdb->m_folder)
   {
-    *result = m_mdb->m_folder;
-    NS_ADDREF(*result);
+    NS_ADDREF(*result = m_mdb->m_folder);
   }
   else
     *result = nullptr;
@@ -1096,10 +1095,6 @@ void nsMsgPropertyEnumerator::PrefetchNext(void)
 
 NS_IMETHODIMP nsMsgHdr::GetPropertyEnumerator(nsIUTF8StringEnumerator** _result)
 {
-  nsMsgPropertyEnumerator* enumerator = new nsMsgPropertyEnumerator(this);
-  if (!enumerator)
-    return NS_ERROR_OUT_OF_MEMORY;
-
-  NS_ADDREF(*_result = enumerator);
+  NS_ADDREF(*_result = new nsMsgPropertyEnumerator(this));
   return NS_OK;
 }
