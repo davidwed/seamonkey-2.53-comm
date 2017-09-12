@@ -374,7 +374,7 @@ nsresult nsMsgComposeAndSend::GetNotificationCallbacks(nsIInterfaceRequestor** a
       ir = aggregrateIR;
     }
     if (ir) {
-      NS_ADDREF(*aCallbacks = ir);
+      ir.forget(aCallbacks);
       return NS_OK;
     }
   }
@@ -5053,8 +5053,7 @@ NS_IMETHODIMP
 nsMsgComposeAndSend::GetIdentity(nsIMsgIdentity **aIdentity)
 {
   NS_ENSURE_ARG_POINTER(aIdentity);
-  *aIdentity = mUserIdentity;
-  NS_IF_ADDREF(*aIdentity);
+  NS_IF_ADDREF(*aIdentity = mUserIdentity);
   return NS_OK;
 }
 
@@ -5065,8 +5064,7 @@ nsMsgComposeAndSend::GetAttachment(uint32_t aIndex,
   NS_ENSURE_ARG_POINTER(aAttachment);
   if (aIndex >= m_attachment_count)
     return NS_ERROR_ILLEGAL_VALUE;
-  *aAttachment = m_attachments[aIndex];
-  NS_IF_ADDREF(*aAttachment);
+  NS_IF_ADDREF(*aAttachment = m_attachments[aIndex]);
   return NS_OK;
 }
 
