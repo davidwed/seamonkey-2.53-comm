@@ -2864,8 +2864,7 @@ NS_IMETHODIMP nsMsgDBEnumerator::GetNext(nsISupports **aItem)
   {
     if (mResultHdr)
     {
-      *aItem = mResultHdr;
-      NS_ADDREF(*aItem);
+      NS_ADDREF(*aItem = mResultHdr);
       mNextPrefetched = false;
     }
   }
@@ -3015,11 +3014,8 @@ nsMsgDatabase::EnumerateMessages(nsISimpleEnumerator* *result)
 {
   RememberLastUseTime();
   NS_ENSURE_ARG_POINTER(result);
-  nsMsgDBEnumerator* e = new nsMsgDBEnumerator(this, m_mdbAllMsgHeadersTable,
-                                               nullptr, nullptr);
-  if (!e)
-    return NS_ERROR_OUT_OF_MEMORY;
-  NS_ADDREF(*result = e);
+  NS_ADDREF(*result = new nsMsgDBEnumerator(this, m_mdbAllMsgHeadersTable,
+                                            nullptr, nullptr));
   return NS_OK;
 }
 
@@ -3027,11 +3023,8 @@ NS_IMETHODIMP
 nsMsgDatabase::ReverseEnumerateMessages(nsISimpleEnumerator* *result)
 {
   NS_ENSURE_ARG_POINTER(result);
-  nsMsgDBEnumerator* e = new nsMsgDBEnumerator(this, m_mdbAllMsgHeadersTable,
-                                               nullptr, nullptr, false);
-  if (!e)
-    return NS_ERROR_OUT_OF_MEMORY;
-  NS_ADDREF(*result = e);
+  NS_ADDREF(*result = new nsMsgDBEnumerator(this, m_mdbAllMsgHeadersTable,
+                                            nullptr, nullptr, false));
   return NS_OK;
 }
 
@@ -3310,8 +3303,7 @@ NS_IMETHODIMP nsMsgDBThreadEnumerator::GetNext(nsISupports **aItem)
   {
     if (mResultThread)
     {
-      *aItem = mResultThread;
-      NS_ADDREF(mResultThread);
+      NS_ADDREF(*aItem = mResultThread);
       mNextPrefetched = false;
     }
   }
@@ -3392,10 +3384,7 @@ NS_IMETHODIMP
 nsMsgDatabase::EnumerateThreads(nsISimpleEnumerator* *result)
 {
   RememberLastUseTime();
-  nsMsgDBThreadEnumerator* e = new nsMsgDBThreadEnumerator(this, nullptr);
-  if (e == nullptr)
-    return NS_ERROR_OUT_OF_MEMORY;
-  NS_ADDREF(*result = e);
+  NS_ADDREF(*result = new nsMsgDBThreadEnumerator(this, nullptr));
   return NS_OK;
 }
 
@@ -3413,11 +3402,7 @@ nsresult
 nsMsgDatabase::EnumerateMessagesWithFlag(nsISimpleEnumerator* *result, uint32_t *pFlag)
 {
   RememberLastUseTime();
-
-  nsMsgDBEnumerator* e = new nsMsgDBEnumerator(this, m_mdbAllMsgHeadersTable, nsMsgFlagSetFilter, pFlag);
-  if (!e)
-    return NS_ERROR_OUT_OF_MEMORY;
-  NS_ADDREF(*result = e);
+  NS_ADDREF(*result = new nsMsgDBEnumerator(this, m_mdbAllMsgHeadersTable, nsMsgFlagSetFilter, pFlag));
   return NS_OK;
 }
 
@@ -5166,8 +5151,7 @@ NS_IMETHODIMP nsMsgDatabase::GetMsgRetentionSettings(nsIMsgRetentionSettings **r
       m_retentionSettings->SetApplyToFlaggedMessages(applyToFlaggedMessages);
     }
   }
-  *retentionSettings = m_retentionSettings;
-  NS_IF_ADDREF(*retentionSettings);
+  NS_IF_ADDREF(*retentionSettings = m_retentionSettings);
   return NS_OK;
 }
 
@@ -5225,8 +5209,7 @@ NS_IMETHODIMP nsMsgDatabase::GetMsgDownloadSettings(nsIMsgDownloadSettings **dow
       m_downloadSettings->SetAgeLimitOfMsgsToDownload(ageLimitOfMsgsToDownload);
     }
   }
-  *downloadSettings = m_downloadSettings;
-  NS_IF_ADDREF(*downloadSettings);
+  NS_IF_ADDREF(*downloadSettings = m_downloadSettings);
   return NS_OK;
 }
 
@@ -5696,10 +5679,7 @@ nsMsgDatabase::GetCachedHits(const char *aSearchFolderUri, nsISimpleEnumerator *
   (void) GetSearchResultsTable(aSearchFolderUri, false, getter_AddRefs(table));
   if (!table)
     return NS_ERROR_FAILURE; // expected result for no cached hits
-  nsMsgDBEnumerator* e = new nsMsgDBEnumerator(this, table, nullptr, nullptr);
-  if (e == nullptr)
-      return NS_ERROR_OUT_OF_MEMORY;
-  NS_ADDREF(*aEnumerator = e);
+  NS_ADDREF(*aEnumerator = new nsMsgDBEnumerator(this, table, nullptr, nullptr));
   return NS_OK;
 }
 
