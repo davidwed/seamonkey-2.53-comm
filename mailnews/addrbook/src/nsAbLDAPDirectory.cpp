@@ -628,7 +628,7 @@ NS_IMETHODIMP nsAbLDAPDirectory::GetReplicationFile(nsIFile **aResult)
   rv = profileDir->AppendNative(fileName);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  NS_ADDREF(*aResult = profileDir);
+  profileDir.forget(aResult);
 
   return NS_OK;
 }
