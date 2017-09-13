@@ -448,7 +448,7 @@ NS_IMETHODIMP nsAbOutlookDirectory::AddMailList(nsIAbDirectory *aMailList, nsIAb
   }
   m_AddressList->AppendElement(newList);
   NotifyItemAddition(newList);
-  NS_IF_ADDREF(*addedList = newList);
+  newList.forget(addedList);
 
   return rv;
 }
@@ -1249,8 +1249,7 @@ nsresult nsAbOutlookDirectory::CreateCard(nsIAbCard *aData, nsIAbCard **aNewCard
         retCode = ModifyCard(newCard) ;
         NS_ENSURE_SUCCESS(retCode, retCode) ;
     }
-    *aNewCard = newCard ;
-    NS_ADDREF(*aNewCard) ;
+    newCard.forget(aNewCard);
     return retCode ;
 }
 
