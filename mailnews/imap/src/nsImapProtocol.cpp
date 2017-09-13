@@ -406,7 +406,6 @@ nsImapProtocol::nsImapProtocol() : nsMsgProtocol(nullptr),
   m_connectionStatus = NS_OK;
   m_safeToCloseConnection = false;
   m_hostSessionList = nullptr;
-  m_flagState = nullptr;
   m_fetchBodyIdList = nullptr;
   m_isGmailServer = false;
   m_fetchingWholeMessage = false;
@@ -542,7 +541,6 @@ nsImapProtocol::Initialize(nsIImapHostSessionList * aHostSessionList,
   aServer->GetForceSelect(m_forceSelectValue);
   aServer->GetUseCondStore(&m_useCondStore);
   aServer->GetUseCompressDeflate(&m_useCompressDeflate);
-  NS_ADDREF(m_flagState);
 
   m_hostSessionList = aHostSessionList; // no ref count...host session list has life time > connection
   m_parser.SetHostSessionList(aHostSessionList);
@@ -573,8 +571,6 @@ nsImapProtocol::Initialize(nsIImapHostSessionList * aHostSessionList,
 nsImapProtocol::~nsImapProtocol()
 {
   PR_Free(m_fetchBodyIdList);
-
-  NS_IF_RELEASE(m_flagState);
 
   PR_Free(m_dataOutputBuf);
   delete m_inputStreamBuffer;
@@ -4223,7 +4219,7 @@ void nsImapProtocol::ProcessMailboxUpdate(bool handlePossibleUndo)
   uint32_t *msgIdList = nullptr;
   uint32_t msgCount = 0;
 
-  nsImapMailboxSpec *new_spec = GetServerStateParser().CreateCurrentMailboxSpec();
+  RefPtr<nsImapMailboxSpec> new_spec = GetServerStateParser().CreateCurrentMailboxSpec();
   if (new_spec && GetServerStateParser().LastCommandSuccessful())
   {
     nsImapAction imapAction;
@@ -4248,8 +4244,6 @@ void nsImapProtocol::ProcessMailboxUpdate(bool handlePossibleUndo)
         m_runningUrl->SetRerunningUrl(true);
     }
   }
-  else if (!new_spec)
-    HandleMemoryFailure();
 
   if (GetServerStateParser().LastCommandSuccessful())
   {
@@ -4289,8 +4283,6 @@ void nsImapProtocol::ProcessMailboxUpdate(bool handlePossibleUndo)
   }
   if (!GetServerStateParser().LastCommandSuccessful())
     GetServerStateParser().ResetFlagInfo();
-
-  NS_IF_RELEASE(new_spec);
 }
 
 void nsImapProtocol::FolderHeaderDump(uint32_t *msgUids, uint32_t msgCount)
@@ -4944,7 +4936,6 @@ nsImapProtocol::DiscoverMailboxSpec(nsImapMailboxSpec * adoptedBoxSpec)
         m_runningUrl->SetOnlineSubDirSeparator(adoptedBoxSpec->mHierarchySeparator);
 
     }
-    NS_IF_RELEASE(adoptedBoxSpec);
     break;
   case kListingForFolderFlags:
     {
@@ -4952,7 +4943,6 @@ nsImapProtocol::DiscoverMailboxSpec(nsImapMailboxSpec * adoptedBoxSpec)
       nsCString mailboxName(adoptedBoxSpec->mAllocatedPathName);
       m_standardListMailboxes.Put(mailboxName, adoptedBoxSpec->mBoxFlags);
     }
-    NS_IF_RELEASE(adoptedBoxSpec);
     break;
   case kListingForCreate:
   case kNoOperationInProgress:
@@ -5076,15 +5066,11 @@ nsImapProtocol::DiscoverMailboxSpec(nsImapMailboxSpec * adoptedBoxSpec)
         }
       }
       }
-      NS_IF_RELEASE( adoptedBoxSpec);
-      break;
-    case kDiscoverBaseFolderInProgress:
       break;
     case kDeleteSubFoldersInProgress:
       {
         NS_ASSERTION(m_deletableChildren, "Oops .. null m_deletableChildren\n");
         m_deletableChildren->AppendElement(ToNewCString(adoptedBoxSpec->mAllocatedPathName));
-        NS_IF_RELEASE(adoptedBoxSpec);
       }
       break;
     case kListingForInfoOnly:
@@ -5095,12 +5081,10 @@ nsImapProtocol::DiscoverMailboxSpec(nsImapMailboxSpec * adoptedBoxSpec)
         nsIMAPMailboxInfo *mb = new nsIMAPMailboxInfo(adoptedBoxSpec->mAllocatedPathName,
                                                       adoptedBoxSpec->mHierarchySeparator);
         m_listedMailboxList.AppendElement(mb);
-        NS_IF_RELEASE(adoptedBoxSpec);
       }
       break;
     case kDiscoveringNamespacesOnly:
       {
-        NS_IF_RELEASE(adoptedBoxSpec);
       }
       break;
     default:
@@ -6750,10 +6734,9 @@ void nsImapProtocol::OnStatusForFolder(const char *mailboxName)
 
   if (GetServerStateParser().LastCommandSuccessful())
   {
-    nsImapMailboxSpec *new_spec = GetServerStateParser().CreateCurrentMailboxSpec(mailboxName);
+    RefPtr<nsImapMailboxSpec> new_spec = GetServerStateParser().CreateCurrentMailboxSpec(mailboxName);
     if (new_spec && m_imapMailFolderSink)
       m_imapMailFolderSink->UpdateImapMailboxStatus(this, new_spec);
-    NS_IF_RELEASE(new_spec);
   }
 }
 
@@ -7280,43 +7263,37 @@ void nsImapProtocol::DiscoverAllAndSubscribedBoxes()
         {
           // Explicitly discover each Namespace, just so they're
           // there in the subscribe UI
-          nsImapMailboxSpec *boxSpec = new nsImapMailboxSpec;
-          if (boxSpec)
+          RefPtr<nsImapMailboxSpec> boxSpec = new nsImapMailboxSpec;
+          boxSpec->mFolderSelected = false;
+          boxSpec->mHostName.Assign(GetImapHostName());
+          boxSpec->mConnection = this;
+          boxSpec->mFlagState = nullptr;
+          boxSpec->mDiscoveredFromLsub = true;
+          boxSpec->mOnlineVerified = true;
+          boxSpec->mBoxFlags = kNoselect;
+          boxSpec->mHierarchySeparator = ns->GetDelimiter();
+
+          m_runningUrl->AllocateCanonicalPath(ns->GetPrefix(), ns->GetDelimiter(),
+                                              getter_Copies(boxSpec->mAllocatedPathName));
+          boxSpec->mNamespaceForFolder = ns;
+          boxSpec->mBoxFlags |= kNameSpace;
+
+          switch (ns->GetType())
           {
-            NS_ADDREF(boxSpec);
-            boxSpec->mFolderSelected = false;
-            boxSpec->mHostName.Assign(GetImapHostName());
-            boxSpec->mConnection = this;
-            boxSpec->mFlagState = nullptr;
-            boxSpec->mDiscoveredFromLsub = true;
-            boxSpec->mOnlineVerified = true;
-            boxSpec->mBoxFlags = kNoselect;
-            boxSpec->mHierarchySeparator = ns->GetDelimiter();
-
-            m_runningUrl->AllocateCanonicalPath(ns->GetPrefix(), ns->GetDelimiter(),
-                                                getter_Copies(boxSpec->mAllocatedPathName));
-            boxSpec->mNamespaceForFolder = ns;
-            boxSpec->mBoxFlags |= kNameSpace;
-
-            switch (ns->GetType())
-            {
-            case kPersonalNamespace:
-              boxSpec->mBoxFlags |= kPersonalMailbox;
-              break;
-            case kPublicNamespace:
-              boxSpec->mBoxFlags |= kPublicMailbox;
-              break;
-            case kOtherUsersNamespace:
-              boxSpec->mBoxFlags |= kOtherUsersMailbox;
-              break;
-            default:	// (kUnknownNamespace)
-              break;
-            }
-
-            DiscoverMailboxSpec(boxSpec);
+          case kPersonalNamespace:
+            boxSpec->mBoxFlags |= kPersonalMailbox;
+            break;
+          case kPublicNamespace:
+            boxSpec->mBoxFlags |= kPublicMailbox;
+            break;
+          case kOtherUsersNamespace:
+            boxSpec->mBoxFlags |= kOtherUsersMailbox;
+            break;
+          default:	// (kUnknownNamespace)
+            break;
           }
-          else
-            HandleMemoryFailure();
+
+          DiscoverMailboxSpec(boxSpec);
         }
 
         nsAutoCString allPattern(prefix);
@@ -7421,44 +7398,38 @@ void nsImapProtocol::DiscoverMailboxList()
         {
           // Explicitly discover each Namespace, so that we can
                     // create subfolders of them,
-          nsImapMailboxSpec *boxSpec = new nsImapMailboxSpec;
-          if (boxSpec)
+          RefPtr<nsImapMailboxSpec> boxSpec = new nsImapMailboxSpec;
+          boxSpec->mFolderSelected = false;
+          boxSpec->mHostName = GetImapHostName();
+          boxSpec->mConnection = this;
+          boxSpec->mFlagState = nullptr;
+          boxSpec->mDiscoveredFromLsub = true;
+          boxSpec->mOnlineVerified = true;
+          boxSpec->mBoxFlags = kNoselect;
+          boxSpec->mHierarchySeparator = ns->GetDelimiter();
+          // Until |AllocateCanonicalPath()| gets updated:
+          m_runningUrl->AllocateCanonicalPath(
+                          ns->GetPrefix(), ns->GetDelimiter(),
+                          getter_Copies(boxSpec->mAllocatedPathName));
+          boxSpec->mNamespaceForFolder = ns;
+          boxSpec->mBoxFlags |= kNameSpace;
+
+          switch (ns->GetType())
           {
-            NS_ADDREF(boxSpec);
-            boxSpec->mFolderSelected = false;
-            boxSpec->mHostName = GetImapHostName();
-            boxSpec->mConnection = this;
-            boxSpec->mFlagState = nullptr;
-            boxSpec->mDiscoveredFromLsub = true;
-            boxSpec->mOnlineVerified = true;
-            boxSpec->mBoxFlags = kNoselect;
-            boxSpec->mHierarchySeparator = ns->GetDelimiter();
-            // Until |AllocateCanonicalPath()| gets updated:
-            m_runningUrl->AllocateCanonicalPath(
-                            ns->GetPrefix(), ns->GetDelimiter(),
-                            getter_Copies(boxSpec->mAllocatedPathName));
-            boxSpec->mNamespaceForFolder = ns;
-            boxSpec->mBoxFlags |= kNameSpace;
-
-            switch (ns->GetType())
-            {
-            case kPersonalNamespace:
-              boxSpec->mBoxFlags |= kPersonalMailbox;
-              break;
-            case kPublicNamespace:
-              boxSpec->mBoxFlags |= kPublicMailbox;
-              break;
-            case kOtherUsersNamespace:
-              boxSpec->mBoxFlags |= kOtherUsersMailbox;
-              break;
-            default:  // (kUnknownNamespace)
-              break;
-            }
-
-            DiscoverMailboxSpec(boxSpec);
+          case kPersonalNamespace:
+            boxSpec->mBoxFlags |= kPersonalMailbox;
+            break;
+          case kPublicNamespace:
+            boxSpec->mBoxFlags |= kPublicMailbox;
+            break;
+          case kOtherUsersNamespace:
+            boxSpec->mBoxFlags |= kOtherUsersMailbox;
+            break;
+          default:  // (kUnknownNamespace)
+            break;
           }
-          else
-            HandleMemoryFailure();
+
+          DiscoverMailboxSpec(boxSpec);
         }
 
         // now do the folders within this namespace
@@ -9556,11 +9527,9 @@ nsresult nsImapMockChannel::ReadFromMemCache(nsICacheEntry *entry)
     NS_ENSURE_SUCCESS(rv, rv);
 
     // if we are going to read from the cache, then create a mock stream listener class and use it
-    nsImapCacheStreamListener * cacheListener = new nsImapCacheStreamListener();
-    NS_ADDREF(cacheListener);
+    RefPtr<nsImapCacheStreamListener> cacheListener = new nsImapCacheStreamListener();
     cacheListener->Init(m_channelListener, this);
     rv = pump->AsyncRead(cacheListener, m_channelContext);
-    NS_RELEASE(cacheListener);
 
     if (NS_SUCCEEDED(rv)) // ONLY if we succeeded in actually starting the read should we return
     {
@@ -9696,8 +9665,7 @@ bool nsImapMockChannel::ReadFromLocalCache()
       {
         // dougt - This may break the ablity to "cancel" a read from offline mail reading.
         // fileChannel->SetLoadGroup(m_loadGroup);
-        nsImapCacheStreamListener * cacheListener = new nsImapCacheStreamListener();
-        NS_ADDREF(cacheListener);
+        RefPtr<nsImapCacheStreamListener> cacheListener = new nsImapCacheStreamListener();
         cacheListener->Init(m_channelListener, this);
 
         // create a stream pump that will async read the specified amount of data.
@@ -9707,8 +9675,6 @@ bool nsImapMockChannel::ReadFromLocalCache()
                                    offset, (int64_t) size);
         if (NS_SUCCEEDED(rv))
           rv = pump->AsyncRead(cacheListener, m_channelContext);
-
-        NS_RELEASE(cacheListener);
 
         if (NS_SUCCEEDED(rv)) // ONLY if we succeeded in actually starting the read should we return
         {
