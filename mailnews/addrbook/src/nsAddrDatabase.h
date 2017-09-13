@@ -249,7 +249,7 @@ public:
   nsIMdbTableRowCursor *GetTableRowCursor();
   nsIMdbTable    *GetPabTable() {return m_mdbPabTable;}
 
-  static nsAddrDatabase* FindInCache(nsIFile *dbName);
+  static already_AddRefed<nsAddrDatabase> FindInCache(nsIFile *dbName);
 
   static void    CleanupCache();
 
