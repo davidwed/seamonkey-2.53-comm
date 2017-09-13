@@ -1438,7 +1438,7 @@ NS_IMETHODIMP nsAbView::GetSelectedAddresses(nsIArray **_retval)
     }
   }
 
-  NS_IF_ADDREF(*_retval = addresses);
+  addresses.forget(_retval);
 
   return NS_OK;
 }
