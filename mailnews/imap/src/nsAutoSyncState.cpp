@@ -318,7 +318,7 @@ NS_IMETHODIMP nsAutoSyncState::GetNextGroupOfMessages(uint32_t aSuggestedGroupSi
   } //endif
 
    // return it to the caller
-  NS_IF_ADDREF(*aMessagesList = group);
+  group.forget(aMessagesList);
 
   return NS_OK;
 }
@@ -562,7 +562,7 @@ NS_IMETHODIMP nsAutoSyncState::GetOwnerFolder(nsIMsgFolder **aFolder)
   nsCOMPtr <nsIMsgFolder> ownerFolder = do_QueryReferent(mOwnerFolder, &rv);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  NS_IF_ADDREF(*aFolder = ownerFolder);
+  ownerFolder.forget(aFolder);
   return NS_OK;
 }
 
