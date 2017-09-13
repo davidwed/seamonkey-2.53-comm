@@ -232,17 +232,16 @@ nsAddrDatabase::CleanupCache()
 //----------------------------------------------------------------------
 // FindInCache - this addrefs the db it finds.
 //----------------------------------------------------------------------
-nsAddrDatabase* nsAddrDatabase::FindInCache(nsIFile *dbName)
+already_AddRefed<nsAddrDatabase> nsAddrDatabase::FindInCache(nsIFile *dbName)
 {
   nsTArray<nsAddrDatabase*>* dbCache = GetDBCache();
   uint32_t length = dbCache->Length();
   for (uint32_t i = 0; i < length; ++i)
   {
-    nsAddrDatabase* pAddrDB = dbCache->ElementAt(i);
+    RefPtr<nsAddrDatabase> pAddrDB = dbCache->ElementAt(i);
     if (pAddrDB->MatchDbName(dbName))
     {
-      NS_ADDREF(pAddrDB);
-      return pAddrDB;
+      return pAddrDB.forget();
     }
   }
   return nullptr;
@@ -299,10 +298,10 @@ NS_IMETHODIMP nsAddrDatabase::Open
 {
   *pAddrDB = nullptr;
 
-  nsAddrDatabase *pAddressBookDB = FindInCache(aMabFile);
+  RefPtr<nsAddrDatabase> pAddressBookDB = FindInCache(aMabFile);
 
   if (pAddressBookDB) {
-    *pAddrDB = pAddressBookDB;
+    pAddressBookDB.forget(pAddrDB);
     return NS_OK;
   }
 
@@ -440,25 +439,19 @@ nsresult nsAddrDatabase::AlertAboutLockedMabFile(const char16_t *aFileName)
 nsresult
 nsAddrDatabase::OpenInternal(nsIFile *aMabFile, bool aCreate, nsIAddrDatabase** pAddrDB)
 {
-  nsAddrDatabase *pAddressBookDB = new nsAddrDatabase();
-  if (!pAddressBookDB) {
-    return NS_ERROR_OUT_OF_MEMORY;
-  }
-
-  NS_ADDREF(pAddressBookDB);
+  RefPtr<nsAddrDatabase> pAddressBookDB = new nsAddrDatabase();
 
   nsresult rv = pAddressBookDB->OpenMDB(aMabFile, aCreate);
   if (NS_SUCCEEDED(rv))
   {
     pAddressBookDB->SetDbPath(aMabFile);
     GetDBCache()->AppendElement(pAddressBookDB);
-    *pAddrDB = pAddressBookDB;
+    pAddressBookDB.forget(pAddrDB);
   }
   else
   {
     *pAddrDB = nullptr;
     pAddressBookDB->ForceClosed();
-    NS_IF_RELEASE(pAddressBookDB);
     pAddressBookDB = nullptr;
   }
   return rv;
@@ -1282,14 +1275,12 @@ NS_IMETHODIMP nsAddrDatabase::AddListCardColumnsToRow
       err = m_mdbPabTable->AddRow(m_mdbEnv, pCardRow);
     }
 
-    nsCOMPtr<nsIAbCard> newCard;
-    CreateABCard(pCardRow, 0, getter_AddRefs(newCard));
-    NS_IF_ADDREF(*aPNewCard = newCard);
+    CreateABCard(pCardRow, 0, aPNewCard);
 
     if (cardWasAdded) {
-      NotifyCardEntryChange(AB_NotifyInserted, newCard, aParent);
+      NotifyCardEntryChange(AB_NotifyInserted, *aPNewCard, aParent);
       if (aRoot)
-        NotifyCardEntryChange(AB_NotifyInserted, newCard, aRoot);
+        NotifyCardEntryChange(AB_NotifyInserted, *aPNewCard, aRoot);
     }
     else if (!aInMailingList) {
       nsresult rv;
@@ -2306,7 +2297,6 @@ nsresult nsAddrDatabase::GetListFromDB(nsIAbDirectory *newList, nsIMdbRow* listR
       if(NS_SUCCEEDED(err))
         dbnewList->AddAddressToList(card);
     }
-//        NS_IF_ADDREF(card);
   }
 
   return err;
@@ -2585,12 +2575,8 @@ nsListAddressEnumerator::GetNext(nsISupports **aResult)
 
 NS_IMETHODIMP nsAddrDatabase::EnumerateCards(nsIAbDirectory *directory, nsISimpleEnumerator **result)
 {
-    nsAddrDBEnumerator* e = new nsAddrDBEnumerator(this);
+    NS_ADDREF(*result = new nsAddrDBEnumerator(this));
     m_dbDirectory = do_GetWeakReference(directory);
-    if (!e)
-        return NS_ERROR_OUT_OF_MEMORY;
-    NS_ADDREF(e);
-    *result = e;
     return NS_OK;
 }
 
@@ -2645,14 +2631,10 @@ NS_IMETHODIMP nsAddrDatabase::EnumerateListAddresses(nsIAbDirectory *directory, 
 
     if(NS_SUCCEEDED(rv))
     {
-    dbdirectory->GetDbRowID((uint32_t*)&rowID);
+      dbdirectory->GetDbRowID((uint32_t*)&rowID);
 
-    nsListAddressEnumerator* e = new nsListAddressEnumerator(this, rowID);
-    m_dbDirectory = do_GetWeakReference(directory);
-    if (!e)
-        return NS_ERROR_OUT_OF_MEMORY;
-    NS_ADDREF(e);
-    *result = e;
+      NS_ADDREF(*result = new nsListAddressEnumerator(this, rowID));
+      m_dbDirectory = do_GetWeakReference(directory);
     }
     return rv;
 }
@@ -2679,7 +2661,7 @@ nsresult nsAddrDatabase::CreateCardFromDeletedCardsTable(nsIMdbRow* cardRow, mdb
     InitCardFromRow(personCard, cardRow);
     personCard->SetPropertyAsUint32(kRowIDProperty, rowID);
 
-    NS_IF_ADDREF(*result = personCard);
+    personCard.forget(result);
   }
 
   return rv;
@@ -2717,7 +2699,7 @@ nsresult nsAddrDatabase::CreateCard(nsIMdbRow* cardRow, mdb_id listRowID, nsIAbC
 
     personCard->SetDirectoryId(id);
 
-    NS_IF_ADDREF(*result = personCard);
+    personCard.forget(result);
   }
 
   return rv;
@@ -2775,7 +2757,7 @@ nsresult nsAddrDatabase::CreateABListCard(nsIMdbRow* listRow, nsIAbCard **result
       personCard->SetDirectoryId(id);
     }
 
-    NS_IF_ADDREF(*result = personCard);
+    personCard.forget(result);
   }
   if (listURI)
     PR_smprintf_free(listURI);
@@ -2834,7 +2816,7 @@ nsresult nsAddrDatabase::CreateABList(nsIMdbRow* listRow, nsIAbDirectory **resul
             }
 
             dbm_dbDirectory->AddMailListToDirectory(mailList);
-            NS_IF_ADDREF(*result = mailList);
+            mailList.forget(result);
         }
     }
 
@@ -3089,7 +3071,7 @@ nsAddrDatabase::GetRowForCharColumn(const char16_t *unicodeStr,
 
         if (NS_SUCCEEDED(rv) && equals)
         {
-          NS_IF_ADDREF(*aFindRow = currentRow);
+          currentRow.forget(aFindRow);
           if (aRowPos)
             *aRowPos = rowPos;
           return NS_OK;
