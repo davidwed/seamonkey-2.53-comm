@@ -518,7 +518,7 @@ nsMsgSearchSession::GetRunningAdapter(nsIMsgSearchAdapter **aSearchAdapter)
   nsMsgSearchScopeTerm *scope = GetRunningScope();
   if (scope)
   {
-    NS_IF_ADDREF(*aSearchAdapter = scope->m_adapter);    
+    NS_IF_ADDREF(*aSearchAdapter = scope->m_adapter);
   }
   return NS_OK;
 }
