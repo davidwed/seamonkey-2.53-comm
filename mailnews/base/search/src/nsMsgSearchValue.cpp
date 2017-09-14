@@ -86,7 +86,7 @@ nsMsgSearchValueImpl::ToString(nsAString &aResult)
         return NS_OK;
     }
 
-    
+
     switch (mValue.attribute) {
 
     case nsMsgSearchAttrib::Priority:
@@ -102,14 +102,14 @@ nsMsgSearchValueImpl::ToString(nsAString &aResult)
     {
       nsAutoString tempInt;
       tempInt.AppendInt(mValue.attribute);
-      
+
         aResult.AppendLiteral("type=");
         aResult.Append(tempInt);
     }
         break;
     default:
         NS_ERROR("Unknown search value type");
-    }        
+    }
 
     aResult.AppendLiteral("]");
 
