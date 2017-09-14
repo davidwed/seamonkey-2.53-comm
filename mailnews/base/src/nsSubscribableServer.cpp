@@ -171,11 +171,8 @@ NS_IMETHODIMP
 nsSubscribableServer::GetSubscribeListener(nsISubscribeListener **aListener)
 {
   NS_ENSURE_ARG_POINTER(aListener);
-	if (mSubscribeListener) {
-			*aListener = mSubscribeListener;
-			NS_ADDREF(*aListener);
-	}
-	return NS_OK;
+  NS_IF_ADDREF(*aListener = mSubscribeListener);
+  return NS_OK;
 }
 
 NS_IMETHODIMP
