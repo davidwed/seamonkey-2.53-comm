@@ -78,10 +78,6 @@ NS_IMETHODIMP
 nsMsgSearchDBView::CloneDBView(nsIMessenger *aMessengerInstance, nsIMsgWindow *aMsgWindow, nsIMsgDBViewCommandUpdater *aCmdUpdater, nsIMsgDBView **_retval)
 {
   nsMsgSearchDBView* newMsgDBView = new nsMsgSearchDBView();
-
-  if (!newMsgDBView)
-    return NS_ERROR_OUT_OF_MEMORY;
-
   nsresult rv = CopyDBView(newMsgDBView, aMessengerInstance, aMsgWindow, aCmdUpdater);
   NS_ENSURE_SUCCESS(rv,rv);
 
