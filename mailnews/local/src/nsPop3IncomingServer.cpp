@@ -490,9 +490,7 @@ NS_IMETHODIMP nsPop3IncomingServer::DownloadMailFromServers(nsIPop3IncomingServe
                               nsIMsgFolder *aFolder,
                               nsIUrlListener *aUrlListener)
 {
-  nsPop3GetMailChainer *getMailChainer = new nsPop3GetMailChainer;
-  NS_ENSURE_TRUE(getMailChainer, NS_ERROR_OUT_OF_MEMORY);
-  getMailChainer->AddRef(); // this object owns itself and releases when done.
+  RefPtr<nsPop3GetMailChainer> getMailChainer = new nsPop3GetMailChainer;
   return getMailChainer->GetNewMailForServers(aServers, aCount, aMsgWindow, aFolder, aUrlListener);
 }
 
@@ -535,9 +533,7 @@ nsPop3IncomingServer::GetNewMessages(nsIMsgFolder *aFolder, nsIMsgWindow *aMsgWi
   }
   if (deferredToAccount.IsEmpty() && !deferredServers.IsEmpty())
   {
-    nsPop3GetMailChainer *getMailChainer = new nsPop3GetMailChainer;
-    NS_ENSURE_TRUE(getMailChainer, NS_ERROR_OUT_OF_MEMORY);
-    getMailChainer->AddRef(); // this object owns itself and releases when done.
+    RefPtr<nsPop3GetMailChainer> getMailChainer = new nsPop3GetMailChainer;
     deferredServers.InsertElementAt(0, this);
     return getMailChainer->GetNewMailForServers(deferredServers.Elements(),
           deferredServers.Length(), aMsgWindow, inbox, aUrlListener);
@@ -739,6 +735,5 @@ nsresult nsPop3GetMailChainer::RunNextGetNewMail()
     }
   }
   rv = m_listener ? m_listener->OnStopRunningUrl(nullptr, NS_OK) : NS_OK;
-  Release(); // release ref to ourself.
   return rv;
 }
