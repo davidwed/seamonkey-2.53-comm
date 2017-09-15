@@ -323,7 +323,7 @@ NS_IMETHODIMP nsImapMailFolder::AddSubfolder(const nsAString& aName, nsIMsgFolde
   folder->SetFlags(flags);
 
   mSubFolders.AppendObject(folder);
-  folder.swap(*aChild);
+  folder.forget(aChild);
 
   nsCOMPtr <nsIMsgImapMailFolder> imapChild = do_QueryInterface(*aChild);
   if (imapChild)
@@ -415,7 +415,7 @@ nsresult nsImapMailFolder::AddSubfolderWithPath(nsAString& name, nsIFile *dbPath
 
   if (folder)
     mSubFolders.AppendObject(folder);
-  folder.swap(*child);
+  folder.forget(child);
   return NS_OK;
 }
 
@@ -1821,7 +1821,7 @@ nsImapMailFolder::GetImapIncomingServer(nsIImapIncomingServer **aImapIncomingSer
   if (NS_SUCCEEDED(GetServer(getter_AddRefs(server))) && server)
   {
     nsCOMPtr <nsIImapIncomingServer> incomingServer = do_QueryInterface(server);
-    incomingServer.swap(*aImapIncomingServer);
+    incomingServer.forget(aImapIncomingServer);
     return NS_OK;
   }
   return NS_ERROR_NULL_POINTER;
@@ -6957,7 +6957,7 @@ nsresult nsImapMailFolder::GetClearedOriginalOp(nsIMsgOfflineImapOperation *op, 
       }
     }
   }
-  returnOp.swap(*originalOp);
+  returnOp.forget(originalOp);
   return rv;
 }
 
@@ -6986,7 +6986,7 @@ nsresult nsImapMailFolder::GetOriginalOp(nsIMsgOfflineImapOperation *op, nsIMsgO
       rv = (*originalDB)->GetOfflineOpForKey(originalKey, false, getter_AddRefs(returnOp));
     }
   }
-  returnOp.swap(*originalOp);
+  returnOp.forget(originalOp);
   return rv;
 }
 
@@ -9463,7 +9463,7 @@ NS_IMETHODIMP nsImapMailFolder::GetCustomIdentity(nsIMsgIdentity **aIdentity)
       }
       if (retIdentity)
       {
-        retIdentity.swap(*aIdentity);
+        retIdentity.forget(aIdentity);
         return NS_OK;
       }
     }
