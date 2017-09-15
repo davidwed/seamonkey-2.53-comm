@@ -97,7 +97,7 @@ NS_IMETHODIMP nsMsgWindow::GetMessageWindowDocShell(nsIDocShell ** aDocShell)
       mMessageWindowDocShellWeak = do_GetWeakReference(docShell);
     }
   }
-  docShell.swap(*aDocShell);
+  docShell.forget(aDocShell);
   return NS_OK;
 }
 
@@ -233,7 +233,7 @@ NS_IMETHODIMP nsMsgWindow::GetAuthPrompt(nsIAuthPrompt * *aAuthPrompt)
   nsCOMPtr<nsIAuthPrompt> prompt = do_GetInterface(docShell, &rv);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  prompt.swap(*aAuthPrompt);
+  prompt.forget(aAuthPrompt);
 
   return rv;
 }
@@ -488,7 +488,7 @@ NS_IMETHODIMP nsMsgWindow::GetPromptDialog(nsIPrompt **aPrompt)
   {
     nsCOMPtr<nsIPrompt> dialog;
     dialog = do_GetInterface(rootShell, &rv);
-    dialog.swap(*aPrompt);
+    dialog.forget(aPrompt);
   }
   return rv;
 }
