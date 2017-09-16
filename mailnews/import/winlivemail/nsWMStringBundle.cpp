@@ -14,24 +14,18 @@
 
 #define WM_MSGS_URL       "chrome://messenger/locale/wmImportMsgs.properties"
 
-nsIStringBundle *  nsWMStringBundle::m_pBundle = nullptr;
+nsCOMPtr<nsIStringBundle> nsWMStringBundle::m_pBundle = nullptr;
 
-nsIStringBundle *nsWMStringBundle::GetStringBundle(void)
+void nsWMStringBundle::GetStringBundle(void)
 {
   if (m_pBundle)
-    return m_pBundle;
-
-  nsIStringBundle*  sBundle = nullptr;
+    return;
 
   nsCOMPtr<nsIStringBundleService> sBundleService =
     mozilla::services::GetStringBundleService();
   if (sBundleService) {
-    sBundleService->CreateBundle(WM_MSGS_URL, &sBundle);
+    sBundleService->CreateBundle(WM_MSGS_URL, getter_AddRefs(m_pBundle));
   }
-
-  m_pBundle = sBundle;
-
-  return sBundle;
 }
 
 void nsWMStringBundle::GetStringByID(int32_t stringID, nsString& result)
@@ -44,7 +38,7 @@ void nsWMStringBundle::GetStringByID(int32_t stringID, nsString& result)
 char16_t *nsWMStringBundle::GetStringByID(int32_t stringID)
 {
   if (!m_pBundle)
-    m_pBundle = GetStringBundle();
+    GetStringBundle();
 
   if (m_pBundle) {
     nsAutoString str;
@@ -64,7 +58,5 @@ char16_t *nsWMStringBundle::GetStringByID(int32_t stringID)
 
 void nsWMStringBundle::Cleanup(void)
 {
-  if (m_pBundle)
-    m_pBundle->Release();
   m_pBundle = nullptr;
 }
