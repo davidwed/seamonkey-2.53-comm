@@ -243,10 +243,12 @@ NS_IMETHODIMP nsImportGenericMail::SetData(const char *dataId, nsISupports *item
     return NS_ERROR_NULL_POINTER;
 
   if (!PL_strcasecmp(dataId, "mailInterface")) {
+    m_pInterface = nullptr;
     if (item)
       m_pInterface = do_QueryInterface(item);
   }
   if (!PL_strcasecmp(dataId, "mailBoxes")) {
+    m_pMailboxes = nullptr;
     if (item)
       m_pMailboxes = do_QueryInterface(item);
   }
@@ -262,6 +264,7 @@ NS_IMETHODIMP nsImportGenericMail::SetData(const char *dataId, nsISupports *item
   }
 
   if (!PL_strcasecmp(dataId, "mailDestination")) {
+    m_pDestFolder = nullptr;
     if (item)
       m_pDestFolder = do_QueryInterface(item);
     m_deleteDestFolder = false;
