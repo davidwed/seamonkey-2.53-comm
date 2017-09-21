@@ -14,7 +14,7 @@
 #include "nsMimeTypes.h"
 #include "nsICharsetConverterManager.h"
 #include "prprf.h"
-#include "nsMsgQuote.h" 
+#include "nsMsgQuote.h"
 #include "nsMsgCompUtils.h"
 #include "nsIMsgMessageService.h"
 #include "nsMsgUtils.h"
@@ -187,7 +187,7 @@ nsMsgQuote::QuoteMessage(const char *msgURI, bool quoteHeaders,
   if (NS_FAILED(rv)) return rv;
   nsCOMPtr<nsISupports> ctxt = do_QueryInterface(aURL);
 
-  nsCOMPtr<nsIStreamConverterService> streamConverterService = 
+  nsCOMPtr<nsIStreamConverterService> streamConverterService =
            do_GetService("@mozilla.org/streamConverters;1", &rv);
   NS_ENSURE_SUCCESS(rv,rv);
 
@@ -199,7 +199,7 @@ nsMsgQuote::QuoteMessage(const char *msgURI, bool quoteHeaders,
                                                 getter_AddRefs(convertedListener));
   if (NS_FAILED(rv)) return rv;
 
-  //  now try to open the channel passing in our display consumer as the listener 
+  //  now try to open the channel passing in our display consumer as the listener
   rv = mQuoteChannel->AsyncOpen(convertedListener, ctxt);
   return rv;
 }
