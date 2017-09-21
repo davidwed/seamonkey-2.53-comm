@@ -634,7 +634,7 @@ nsresult nsMessenger::SaveAttachment(nsIFile *aFile,
   nsCOMPtr<nsIURI> URL;
   nsAutoCString fullMessageUri(aMessageUri);
 
-  // This instance will be held onto by the listeners, and will be released once 
+  // This instance will be held onto by the listeners, and will be released once
   // the transfer has been completed.
   RefPtr<nsSaveMsgListener> saveListener(new nsSaveMsgListener(aFile, this, aListener));
   if (!saveListener)
@@ -861,7 +861,7 @@ nsMessenger::SaveOneAttachment(const char * aContentType, const char * aURL,
   rv = localFile->GetNativePath(dirName);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  nsSaveAllAttachmentsState *saveState = 
+  nsSaveAllAttachmentsState *saveState =
     new nsSaveAllAttachmentsState(1,
                                   &aContentType,
                                   &aURL,
@@ -1030,7 +1030,7 @@ nsMessenger::SaveAs(const nsACString& aURI, bool aAsFile,
       saveAsFile = do_CreateInstance(NS_LOCAL_FILE_CONTRACTID, &rv);
       rv = saveAsFile->InitWithPath(aMsgFilename);
       if (NS_FAILED(rv))
-        goto done;      
+        goto done;
       if (StringEndsWith(aMsgFilename, NS_LITERAL_STRING(TEXT_FILE_EXTENSION),
                          nsCaseInsensitiveStringComparator()))
         saveAsFileType = TEXT_FILE_TYPE;
@@ -1147,7 +1147,7 @@ nsMessenger::SaveAs(const nsACString& aURI, bool aAsFile,
 
     NS_ENSURE_SUCCESS(rv, rv);
 
-    // For temp file, we should use restrictive 00600 instead of ATTACHMENT_PERMISSION 
+    // For temp file, we should use restrictive 00600 instead of ATTACHMENT_PERMISSION
     rv = tmpFile->CreateUnique(nsIFile::NORMAL_FILE_TYPE, 00600);
     if (NS_FAILED(rv)) goto done;
 
@@ -1632,7 +1632,7 @@ nsSaveMsgListener::nsSaveMsgListener(nsIFile* aFile, nsMessenger *aMessenger, ns
   mListener = aListener;
   mUrlHasStopped = false;
   mRequestHasStopped = false;
-  
+
     // rhp: for charset handling
   m_doCharsetConversion = false;
   m_saveAllAttachmentsState = nullptr;
@@ -1682,7 +1682,7 @@ nsSaveMsgListener::OnStopRunningUrl(nsIURI *url, nsresult exitCode)
   mUrlHasStopped = true;
 
   // ** save as template goes here
-  if (!m_templateUri.IsEmpty()) 
+  if (!m_templateUri.IsEmpty())
   {
     nsCOMPtr<nsIRDFService> rdf(do_GetService(kRDFServiceCID, &rv));
     if (NS_FAILED(rv)) goto done;
@@ -1719,12 +1719,12 @@ done:
     if (m_messenger)
         m_messenger->Alert("saveMessageFailed");
   }
-  
+
   if (mRequestHasStopped && mListener)
     mListener->OnStopRunningUrl(url, exitCode);
   else
     mListenerUri = url;
-  
+
   return rv;
 }
 
@@ -1765,13 +1765,13 @@ nsSaveMsgListener::OnStopCopy(nsresult aStatus)
 nsresult nsSaveMsgListener::InitializeDownload(nsIRequest * aRequest)
 {
   nsresult rv = NS_OK;
-  
+
   mInitialized = true;
   nsCOMPtr<nsIChannel> channel (do_QueryInterface(aRequest));
-  
+
   if (!channel)
     return rv;
-  
+
   // Get the max progress from the URL if we haven't already got it.
   if (mMaxProgress == -1)
   {
@@ -1781,14 +1781,14 @@ nsresult nsSaveMsgListener::InitializeDownload(nsIRequest * aRequest)
     if (mailnewsUrl)
       mailnewsUrl->GetMaxProgress(&mMaxProgress);
   }
-  
+
   if (!m_contentType.IsEmpty())
   {
     nsCOMPtr<nsIMIMEService> mimeService (do_GetService(NS_MIMESERVICE_CONTRACTID));
     nsCOMPtr<nsIMIMEInfo> mimeinfo;
-    
+
     mimeService->GetFromTypeAndExtension(m_contentType, EmptyCString(), getter_AddRefs(mimeinfo));
-    
+
     // create a download progress window
 
     // Set saveToDisk explicitly to avoid launching the saved file.
@@ -1807,15 +1807,15 @@ nsresult nsSaveMsgListener::InitializeDownload(nsIRequest * aRequest)
       if (tr && m_file)
       {
         PRTime timeDownloadStarted = PR_Now();
-        
+
         nsCOMPtr<nsIURI> outputURI;
         NS_NewFileURI(getter_AddRefs(outputURI), m_file);
-        
+
         nsCOMPtr<nsIURI> url;
         channel->GetURI(getter_AddRefs(url));
         rv = tr->Init(url, outputURI, EmptyString(), mimeinfo,
                       timeDownloadStarted, nullptr, this, false);
-        
+
           // now store the web progresslistener
         mTransfer = tr;
       }
@@ -1844,7 +1844,7 @@ nsSaveMsgListener::OnStopRequest(nsIRequest* request, nsISupports* aSupport,
 {
   nsresult rv = NS_OK;
   mRequestHasStopped = true;
-  
+
   // rhp: If we are doing the charset conversion magic, this is different
   // processing, otherwise, its just business as usual.
   // If we need text/plain, then we need to convert the HTML and then convert
@@ -1873,13 +1873,13 @@ nsSaveMsgListener::OnStopRequest(nsIRequest* request, nsISupports* aSupport,
         rv = NS_ERROR_FAILURE;
     }
   }
- 
+
   if (m_outputStream)
   {
     m_outputStream->Close();
     m_outputStream = nullptr;
   }
-  
+
   if (m_saveAllAttachmentsState)
   {
     m_saveAllAttachmentsState->m_curIndex++;
@@ -1891,9 +1891,9 @@ nsSaveMsgListener::OnStopRequest(nsIRequest* request, nsISupports* aSupport,
       nsCOMPtr<nsIFile> localFile = do_CreateInstance(NS_LOCAL_FILE_CONTRACTID, &rv);
       if (NS_FAILED(rv)) goto done;
       rv = localFile->InitWithNativePath(nsDependentCString(state->m_directoryName));
-      
+
       if (NS_FAILED(rv)) goto done;
-      
+
       ConvertAndSanitizeFileName(state->m_displayNameArray[i], unescapedName);
       rv = localFile->Append(unescapedName);
       if (NS_FAILED(rv))
@@ -1969,7 +1969,7 @@ nsSaveMsgListener::OnDataAvailable(nsIRequest* request,
   // first, check to see if we've been canceled....
   if (mCanceled) // then go cancel our underlying channel too
     return request->Cancel(NS_BINDING_ABORTED);
-  
+
   if (!mInitialized)
     InitializeDownload(request);
 
@@ -2861,7 +2861,7 @@ nsDelAttachListener::StartProcessing(nsMessenger * aMessenger, nsIMsgWindow * aM
                                        getter_AddRefs(mMsgFile));
   NS_ENSURE_SUCCESS(rv,rv);
 
-  // For temp file, we should use restrictive 00600 instead of ATTACHMENT_PERMISSION 
+  // For temp file, we should use restrictive 00600 instead of ATTACHMENT_PERMISSION
   rv = mMsgFile->CreateUnique(nsIFile::NORMAL_FILE_TYPE, 00600);
   NS_ENSURE_SUCCESS(rv,rv);
 
@@ -2958,7 +2958,7 @@ nsMessenger::DetachAttachments(uint32_t aCount,
   // if withoutWarning no dialog for user
   if (!withoutWarning && NS_FAILED(PromptIfDeleteAttachments(saveFileUris != nullptr, aCount, aDisplayNameArray)))
       return NS_OK;
-  
+
   nsresult rv = NS_OK;
 
   // ensure that our arguments are valid
