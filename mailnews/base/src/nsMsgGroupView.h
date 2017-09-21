@@ -32,9 +32,9 @@ public:
   NS_IMETHOD CopyDBView(nsMsgDBView *aNewMsgDBView, nsIMessenger *aMessengerInstance,
                         nsIMsgWindow *aMsgWindow, nsIMsgDBViewCommandUpdater *aCmdUpdater);
   NS_IMETHOD Close() override;
-  NS_IMETHOD OnHdrDeleted(nsIMsgDBHdr *aHdrDeleted, nsMsgKey aParentKey, int32_t aFlags, 
+  NS_IMETHOD OnHdrDeleted(nsIMsgDBHdr *aHdrDeleted, nsMsgKey aParentKey, int32_t aFlags,
                           nsIDBChangeListener *aInstigator) override;
-  NS_IMETHOD OnHdrFlagsChanged(nsIMsgDBHdr *aHdrChanged, uint32_t aOldFlags, 
+  NS_IMETHOD OnHdrFlagsChanged(nsIMsgDBHdr *aHdrChanged, uint32_t aOldFlags,
                                uint32_t aNewFlags, nsIDBChangeListener *aInstigator) override;
 
   NS_IMETHOD LoadMessageByViewIndex(nsMsgViewIndex aViewIndex) override;

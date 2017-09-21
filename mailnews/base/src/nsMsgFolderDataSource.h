@@ -30,7 +30,7 @@ class nsMsgFolderDataSource : public nsMsgRDFDataSource,
                               public nsIFolderListener
 {
 public:
-  
+
   NS_DECL_ISUPPORTS_INHERITED
   NS_DECL_NSIFOLDERLISTENER
 
@@ -57,12 +57,12 @@ public:
                         nsISimpleEnumerator** sources) override;
 
   NS_IMETHOD GetTargets(nsIRDFResource* source,
-                        nsIRDFResource* property,    
+                        nsIRDFResource* property,
                         bool tv,
                         nsISimpleEnumerator** targets) override;
 
   NS_IMETHOD Assert(nsIRDFResource* source,
-                    nsIRDFResource* property, 
+                    nsIRDFResource* property,
                     nsIRDFNode* target,
                     bool tv) override;
 
@@ -83,7 +83,7 @@ public:
                          nsISimpleEnumerator** labels) override;
 
   NS_IMETHOD ArcLabelsOut(nsIRDFResource* source,
-                          nsISimpleEnumerator** labels) override; 
+                          nsISimpleEnumerator** labels) override;
 
   NS_IMETHOD GetAllResources(nsISimpleEnumerator** aResult) override;
 
@@ -158,7 +158,7 @@ protected:
   nsresult createFolderChildNode(nsIMsgFolder *folder, nsIRDFNode **target);
 
   nsresult getFolderArcLabelsOut(nsCOMArray<nsIRDFResource> &aArcs);
-  
+
 #if 0
   nsresult DoDeleteFromFolder(nsIMsgFolder *folder,
                 nsISupportsArray *arguments, nsIMsgWindow *msgWindow, bool reallyDelete);
@@ -169,7 +169,7 @@ protected:
   nsresult DoFolderCopyToFolder(nsIMsgFolder *dstFolder, nsISupportsArray *arguments,
               nsIMsgWindow *msgWindow, bool isMoveFolder);
 
-  nsresult DoNewFolder(nsIMsgFolder *folder, nsISupportsArray *arguments, 
+  nsresult DoNewFolder(nsIMsgFolder *folder, nsISupportsArray *arguments,
                         nsIMsgWindow *window);
 #endif
 
@@ -292,7 +292,7 @@ public:
 
   NS_IMETHOD GetURI(char* *uri) override;
   NS_IMETHOD GetTargets(nsIRDFResource* source,
-                        nsIRDFResource* property,    
+                        nsIRDFResource* property,
                         bool tv,
                         nsISimpleEnumerator** targets) override;
   NS_IMETHOD GetTarget(nsIRDFResource* source,
@@ -326,8 +326,8 @@ class nsMsgUnreadFoldersDataSource : public nsMsgFlatFolderDataSource
 public:
   nsMsgUnreadFoldersDataSource() {m_dsName = "mailnewsunreadfolders";}
   virtual ~nsMsgUnreadFoldersDataSource() {}
-  virtual nsresult NotifyPropertyChanged(nsIRDFResource *resource, 
-                    nsIRDFResource *propertyResource, nsIRDFNode *newNode, 
+  virtual nsresult NotifyPropertyChanged(nsIRDFResource *resource,
+                    nsIRDFResource *propertyResource, nsIRDFNode *newNode,
                     nsIRDFNode *oldNode = nullptr) override;
 protected:
   virtual bool WantsThisFolder(nsIMsgFolder *folder) override;
@@ -348,8 +348,8 @@ public:
   nsMsgRecentFoldersDataSource() {m_dsName = "mailnewsrecentfolders";
                                   m_cutOffDate = 0; m_maxNumFolders = 15;}
   virtual ~nsMsgRecentFoldersDataSource() {}
-  virtual nsresult NotifyPropertyChanged(nsIRDFResource *resource, 
-                    nsIRDFResource *property, nsIRDFNode *newNode, 
+  virtual nsresult NotifyPropertyChanged(nsIRDFResource *resource,
+                    nsIRDFResource *property, nsIRDFNode *newNode,
                     nsIRDFNode *oldNode) override;
   NS_IMETHOD OnItemAdded(nsIMsgFolder *parentItem, nsISupports *item) override;
   virtual void Cleanup() override;
