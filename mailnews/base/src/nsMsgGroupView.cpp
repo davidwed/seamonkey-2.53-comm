@@ -955,6 +955,9 @@ NS_IMETHODIMP nsMsgGroupView::CellTextForColumn(int32_t aRow,
 
 NS_IMETHODIMP nsMsgGroupView::LoadMessageByViewIndex(nsMsgViewIndex aViewIndex)
 {
+  if (!IsValidIndex(aViewIndex))
+    return NS_MSG_INVALID_DBVIEW_INDEX;
+
   if (m_flags[aViewIndex] & MSG_VIEW_FLAG_DUMMY)
   {
     // if we used to have one item selected, and now we have more than one, we should clear the message pane.
@@ -993,21 +996,6 @@ int32_t nsMsgGroupView::FindLevelInThread(nsIMsgDBHdr *msgHdr,
   if (!(m_viewFlags & nsMsgViewFlagsType::kGroupBySort))
     return nsMsgDBView::FindLevelInThread(msgHdr, startOfThread, viewIndex);
   return (startOfThread == viewIndex) ? 0 : 1;
-}
-
-
-nsMsgViewIndex nsMsgGroupView::ThreadIndexOfMsg(nsMsgKey msgKey,
-                                            nsMsgViewIndex msgIndex /* = nsMsgViewIndex_None */,
-                                            int32_t *pThreadCount /* = NULL */,
-                                            uint32_t *pFlags /* = NULL */)
-{
-  if (msgIndex != nsMsgViewIndex_None && GroupViewUsesDummyRow())
-  {
-    // this case is all we care about at this point.
-    if (m_flags[msgIndex] & MSG_VIEW_FLAG_ISTHREAD)
-      return msgIndex;
-  }
-  return nsMsgDBView::ThreadIndexOfMsg(msgKey, msgIndex, pThreadCount, pFlags);
 }
 
 bool nsMsgGroupView::GroupViewUsesDummyRow()
