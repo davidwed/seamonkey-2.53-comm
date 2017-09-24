@@ -261,7 +261,7 @@ function OnUnloadMsgHeaderPane()
     { bubbles: false, cancelable: true }));
 }
 
-const MsgHdrViewObserver = {
+var MsgHdrViewObserver = {
   observe: function(subject, topic, prefName) {
     // Verify that we're changing mail pane config prefs.
     if (topic == "nsPref:changed") {
