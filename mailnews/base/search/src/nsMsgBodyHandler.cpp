@@ -433,7 +433,7 @@ void nsMsgBodyHandler::SniffPossibleMIMEHeader(const nsCString &line)
     // we can simply collect the boundaries instead of forming a tree
     // structure from the message. Keep it simple ;-)
     nsCString boundary;
-    boundary.Assign("--");
+    boundary.AssignLiteral("--");
     boundary.Append(Substring(line, start, end-start));
     if (!m_boundaries.Contains(boundary))
       m_boundaries.AppendElement(boundary);
