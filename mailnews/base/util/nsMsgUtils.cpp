@@ -130,8 +130,8 @@ nsresult GetMessageServiceContractIDForURI(const char *uri, nsCString &contractI
 
   nsAutoCString protocol(StringHead(uriStr, pos));
 
-  if (protocol.Equals("file") && uriStr.Find("application/x-message-display") != -1)
-    protocol.Assign("mailbox");
+  if (protocol.EqualsLiteral("file") && uriStr.Find("application/x-message-display") != -1)
+    protocol.AssignLiteral("mailbox");
   //Build message service contractid
   contractID = "@mozilla.org/messenger/messageservice;1?type=";
   contractID += protocol.get();
@@ -1314,7 +1314,7 @@ nsresult MsgCleanupTempFiles(const char *fileName, const char *extension)
 {
   nsCOMPtr<nsIFile> tmpFile;
   nsCString rootName(fileName);
-  rootName.Append(".");
+  rootName.Append('.');
   rootName.Append(extension);
   nsresult rv = GetSpecialDirectoryWithFileName(NS_OS_TEMP_DIR,
                                                 rootName.get(),
@@ -1330,9 +1330,9 @@ nsresult MsgCleanupTempFiles(const char *fileName, const char *extension)
     {
       tmpFile->Remove(false);
       nsCString leafName(fileName);
-      leafName.Append("-");
+      leafName.Append('-');
       leafName.AppendInt(index);
-      leafName.Append(".");
+      leafName.Append('.');
       leafName.Append(extension);
         // start with "Picture-1.jpg" after "Picture.jpg" exists
       tmpFile->SetNativeLeafName(leafName);

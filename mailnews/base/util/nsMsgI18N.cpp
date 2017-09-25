@@ -159,7 +159,7 @@ const nsACString& nsMsgI18NFileSystemCharset()
         }
 
     if (NS_FAILED(rv))
-      fileSystemCharset.Assign("ISO-8859-1");
+      fileSystemCharset.AssignLiteral("ISO-8859-1");
   }
   return fileSystemCharset;
 }
@@ -176,7 +176,7 @@ void nsMsgI18NTextFileCharset(nsACString& aCharset)
   }
 
   if (NS_FAILED(rv))
-    aCharset.Assign("ISO-8859-1");
+    aCharset.AssignLiteral("ISO-8859-1");
 }
 
 // MIME encoder, output string should be freed by PR_FREE
