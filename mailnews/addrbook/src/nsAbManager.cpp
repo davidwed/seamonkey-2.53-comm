@@ -819,8 +819,8 @@ nsAbManager::ExportDirectoryToDelimitedText(nsIAbDirectory *aDirectory,
 
               if (needsQuotes)
               {
-                newValue.Insert(NS_LITERAL_STRING("\""), 0);
-                newValue.AppendLiteral("\"");
+                newValue.InsertLiteral(u"\"", 0);
+                newValue.Append(u'"');
               }
 
               rv = nsMsgI18NConvertFromUnicode(useUTF8 ? NS_LITERAL_CSTRING("UTF-8") :
