@@ -818,13 +818,13 @@ nsMimeBaseEmitter::WriteHeaderFieldHTML(const char *field, const char *value)
   if (newValue.IsEmpty())
     return NS_OK;
 
-  mHTMLHeaders.Append("<tr>");
-  mHTMLHeaders.Append("<td>");
+  mHTMLHeaders.AppendLiteral("<tr>");
+  mHTMLHeaders.AppendLiteral("<td>");
 
   if (mFormat == nsMimeOutput::nsMimeMessageSaveAs)
-    mHTMLHeaders.Append("<b>");
+    mHTMLHeaders.AppendLiteral("<b>");
   else
-    mHTMLHeaders.Append("<div class=\"headerdisplayname\" style=\"display:inline;\">");
+    mHTMLHeaders.AppendLiteral("<div class=\"headerdisplayname\" style=\"display:inline;\">");
 
   // Here is where we are going to try to L10N the tagName so we will always
   // get a field name next to an emitted header value. Note: Default will always
@@ -843,18 +843,18 @@ nsMimeBaseEmitter::WriteHeaderFieldHTML(const char *field, const char *value)
     PR_FREEIF(l10nTagName);
   }
 
-  mHTMLHeaders.Append(": ");
+  mHTMLHeaders.AppendLiteral(": ");
   if (mFormat == nsMimeOutput::nsMimeMessageSaveAs)
-    mHTMLHeaders.Append("</b>");
+    mHTMLHeaders.AppendLiteral("</b>");
   else
-    mHTMLHeaders.Append("</div>");
+    mHTMLHeaders.AppendLiteral("</div>");
 
   // Now write out the actual value itself and move on!
   //
   mHTMLHeaders.Append(newValue);
-  mHTMLHeaders.Append("</td>");
+  mHTMLHeaders.AppendLiteral("</td>");
 
-  mHTMLHeaders.Append("</tr>");
+  mHTMLHeaders.AppendLiteral("</tr>");
 
   return NS_OK;
 }
@@ -869,13 +869,13 @@ nsMimeBaseEmitter::WriteHeaderFieldHTMLPrefix(const nsACString &name)
      /* DO NOTHING */ ;   // rhp: Do nothing...leaving the conditional like this so its
                           //      easier to see the logic of what is going on.
   else {
-    mHTMLHeaders.Append("<br><fieldset class=\"mimeAttachmentHeader\">");
+    mHTMLHeaders.AppendLiteral("<br><fieldset class=\"mimeAttachmentHeader\">");
     if (!name.IsEmpty()) {
-      mHTMLHeaders.Append("<legend class=\"mimeAttachmentHeaderName\">");
+      mHTMLHeaders.AppendLiteral("<legend class=\"mimeAttachmentHeaderName\">");
       nsAppendEscapedHTML(name, mHTMLHeaders);
-      mHTMLHeaders.Append("</legend>");
+      mHTMLHeaders.AppendLiteral("</legend>");
     }
-    mHTMLHeaders.Append("</fieldset>");
+    mHTMLHeaders.AppendLiteral("</fieldset>");
   }
 
   mFirstHeaders = false;
@@ -885,7 +885,7 @@ nsMimeBaseEmitter::WriteHeaderFieldHTMLPrefix(const nsACString &name)
 nsresult
 nsMimeBaseEmitter::WriteHeaderFieldHTMLPostfix()
 {
-  mHTMLHeaders.Append("<br>");
+  mHTMLHeaders.AppendLiteral("<br>");
   return NS_OK;
 }
 
@@ -919,7 +919,7 @@ nsMimeBaseEmitter::WriteHTMLHeaders(const nsACString &name)
 nsresult
 nsMimeBaseEmitter::DumpSubjectFromDate()
 {
-  mHTMLHeaders.Append("<table border=0 cellspacing=0 cellpadding=0 width=\"100%\" class=\"header-part1\">");
+  mHTMLHeaders.AppendLiteral("<table border=0 cellspacing=0 cellpadding=0 width=\"100%\" class=\"header-part1\">");
 
     // This is the envelope information
     OutputGenericHeader(HEADER_SUBJECT);
@@ -931,7 +931,7 @@ nsMimeBaseEmitter::DumpSubjectFromDate()
          ( mFormat == nsMimeOutput::nsMimeMessageBodyQuoting ) )
       OutputGenericHeader(HEADER_TO);
 
-  mHTMLHeaders.Append("</table>");
+  mHTMLHeaders.AppendLiteral("</table>");
 
   return NS_OK;
 }
@@ -949,7 +949,7 @@ nsMimeBaseEmitter::DumpToCC()
   // which looked weird.
   if (toField || ccField || bccField || newsgroupField)
   {
-    mHTMLHeaders.Append("<table border=0 cellspacing=0 cellpadding=0 width=\"100%\" class=\"header-part2\">");
+    mHTMLHeaders.AppendLiteral("<table border=0 cellspacing=0 cellpadding=0 width=\"100%\" class=\"header-part2\">");
 
     if (toField)
       WriteHeaderFieldHTML(HEADER_TO, toField);
@@ -960,7 +960,7 @@ nsMimeBaseEmitter::DumpToCC()
     if (newsgroupField)
       WriteHeaderFieldHTML(HEADER_NEWSGROUPS, newsgroupField);
 
-    mHTMLHeaders.Append("</table>");
+    mHTMLHeaders.AppendLiteral("</table>");
   }
 
   return NS_OK;
@@ -971,7 +971,7 @@ nsMimeBaseEmitter::DumpRestOfHeaders()
 {
   nsTArray<headerInfoType*> *array = mDocHeader? mHeaderArray : mEmbeddedHeaderArray;
 
-  mHTMLHeaders.Append("<table border=0 cellspacing=0 cellpadding=0 width=\"100%\" class=\"header-part3\">");
+  mHTMLHeaders.AppendLiteral("<table border=0 cellspacing=0 cellpadding=0 width=\"100%\" class=\"header-part3\">");
 
   for (size_t i = 0; i < array->Length(); i++)
   {
@@ -990,7 +990,7 @@ nsMimeBaseEmitter::DumpRestOfHeaders()
     WriteHeaderFieldHTML(headerInfo->name, headerInfo->value);
   }
 
-  mHTMLHeaders.Append("</table>");
+  mHTMLHeaders.AppendLiteral("</table>");
   return NS_OK;
 }
 
