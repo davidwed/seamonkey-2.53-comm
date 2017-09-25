@@ -907,7 +907,7 @@ NS_IMETHODIMP nsMsgGroupView::CellTextForColumn(int32_t aRow,
             }
           }
           if (aValue.IsEmpty())
-            aValue.AssignLiteral("*");
+            aValue.Assign('*');
           break;
         }
 
