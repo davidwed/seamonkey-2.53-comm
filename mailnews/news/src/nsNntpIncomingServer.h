@@ -37,7 +37,7 @@ class nsNntpIncomingServer : public nsMsgIncomingServer,
                              public nsIUrlListener,
                              public nsISubscribableServer,
                              public nsITreeView
-                             
+
 {
 public:
     NS_DECL_ISUPPORTS_INHERITED
@@ -102,7 +102,7 @@ private:
     nsTArray<nsCString> mSubscribeSearchResult;
     bool mSearchResultSortDescending;
     // the list of of subscribed newsgroups within a given
-    // subscribed dialog session.  
+    // subscribed dialog session.
     // we need to keep track of them so we know what to show as "checked"
     // in the search view
     nsTArray<nsCString> mTempSubscribed;
