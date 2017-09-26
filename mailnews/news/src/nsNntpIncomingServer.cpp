@@ -636,7 +636,7 @@ nsNntpIncomingServer::PrepareForNextUrl(nsNNTPProtocol *aConnection)
     if (NS_SUCCEEDED(rv))
       return NS_OK;
   }
-  
+
   // No queued uris.
   return NS_OK;
 }
