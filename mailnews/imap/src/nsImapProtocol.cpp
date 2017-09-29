@@ -55,6 +55,7 @@
 #include "nsXPCOMCIDInternal.h"
 #include "nsIXULAppInfo.h"
 #include "nsSyncRunnableHelpers.h"
+#include "SlicedInputStream.h"
 
 // netlib required files
 #include "nsIStreamListener.h"
@@ -9666,9 +9667,10 @@ bool nsImapMockChannel::ReadFromLocalCache()
 
         // create a stream pump that will async read the specified amount of data.
         // XXX make offset/size 64-bit ints
+        RefPtr<SlicedInputStream> slicedStream =
+          new SlicedInputStream(fileStream, uint64_t(offset), uint64_t(size));
         nsCOMPtr<nsIInputStreamPump> pump;
-        rv = NS_NewInputStreamPump(getter_AddRefs(pump), fileStream,
-                                   offset, (int64_t) size);
+        rv = NS_NewInputStreamPump(getter_AddRefs(pump), slicedStream);
         if (NS_SUCCEEDED(rv))
           rv = pump->AsyncRead(cacheListener, m_channelContext);
 
