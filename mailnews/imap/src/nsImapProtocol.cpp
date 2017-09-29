@@ -5453,14 +5453,6 @@ void nsImapProtocol::Capability()
     nsresult rv = SendData(command.get());
     if (NS_SUCCEEDED(rv))
         ParseIMAPandCheckForNewMail();
-    if (!gUseLiteralPlus)
-    {
-      eIMAPCapabilityFlags capabilityFlag = GetServerStateParser().GetCapabilityFlag();
-      if (capabilityFlag & kLiteralPlusCapability)
-      {
-        GetServerStateParser().SetCapabilityFlag(capabilityFlag & ~kLiteralPlusCapability);
-      }
-    }
 }
 
 void nsImapProtocol::ID()
@@ -6109,8 +6101,6 @@ void nsImapProtocol::UploadMessageFromFile (nsIFile* file,
   nsresult rv;
   bool eof = false;
   nsCString flagString;
-  bool hasLiteralPlus = (GetServerStateParser().GetCapabilityFlag() &
-    kLiteralPlusCapability);
 
   nsCOMPtr <nsIInputStream> fileInputStream;
 
@@ -6173,7 +6163,13 @@ void nsImapProtocol::UploadMessageFromFile (nsIFile* file,
     rv = NS_NewLocalFileInputStream(getter_AddRefs(fileInputStream), file);
     if (NS_FAILED(rv) || !fileInputStream) goto done;
     command.AppendInt((int32_t)fileSize);
-    if (hasLiteralPlus)
+
+    // Set useLiteralPlus to true if server has capability LITERAL+ and
+    // LITERAL+ useage is enabled in the config editor,
+    // i.e., "mail.imap.use_literal_plus" = true.
+    bool useLiteralPlus = (GetServerStateParser().GetCapabilityFlag() &
+                          kLiteralPlusCapability) && gUseLiteralPlus;
+    if (useLiteralPlus)
       command.AppendLiteral("+}" CRLF);
     else
       command.AppendLiteral("}" CRLF);
@@ -6181,7 +6177,7 @@ void nsImapProtocol::UploadMessageFromFile (nsIFile* file,
     rv = SendData(command.get());
     if (NS_FAILED(rv)) goto done;
 
-    if (!hasLiteralPlus)
+    if (!useLiteralPlus)
       ParseIMAPandCheckForNewMail();
 
     totalSize = fileSize;
