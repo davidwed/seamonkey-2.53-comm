@@ -60,6 +60,40 @@ XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   return tmp.require("devtools/server/main").DebuggerServer;
 });
 
+const global = this;
+
+const listeners = {
+  mm: {
+    // PLEASE KEEP THIS LIST IN SYNC WITH THE MOBILE LISTENERS IN nsBrowserGlue.js
+    "RemoteLogins:findLogins": ["LoginManagerParent"],
+    "RemoteLogins:findRecipes": ["LoginManagerParent"],
+    "RemoteLogins:onFormSubmit": ["LoginManagerParent"],
+    "RemoteLogins:autoCompleteLogins": ["LoginManagerParent"],
+    "RemoteLogins:removeLogin": ["LoginManagerParent"],
+    "RemoteLogins:insecureLoginFormPresent": ["LoginManagerParent"],
+    // PLEASE KEEP THIS LIST IN SYNC WITH THE MOBILE LISTENERS IN nsBrowserGlue.js
+  },
+
+  receiveMessage(modules, data) {
+    let val;
+    for (let module of modules[data.name]) {
+      try {
+        val = global[module].receiveMessage(data) || val;
+      } catch (e) {
+        Components.utils.reportError(e);
+      }
+    }
+    return val;
+  },
+
+  init() {
+    let receiveMessageMM = this.receiveMessage.bind(this, this.mm);
+    for (let message of Object.keys(this.mm)) {
+      Services.mm.addMessageListener(message, receiveMessageMM);
+    }
+  }
+};
+
 // We try to backup bookmarks at idle times, to avoid doing that at shutdown.
 // Number of idle seconds before trying to backup bookmarks.  15 minutes.
 const BOOKMARKS_BACKUP_IDLE_TIME_SEC = 15 * 60;
@@ -185,7 +219,7 @@ SuiteGlue.prototype = {
         this._promptForMasterPassword();
         this._checkForNewAddons();
         Services.search.init();
-        LoginManagerParent.init();
+        listeners.init();
 
         Cc["@mozilla.org/globalmessagemanager;1"]
           .getService(Ci.nsIMessageListenerManager)
