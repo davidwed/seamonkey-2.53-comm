@@ -36,40 +36,40 @@ nsNoneService::SetDefaultLocalPath(nsIFile *aPath)
 {
     NS_ENSURE_ARG(aPath);
     return NS_SetPersistentFile(PREF_MAIL_ROOT_NONE_REL, PREF_MAIL_ROOT_NONE, aPath);
-}     
+}
 
 NS_IMETHODIMP
 nsNoneService::GetDefaultLocalPath(nsIFile ** aResult)
 {
     NS_ENSURE_ARG_POINTER(aResult);
     *aResult = nullptr;
-    
+
     bool havePref;
-    nsCOMPtr<nsIFile> localFile;    
+    nsCOMPtr<nsIFile> localFile;
     nsresult rv = NS_GetPersistentFile(PREF_MAIL_ROOT_NONE_REL,
                               PREF_MAIL_ROOT_NONE,
                               NS_APP_MAIL_50_DIR,
                               havePref,
                               getter_AddRefs(localFile));
     if (NS_FAILED(rv)) return rv;
-    
+
     bool exists;
     rv = localFile->Exists(&exists);
     if (NS_SUCCEEDED(rv) && !exists)
         rv = localFile->Create(nsIFile::DIRECTORY_TYPE, 0775);
     if (NS_FAILED(rv)) return rv;
-    
-    if (!havePref || !exists) 
+
+    if (!havePref || !exists)
     {
         rv = NS_SetPersistentFile(PREF_MAIL_ROOT_NONE_REL, PREF_MAIL_ROOT_NONE, localFile);
         NS_ASSERTION(NS_SUCCEEDED(rv), "Failed to set root dir pref.");
     }
-        
+
     NS_IF_ADDREF(*aResult = localFile);
     return NS_OK;
 
 }
-    
+
 
 NS_IMETHODIMP
 nsNoneService::GetServerIID(nsIID* *aServerIID)
@@ -108,7 +108,7 @@ nsNoneService::GetCanDelete(bool *aCanDelete)
   NS_ENSURE_ARG_POINTER(aCanDelete);
   *aCanDelete = false;
   return NS_OK;
-}  
+}
 
 NS_IMETHODIMP
 nsNoneService::GetCanDuplicate(bool *aCanDuplicate)
@@ -116,7 +116,7 @@ nsNoneService::GetCanDuplicate(bool *aCanDuplicate)
   NS_ENSURE_ARG_POINTER(aCanDuplicate);
   *aCanDuplicate = false;
   return NS_OK;
-}  
+}
 
 NS_IMETHODIMP
 nsNoneService::GetCanGetMessages(bool *aCanGetMessages)
@@ -124,7 +124,7 @@ nsNoneService::GetCanGetMessages(bool *aCanGetMessages)
     NS_ENSURE_ARG_POINTER(aCanGetMessages);
     *aCanGetMessages = false;
     return NS_OK;
-}  
+}
 
 NS_IMETHODIMP
 nsNoneService::GetCanGetIncomingMessages(bool *aCanGetIncomingMessages)
@@ -132,14 +132,14 @@ nsNoneService::GetCanGetIncomingMessages(bool *aCanGetIncomingMessages)
     NS_ENSURE_ARG_POINTER(aCanGetIncomingMessages);
     *aCanGetIncomingMessages = false;
     return NS_OK;
-} 
+}
 
-NS_IMETHODIMP 
+NS_IMETHODIMP
 nsNoneService::GetDefaultDoBiff(bool *aDoBiff)
 {
     NS_ENSURE_ARG_POINTER(aDoBiff);
     // by default, don't do biff for "none" servers
-    *aDoBiff = false;    
+    *aDoBiff = false;
     return NS_OK;
 }
 
@@ -151,11 +151,11 @@ nsNoneService::GetDefaultServerPort(bool isSecure, int32_t *aDefaultPort)
     return NS_OK;
 }
 
-NS_IMETHODIMP 
+NS_IMETHODIMP
 nsNoneService::GetShowComposeMsgLink(bool *showComposeMsgLink)
 {
     NS_ENSURE_ARG_POINTER(showComposeMsgLink);
-    *showComposeMsgLink = false;    
+    *showComposeMsgLink = false;
     return NS_OK;
 }
 
