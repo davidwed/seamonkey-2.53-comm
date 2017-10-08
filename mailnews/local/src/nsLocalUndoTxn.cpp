@@ -51,7 +51,7 @@ nsLocalMoveCopyMsgTxn::Init(nsIMsgFolder* srcFolder, nsIMsgFolder* dstFolder,
       m_srcIsImap4 = true;
     return nsMsgTxn::Init();
 }
-nsresult 
+nsresult
 nsLocalMoveCopyMsgTxn::GetSrcIsImap(bool *isImap)
 {
   *isImap = m_srcIsImap4;
@@ -105,7 +105,7 @@ nsLocalMoveCopyMsgTxn::AddDstMsgSize(uint32_t msgSize)
 }
 
 nsresult
-nsLocalMoveCopyMsgTxn::UndoImapDeleteFlag(nsIMsgFolder* folder, 
+nsLocalMoveCopyMsgTxn::UndoImapDeleteFlag(nsIMsgFolder* folder,
                                           nsTArray<nsMsgKey>& keyArray,
                                           bool deleteFlag)
 {
@@ -155,7 +155,7 @@ nsLocalMoveCopyMsgTxn::UndoTransaction()
 {
   nsresult rv;
   nsCOMPtr<nsIMsgDatabase> dstDB;
-  
+
   nsCOMPtr<nsIMsgFolder> dstFolder = do_QueryReferent(m_dstFolder, &rv);
   NS_ENSURE_SUCCESS(rv, rv);
   nsCOMPtr<nsIMsgLocalMailFolder> dstlocalMailFolder = do_QueryReferent(m_dstFolder, &rv);
@@ -169,16 +169,16 @@ nsLocalMoveCopyMsgTxn::UndoTransaction()
     // UndoTransactionInternal.
     mUndoFolderListener = new nsLocalUndoFolderListener(this, dstFolder);
     if (!mUndoFolderListener)
-      return NS_ERROR_OUT_OF_MEMORY; 
+      return NS_ERROR_OUT_OF_MEMORY;
     NS_ADDREF(mUndoFolderListener);
-    
-    nsCOMPtr<nsIMsgMailSession> mailSession = 
-      do_GetService(NS_MSGMAILSESSION_CONTRACTID, &rv); 
+
+    nsCOMPtr<nsIMsgMailSession> mailSession =
+      do_GetService(NS_MSGMAILSESSION_CONTRACTID, &rv);
     NS_ENSURE_SUCCESS(rv,rv);
-    
+
     rv = mailSession->AddFolderListener(mUndoFolderListener, nsIFolderListener::event);
     NS_ENSURE_SUCCESS(rv,rv);
-    
+
     rv = dstFolder->GetMsgDatabase(getter_AddRefs(dstDB));
     NS_ENSURE_SUCCESS(rv,rv);
   }
@@ -187,20 +187,20 @@ nsLocalMoveCopyMsgTxn::UndoTransaction()
   return rv;
 }
 
-nsresult 
+nsresult
 nsLocalMoveCopyMsgTxn::UndoTransactionInternal()
 {
   nsresult rv = NS_ERROR_FAILURE;
 
   if (mUndoFolderListener)
   {
-    nsCOMPtr<nsIMsgMailSession> mailSession = 
-      do_GetService(NS_MSGMAILSESSION_CONTRACTID, &rv); 
+    nsCOMPtr<nsIMsgMailSession> mailSession =
+      do_GetService(NS_MSGMAILSESSION_CONTRACTID, &rv);
     NS_ENSURE_SUCCESS(rv,rv);
-    
+
     rv = mailSession->RemoveFolderListener(mUndoFolderListener);
     NS_ENSURE_SUCCESS(rv,rv);
-    
+
     NS_RELEASE(mUndoFolderListener);
     mUndoFolderListener = nullptr;
   }
@@ -209,10 +209,10 @@ nsLocalMoveCopyMsgTxn::UndoTransactionInternal()
   nsCOMPtr<nsIMsgDatabase> dstDB;
   nsCOMPtr<nsIMsgFolder> srcFolder = do_QueryReferent(m_srcFolder, &rv);
   NS_ENSURE_SUCCESS(rv,rv);
-  
+
   nsCOMPtr<nsIMsgFolder> dstFolder = do_QueryReferent(m_dstFolder, &rv);
   NS_ENSURE_SUCCESS(rv,rv);
-  
+
   rv = srcFolder->GetMsgDatabase(getter_AddRefs(srcDB));
   if(NS_FAILED(rv)) return rv;
 
@@ -247,7 +247,7 @@ nsLocalMoveCopyMsgTxn::UndoTransactionInternal()
 
       for (i = 0; i < count; i++)
       {
-        rv = dstDB->GetMsgHdrForKey(m_dstKeyArray[i], 
+        rv = dstDB->GetMsgHdrForKey(m_dstKeyArray[i],
                                     getter_AddRefs(oldHdr));
         NS_ASSERTION(oldHdr, "fatal ... cannot get old msg header\n");
         if (NS_SUCCEEDED(rv) && oldHdr)
@@ -255,7 +255,7 @@ nsLocalMoveCopyMsgTxn::UndoTransactionInternal()
           rv = srcDB->CopyHdrFromExistingHdr(m_srcKeyArray[i],
                                              oldHdr, true,
                                              getter_AddRefs(newHdr));
-          NS_ASSERTION(newHdr, 
+          NS_ASSERTION(newHdr,
                        "fatal ... cannot create new msg header\n");
           if (NS_SUCCEEDED(rv) && newHdr)
           {
@@ -343,7 +343,7 @@ nsLocalMoveCopyMsgTxn::RedoTransaction()
 
   nsCOMPtr<nsIMsgFolder> dstFolder = do_QueryReferent(m_dstFolder, &rv);
   NS_ENSURE_SUCCESS(rv,rv);
-  
+
   rv = srcFolder->GetMsgDatabase(getter_AddRefs(srcDB));
   if(NS_FAILED(rv)) return rv;
   rv = dstFolder->GetMsgDatabase(getter_AddRefs(dstDB));
@@ -356,10 +356,10 @@ nsLocalMoveCopyMsgTxn::RedoTransaction()
 
   nsCOMPtr<nsIMutableArray> srcMessages = do_CreateInstance(NS_ARRAY_CONTRACTID);
   nsCOMPtr <nsISupports> msgSupports;
-  
+
   for (i=0; i<count; i++)
   {
-    rv = srcDB->GetMsgHdrForKey(m_srcKeyArray[i], 
+    rv = srcDB->GetMsgHdrForKey(m_srcKeyArray[i],
                                 getter_AddRefs(oldHdr));
     NS_ASSERTION(oldHdr, "fatal ... cannot get old msg header\n");
 
@@ -367,7 +367,7 @@ nsLocalMoveCopyMsgTxn::RedoTransaction()
     {
       msgSupports =do_QueryInterface(oldHdr);
       srcMessages->AppendElement(msgSupports, false);
-      
+
       if (m_canUndelete)
       {
       rv = dstDB->CopyHdrFromExistingHdr(m_dstKeyArray[i],
@@ -394,7 +394,7 @@ nsLocalMoveCopyMsgTxn::RedoTransaction()
       NS_ASSERTION(!m_srcKeyArray.IsEmpty(), "no source keys");
       if (m_srcKeyArray.IsEmpty())
         return NS_ERROR_UNEXPECTED;
-    
+
       bool deleteFlag = false; //message is un-deleted- we are trying to redo
       CheckForToggleDelete(srcFolder, m_srcKeyArray[0], &deleteFlag); // there could have been a toggle
       rv = UndoImapDeleteFlag(srcFolder, m_srcKeyArray, deleteFlag);
