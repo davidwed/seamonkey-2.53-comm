@@ -156,10 +156,10 @@ nsImportGenericAddressBooks::nsImportGenericAddressBooks()
 nsImportGenericAddressBooks::~nsImportGenericAddressBooks()
 {
   if (m_pDestinationUri)
-    NS_Free(m_pDestinationUri);
+    free(m_pDestinationUri);
 
   if (m_description)
-    NS_Free(m_description);
+    free(m_description);
 
   NS_IF_RELEASE(m_pFieldMap);
   NS_IF_RELEASE(m_pInterface);
@@ -252,7 +252,7 @@ NS_IMETHODIMP nsImportGenericAddressBooks::GetData(const char *dataId, nsISuppor
         *_retval = data;
         NS_ADDREF(*_retval);
       }
-      NS_Free(pData);
+      free(pData);
     }
   }
 
@@ -294,7 +294,7 @@ NS_IMETHODIMP nsImportGenericAddressBooks::SetData(const char *dataId, nsISuppor
       nsCOMPtr<nsISupportsCString> abString = do_QueryInterface(item);
       if (abString) {
         if (m_pDestinationUri)
-          NS_Free(m_pDestinationUri);
+          free(m_pDestinationUri);
         m_pDestinationUri = nullptr;
                 nsAutoCString tempUri;
                 abString->GetData(tempUri);
@@ -362,7 +362,7 @@ void nsImportGenericAddressBooks::GetDefaultLocation(void)
     return;
 
   if (m_description)
-    NS_Free(m_description);
+    free(m_description);
   m_description = nullptr;
   m_pInterface->GetAutoFind(&m_description, &m_autoFind);
   m_gotLocation = true;
@@ -769,7 +769,7 @@ AddressThreadData::AddressThreadData()
 AddressThreadData::~AddressThreadData()
 {
   if (pDestinationUri)
-    NS_Free(pDestinationUri);
+    free(pDestinationUri);
 
   NS_IF_RELEASE(books);
   NS_IF_RELEASE(addressImport);
@@ -790,7 +790,7 @@ void nsImportGenericAddressBooks::ReportError(const char16_t *pName,
   nsString pText;
   nsTextFormatter::ssprintf(pText, pFmt, pName);
   pStream->Append(pText);
-  NS_Free(pFmt);
+  free(pFmt);
   pStream->AppendLiteral(MSG_LINEBREAK);
 }
 
@@ -856,11 +856,11 @@ static void ImportAddressThread(void *stuff)
                                                        &fatalError);
           if (NS_SUCCEEDED(rv) && pSuccess) {
             success.Append(pSuccess);
-            NS_Free(pSuccess);
+            free(pSuccess);
           }
           if (pError) {
             error.Append(pError);
-            NS_Free(pError);
+            free(pError);
           }
         }
         else {
