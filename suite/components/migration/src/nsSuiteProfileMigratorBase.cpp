@@ -487,7 +487,7 @@ nsSuiteProfileMigratorBase::WriteBranch(const char * branchName,
     switch (pref->type) {
     case nsIPrefBranch::PREF_STRING:
       branch->SetCharPref(pref->prefName, pref->stringValue);
-      NS_Free(pref->stringValue);
+      free(pref->stringValue);
       pref->stringValue = nullptr;
       break;
     case nsIPrefBranch::PREF_BOOL:
@@ -501,7 +501,7 @@ nsSuiteProfileMigratorBase::WriteBranch(const char * branchName,
                  "nsSuiteProfileMigratorBase::WriteBranch\n");
       break;
     }
-    NS_Free(pref->prefName);
+    free(pref->prefName);
     pref->prefName = nullptr;
     delete pref;
     pref = nullptr;
@@ -612,7 +612,7 @@ nsSuiteProfileMigratorBase::CopySignatureFiles(PBStructArray &aIdentities,
         rv = targetSigFile->GetPersistentDescriptor(descriptorString);
         NS_ENSURE_SUCCESS(rv, rv);
 
-        NS_Free(pref->stringValue);
+        free(pref->stringValue);
         pref->stringValue = ToNewCString(descriptorString);
       }
     }
@@ -701,7 +701,7 @@ nsSuiteProfileMigratorBase::CopyMailFolderPrefs(PBStructArray &aMailServers,
         rv = targetMailFolder->GetPersistentDescriptor(descriptorString);
         NS_ENSURE_SUCCESS(rv, rv);
 
-        NS_Free(pref->stringValue);
+        free(pref->stringValue);
         pref->stringValue = ToNewCString(descriptorString);
       }
     }
@@ -735,7 +735,7 @@ nsSuiteProfileMigratorBase::CopyMailFolderPrefs(PBStructArray &aMailServers,
         rv = targetNewsRCFile->GetPersistentDescriptor(descriptorString);
         NS_ENSURE_SUCCESS(rv, rv);
 
-        NS_Free(pref->stringValue);
+        free(pref->stringValue);
         pref->stringValue = ToNewCString(descriptorString);
       }
     }
@@ -749,7 +749,7 @@ nsSuiteProfileMigratorBase::CopyMailFolderPrefs(PBStructArray &aMailServers,
 
     if (StringEndsWith(prefName, NS_LITERAL_CSTRING(".directory-rel"))) {
       if (pref->type == nsIPrefBranch::PREF_STRING)
-        NS_Free(pref->stringValue);
+        free(pref->stringValue);
 
       aMailServers.RemoveElementAt(i);
     }
