@@ -179,16 +179,16 @@ nsMsgDBView::~nsMsgDBView()
     NS_IF_RELEASE(kJunkMsgAtom);
     NS_IF_RELEASE(kNotJunkMsgAtom);
 
-    NS_Free(kHighestPriorityString);
-    NS_Free(kHighPriorityString);
-    NS_Free(kLowestPriorityString);
-    NS_Free(kLowPriorityString);
-    NS_Free(kNormalPriorityString);
+    free(kHighestPriorityString);
+    free(kHighPriorityString);
+    free(kLowestPriorityString);
+    free(kLowPriorityString);
+    free(kNormalPriorityString);
 
-    NS_Free(kReadString);
-    NS_Free(kRepliedString);
-    NS_Free(kForwardedString);
-    NS_Free(kNewString);
+    free(kReadString);
+    free(kRepliedString);
+    free(kForwardedString);
+    free(kNewString);
   }
 }
 
@@ -2462,7 +2462,7 @@ NS_IMETHODIMP nsMsgDBView::GetIndicesForSelection(uint32_t *length, nsMsgViewInd
   *length = numIndices;
 
   uint32_t datalen = numIndices * sizeof(nsMsgViewIndex);
-  *indices = (nsMsgViewIndex *)NS_Alloc(datalen);
+  *indices = (nsMsgViewIndex *)moz_xmalloc(datalen);
   if (!*indices) return NS_ERROR_OUT_OF_MEMORY;
   memcpy(*indices, selection.Elements(), datalen);
   return NS_OK;
@@ -2490,7 +2490,7 @@ NS_IMETHODIMP nsMsgDBView::GetSelectedMsgHdrs(uint32_t *aLength, nsIMsgDBHdr ***
   uint32_t numMsgsSelected;
   messages->GetLength(&numMsgsSelected);
 
-  nsIMsgDBHdr **headers = static_cast<nsIMsgDBHdr**>(NS_Alloc(
+  nsIMsgDBHdr **headers = static_cast<nsIMsgDBHdr**>(moz_xmalloc(
     sizeof(nsIMsgDBHdr*) * numMsgsSelected));
   for (uint32_t i = 0; i < numMsgsSelected; i++)
   {
