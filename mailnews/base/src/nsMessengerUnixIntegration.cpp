@@ -495,7 +495,7 @@ void nsMessengerUnixIntegration::FillToolTipInfo()
     // If we had new messages, we *should* have new keys, but we'll
     // check just in case.
     if (numNewKeys <= 0) {
-      NS_Free(newMessageKeys);
+      free(newMessageKeys);
       return;
     }
 
@@ -523,7 +523,7 @@ void nsMessengerUnixIntegration::FillToolTipInfo()
 
     // At this point, we don't need newMessageKeys any more,
     // so let's free it.
-    NS_Free(newMessageKeys);
+    free(newMessageKeys);
 
     // If we didn't happen to add any message headers, bail out
     if (!newMsgHdrs.Count())
