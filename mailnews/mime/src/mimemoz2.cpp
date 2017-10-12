@@ -967,10 +967,10 @@ mime_display_stream_complete (nsMIMESession *stream)
     MimeHeaders_free (msd->headers);
 
   if (msd->url_name)
-    NS_Free(msd->url_name);
+    free(msd->url_name);
 
   if (msd->orig_url_name)
-      NS_Free(msd->orig_url_name);
+      free(msd->orig_url_name);
 
   delete msd;
 }
@@ -1002,10 +1002,10 @@ mime_display_stream_abort (nsMIMESession *stream, int status)
     MimeHeaders_free (msd->headers);
 
   if (msd->url_name)
-    NS_Free(msd->url_name);
+    free(msd->url_name);
 
   if (msd->orig_url_name)
-      NS_Free(msd->orig_url_name);
+      free(msd->orig_url_name);
 
   delete msd;
 }
