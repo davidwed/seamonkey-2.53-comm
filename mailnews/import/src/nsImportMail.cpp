@@ -603,7 +603,7 @@ void nsImportGenericMail::ReportError(int32_t id, const char16_t *pName, nsStrin
   nsString pText;
   nsTextFormatter::ssprintf(pText, pFmt, pName);
   pStream->Append(pText);
-  NS_Free(pFmt);
+  free(pFmt);
   pStream->Append(NS_ConvertASCIItoUTF16(MSG_LINEBREAK));
 }
 
@@ -789,7 +789,7 @@ ImportMailThread(void *stuff)
       box->GetDisplayName(&pName);
       if (pName) {
         lastName = pName;
-        NS_Free(pName);
+        free(pName);
       }
       else
         lastName.AssignLiteral("Unknown!");
@@ -831,11 +831,11 @@ ImportMailThread(void *stuff)
         rv = pData->mailImport->ImportMailbox(box, newFolder, &pError, &pSuccess, &fatalError);
         if (pError) {
           error.Append(pError);
-          NS_Free(pError);
+          free(pError);
         }
         if (pSuccess) {
           success.Append(pSuccess);
-          NS_Free(pSuccess);
+          free(pSuccess);
         }
 
         pData->currentSize = 0;
