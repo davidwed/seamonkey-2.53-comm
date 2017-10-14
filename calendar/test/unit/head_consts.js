@@ -37,7 +37,7 @@ function createDate(aYear, aMonth, aDay, aHasTime, aHour, aMinute, aSecond, aTim
                aHour || 0,
                aMinute || 0,
                aSecond || 0,
-               aTimezone || cal.UTC());
+               aTimezone || cal.dtz.UTC);
     date.isDate = !aHasTime;
     return date;
 }
