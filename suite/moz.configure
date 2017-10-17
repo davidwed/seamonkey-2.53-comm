@@ -47,4 +47,16 @@ def debugqa(arg):
 
 set_config('MOZ_DEBUGQA', debugqa)
 
-include('../mozilla/toolkit/moz.configure')
+@depends(application)
+def is_comm(app):
+    return app[0].startswith('comm/')
+
+
+@depends(is_comm)
+def toolkit_configure(is_comm):
+    if is_comm:
+        return '../../toolkit/moz.configure'
+    else:
+        return '../mozilla/toolkit/moz.configure'
+
+include(toolkit_configure)
