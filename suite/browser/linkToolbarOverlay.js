@@ -13,7 +13,7 @@ function(event)
 
   if (element.ownerDocument != getBrowser().contentDocument ||
       !linkToolbarUI.isLinkToolbarEnabled() ||
-      !(element instanceof Ci.nsIDOMHTMLLinkElement) ||
+      !(ChromeUtils.getClassName(element) === "HTMLLinkElement") ||
       !element.href || (!element.rel && !element.rev))
     return;
 
@@ -67,7 +67,7 @@ function()
 
       while(currentNode)
       {
-        if (currentNode instanceof Ci.nsIDOMHTMLLinkElement)
+        if (ChromeUtils.getClassName(currentNode) === "HTMLLinkElement")
           linkToolbarUI.linkAdded({originalTarget: currentNode});
         currentNode = currentNode.nextSibling;
       }
