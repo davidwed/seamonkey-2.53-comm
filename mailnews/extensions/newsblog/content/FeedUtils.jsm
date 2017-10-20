@@ -603,8 +603,6 @@ var FeedUtils = {
     this.setFolderPaneProperty(aFeed.folder, "favicon", null, "row");
     // Remove from cache.
     delete this[aFeed.server.serverURI][aFeed.url];
-
-    feed = null;
   },
 
 /**
