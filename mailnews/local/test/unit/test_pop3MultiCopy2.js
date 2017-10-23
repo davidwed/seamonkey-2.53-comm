@@ -49,7 +49,7 @@ add_task(function* maildirToMbox() {
   let enumerator = gInboxFolder.msgDatabase.EnumerateMessages();
   while (enumerator.hasMoreElements()) {
     let hdr = enumerator.getNext().QueryInterface(Ci.nsIMsgDBHdr);
-    messages.appendElement(hdr, false);
+    messages.appendElement(hdr);
   }
   do_check_eq(messages.length, 2);
 
@@ -65,7 +65,7 @@ add_task(function* maildirToMbox() {
   let subjects = [];
   while (enumerator.hasMoreElements()) {
     let hdr = enumerator.getNext().QueryInterface(Ci.nsIMsgDBHdr);
-    messages.appendElement(hdr, false);
+    messages.appendElement(hdr);
     dump("Subject: " + hdr.subject + "\n");
     subjects.push(hdr.subject);
   }
@@ -97,7 +97,7 @@ add_task(function* mboxToMaildir() {
   let enumerator = gTestFolder.msgDatabase.EnumerateMessages();
   while (enumerator.hasMoreElements()) {
     let hdr = enumerator.getNext().QueryInterface(Ci.nsIMsgDBHdr);
-    messages.appendElement(hdr, false);
+    messages.appendElement(hdr);
   }
   do_check_eq(messages.length, 2);
 
@@ -113,7 +113,7 @@ add_task(function* mboxToMaildir() {
   let subjects = [];
   while (enumerator.hasMoreElements()) {
     let hdr = enumerator.getNext().QueryInterface(Ci.nsIMsgDBHdr);
-    messages.appendElement(hdr, false);
+    messages.appendElement(hdr);
     dump("Subject: " + hdr.subject + "\n");
     subjects.push(hdr.subject);
   }

@@ -222,7 +222,7 @@ HandlerInfoWrapper.prototype = {
         return;
     } catch (e) {
     }
-    this.possibleApplicationHandlers.appendElement(aNewHandler, false);
+    this.possibleApplicationHandlers.appendElement(aNewHandler);
   },
 
   removePossibleApplicationHandler: function(aHandler) {
@@ -569,14 +569,14 @@ FeedHandlerInfo.prototype = {
       let preferredApp = getLocalHandlerApp(preferredAppFile);
       let defaultApp = this._defaultApplicationHandler;
       if (!defaultApp || !defaultApp.equals(preferredApp))
-        this._possibleApplicationHandlers.appendElement(preferredApp, false);
+        this._possibleApplicationHandlers.appendElement(preferredApp);
     }
 
     if (converterSvc) {
       // Add the registered web handlers.  There can be any number of these.
       var webHandlers = converterSvc.getContentHandlers(this.type, {});
       for (let webHandler of webHandlers)
-        this._possibleApplicationHandlers.appendElement(webHandler, false);
+        this._possibleApplicationHandlers.appendElement(webHandler);
     }
 
     return this._possibleApplicationHandlers;
