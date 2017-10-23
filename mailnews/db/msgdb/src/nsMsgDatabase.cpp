@@ -469,7 +469,7 @@ NS_IMETHODIMP nsMsgDBService::GetOpenDBs(nsIArray **aOpenDBs)
   nsCOMPtr<nsIMutableArray> openDBs(do_CreateInstance(NS_ARRAY_CONTRACTID, &rv));
   NS_ENSURE_SUCCESS(rv, rv);
   for (uint32_t i = 0; i < m_dbCache.Length(); i++)
-    openDBs->AppendElement(m_dbCache[i], false);
+    openDBs->AppendElement(m_dbCache[i]);
 
   openDBs.forget(aOpenDBs);
   return NS_OK;
@@ -3086,7 +3086,7 @@ nsMsgDatabase::NextMatchingHdrs(nsISimpleEnumerator *aEnumerator,
     if (NS_SUCCEEDED(rv) && nextMessage)
     {
       if (aMatchingHdrs)
-        aMatchingHdrs->AppendElement(nextMessage, false);
+        aMatchingHdrs->AppendElement(nextMessage);
       ++numMatches;
       if (aMaxResults && numMatches == aMaxResults)
         break;
@@ -5346,7 +5346,7 @@ nsresult nsMsgDatabase::PurgeMessagesOlderThan(uint32_t daysToKeepHdrs,
       pHeader->GetMessageKey(&msgKey);
       keysToDelete.AppendElement(msgKey);
       if (hdrsToDelete)
-        hdrsToDelete->AppendElement(pHeader, false);
+        hdrsToDelete->AppendElement(pHeader);
     }
     NS_RELEASE(pHeader);
   }
@@ -5409,7 +5409,7 @@ nsresult nsMsgDatabase::PurgeExcessMessages(uint32_t numHeadersToKeep,
       keysToDelete.AppendElement(msgKey);
       numHdrs--;
       if (hdrsToDelete)
-        hdrsToDelete->AppendElement(pHeader, false);
+        hdrsToDelete->AppendElement(pHeader);
     }
     NS_RELEASE(pHeader);
   }
