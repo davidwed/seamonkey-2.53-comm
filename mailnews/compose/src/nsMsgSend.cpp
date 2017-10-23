@@ -4000,7 +4000,7 @@ nsMsgComposeAndSend::FilterSentMessage()
   if (NS_FAILED(rv))
     return rv;
 
-  rv = msgArray->AppendElement(msgHdr, false);
+  rv = msgArray->AppendElement(msgHdr);
   if (NS_FAILED(rv))
     return rv;
 
