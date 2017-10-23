@@ -2106,7 +2106,7 @@ NS_IMETHODIMP nsParseNewMailState::ApplyFilterHit(nsIMsgFilter *filter, nsIMsgWi
           if (!actionTargetFolderUri.IsEmpty() && !actionTargetFolderUri.Equals(uri))
           {
             nsCOMPtr<nsIMutableArray> messageArray(do_CreateInstance(NS_ARRAY_CONTRACTID));
-            messageArray->AppendElement(msgHdr, false);
+            messageArray->AppendElement(msgHdr);
 
             nsCOMPtr<nsIMsgFolder> dstFolder;
             nsCOMPtr<nsIMsgCopyService> copyService;
@@ -2154,7 +2154,7 @@ NS_IMETHODIMP nsParseNewMailState::ApplyFilterHit(nsIMsgFilter *filter, nsIMsgWi
       case nsMsgFilterAction::MarkFlagged:
         {
           nsCOMPtr<nsIMutableArray> messageArray(do_CreateInstance(NS_ARRAY_CONTRACTID));
-          messageArray->AppendElement(msgHdr, false);
+          messageArray->AppendElement(msgHdr);
           m_downloadFolder->MarkMessagesFlagged(messageArray, true);
         }
         break;
@@ -2168,7 +2168,7 @@ NS_IMETHODIMP nsParseNewMailState::ApplyFilterHit(nsIMsgFilter *filter, nsIMsgWi
         nsCString keyword;
         filterAction->GetStrValue(keyword);
         nsCOMPtr<nsIMutableArray> messageArray(do_CreateInstance(NS_ARRAY_CONTRACTID));
-        messageArray->AppendElement(msgHdr, false);
+        messageArray->AppendElement(msgHdr);
         m_downloadFolder->AddKeywordsToMessages(messageArray, keyword);
         break;
       }
@@ -2222,7 +2222,7 @@ NS_IMETHODIMP nsParseNewMailState::ApplyFilterHit(nsIMsgFilter *filter, nsIMsgWi
           {
             nsCOMPtr<nsIMutableArray> messages = do_CreateInstance(NS_ARRAY_CONTRACTID, &rv);
             NS_ENSURE_SUCCESS(rv, rv);
-            messages->AppendElement(msgHdr, false);
+            messages->AppendElement(msgHdr);
             // This action ignores the deleteMailLeftOnServer preference
             localFolder->MarkMsgsOnPop3Server(messages, POP3_FORCE_DEL);
 
@@ -2247,7 +2247,7 @@ NS_IMETHODIMP nsParseNewMailState::ApplyFilterHit(nsIMsgFilter *filter, nsIMsgWi
           {
             nsCOMPtr<nsIMutableArray> messages = do_CreateInstance(NS_ARRAY_CONTRACTID, &rv);
             NS_ENSURE_SUCCESS(rv, rv);
-            messages->AppendElement(msgHdr, false);
+            messages->AppendElement(msgHdr);
             localFolder->MarkMsgsOnPop3Server(messages, POP3_FETCH_BODY);
             // Don't add this header to the DB, we're going to replace it
             // with the full message.
@@ -2280,7 +2280,7 @@ NS_IMETHODIMP nsParseNewMailState::ApplyFilterHit(nsIMsgFilter *filter, nsIMsgWi
             do_CreateInstance(NS_ARRAY_CONTRACTID, &rv));
         NS_ENSURE_TRUE(messageArray, rv);
         if (NS_SUCCEEDED(rv))
-          rv = messageArray->AppendElement(msgHdr, false);
+          rv = messageArray->AppendElement(msgHdr);
 
 
         if (NS_SUCCEEDED(rv))
@@ -2377,7 +2377,7 @@ nsresult nsParseNewMailState::ApplyForwardAndReplyFilter(nsIMsgWindow *msgWindow
 void nsParseNewMailState::MarkFilteredMessageRead(nsIMsgDBHdr *msgHdr)
 {
   nsCOMPtr<nsIMutableArray> messageArray(do_CreateInstance(NS_ARRAY_CONTRACTID));
-  messageArray->AppendElement(msgHdr, false);
+  messageArray->AppendElement(msgHdr);
   m_downloadFolder->MarkMessagesRead(messageArray, true);
 }
 
@@ -2395,7 +2395,7 @@ void nsParseNewMailState::MarkFilteredMessageUnread(nsIMsgDBHdr *msgHdr)
     msgHdr->OrFlags(nsMsgMessageFlags::New, &newFlags);
   }
   nsCOMPtr<nsIMutableArray> messageArray(do_CreateInstance(NS_ARRAY_CONTRACTID));
-  messageArray->AppendElement(msgHdr, false);
+  messageArray->AppendElement(msgHdr);
   m_downloadFolder->MarkMessagesRead(messageArray, false);
 }
 
