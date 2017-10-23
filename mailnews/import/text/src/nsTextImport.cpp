@@ -316,7 +316,7 @@ NS_IMETHODIMP ImportAddressImpl::FindAddressBooks(nsIFile *pLoc, nsIArray **ppAr
     desc->SetSize((uint32_t) sz);
     desc->SetAbFile(m_fileLoc);
     rv = desc->QueryInterface(kISupportsIID, (void **) &pInterface);
-    array->AppendElement(pInterface, false);
+    array->AppendElement(pInterface);
     pInterface->Release();
   }
   if (NS_FAILED(rv)) {
