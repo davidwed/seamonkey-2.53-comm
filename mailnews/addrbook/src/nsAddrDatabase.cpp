@@ -1839,7 +1839,7 @@ NS_IMETHODIMP nsAddrDatabase::GetDeletedCardList(nsIArray **aResult)
           nsCOMPtr<nsIAbCard>    card;
           rv = CreateCardFromDeletedCardsTable(currentRow, 0, getter_AddRefs(card));
           if (NS_SUCCEEDED(rv)) {
-            resultCardArray->AppendElement(card, false);
+            resultCardArray->AppendElement(card);
           }
         }
       }
