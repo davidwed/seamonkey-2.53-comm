@@ -240,7 +240,7 @@ nsBeckyAddressBooks::AppendAddressBookDescriptor(nsIFile *aEntry,
   aEntry->GetLeafName(name);
   descriptor->SetPreferredName(name);
 
-  return aCollected->AppendElement(descriptor, false);
+  return aCollected->AppendElement(descriptor);
 }
 
 nsresult
