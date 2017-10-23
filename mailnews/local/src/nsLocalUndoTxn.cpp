@@ -261,9 +261,9 @@ nsLocalMoveCopyMsgTxn::UndoTransactionInternal()
           {
             newHdr->SetStatusOffset(m_srcStatusOffsetArray[i]);
             srcDB->UndoDelete(newHdr);
-            srcMessages->AppendElement(newHdr, false);
+            srcMessages->AppendElement(newHdr);
             // (we want to keep these two lists in sync)
-            dstMessages->AppendElement(oldHdr, false);
+            dstMessages->AppendElement(oldHdr);
           }
         }
       }
@@ -300,7 +300,7 @@ nsLocalMoveCopyMsgTxn::UndoTransactionInternal()
         {
           nsCString messageId;
           dstHdr->GetMessageId(getter_Copies(messageId));
-          dstMessages->AppendElement(dstHdr, false);
+          dstMessages->AppendElement(dstHdr);
           m_copiedMsgIds.AppendElement(messageId);
         }
         else
@@ -366,7 +366,7 @@ nsLocalMoveCopyMsgTxn::RedoTransaction()
     if (NS_SUCCEEDED(rv) && oldHdr)
     {
       msgSupports =do_QueryInterface(oldHdr);
-      srcMessages->AppendElement(msgSupports, false);
+      srcMessages->AppendElement(msgSupports);
 
       if (m_canUndelete)
       {
