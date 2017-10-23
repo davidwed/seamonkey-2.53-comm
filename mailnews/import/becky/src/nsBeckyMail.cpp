@@ -144,7 +144,7 @@ nsBeckyMail::AppendMailboxDescriptor(nsIFile *aEntry,
   descriptor->SetDepth(aDepth);
 
   mailboxFile->InitWithFile(aEntry);
-  aCollected->AppendElement(descriptor, false);
+  aCollected->AppendElement(descriptor);
 
   return NS_OK;
 }
