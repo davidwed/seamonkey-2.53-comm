@@ -192,7 +192,7 @@ var editContactInlineUI = {
 
     let cardArray = Cc["@mozilla.org/array;1"]
                       .createInstance(Ci.nsIMutableArray);
-    cardArray.appendElement(this._cardDetails.card, false);
+    cardArray.appendElement(this._cardDetails.card);
 
     MailServices.ab.getDirectory(this._cardDetails.book.URI).deleteCards(cardArray);
   },
@@ -231,8 +231,8 @@ var editContactInlineUI = {
 
       // ...and delete it from the old place.
       let cardArray = Cc["@mozilla.org/array;1"]
-                              .createInstance(Ci.nsIMutableArray);
-      cardArray.appendElement(this._cardDetails.card, false);
+                        .createInstance(Ci.nsIMutableArray);
+      cardArray.appendElement(this._cardDetails.card);
       originalBook.deleteCards(cardArray);
     }
 
