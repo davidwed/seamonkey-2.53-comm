@@ -536,7 +536,7 @@ function RemoveAllMessageTags()
       messages.clear();
       prevHdrFolder = msgHdr.folder;
     }
-    messages.appendElement(msgHdr, false);
+    messages.appendElement(msgHdr);
   }
   if (prevHdrFolder)
     prevHdrFolder.removeKeywordsFromMessages(messages, allKeys);
@@ -647,7 +647,7 @@ function ToggleMessageTag(key, addKey)
       // If we don't, the thread tree won't always show the correct tag state,
       // because resetting a label doesn't update the tree anymore...
       msg.clear();
-      msg.appendElement(msgHdr, false);
+      msg.appendElement(msgHdr);
       msgHdr.folder.addKeywordsToMessages(msg, "$label" + msgHdr.label);
       msgHdr.label = 0; // remove legacy label
     }
@@ -658,7 +658,7 @@ function ToggleMessageTag(key, addKey)
       messages.clear();
       prevHdrFolder = msgHdr.folder;
     }
-    messages.appendElement(msgHdr, false);
+    messages.appendElement(msgHdr);
   }
   if (prevHdrFolder)
     prevHdrFolder[toggler](messages, key);
@@ -1199,7 +1199,7 @@ BatchMessageMover.prototype =
     let filterArray = Cc["@mozilla.org/array;1"]
                         .createInstance(Ci.nsIMutableArray);
     for (let message of msgs) {
-      filterArray.appendElement(message, false);
+      filterArray.appendElement(message);
     }
 
     // Apply filters to this batch.
@@ -1236,7 +1236,7 @@ BatchMessageMover.prototype =
       if (srcFolder.msgDatabase.ContainsKey(item.messageKey) &&
           !(srcFolder.getProcessingFlags(item.messageKey) &
             Ci.nsMsgProcessingFlags.FilterToMove)) {
-        moveArray.appendElement(item, false);
+        moveArray.appendElement(item);
       }
     }
 
@@ -1878,7 +1878,7 @@ function MsgApplyFilters()
   var preselectedFolder = GetFirstSelectedMsgFolder();
   var selectedFolders = Cc["@mozilla.org/array;1"]
                           .createInstance(Ci.nsIMutableArray);
-  selectedFolders.appendElement(preselectedFolder, false);
+  selectedFolders.appendElement(preselectedFolder);
 
   var curFilterList = preselectedFolder.getFilterList(msgWindow);
   // create a new filter list and copy over the enabled filters to it.
@@ -1927,7 +1927,7 @@ function MsgApplyFiltersToSelection()
         {
           var msgHdr = folder.GetMessageHeader(gDBView.getKeyAt(indices[i]));
           if (msgHdr)
-            selectedMsgs.appendElement(msgHdr, false);
+            selectedMsgs.appendElement(msgHdr);
         }
       } catch (ex) {}
     }
@@ -2865,7 +2865,7 @@ function MarkMessageAsRead(msgHdr)
   ClearPendingReadTimer();
   var headers = Cc["@mozilla.org/array;1"]
                   .createInstance(Ci.nsIMutableArray);
-  headers.appendElement(msgHdr, false);
+  headers.appendElement(msgHdr);
   msgHdr.folder.markMessagesRead(headers, true);
 }
 
