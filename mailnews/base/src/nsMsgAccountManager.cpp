@@ -924,7 +924,7 @@ nsMsgAccountManager::GetAccounts(nsIArray **_retval)
       if (hidden)
         continue;
     }
-    accounts->AppendElement(existingAccount, false);
+    accounts->AppendElement(existingAccount);
   }
   NS_IF_ADDREF(*_retval = accounts);
   return NS_OK;
@@ -982,7 +982,7 @@ nsMsgAccountManager::GetAllIdentities(nsIArray **_retval)
       }
 
       if (!found)
-        result->AppendElement(identity, false);
+        result->AppendElement(identity);
     }
   }
   result.forget(_retval);
@@ -1015,7 +1015,7 @@ nsMsgAccountManager::GetAllServers(nsIArray **_retval)
     }
 
     if (!type.EqualsLiteral("im")) {
-      servers->AppendElement(server, false);
+      servers->AppendElement(server);
     }
   }
 
@@ -2135,7 +2135,7 @@ nsMsgAccountManager::GetIdentitiesForServer(nsIMsgIncomingServer *server,
           {
             nsCOMPtr<nsISupports> id(do_QueryElementAt(theseIdentities, j, &rv));
             if (NS_SUCCEEDED(rv))
-              identities->AppendElement(id, false);
+              identities->AppendElement(id);
           }
         }
       }
@@ -2186,7 +2186,7 @@ nsMsgAccountManager::GetServersForIdentity(nsIMsgIdentity *aIdentity,
           rv = m_accounts[i]->GetIncomingServer(getter_AddRefs(thisServer));
           if (thisServer && NS_SUCCEEDED(rv))
           {
-            servers->AppendElement(thisServer, false);
+            servers->AppendElement(thisServer);
             break;
           }
         }
