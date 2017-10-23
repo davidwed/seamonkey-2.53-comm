@@ -2366,7 +2366,7 @@ function RemoveDraft()
       {
         var msgs = Cc["@mozilla.org/array;1"]
                      .createInstance(Ci.nsIMutableArray);
-        msgs.appendElement(folder.GetMessageHeader(msgKey), false);
+        msgs.appendElement(folder.GetMessageHeader(msgKey));
         folder.deleteMessages(msgs, null, true, false, null, false);
       }
     }
