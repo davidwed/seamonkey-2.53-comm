@@ -302,7 +302,7 @@ function run_test()
   var cardsToDelete = Cc["@mozilla.org/array;1"]
                         .createInstance(Ci.nsIMutableArray);
   while (childCards.hasMoreElements()) {
-    cardsToDelete.appendElement(childCards.getNext(), false);
+    cardsToDelete.appendElement(childCards.getNext());
   }
 
   collectChecker.AB.deleteCards(cardsToDelete);
