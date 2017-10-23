@@ -465,7 +465,7 @@ function AbDelete()
       let cardArray =
         Cc["@mozilla.org/array;1"]
           .createInstance(Ci.nsIMutableArray);
-      cardArray.appendElement(cards[i], false);
+      cardArray.appendElement(cards[i]);
       if (directory)
         directory.deleteCards(cardArray);
     }

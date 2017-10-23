@@ -675,11 +675,11 @@ SuiteGlue.prototype = {
                    .createInstance(Ci.nsIMutableArray);
     let str = Cc["@mozilla.org/supports-string;1"]
                 .createInstance(Ci.nsISupportsString);
-    args.appendElement(str, false);
+    args.appendElement(str);
     str = Cc["@mozilla.org/supports-string;1"]
             .createInstance(Ci.nsISupportsString);
     str.data = Services.prefs.getCharPref(PREF_EM_NEW_ADDONS_LIST);
-    args.appendElement(str, false);
+    args.appendElement(str);
     const EMURL = "chrome://mozapps/content/extensions/extensions.xul";
     // This window is the "first" to open.
     // 'alwaysRaised' makes sure it stays in the foreground (though unfocused)
