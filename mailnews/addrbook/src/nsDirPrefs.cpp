@@ -778,7 +778,7 @@ static char *DIR_GetStringPref(const char *prefRoot, const char *prefLeaf, const
     prefLocation.Append('.');
     prefLocation.Append(prefLeaf);
 
-    if (NS_SUCCEEDED(pPref->GetCharPref(prefLocation.get(), getter_Copies(value))))
+    if (NS_SUCCEEDED(pPref->GetCharPref(prefLocation.get(), value)))
     {
         /* unfortunately, there may be some prefs out there which look like this */
         if (value.EqualsLiteral("(null)"))
@@ -791,7 +791,7 @@ static char *DIR_GetStringPref(const char *prefRoot, const char *prefLeaf, const
 
         if (value.IsEmpty())
         {
-          rv = pPref->GetCharPref(prefLocation.get(), getter_Copies(value));
+          rv = pPref->GetCharPref(prefLocation.get(), value);
         }
     }
     else
@@ -828,10 +828,10 @@ static char *DIR_GetLocalizedStringPref(const char *prefRoot, const char *prefLe
   if (NS_SUCCEEDED(rv))
     rv = locStr->ToString(getter_Copies(wvalue));
 
-  char *value = nullptr;
+  nsCString value;
   if (!wvalue.IsEmpty())
   {
-    value = ToNewCString(NS_ConvertUTF16toUTF8(wvalue));
+    value = NS_ConvertUTF16toUTF8(wvalue);
   }
   else
   {
@@ -847,12 +847,12 @@ static char *DIR_GetLocalizedStringPref(const char *prefRoot, const char *prefLe
     // the localized version, then we try and get the non-localized version
     // instead. If the string value is empty, then we'll just get the empty value
     // back here.
-    rv = pPref->GetCharPref(prefLocation.get(), &value);
+    rv = pPref->GetCharPref(prefLocation.get(), value);
     if (NS_FAILED(rv))
-      value = nullptr;
+      value.Truncate();
   }
 
-  return value;
+  return moz_xstrdup(value.get());
 }
 
 static int32_t DIR_GetIntPref(const char *prefRoot, const char *prefLeaf, int32_t defaultValue)
@@ -1236,13 +1236,13 @@ static void DIR_SetStringPref(const char *prefRoot, const char *prefLeaf, const 
   prefLocation.Append('.');
   prefLocation.Append(prefLeaf);
 
-  if (NS_SUCCEEDED(pPref->GetCharPref(prefLocation.get(), getter_Copies(defaultPref))))
+  if (NS_SUCCEEDED(pPref->GetCharPref(prefLocation.get(), defaultPref)))
   {
     /* If there's a default pref, just set ours in and let libpref worry
      * about potential defaults in all.js
      */
     if (value) /* added this check to make sure we have a value before we try to set it..*/
-      rv = pPref->SetCharPref (prefLocation.get(), value);
+      rv = pPref->SetCharPref(prefLocation.get(), nsDependentCString(value));
     else
       rv = pPref->ClearUserPref(prefLocation.get());
   }
@@ -1252,17 +1252,17 @@ static void DIR_SetStringPref(const char *prefRoot, const char *prefLeaf, const 
      * if the user pref is different than one of them.
      */
     nsCString userPref;
-    if (NS_SUCCEEDED(pPref->GetCharPref (prefLocation.get(), getter_Copies(userPref))))
+    if (NS_SUCCEEDED(pPref->GetCharPref(prefLocation.get(), userPref)))
     {
       if (value && (defaultValue ? PL_strcasecmp(value, defaultValue) : value != defaultValue))
-        rv = pPref->SetCharPref (prefLocation.get(), value);
+        rv = pPref->SetCharPref(prefLocation.get(), nsDependentCString(value));
       else
         rv = pPref->ClearUserPref(prefLocation.get());
     }
     else
     {
       if (value && (defaultValue ? PL_strcasecmp(value, defaultValue) : value != defaultValue))
-        rv = pPref->SetCharPref (prefLocation.get(), value);
+        rv = pPref->SetCharPref(prefLocation.get(), nsDependentCString(value));
     }
   }
 
