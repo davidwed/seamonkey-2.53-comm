@@ -21,4 +21,4 @@ EXTRA_PP_JS_MODULES += [
 JAR_MANIFESTS += ['jar.mn']
 
 if CONFIG['CC_TYPE'] == 'clang-cl':
-    ALLOW_COMPILER_WARNINGS = True  # workaround for bug 1090497 / bug 1481326
+    AllowCompilerWarnings()  # workaround for bug 1090497 / bug 1481326
