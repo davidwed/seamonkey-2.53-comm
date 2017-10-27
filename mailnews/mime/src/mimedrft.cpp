@@ -1263,7 +1263,7 @@ mime_parse_stream_complete (nsMIMESession *stream)
       PR_FREEIF(parm);
 
       parm = MimeHeaders_get_parameter(draftInfo, "receipt", NULL, NULL);
-      if (parm && !strcmp(parm, "0"))
+      if (!parm || !strcmp(parm, "0"))
         fields->SetReturnReceipt(false);
       else
       {
