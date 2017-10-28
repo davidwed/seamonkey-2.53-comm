@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/Deprecated.jsm");
 Cu.import("resource:///modules/jsmime.jsm");
 Cu.import("resource:///modules/mimeParser.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -443,15 +442,8 @@ MimeConverter.prototype = {
   classID: Components.ID("93f8c049-80ed-4dda-9000-94ad8daba44c"),
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIMimeConverter]),
 
-  encodeMimePartIIStr_UTF8: function (aHeader, aStructured, aCharset,
+  encodeMimePartIIStr_UTF8: function (aHeader, aStructured,
       aFieldNameLen, aLineLength) {
-    // The JSMime encoder only works in UTF-8, so if someone requests to not do
-    // it, they need to change their code.
-    if (aCharset.toLowerCase() != "utf-8") {
-      Deprecated.warning("Encoding to non-UTF-8 values is obsolete",
-        "http://bugzilla.mozilla.org/show_bug.cgi?id=790855");
-    }
-
     // Compute the encoding options. The way our API is structured in this
     // method is really horrendous and does not align with the way that JSMime
     // handles it. Instead, we'll need to create a fake header to take into
