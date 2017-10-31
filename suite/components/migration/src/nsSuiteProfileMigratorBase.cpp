@@ -125,13 +125,22 @@ nsSuiteProfileMigratorBase::GetSourceProfiles(nsIArray** aResult) {
 nsresult
 nsSuiteProfileMigratorBase::GetString(PrefTransform* aTransform,
                                       nsIPrefBranch* aBranch) {
-  GETPREF(aTransform, GetCharPref, &aTransform->stringValue)
+  PrefTransform* xform = (PrefTransform*)aTransform;
+  nsCString str;
+  nsresult rv = aBranch->GetCharPref(xform->sourcePrefName, str);
+  if (NS_SUCCEEDED(rv)) {
+    xform->prefHasValue = true;
+    xform->stringValue = moz_xstrdup(str.get());
+  }
+  return rv;
 }
 
 nsresult
 nsSuiteProfileMigratorBase::SetString(PrefTransform* aTransform,
                                       nsIPrefBranch* aBranch) {
-  SETPREF(aTransform, SetCharPref, aTransform->stringValue)
+  PrefTransform* xform = (PrefTransform*) aTransform;
+  SETPREF(aTransform, SetCharPref,
+          nsDependentCString(xform->stringValue));
 }
 
 nsresult
@@ -452,9 +461,12 @@ nsSuiteProfileMigratorBase::ReadBranch(const char * branchName,
     prefBranch->type = type;
 
     switch (type) {
-    case nsIPrefBranch::PREF_STRING:
-      rv = branch->GetCharPref(currPref, &prefBranch->stringValue);
+    case nsIPrefBranch::PREF_STRING: {
+      nsCString str;
+      rv = branch->GetCharPref(currPref, str);
+      prefBranch->stringValue = moz_xstrdup(str.get());
       break;
+    }
     case nsIPrefBranch::PREF_BOOL:
       rv = branch->GetBoolPref(currPref, &prefBranch->boolValue);
       break;
@@ -485,11 +497,13 @@ nsSuiteProfileMigratorBase::WriteBranch(const char * branchName,
     PrefBranchStruct* pref = aPrefs.ElementAt(i);
 
     switch (pref->type) {
-    case nsIPrefBranch::PREF_STRING:
-      branch->SetCharPref(pref->prefName, pref->stringValue);
+    case nsIPrefBranch::PREF_STRING: {
+      branch->SetCharPref(pref->prefName,
+                          nsDependentCString(pref->stringValue));
       free(pref->stringValue);
       pref->stringValue = nullptr;
       break;
+    }
     case nsIPrefBranch::PREF_BOOL:
       branch->SetBoolPref(pref->prefName, pref->boolValue);
       break;
@@ -516,7 +530,7 @@ nsSuiteProfileMigratorBase::GetFileValue(nsIPrefBranch* aPrefBranch,
                                          nsIFile** aReturnFile) {
   nsCString prefValue;
   nsCOMPtr<nsIFile> theFile;
-  nsresult rv = aPrefBranch->GetCharPref(aRelPrefName, getter_Copies(prefValue));
+  nsresult rv = aPrefBranch->GetCharPref(aRelPrefName, prefValue);
   if (NS_SUCCEEDED(rv)) {
     // The pref has the format: [ProfD]a/b/c
     if (!StringBeginsWith(prefValue, NS_LITERAL_CSTRING("[ProfD]")))
@@ -655,7 +669,7 @@ nsSuiteProfileMigratorBase::CopyMailFolderPrefs(PBStructArray &aMailServers,
         break; // should we clear out this server pref from aMailServers?
 
       nsCString serverType;
-      serverBranch->GetCharPref("type", getter_Copies(serverType));
+      serverBranch->GetCharPref("type", serverType);
 
       nsCOMPtr<nsIFile> sourceMailFolder;
       nsresult rv = GetFileValue(serverBranch, "directory-rel", "directory",
@@ -684,7 +698,7 @@ nsSuiteProfileMigratorBase::CopyMailFolderPrefs(PBStructArray &aMailServers,
         // for all of our server types, append the host name to the directory
         // as part of the new location
         nsCString hostName;
-        serverBranch->GetCharPref("hostname", getter_Copies(hostName));
+        serverBranch->GetCharPref("hostname", hostName);
         targetMailFolder->Append(NS_ConvertASCIItoUTF16(hostName));
 
         // we should make sure the host name based directory we are going to
