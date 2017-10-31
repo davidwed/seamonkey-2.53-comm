@@ -258,7 +258,7 @@ nsSuiteDirectoryProvider::AppendDistroSearchDirs(nsIProperties* aDirSvc,
 
     nsCString defLocale;
     rv = prefs->GetCharPref("distribution.searchplugins.defaultLocale",
-                            getter_Copies(defLocale));
+                            defLocale);
     if (NS_SUCCEEDED(rv)) {
       nsCOMPtr<nsIFile> defLocalePlugins;
       rv = localePlugins->Clone(getter_AddRefs(defLocalePlugins));
