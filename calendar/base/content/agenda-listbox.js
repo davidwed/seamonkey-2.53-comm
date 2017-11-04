@@ -88,7 +88,7 @@ agendaListbox.addPeriodListItem = function(aPeriod, aItemId) {
     aPeriod.listItem = document.getElementById(aItemId + "-hidden").cloneNode(true);
     agendaListbox.agendaListboxControl.appendChild(aPeriod.listItem);
     aPeriod.listItem.id = aItemId;
-    aPeriod.listItem.getCheckbox().setChecked(aPeriod.open);
+    aPeriod.listItem.getCheckbox().checked = aPeriod.open;
     aPeriod.listItem.getCheckbox().addEventListener("CheckboxStateChange", this.onCheckboxChange, true);
 };
 
@@ -189,12 +189,12 @@ agendaListbox.onKeyPress = function(aEvent) {
             break;
         case aEvent.DOM_VK_LEFT:
             if (!this.isEventListItem(listItem)) {
-                listItem.getCheckbox().setChecked(false);
+                listItem.getCheckbox().checked = false;
             }
             break;
         case aEvent.DOM_VK_RIGHT:
             if (!this.isEventListItem(listItem)) {
-                listItem.getCheckbox().setChecked(true);
+                listItem.getCheckbox().checked = true;
             }
             break;
     }
