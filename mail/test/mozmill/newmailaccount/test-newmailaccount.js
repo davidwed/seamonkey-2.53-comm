@@ -30,7 +30,6 @@ var kProvisionerUrl = "chrome://messenger/content/newmailaccount/accountProvisio
 var kProvisionerEnabledPref = "mail.provider.enabled";
 var kSuggestFromNamePref = "mail.provider.suggestFromName";
 var kProviderListPref = "mail.provider.providerList";
-var kAcceptedLanguage = "general.useragent.locale";
 var kDefaultServerPort = 4444;
 var kDefaultServerRoot = "http://localhost:" + kDefaultServerPort;
 
@@ -48,7 +47,7 @@ var gProvisionerEnabled = Services.prefs.getBoolPref(kProvisionerEnabledPref);
 // Record what the original value of the mail.provider.enabled pref is so
 // that we can put it back once the tests are done.
 var gProvisionerEnabled = Services.prefs.getBoolPref(kProvisionerEnabledPref);
-var gOldAcceptLangs = Services.prefs.getCharPref(kAcceptedLanguage);
+var gOldAcceptLangs = Services.locale.getRequestedLocales();
 var gNumAccounts;
 
 function setupModule(module) {
@@ -59,7 +58,7 @@ function setupModule(module) {
   // Make sure we enable the Account Provisioner.
   Services.prefs.setBoolPref(kProvisionerEnabledPref, true);
   // Restrict the user's language to just en-US
-  Services.prefs.setCharPref(kAcceptedLanguage, "en-US");
+  Services.locale.setRequestedLocales(["en-US"]);
 
   // Add a "bar" search engine that we can switch to be the default.
   Services.search.addEngineWithDetails("bar", null, null, null, "post",
@@ -70,7 +69,7 @@ function teardownModule(module) {
   // Put the mail.provider.enabled pref back the way it was.
   Services.prefs.setBoolPref(kProvisionerEnabledPref, gProvisionerEnabled);
   // And same with the user languages
-  Services.prefs.setCharPref(kAcceptedLanguage, gOldAcceptLangs);
+  Services.locale.setRequestedLocales(gOldAcceptLangs);
 }
 
 /* Helper function that returns the number of accounts associated with the
@@ -1123,8 +1122,8 @@ function subtest_disabled_fields_when_searching(aController) {
 function test_search_button_disabled_if_no_lang_support() {
   // Set the user's supported language to something ridiculous (caching the
   // old one so we can put it back later).
-  let oldLang = Services.prefs.getCharPref(kAcceptedLanguage);
-  Services.prefs.setCharPref(kAcceptedLanguage, "foo");
+  let originalReqLocales = Services.locale.getRequestedLocales();
+  Services.locale.setRequestedLocales(["foo"]);
 
   plan_for_modal_dialog("AccountCreation", function(aController) {
     wait_for_provider_list_loaded(aController);
@@ -1136,7 +1135,7 @@ function test_search_button_disabled_if_no_lang_support() {
   open_provisioner_window();
   wait_for_modal_dialog("AccountCreation");
 
-  Services.prefs.setCharPref(kAcceptedLanguage, oldLang);
+  Services.locale.setRequestedLocales(originalReqLocales);
 }
 
 /**
@@ -1162,8 +1161,8 @@ function subtest_search_button_enabled_state_on_init(aController) {
  * is not set to "*".
  */
 function test_provider_language_wildcard() {
-  let oldLang = Services.prefs.getCharPref(kAcceptedLanguage);
-  Services.prefs.setCharPref(kAcceptedLanguage, "foo-bar");
+  let originalReqLocales = Services.locale.getRequestedLocales();
+  Services.locale.setRequestedLocales(["foo-bar"]);
 
   let original = Services.prefs.getCharPref(kProviderListPref);
   Services.prefs.setCharPref(kProviderListPref, url + "providerListWildcard");
@@ -1173,7 +1172,7 @@ function test_provider_language_wildcard() {
   open_provisioner_window();
   wait_for_modal_dialog("AccountCreation");
   Services.prefs.setCharPref(kProviderListPref, original);
-  Services.prefs.setCharPref(kAcceptedLanguage, oldLang);
+  Services.locale.setRequestedLocales(originalReqLocales);
 }
 
 /**
