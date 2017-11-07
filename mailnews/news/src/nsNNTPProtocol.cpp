@@ -28,6 +28,7 @@
 #include "mozilla/Attributes.h"
 #include "mozilla/Logging.h"
 #include "mozilla/Services.h"
+#include "mozilla/SlicedInputStream.h"
 #include "mozilla/mailnews/MimeHeaderParser.h"
 #include "nsContentUtils.h"
 
@@ -79,7 +80,6 @@
 #include "nsICancelable.h"
 
 #include "nsIInputStreamPump.h"
-#include "SlicedInputStream.h"
 #include "nsIProxyInfo.h"
 #include "nsContentSecurityManager.h"
 

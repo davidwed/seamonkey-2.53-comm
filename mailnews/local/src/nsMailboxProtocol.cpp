@@ -17,6 +17,7 @@
 #include "nsICopyMsgStreamListener.h"
 #include "prtime.h"
 #include "mozilla/Logging.h"
+#include "mozilla/SlicedInputStream.h"
 #include "prerror.h"
 #include "prprf.h"
 #include "nspr.h"
@@ -30,7 +31,6 @@
 #include "nsIMimeHeaders.h"
 #include "nsIMsgPluggableStore.h"
 #include "nsISeekableStream.h"
-#include "SlicedInputStream.h"
 #include "nsStreamUtils.h"
 
 #include "nsIMsgMdnGenerator.h"

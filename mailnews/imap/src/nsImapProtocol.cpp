@@ -56,7 +56,6 @@
 #include "nsXPCOMCIDInternal.h"
 #include "nsIXULAppInfo.h"
 #include "nsSyncRunnableHelpers.h"
-#include "SlicedInputStream.h"
 
 // netlib required files
 #include "nsIStreamListener.h"
@@ -75,6 +74,7 @@
 #include "nsMsgCompressOStream.h"
 #include "mozilla/Logging.h"
 #include "mozilla/Attributes.h"
+#include "mozilla/SlicedInputStream.h"
 #include "nsIPrincipal.h"
 #include "nsContentSecurityManager.h"
 
