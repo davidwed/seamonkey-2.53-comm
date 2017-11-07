@@ -38,9 +38,9 @@
 #include "nsICancelable.h"
 #include "nsMimeTypes.h"
 #include "mozilla/Services.h"
+#include "mozilla/SlicedInputStream.h"
 #include <algorithm>
 #include "nsContentSecurityManager.h"
-#include "SlicedInputStream.h"
 
 #undef PostMessage // avoid to collision with WinUser.h
 
