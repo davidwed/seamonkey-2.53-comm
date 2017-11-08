@@ -5556,8 +5556,7 @@ function getMailToolbox()
 
 function getPref(aPrefName, aIsComplex) {
   if (aIsComplex) {
-    return Services.prefs
-                   .getComplexValue(aPrefName, Ci.nsISupportsString).data;
+    return Services.prefs.getStringPref(aPrefName);
   }
   switch (Services.prefs.getPrefType(aPrefName)) {
     case Ci.nsIPrefBranch.PREF_BOOL:
