@@ -77,10 +77,7 @@ var gAttachmentReminderOptionsDialog = {
         keywordList += ",";
     }
 
-    var str = Cc["@mozilla.org/supports-string;1"]
-                .createInstance(Ci.nsISupportsString);
-    str.data = keywordList;
-    Services.prefs.setComplexValue("mail.compose.attachment_reminder_keywords",
-                                   Ci.nsISupportsString, str);
+    Services.prefs.setStringPref("mail.compose.attachment_reminder_keywords",
+                                 keywordList);
   }
 };
