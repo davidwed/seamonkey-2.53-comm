@@ -146,18 +146,14 @@ function SetStringPref(aPref, aValue)
 {
   const nsISupportsString = Ci.nsISupportsString;
   try {
-    var str = Cc["@mozilla.org/supports-string;1"]
-                .createInstance(nsISupportsString);
-    str.data = aValue;
-    Services.prefs.setComplexValue(aPref, nsISupportsString, str);
+    Services.prefs.setStringPref(aPref, aValue);
   } catch (e) {}
 }
 
 function GetStringPref(name)
 {
   try {
-    return Services.prefs.getComplexValue(name,
-               Ci.nsISupportsString).data;
+    return Services.prefs.getStringPref(name);
   } catch (e) {}
   return "";
 }
