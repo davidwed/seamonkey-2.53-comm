@@ -411,7 +411,7 @@ function GetFileProtocolHandler()
 function GetStringPref(name)
 {
   try {
-    return Services.prefs.getComplexValue(name, Ci.nsISupportsString).data;
+    return Services.prefs.getStringPref(name);
   } catch (e) {}
   return "";
 }
@@ -419,10 +419,7 @@ function GetStringPref(name)
 function SetStringPref(aPrefName, aPrefValue)
 {
   try {
-    let str = Cc["@mozilla.org/supports-string;1"]
-                .createInstance(Ci.nsISupportsString);
-    str.data = aPrefValue;
-    Services.prefs.setComplexValue(aPrefName, Ci.nsISupportsString, str);
+    Services.prefs.setStringPref(aPrefName, aPrefValue);
   }
   catch(e) {}
 }
