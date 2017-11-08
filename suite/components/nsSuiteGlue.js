@@ -322,11 +322,8 @@ SuiteGlue.prototype = {
         case "javascript":
           break;
         default:
-          var str = Cc["@mozilla.org/supports-string;1"]
-                      .createInstance(Ci.nsISupportsString);
-          str.data = aLocation.spec;
-          Services.prefs.setComplexValue("browser.history.last_page_visited",
-                                         Ci.nsISupportsString, str);
+          Services.prefs.setStringPref("browser.history.last_page_visited",
+                                       aLocation.spec);
           break;
       }
     }
