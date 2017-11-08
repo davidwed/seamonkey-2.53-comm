@@ -723,7 +723,7 @@ function GetPublishStringPref(prefBranch, name)
   if (prefBranch && name)
   {
     try {
-      return prefBranch.getComplexValue(name, Ci.nsISupportsString).data;
+      return prefBranch.getStringPref(name);
     } catch (e) {}
   }
   return "";
@@ -734,10 +734,7 @@ function SetPublishStringPref(prefBranch, name, value)
   if (prefBranch && name)
   {
     try {
-        var str = Cc["@mozilla.org/supports-string;1"]
-                    .createInstance(Ci.nsISupportsString);
-        str.data = value;
-        prefBranch.setComplexValue(name, Ci.nsISupportsString, str);
+        prefBranch.setStringPref(name, value);
     } catch (e) {}
   }
 }
