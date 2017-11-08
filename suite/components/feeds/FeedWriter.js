@@ -766,8 +766,7 @@ FeedWriter.prototype = {
     switch (handler) {
       case "web":
         if (this._handlersMenuList) {
-          var url = Services.prefs.getComplexValue(getPrefWebForType(feedType),
-                                                   Ci.nsISupportsString).data;
+          var url = Services.prefs.getStringPref(getPrefWebForType(feedType));
           var handlers = this._handlersMenuList.getElementsByAttribute("webhandlerurl", url);
           if (handlers.length == 0) {
             LOG("FeedWriter._setSelectedHandler: selected web handler isn't in the menulist");
@@ -1113,12 +1112,7 @@ FeedWriter.prototype = {
         var webURI = selectedItem.getAttribute("webhandlerurl");
         Services.prefs.setCharPref(getPrefReaderForType(feedType), "web");
 
-        var supportsString = Cc["@mozilla.org/supports-string;1"]
-                               .createInstance(Ci.nsISupportsString);
-        supportsString.data = webURI;
-        Services.prefs.setComplexValue(getPrefWebForType(feedType),
-                                       Ci.nsISupportsString,
-                                       supportsString);
+        Services.prefs.setStringPref(getPrefWebForType(feedType), webURI);
 
         var wccr = Cc["@mozilla.org/embeddor.implemented/web-content-handler-registrar;1"]
                      .getService(Ci.nsIWebContentConverterService);
