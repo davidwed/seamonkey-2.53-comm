@@ -5,7 +5,6 @@
 #ifndef nsCharsetConverterManager_h__
 #define nsCharsetConverterManager_h__
 
-#include "nsISupports.h"
 #include "nsICharsetConverterManager.h"
 
 class nsCharsetAlias;
