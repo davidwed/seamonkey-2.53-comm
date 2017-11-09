@@ -7,7 +7,6 @@
 #include "nsAbBoolExprToLDAPFilter.h"
 #include "nsILDAPMessage.h"
 #include "nsILDAPErrors.h"
-#include "nsILDAPOperation.h"
 #include "nsIAbLDAPAttributeMap.h"
 #include "nsAbUtils.h"
 #include "nsAbBaseCID.h"
