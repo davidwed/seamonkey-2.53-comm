@@ -6,7 +6,7 @@ def test(mod, path, entity=None):
   import re
   # ignore anything but SeaMonkey
   if mod not in ("netwerk", "dom", "toolkit", "security/manager",
-                 "devtools/client", "devtools/shared",
+                 "devtools/client", "devtools/shared", "devtools/shim",
                  "suite",
                  "extensions/spellcheck",
                  "suite/branding/seamonkey",
