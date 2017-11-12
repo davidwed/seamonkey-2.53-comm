@@ -10,3 +10,6 @@ comm.jar:
    content/communicator/search/searchbarBindings.css                (content/searchbarBindings.css)
    content/communicator/search/search-panel.js                      (content/search-panel.js)
    content/communicator/search/search-panel.xul                     (content/search-panel.xul)
+
+# L10n resource overrides
+% resource search-plugins chrome://communicator/locale/searchplugins/
