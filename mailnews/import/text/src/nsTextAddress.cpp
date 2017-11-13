@@ -46,7 +46,7 @@ nsresult nsTextAddress::GetUnicharLineStreamForFile(nsIFile *aFile,
   nsAutoCString charset;
   nsresult rv = MsgDetectCharsetFromFile(aFile, charset);
   if (NS_FAILED(rv)) {
-    charset.Assign(nsMsgI18NFileSystemCharset());
+    charset = nsMsgI18NFileSystemCharset();
   }
 
   nsCOMPtr<nsIConverterInputStream> converterStream =

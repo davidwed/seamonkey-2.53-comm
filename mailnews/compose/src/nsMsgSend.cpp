@@ -1590,7 +1590,10 @@ nsMsgComposeAndSend::GetBodyFromEditor()
 
   if (aCharset && *aCharset)
   {
-    rv = nsMsgI18NConvertFromUnicode(aCharset, nsDependentString(bodyText), outCString, true);
+    rv = nsMsgI18NConvertFromUnicode(nsDependentCString(aCharset),
+                                     nsDependentString(bodyText),
+                                     outCString,
+                                     true);
     bool isAsciiOnly = NS_IsAscii(outCString.get()) &&
       !nsMsgI18Nstateful_charset(mCompFields->GetCharacterSet());
     if (mCompFields->GetForceMsgEncoding())
@@ -1632,8 +1635,10 @@ nsMsgComposeAndSend::GetBodyFromEditor()
     if (origHTMLBody)
     {
       nsCString newBody;
-      rv = nsMsgI18NConvertFromUnicode(aCharset,
-        nsDependentString(origHTMLBody), newBody, true);
+      rv = nsMsgI18NConvertFromUnicode(nsDependentCString(aCharset),
+                                       nsDependentString(origHTMLBody),
+                                       newBody,
+                                       true);
       if (NS_SUCCEEDED(rv))
       {
         mOriginalHTMLBody = ToNewCString(newBody);
@@ -2538,7 +2543,9 @@ nsMsgComposeAndSend::HackAttachments(nsIArray *attachments,
       if (NS_FAILED(status))
       {
         nsString errorMsg;
-        nsresult rv = ConvertToUnicode(nsMsgI18NFileSystemCharset(), m_attachments[i]->m_realName, attachmentFileName);
+        nsresult rv = nsMsgI18NConvertToUnicode(nsMsgI18NFileSystemCharset(),
+                                                m_attachments[i]->m_realName,
+                                                attachmentFileName);
         if (attachmentFileName.IsEmpty() && m_attachments[i]->mURL) {
           nsCString asciiSpec;
           m_attachments[i]->mURL->GetAsciiSpec(asciiSpec);
@@ -5034,7 +5041,9 @@ nsMsgComposeAndSend::GetSendBody(nsAString& aBody)
     aBody.Truncate();
     return NS_OK;
   }
-  return ConvertToUnicode(charSet.get(), m_attachment1_body, aBody);
+  return nsMsgI18NConvertToUnicode(charSet,
+                                   nsDependentCString(m_attachment1_body),
+                                   aBody);
 }
 
 NS_IMETHODIMP
