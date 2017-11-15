@@ -8,7 +8,7 @@ include $(moztopsrcdir)/config/rules.mk
 
 MOZ_PKG_REMOVALS = $(srcdir)/removed-files.in
 
-MOZ_PKG_MANIFEST_P = $(srcdir)/package-manifest.in
+MOZ_PKG_MANIFEST = $(srcdir)/package-manifest.in
 # Be fatal, except when building with XULRunner which already bundles some files.
 ifndef SYSTEM_LIBXUL
 MOZ_PKG_FATAL_WARNINGS = 1
@@ -128,15 +128,6 @@ ifdef MAKENSISU
 DEFINES += -DHAVE_MAKENSISU=1
 endif
 
-ifdef MOZ_PKG_MANIFEST_P
-MOZ_PKG_MANIFEST = package-manifest
-
-$(MOZ_PKG_MANIFEST): $(MOZ_PKG_MANIFEST_P) $(GLOBAL_DEPS)
-	$(call py_action,preprocessor,$(DEFINES) $(ACDEFINES) $< -o $@)
-
-GARBAGE += $(MOZ_PKG_MANIFEST)
-endif
-
 ifeq ($(MOZ_WIDGET_TOOLKIT),cocoa)
 MOZ_PKG_MAC_DSSTORE=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/dsstore
 MOZ_PKG_MAC_BACKGROUND=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/background.png
@@ -206,12 +197,10 @@ FINDPATH=bin
 endif
 
 package-compare:: $(MOZ_PKG_MANIFEST)
-ifdef MOZ_PKG_MANIFEST_P
 	cd $(DIST); find $(PKGCOMP_FIND_OPTS) $(FINDPATH) -type f | sort > bin-list.txt
-	grep "^$(BINPATH)" $(MOZ_PKG_MANIFEST) | sed -e 's/^\///' | sort > $(DIST)/pack-list.txt
+	$(call py_action,preprocessor,$(DEFINES) $(ACDEFINES) $(MOZ_PKG_MANIFEST)) | grep '^$(BINPATH)' | sed -e 's/^\///' | sort > $(DIST)/pack-list.txt
 	-diff -u $(DIST)/pack-list.txt $(DIST)/bin-list.txt
 	rm -f $(DIST)/pack-list.txt $(DIST)/bin-list.txt
-endif
 
 # Overwrite the one made by Firefox with our own.
 make-sourcestamp-file::
