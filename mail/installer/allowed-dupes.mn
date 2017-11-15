@@ -8,11 +8,13 @@
 # mail
 chrome/classic/skin/classic/messenger/icons/new-mail-alert.png
 chrome/messenger/content/branding/icon48.png
+chrome/messenger/content/branding/icon64.png
 chrome/messenger/content/messenger/cloudfile/Box/management.js
 chrome/messenger/content/messenger/cloudfile/Hightail/management.js
 chrome/devtools/modules/devtools/client/themes/splitters.css
 chrome/devtools/skin/splitters.css
 chrome/icons/default/default48.png
+chrome/icons/default/default64.png
 # calendar addon
 extensions/{e2fda1a4-762b-4020-b5ad-a41df1933103}/chrome/skin/linux/lightning/imip.css
 extensions/{e2fda1a4-762b-4020-b5ad-a41df1933103}/chrome/skin/windows/lightning/imip.css
