@@ -45,7 +45,4 @@ fi
 # Include the DevTools client, not just the server (which is the default)
 MOZ_DEVTOOLS=all
 
-# Bundled extensions Lightning
-MOZ_CALENDAR=1
-
 NSS_EXTRA_SYMBOLS_FILE=../comm/mailnews/nss-extra.symbols
