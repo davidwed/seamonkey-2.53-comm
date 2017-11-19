@@ -331,8 +331,8 @@ var FullZoom = FullZoom || {
 };
 
 /***** init and helper functions for viewZoomOverlay.xul *****/
-window.addEventListener("load", registerZoomManager, false);
-window.addEventListener("unload", unregisterZoomManager, false);
+window.addEventListener("load", registerZoomManager);
+window.addEventListener("unload", unregisterZoomManager);
 
 function registerZoomManager() {
   FullZoom.init();
@@ -340,7 +340,7 @@ function registerZoomManager() {
   var zoomBundle = document.getElementById("bundle_viewZoom");
   var zoomMenu = document.getElementById("menu_zoom");
   var parentMenu = zoomMenu.parentNode;
-  parentMenu.addEventListener("popupshowing", updateViewMenu, false);
+  parentMenu.addEventListener("popupshowing", updateViewMenu);
 
   // initialize menu from toolkit.zoomManager.zoomValues and assign accesskeys
   var zoomFactors = ZoomManager.zoomValues;

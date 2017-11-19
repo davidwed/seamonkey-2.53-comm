@@ -170,7 +170,7 @@ function MailTasksOnLoad(aEvent)
   // initialize biff state
   Services.obs.addObserver(biffObserver, BIFF_TOPIC);
   biffObserver.observe(null, BIFF_TOPIC, null); // init mini-mail icon
-  addEventListener("unload", MailTasksOnUnload, false);
+  addEventListener("unload", MailTasksOnUnload);
 
   // don't try to biff if offline, but do so silently
   if (Services.io.offline)
@@ -247,4 +247,4 @@ function InformUserOfCertError(status, targetSite)
                   '','chrome,centerscreen,modal', params);
 }
 
-addEventListener("load", MailTasksOnLoad, false);
+addEventListener("load", MailTasksOnLoad);
