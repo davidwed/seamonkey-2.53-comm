@@ -297,7 +297,7 @@ function onLoadPageInfo()
 
   /* Select the requested tab, if the name is specified */
   loadTab(args);
-  Services.obs.notifyObservers(window, "page-info-dialog-loaded", null);
+  Services.obs.notifyObservers(window, "page-info-dialog-loaded");
 }
 
 function loadPageInfo(frameOuterWindowID, imageElement, browser)
@@ -409,7 +409,7 @@ function resetPageInfo(args)
   /* Rebuild the data */
   loadTab(args);
 
-  Services.obs.notifyObservers(window, "page-info-dialog-reset", null);
+  Services.obs.notifyObservers(window, "page-info-dialog-reset");
 }
 
 function onUnloadPageInfo()

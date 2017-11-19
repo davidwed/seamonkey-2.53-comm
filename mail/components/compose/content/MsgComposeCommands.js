@@ -514,7 +514,7 @@ var gSendListener = {
   onStatus: function (aMsgID, aMsg) {},
   onStopSending: function (aMsgID, aStatus, aMsg, aReturnFile) {
     if (Components.isSuccessCode(aStatus))
-      Services.obs.notifyObservers(null, "mail:composeSendSucceeded", null);
+      Services.obs.notifyObservers(null, "mail:composeSendSucceeded");
   },
   onGetDraftFolderURI: function (aFolderURI) {},
   onSendNotPerformed: function (aMsgID, aStatus) {},
@@ -1660,7 +1660,7 @@ function convertListItemsToRegularAttachment(aItems)
 
   dispatchAttachmentBucketEvent("attachments-converted", convertedAttachments);
   Services.obs.notifyObservers(convertedAttachments,
-                               "mail:attachmentsConverted", null);
+                               "mail:attachmentsConverted");
 
   // We leave the content location in for the notifications because
   // it may be needed to identify the attachment. But clear it out now.
@@ -3084,7 +3084,7 @@ function GenericSendMessage(msgType)
   }
 
   // hook for extra compose pre-processing
-  Services.obs.notifyObservers(window, "mail:composeOnSend", null);
+  Services.obs.notifyObservers(window, "mail:composeOnSend");
 
   var originalCharset = gMsgCompose.compFields.characterSet;
   // Check if the headers of composing mail can be converted to a mail charset.

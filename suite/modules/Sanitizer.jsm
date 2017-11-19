@@ -199,7 +199,7 @@ var Sanitizer = {
         try {
           var os = Cc["@mozilla.org/observer-service;1"]
                      .getService(Ci.nsIObserverService);
-          os.notifyObservers(null, "browser:purge-session-history", "");
+          os.notifyObservers(null, "browser:purge-session-history");
         } catch(ex) {}
       },
 
