@@ -127,7 +127,7 @@ var NotificationWatcher = {
   planForNotification: function(aController) {
     this.alerted = false;
     aController.window.document.addEventListener("AlertActive",
-                                                 this.alertActive, false);
+                                                 this.alertActive);
   },
   waitForNotification: function(aController) {
     if (!this.alerted) {
@@ -143,7 +143,7 @@ var NotificationWatcher = {
                           ALERT_TIMEOUT, 100);
 
     aController.window.document.removeEventListener("AlertActive",
-                                                    this.alertActive, false);
+                                                    this.alertActive);
   },
   alerted: false,
   alertActive: function() {

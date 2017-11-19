@@ -147,8 +147,8 @@ function CreateMailWindowGlobals()
   messenger = Cc["@mozilla.org/messenger;1"]
                 .createInstance(Ci.nsIMessenger);
 
-  window.addEventListener("blur", appIdleManager.onBlur, false);
-  window.addEventListener("focus", appIdleManager.onFocus, false);
+  window.addEventListener("blur", appIdleManager.onBlur);
+  window.addEventListener("focus", appIdleManager.onFocus);
 
   //Create windows status feedback
   // set the JS implementation of status feedback before creating the c++ one..
