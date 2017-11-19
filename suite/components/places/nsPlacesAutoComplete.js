@@ -463,7 +463,7 @@ function nsPlacesAutoComplete()
   // register observers
   this._os = Cc["@mozilla.org/observer-service;1"].
               getService(Ci.nsIObserverService);
-  this._os.addObserver(this, kTopicShutdown, false);
+  this._os.addObserver(this, kTopicShutdown);
 
 }
 
@@ -901,7 +901,7 @@ nsPlacesAutoComplete.prototype = {
     }
     // register observer
     if (aRegisterObserver) {
-      this._prefs.addObserver("", this, false);
+      this._prefs.addObserver("", this);
     }
   },
 
