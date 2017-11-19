@@ -66,7 +66,7 @@
       tree.addEventListener("DOMAttrModified", function treeDOMAttrMod(event) {
           if (event.attrName != "place")
             return;
-          tree.removeEventListener("DOMAttrModified", treeDOMAttrMod, false);
+          tree.removeEventListener("DOMAttrModified", treeDOMAttrMod);
           SimpleTest.executeSoon(function() {
             tree.view.selection.clearSelection();
             ok(document.getElementById("editBMPanel_newFolderButton").disabled,
@@ -76,7 +76,7 @@
             bs.removeItem(itemId);
             SimpleTest.finish();
             });
-        }, false);
+        });
       // Open the folder tree.
       document.getElementById("editBMPanel_foldersExpander").doCommand();
     }

@@ -1672,7 +1672,7 @@ var TabsInTitlebar = {
         if (event.target != window)
           return;
         TabsInTitlebar.allowedBy("sizemode", true);
-      }, false);
+      });
 
       // We need to update the appearance of the titlebar when the menu changes
       // from the active to the inactive state. We can't, however, rely on
