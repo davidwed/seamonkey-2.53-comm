@@ -60,7 +60,7 @@ function onCancel() {
 
 function onLoad() {
   document.getElementById("tasks")
-          .addEventListener("CheckboxStateChange", updateOKButtonState, false);
+          .addEventListener("CheckboxStateChange", updateOKButtonState);
 }
 
 function updateOKButtonState() {

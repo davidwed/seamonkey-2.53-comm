@@ -46,10 +46,10 @@ function test()
       if (frameCount++ < 2)
         return;
       gBrowser.selectedTab.linkedBrowser.removeEventListener("DOMContentLoaded",
-        gBrowserDOMContentLoaded, false)
+        gBrowserDOMContentLoaded)
       gTabLoaded = true;
       maybeClickLink();
-    }, false
+    }
   );
 }
 

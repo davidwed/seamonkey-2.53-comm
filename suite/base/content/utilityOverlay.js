@@ -320,9 +320,9 @@ function goCustomizeToolbar(toolbox)
     // that the user doesn't see a white flash.
     panel.style.visibility = "hidden";
     toolbox.addEventListener("beforecustomization", function toolboxBeforeCustom() {
-      toolbox.removeEventListener("beforecustomization", toolboxBeforeCustom, false);
+      toolbox.removeEventListener("beforecustomization", toolboxBeforeCustom);
       panel.style.removeProperty("visibility");
-    }, false);
+    });
     panel.openPopup(toolbox, "after_start", 0, 0);
     return sheetFrame.contentWindow;
   }
@@ -905,7 +905,7 @@ function utilityOnLoad(aEvent)
   // make sure we remove this observer later
   Services.prefs.addObserver("network.proxy.type", proxyTypeObserver);
 
-  addEventListener("unload", utilityOnUnload, false);
+  addEventListener("unload", utilityOnUnload);
 
   // set the initial state
   setOfflineUI(Services.io.offline);
@@ -922,7 +922,7 @@ function utilityOnUnload(aEvent)
   Services.prefs.removeObserver("network.proxy.type", proxyTypeObserver);
 }
 
-addEventListener("load", utilityOnLoad, false);
+addEventListener("load", utilityOnLoad);
 
 /**
  * example use:
