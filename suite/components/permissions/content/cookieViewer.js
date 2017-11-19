@@ -40,8 +40,8 @@ function Startup() {
   loadPermissions();
 
   // be prepared to reload the display if anything changes
-  Services.obs.addObserver(cookieReloadDisplay, "cookie-changed", false);
-  Services.obs.addObserver(cookieReloadDisplay, "perm-changed", false);
+  Services.obs.addObserver(cookieReloadDisplay, "cookie-changed");
+  Services.obs.addObserver(cookieReloadDisplay, "perm-changed");
 
   // filter the table if requested by caller
   if (window.arguments &&

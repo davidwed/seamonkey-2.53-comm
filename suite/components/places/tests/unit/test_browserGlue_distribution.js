@@ -75,10 +75,10 @@ function run_test() {
           do_execute_soon(continue_test);
         }
       }
-      os.addObserver(cObserver, TOPIC_CUSTOMIZATION_COMPLETE, false);
+      os.addObserver(cObserver, TOPIC_CUSTOMIZATION_COMPLETE);
     }
   }
-  os.addObserver(observer, PlacesUtils.TOPIC_INIT_COMPLETE, false);
+  os.addObserver(observer, PlacesUtils.TOPIC_INIT_COMPLETE);
 }
 
 function continue_test() {

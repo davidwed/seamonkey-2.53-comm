@@ -378,7 +378,7 @@ appUpdater.prototype =
             return;
           }
           Services.obs.removeObserver(selectPanelOnUpdate, "update-staged");
-        }, "update-staged", false);
+        }, "update-staged");
       } else {
         this.selectPanel("apply");
       }

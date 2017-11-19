@@ -32,7 +32,7 @@ var observer = {
   },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 };
-Services.obs.addObserver(observer, "uri-visit-saved", false);
+Services.obs.addObserver(observer, "uri-visit-saved");
 
 function test()
 {
