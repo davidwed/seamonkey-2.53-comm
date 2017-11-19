@@ -492,7 +492,7 @@ AppQuitObserver.prototype = {
   register: function() {
     var obsService = Cc["@mozilla.org/observer-service;1"]
                      .getService(Ci.nsIObserverService);
-    obsService.addObserver(this, "quit-application", false);
+    obsService.addObserver(this, "quit-application");
   },
   unregister: function() {
     var obsService = Cc["@mozilla.org/observer-service;1"]
