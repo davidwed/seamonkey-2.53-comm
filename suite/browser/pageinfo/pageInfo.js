@@ -591,7 +591,7 @@ function addImage(imageViewRow)
 
     // Add the observer, only once.
     if (gImageView.data.length == 1) {
-      Services.obs.addObserver(imagePermissionObserver, "perm-changed", false);
+      Services.obs.addObserver(imagePermissionObserver, "perm-changed");
     }
   }
   else {
