@@ -361,7 +361,7 @@ var gPluginHandler = {
       // Notify all windows that an application quit has been requested.
       let cancelQuit = Cc["@mozilla.org/supports-PRBool;1"].
                          createInstance(Ci.nsISupportsPRBool);
-      Services.obs.notifyObservers(cancelQuit, "quit-application-requested", null);
+      Services.obs.notifyObservers(cancelQuit, "quit-application-requested");
 
       // Something aborted the quit process.
       if (cancelQuit.data)
