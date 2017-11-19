@@ -1077,7 +1077,7 @@ function DelayedStartup() {
   setTimeout(function() { SafeBrowsing.init(); }, 2000);
 
   gBrowserInit.delayedStartupFinished = true;
-  Services.obs.notifyObservers(window, "browser-delayed-startup-finished", "");
+  Services.obs.notifyObservers(window, "browser-delayed-startup-finished");
 }
 
 function UpdateNavBar()
@@ -2944,11 +2944,11 @@ function WindowIsClosing()
   if (!gPrivate && !/Mac/.test(navigator.platform) && isClosingLastBrowser()) {
     let closingCanceled = Cc["@mozilla.org/supports-PRBool;1"]
                             .createInstance(Ci.nsISupportsPRBool);
-    Services.obs.notifyObservers(closingCanceled, "browser-lastwindow-close-requested", null);
+    Services.obs.notifyObservers(closingCanceled, "browser-lastwindow-close-requested");
     if (closingCanceled.data)
       return false;
 
-    Services.obs.notifyObservers(null, "browser-lastwindow-close-granted", null);
+    Services.obs.notifyObservers(null, "browser-lastwindow-close-granted");
 
     return true;
   }

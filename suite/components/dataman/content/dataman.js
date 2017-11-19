@@ -333,7 +333,7 @@ var gDomains = {
       // Add domains for web storages.
       gDataman.debugMsg("Add storages to domain list: " + Date.now()/1000);
       // Force DOM Storage to write its data to the disk.
-      Services.obs.notifyObservers(window, "domstorage-flush-timer", "");
+      Services.obs.notifyObservers(window, "domstorage-flush-timer");
       yield setTimeout(nextStep, 0);
       gStorage.loadList();
       for (let sStorage of gStorage.storages) {
@@ -460,7 +460,7 @@ var gDomains = {
       yield setTimeout(nextStep, 0);
 
       // Send a notification that we have finished.
-      Services.obs.notifyObservers(window, "dataman-loaded", null);
+      Services.obs.notifyObservers(window, "dataman-loaded");
       yield undefined;
     }
 

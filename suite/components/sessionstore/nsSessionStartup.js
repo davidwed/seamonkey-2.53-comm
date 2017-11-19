@@ -174,7 +174,7 @@ SessionStartup.prototype = {
                         .createInstance(Ci.nsISupportsString);
     stateString.data = this._readFile(aFile) || "";
 
-    Services.obs.notifyObservers(stateString, "sessionstore-state-read", "");
+    Services.obs.notifyObservers(stateString, "sessionstore-state-read");
 
     return stateString.data;
   },

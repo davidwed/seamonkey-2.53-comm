@@ -877,7 +877,7 @@ AccountsService.prototype = {
           .map(this.getAccountByNumericId, this)
           .filter(a => a);
 
-    Services.obs.notifyObservers(this, "account-list-updated", null);
+    Services.obs.notifyObservers(this, "account-list-updated");
   },
 
   get _accountList() { return Services.prefs.getCharPref(kPrefMessengerAccounts); },
@@ -1000,7 +1000,7 @@ AccountsService.prototype = {
 
     // Notify observers so that any message stating that autologin is
     // disabled can be removed
-    Services.obs.notifyObservers(this, "autologin-processed", null);
+    Services.obs.notifyObservers(this, "autologin-processed");
   },
 
   _checkingIfPasswordStillMissing: false,
@@ -1062,7 +1062,7 @@ AccountsService.prototype = {
     let list = this._accountList;
     this._accountList = list ? list + "," + key : key;
 
-    Services.obs.notifyObservers(account, "account-added", null);
+    Services.obs.notifyObservers(account, "account-added");
     return account;
   },
 
@@ -1079,7 +1079,7 @@ AccountsService.prototype = {
     account.remove();
     this._accounts.splice(index, 1);
     delete this._accountsById[id];
-    Services.obs.notifyObservers(account, "account-removed", null);
+    Services.obs.notifyObservers(account, "account-removed");
 
     /* Update the account list pref. */
     let list = this._accountList;
