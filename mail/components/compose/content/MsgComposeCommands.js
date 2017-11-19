@@ -1725,9 +1725,9 @@ var messageComposeOfflineQuitObserver =
 function AddMessageComposeOfflineQuitObserver()
 {
   Services.obs.addObserver(messageComposeOfflineQuitObserver,
-                           "network:offline-status-changed", false);
+                           "network:offline-status-changed");
   Services.obs.addObserver(messageComposeOfflineQuitObserver,
-                           "quit-application-requested", false);
+                           "quit-application-requested");
 
   // set the initial state of the send button
   MessageComposeOfflineStateChanged(Services.io.offline);
@@ -2232,7 +2232,7 @@ var dictionaryRemovalObserver =
   isAdded: false,
 
   addObserver: function() {
-    Services.obs.addObserver(this, "spellcheck-dictionary-remove", false);
+    Services.obs.addObserver(this, "spellcheck-dictionary-remove");
     this.isAdded = true;
   },
 
