@@ -2300,7 +2300,7 @@
                                .createInstance(Ci.nsISupportsPRBool);
             var os = Cc["@mozilla.org/observer-service;1"]
                        .getService(Ci.nsIObserverService);
-            os.notifyObservers(cancelQuit, "quit-application-requested", null);
+            os.notifyObservers(cancelQuit, "quit-application-requested");
 
             // Something aborted the quit process.
             if (cancelQuit.data)
