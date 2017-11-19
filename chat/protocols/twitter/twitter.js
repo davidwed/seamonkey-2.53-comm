@@ -378,7 +378,7 @@ TimelineConversation.prototype = {
   sendTyping: function(aString) {
     if (aString.length == 0 && this.inReplyToStatusId) {
       delete this.inReplyToStatusId;
-      this.notifyObservers(null, "status-text-changed", "");
+      this.notifyObservers(null, "status-text-changed");
       return kMaxMessageLength;
     }
     return kMaxMessageLength - this.getTweetLength(aString);
@@ -968,7 +968,7 @@ Account.prototype = {
       },
       QueryInterface: XPCOMUtils.generateQI([Ci.prplIRequestBrowser])
     };
-    Services.obs.notifyObservers(this._browserRequest, "browser-request", null);
+    Services.obs.notifyObservers(this._browserRequest, "browser-request");
   },
   finishAuthorizationRequest: function() {
     // Clean up the cookies, so that several twitter OAuth dialogs can work
