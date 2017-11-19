@@ -49,7 +49,7 @@ function onLoadPermission(uri, principal)
   if (gPermPrincipal && !gPermPrincipal.isSystemPrincipal) {
     var hostText = document.getElementById("hostText");
     hostText.value = gPermPrincipal.origin;
-    Services.obs.addObserver(permissionObserver, "perm-changed", false);
+    Services.obs.addObserver(permissionObserver, "perm-changed");
   }
   for (var i of gPermissions)
     initRow(i);
