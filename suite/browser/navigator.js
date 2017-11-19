@@ -258,14 +258,14 @@ var gFormSubmitObserver = {
         }
       }
     }
-    element.addEventListener("input", inputHandler, false);
-    element.addEventListener("blur", blurHandler, false);
+    element.addEventListener("input", inputHandler);
+    element.addEventListener("blur", blurHandler);
 
     // One event to bring them all and in the darkness bind them.
     this.panel.addEventListener("popuphiding", function popupHidingHandler(aEvent) {
-      aEvent.target.removeEventListener("popuphiding", popupHidingHandler, false);
-      element.removeEventListener("input", inputHandler, false);
-      element.removeEventListener("blur", blurHandler, false);
+      aEvent.target.removeEventListener("popuphiding", popupHidingHandler);
+      element.removeEventListener("input", inputHandler);
+      element.removeEventListener("blur", blurHandler);
     }, false);
 
     this.panel.hidden = false;
@@ -903,7 +903,7 @@ function Startup()
   // hook up UI through progress listener
   getBrowser().addProgressListener(window.XULBrowserWindow);
   // setup the search service DOMLinkAdded listener
-  getBrowser().addEventListener("DOMLinkAdded", BrowserSearch, false);
+  getBrowser().addEventListener("DOMLinkAdded", BrowserSearch);
   // hook up drag'n'drop
   getBrowser().droppedLinkHandler = handleDroppedLink;
 
@@ -1025,7 +1025,7 @@ function Startup()
 
   addEventListener("AppCommand", HandleAppCommandEvent, true);
 
-  addEventListener("sizemodechange", updateWindowState, false);
+  addEventListener("sizemodechange", updateWindowState);
 
   // does clicking on the urlbar select its contents?
   gClickSelectsAll = Services.prefs.getBoolPref("browser.urlbar.clickSelectsAll");
@@ -1063,7 +1063,7 @@ function Startup()
   ZoomListeners.init();
   gBrowser.addTabsProgressListener(ZoomListeners);
 
-  window.addEventListener("MozAfterPaint", DelayedStartup, false);
+  window.addEventListener("MozAfterPaint", DelayedStartup);
 }
 
 // Minimal gBrowserInit shim to keep the Addon-SDK happy.
@@ -1180,7 +1180,7 @@ function Shutdown()
   // shut down browser access support
   window.browserDOMWindow = null;
 
-  getBrowser().removeEventListener("DOMLinkAdded", BrowserSearch, false);
+  getBrowser().removeEventListener("DOMLinkAdded", BrowserSearch);
 
   try {
     getBrowser().removeProgressListener(window.XULBrowserWindow);
@@ -1578,7 +1578,7 @@ var BrowserSearch = {
 
       win = window.openDialog(getBrowserURL(), "_blank",
                               "chrome,all,dialog=no", "about:blank");
-      win.addEventListener("load", webSearchCallback, false);
+      win.addEventListener("load", webSearchCallback);
       return;
     }
 
@@ -2800,7 +2800,7 @@ function SetPageProxyState(aState, aURI)
 
   if (aState == "valid") {
     gLastValidURLStr = gURLBar.value;
-    gURLBar.addEventListener("input", UpdatePageProxyState, false);
+    gURLBar.addEventListener("input", UpdatePageProxyState);
     if (gBrowser.shouldLoadFavIcon(aURI)) {
       var favStr = gBrowser.buildFavIconString(aURI);
       if (favStr != gProxyFavIcon.src) {
@@ -2814,7 +2814,7 @@ function SetPageProxyState(aState, aURI)
       gProxyFavIcon.removeAttribute("src");
     }
   } else if (aState == "invalid") {
-    gURLBar.removeEventListener("input", UpdatePageProxyState, false);
+    gURLBar.removeEventListener("input", UpdatePageProxyState);
     gProxyDeck.selectedIndex = 0;
     gProxyFavIcon.removeAttribute("src");
   }
@@ -3276,7 +3276,7 @@ var LightWeightThemeWebInstaller = {
 
     this._previewWindow = event.target.ownerDocument.defaultView;
     this._previewWindow.addEventListener("pagehide", this, true);
-    gBrowser.tabContainer.addEventListener("TabSelect", this, false);
+    gBrowser.tabContainer.addEventListener("TabSelect", this);
 
     this._manager.previewTheme(data);
   },
@@ -3288,7 +3288,7 @@ var LightWeightThemeWebInstaller = {
 
     this._previewWindow.removeEventListener("pagehide", this, true);
     this._previewWindow = null;
-    gBrowser.tabContainer.removeEventListener("TabSelect", this, false);
+    gBrowser.tabContainer.removeEventListener("TabSelect", this);
 
     this._manager.resetPreview();
   },
