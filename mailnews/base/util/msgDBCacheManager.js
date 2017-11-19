@@ -45,7 +45,7 @@ var msgDBCacheManager =
     // we listen for "quit-application-granted" instead of
     // "quit-application-requested" because other observers of the
     // latter can cancel the shutdown.
-    Services.obs.addObserver(this, "quit-application-granted", false);
+    Services.obs.addObserver(this, "quit-application-granted");
 
     this.startPeriodicCheck();
 
