@@ -538,7 +538,7 @@
         document.getBindingParent(this)._textboxInitialized = true;
 
         // Add observer for suggest preference
-        this._prefBranch.addObserver("browser.search.suggest.enabled", this, false);
+        this._prefBranch.addObserver("browser.search.suggest.enabled", this);
 
         this._inputBox.setAttribute("suggestchecked", this._suggestEnabled);
       ]]></constructor>
