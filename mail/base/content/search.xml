@@ -64,13 +64,13 @@
                                   "keyLabelMac" : "keyLabelNonMac")));
 
           Services.prefs.addObserver("mailnews.database.global.indexer.enabled",
-                                     this._prefObserver, false);
+                                     this._prefObserver);
 
           this.glodaCompleter =
             Cc["@mozilla.org/autocomplete/search;1?name=gloda"]
               .getService(Ci.nsIAutoCompleteSearch)
               .wrappedJSObject;
-          Services.obs.addObserver(this, "autocomplete-did-enter-text", false);
+          Services.obs.addObserver(this, "autocomplete-did-enter-text");
 
           this.glodaEnabled =
             Services.prefs.getBoolPref("mailnews.database.global.indexer.enabled");
