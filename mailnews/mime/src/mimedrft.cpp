@@ -1340,6 +1340,7 @@ mime_parse_stream_complete (nsMIMESession *stream)
         composeFormat = nsIMsgCompFormat::PlainText;
 
       char *body = nullptr;
+      uint32_t bodyLen = 0;
 
       if (!bodyAsAttachment && mdd->messageBody->m_tmpFile)
       {
@@ -1349,7 +1350,6 @@ mime_parse_stream_complete (nsMIMESession *stream)
         mdd->messageBody->m_tmpFile = do_QueryInterface(tempFileCopy);
         tempFileCopy = nullptr;
         mdd->messageBody->m_tmpFile->GetFileSize(&fileSize);
-        uint32_t bodyLen = 0;
 
         // The stream interface can only read up to 4GB (32bit uint).
         // It is highly unlikely to encounter a body lager than that limit,
