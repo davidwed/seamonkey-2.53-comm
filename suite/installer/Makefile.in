@@ -192,7 +192,7 @@ DEFINES += -DMOZ_CLANG_RT_ASAN_LIB=$(notdir $(MOZ_CLANG_RT_ASAN_LIB_PATH))
 endif
 
 libs::
-	$(MAKE) -C $(DEPTH)/suite/locales langpack
+	$(MAKE) -C $(commtopobjdir)/suite/locales langpack
 
 ifeq (WINNT,$(OS_ARCH))
 PKGCOMP_FIND_OPTS =

@@ -9,6 +9,7 @@ SOURCES += ['nsSuiteApp.cpp']
 
 LOCAL_INCLUDES += [
     '!/build',
+    '/%s/ipc/contentproc/' % CONFIG['mozreltopsrcdir'],
     '/%s/toolkit/xre' % CONFIG['mozreltopsrcdir'],
     '/%s/xpcom/base' % CONFIG['mozreltopsrcdir'],
     '/%s/xpcom/build' % CONFIG['mozreltopsrcdir'],
