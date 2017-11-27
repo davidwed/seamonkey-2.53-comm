@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 toolkit.jar:
-    content/global/autocomplete.xml                             (resources/content/autocomplete.xml)
+   content/global/autocomplete.xml                                  (content/autocomplete.xml)
 
 comm.jar:
-    content/communicator/autocomplete.css                       (resources/content/autocomplete.css)
+   content/communicator/autocomplete.css                            (content/autocomplete.css)
