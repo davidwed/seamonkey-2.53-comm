@@ -4,32 +4,32 @@
 
 ifndef COMM_BUILD
 package:
-	@$(MAKE) -C suite/installer
+	@$(MAKE) -C $(commtopobjdir)/suite/installer
 
 package-compare:
-	@$(MAKE) -C suite/installer package-compare
+	@$(MAKE) -C $(commtopobjdir)/suite/installer package-compare
 
 install::
-	@$(MAKE) -C suite/installer install
+	@$(MAKE) -C $(commtopobjdir)/suite/installer install
 
 source-package::
-	@$(MAKE) -C suite/installer source-package
+	@$(MAKE) -C $(commtopobjdir)/suite/installer source-package
 
 upload::
-	@$(MAKE) -C suite/installer upload
+	@$(MAKE) -C $(commtopobjdir)/suite/installer upload
 
 source-upload::
-	@$(MAKE) -C suite/installer source-upload
+	@$(MAKE) -C $(commtopobjdir)/suite/installer source-upload
 
 # make -j1 because dependencies in l10n build targets don't work
 # with parallel builds
 distribution:
-	$(MAKE) -j1 -C suite/locales $@
+	$(MAKE) -j1 -C $(commtopobjdir)/suite/locales $@
 
 # make -j1 because dependencies in l10n build targets don't work
 # with parallel builds
 merge-% installers-% langpack-% chrome-% clobber-%:
-	$(MAKE) -j1 -C suite/locales $@
+	$(MAKE) -j1 -C $(commtopobjdir)/suite/locales $@
 
 # mochitests need to be run from the Mozilla build system
 ifdef ENABLE_TESTS
