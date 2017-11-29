@@ -1305,6 +1305,10 @@ var FeedSubscriptions = {
     document.getElementById("removeFeed").hidden = !isFeed;
     document.getElementById("importOPML").hidden = !isServer;
     document.getElementById("exportOPML").hidden = !isServer;
+
+    document.getElementById("importOPML").disabled =
+    document.getElementById("exportOPML").disabled =
+      this.mActionMode == this.kImportingOPML;
   },
 
   onMouseDown: function (aEvent)
@@ -1325,7 +1329,7 @@ var FeedSubscriptions = {
   setFocus: function ()
   {
     let item = this.mView.currentItem;
-    if (!item)
+    if (!item || this.mActionMode == this.kImportingOPML)
       return;
 
     let nameValue = document.getElementById("nameValue");
@@ -2249,7 +2253,9 @@ var FeedSubscriptions = {
 
     return new Promise(resolve => {
       fp.open(rv => {
-        if (rv != Ci.nsIFilePicker.returnOK || !fp.file) {
+        if ((rv != Ci.nsIFilePicker.returnOK &&
+             rv != Ci.nsIFilePicker.returnReplace) ||
+            !fp.file) {
           resolve(null);
           return;
         }
