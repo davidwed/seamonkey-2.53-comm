@@ -7,7 +7,7 @@
 #include "mozilla/Logging.h"
 #include "mozilla/DebugOnly.h"
 
-static mozilla::LazyLogModule gMapiAddressBookLog("nsMapiAddressBookLog");
+static mozilla::LazyLogModule gMapiAddressBookLog("MAPIAddressBook");
 
 #define PRINTF(args) MOZ_LOG(gMapiAddressBookLog, mozilla::LogLevel::Debug, args)
 
