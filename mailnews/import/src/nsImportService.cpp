@@ -36,6 +36,8 @@
 #include "nsIMsgSend.h"
 #include "nsMsgUtils.h"
 
+mozilla::LazyLogModule IMPORTLOGMODULE("Import");
+
 static nsIImportService *  gImportService = nullptr;
 static const char *  kWhitespace = "\b\t\r\n ";
 
