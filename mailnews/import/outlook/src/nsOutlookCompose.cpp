@@ -43,8 +43,6 @@
 #include "nsMsgMessageFlags.h"
 #include "nsMsgLocalFolderHdrs.h"
 
-#include <algorithm>
-
 static NS_DEFINE_CID(kMsgCompFieldsCID, NS_MSGCOMPFIELDS_CID);
 
 // We need to do some calculations to set these numbers to something reasonable!
