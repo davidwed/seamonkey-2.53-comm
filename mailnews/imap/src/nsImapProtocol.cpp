@@ -37,7 +37,6 @@
 #include "nsTextFormatter.h"
 #include "nsIMsgHdr.h"
 #include "nsMsgI18N.h"
-#include <algorithm>
 // for the memory cache...
 #include "nsICacheEntry.h"
 #include "nsICacheStorage.h"
@@ -72,7 +71,6 @@
 #include "nsDebug.h"
 #include "nsMsgCompressIStream.h"
 #include "nsMsgCompressOStream.h"
-#include "nsAlgorithm.h"
 #include "mozilla/Logging.h"
 #include "mozilla/Attributes.h"
 #include "nsIPrincipal.h"
