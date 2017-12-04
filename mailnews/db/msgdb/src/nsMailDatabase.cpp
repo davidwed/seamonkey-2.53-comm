@@ -16,9 +16,9 @@
 #include "nsMsgUtils.h"
 #include "nsIMsgPluggableStore.h"
 
-static mozilla::LazyLogModule IMAPOffline("IMAPOFFLINE");
-
 using namespace mozilla;
+
+extern LazyLogModule IMAPOffline; // defined in nsMsgOfflineImapOperation.cpp
 
 // scope for all offine ops table
 const char *kOfflineOpsScope = "ns:msg:db:row:scope:ops:all";
