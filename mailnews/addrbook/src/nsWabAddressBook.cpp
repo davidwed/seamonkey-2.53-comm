@@ -7,7 +7,6 @@
 #include "nsWabAddressBook.h"
 #include "mozilla/Logging.h"
 #include "mozilla/DebugOnly.h"
-#include <algorithm>
 
 using namespace mozilla;
 
