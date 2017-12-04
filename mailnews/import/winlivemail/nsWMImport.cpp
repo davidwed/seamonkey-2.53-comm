@@ -33,7 +33,7 @@
 #include "nsIStringBundle.h"
 #include "nsUnicharUtils.h"
 
-#include "WMDebugLog.h"
+#include "ImportDebug.h"
 
 static NS_DEFINE_IID(kISupportsIID, NS_ISUPPORTS_IID);
 
