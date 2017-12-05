@@ -5651,9 +5651,7 @@ void nsMsgDBFolder::decodeMsgSnippet(const nsACString& aEncodingType, bool aIsCo
   }
   else if (MsgLowerCaseEqualsLiteral(aEncodingType, ENCODING_QUOTED_PRINTABLE))
   {
-    // giant hack - decode in place, and truncate string.
-    MsgStripQuotedPrintable((unsigned char *) aMsgSnippet.get());
-    aMsgSnippet.SetLength(strlen(aMsgSnippet.get()));
+    MsgStripQuotedPrintable(aMsgSnippet);
   }
 }
 
