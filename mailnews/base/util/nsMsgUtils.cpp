@@ -1479,13 +1479,15 @@ nsresult MsgGetLocalFileFromURI(const nsACString &aUTF8Path, nsIFile **aFile)
   return NS_OK;
 }
 
-NS_MSG_BASE void MsgStripQuotedPrintable (unsigned char *src)
+NS_MSG_BASE void MsgStripQuotedPrintable (nsCString& aSrc)
 {
   // decode quoted printable text in place
 
-  if (!*src)
+  if (aSrc.IsEmpty())
     return;
-  unsigned char *dest = src;
+
+  char *src = aSrc.BeginWriting();
+  char *dest = src;
   int srcIdx = 0, destIdx = 0;
 
   while (src[srcIdx] != 0)
@@ -1526,6 +1528,7 @@ NS_MSG_BASE void MsgStripQuotedPrintable (unsigned char *src)
   }
 
   dest[destIdx] = src[srcIdx]; // null terminate
+  aSrc.SetLength(destIdx);
 }
 
 NS_MSG_BASE nsresult MsgEscapeString(const nsACString &aStr,
