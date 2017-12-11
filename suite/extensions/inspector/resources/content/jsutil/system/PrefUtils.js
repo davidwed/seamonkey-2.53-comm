@@ -5,23 +5,23 @@
 /***************************************************************
 * PrefUtils -------------------------------------------------
 *  Utility for easily using the Mozilla preferences system.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 ****************************************************************/
+Components.utils.import("resource://gre/modules/Services.jsm");
 
-//////////// global variables /////////////////////
+//////////// global variables ////////////////////
 
 //////////// global constants ////////////////////
-
 const nsIPrefBranch = Components.interfaces.nsIPrefBranch;
 
 ////////////////////////////////////////////////////////////////////////////
 //// class PrefUtils
 
-var PrefUtils = 
+var PrefUtils =
 {
   mPrefs: null,
-  
+
   init: function()
   {
     var prefService = XPCU.getService("@mozilla.org/preferences-service;1", "nsIPrefService");
@@ -49,14 +49,18 @@ var PrefUtils =
   setPref: function(aName, aValue)
   {
     if (!this.mPrefs) this.init();
-    
+
     var type = this.mPrefs.getPrefType(aName);
     try {
       if (type == nsIPrefBranch.PREF_STRING) {
-        var str = Components.classes["@mozilla.org/supports-string;1"]
-                            .createInstance(Components.interfaces.nsISupportsString);
-        str.data = aValue;
-        this.mPrefs.setComplexValue(aName, Components.interfaces.nsISupportsString, str);
+        if (Services.vc.compare(Services.appinfo.platformVersion, "55.0a1") >= 0) {
+          this.mPrefs.setStringPref(aName, aValue);
+        } else {
+          var str = Components.classes["@mozilla.org/supports-string;1"]
+                              .createInstance(Components.interfaces.nsISupportsString);
+          str.data = aValue;
+          this.mPrefs.setComplexValue(aName, Components.interfaces.nsISupportsString, str);
+        }
       } else if (type == nsIPrefBranch.PREF_BOOL) {
         this.mPrefs.setBoolPref(aName, aValue);
       } else if (type == nsIPrefBranch.PREF_INT) {
@@ -74,6 +78,9 @@ var PrefUtils =
     var type = this.mPrefs.getPrefType(aName);
     try {
       if (type == nsIPrefBranch.PREF_STRING) {
+        if (Services.vc.compare(Services.appinfo.platformVersion, "55.0a1") >= 0) {
+          return this.mPrefs.getStringPref(aName);
+        }
         return this.mPrefs.getComplexValue(aName, Components.interfaces.nsISupportsString).data;
       } else if (type == nsIPrefBranch.PREF_BOOL) {
         return this.mPrefs.getBoolPref(aName);
@@ -85,6 +92,4 @@ var PrefUtils =
     }
     return null;
   }
-  
 };
-

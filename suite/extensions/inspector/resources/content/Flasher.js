@@ -4,17 +4,20 @@
 
 /***************************************************************
 * Flasher ---------------------------------------------------
-*   Object for controlling a timed flashing animation which 
+*   Object for controlling a timed flashing animation which
 *   paints a border around an element.
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * REQUIRED IMPORTS:
 ****************************************************************/
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 //////////// global variables /////////////////////
 
 //////////// global constants ////////////////////
 
-const HIGHLIGHTED_PSEUDO_CLASS = ":-moz-devtools-highlighted";
+const isGecko58plus = Services.vc.compare(Services.appinfo.platformVersion, "58.0a1") >= 0;
+
+const HIGHLIGHTED_PSEUDO_CLASS = isGecko58plus? ":target" : ":-moz-devtools-highlighted";
 const INVERT = "filter: url(\"data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='invert'><feColorMatrix in='SourceGraphic' type='matrix' values='-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0'/></filter></svg>%23invert\") !important; "
 
 ////////////////////////////////////////////////////////////////////////////
@@ -30,7 +33,7 @@ function Flasher(aColor, aThickness, aDuration, aSpeed, aInvert)
   this.thickness = aThickness;
   this.invert = aInvert;
   this.duration = aDuration;
-  this.mSpeed = aSpeed;
+  this.speed = aSpeed;
 }
 
 Flasher.prototype =
@@ -192,14 +195,14 @@ LegacyFlasher.prototype =
   //// Properties
 
   get flashing() { return this.mFlashTimeout != null; },
-  
+
   get element() { return this.mElement; },
-  set element(val) 
-  { 
+  set element(val)
+  {
     if (val && val.nodeType == Node.ELEMENT_NODE) {
-      this.mElement = val; 
+      this.mElement = val;
       this.mShell.scrollElementIntoView(val);
-    } else 
+    } else
       throw "Invalid node type.";
   },
 
@@ -344,10 +347,11 @@ DOMIFlasher.prototype =
 
   init: function DOMIFlasher_init()
   {
-    try {
+    // See Bug 368608 comment 43. Flasher should work in Gecko 25 and up.
+    if (Services.vc.compare(Services.appinfo.platformVersion, "25.0a2") >= 0) {
       this.mFlasher = new Flasher(this.color, this.thickness, this.duration,
                                   this.speed, this.invert);
-    } catch (e) {
+    } else {
       this.mFlasher = new LegacyFlasher(this.color, this.thickness,
                                         this.duration, this.speed, this.invert);
     }
