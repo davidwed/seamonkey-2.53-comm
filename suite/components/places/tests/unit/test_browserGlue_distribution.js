@@ -40,7 +40,7 @@ function run_test() {
   let testDistributionFile = gTestDir.clone();
   testDistributionFile.append("distribution.ini");
   testDistributionFile.copyTo(distroDir, "distribution.ini");
-  do_check_true(testDistributionFile.exists());
+  Assert.ok(testDistributionFile.exists());
 
   // Disable Smart Bookmarks creation.
   Services.prefs.setIntPref(PREF_SMART_BOOKMARKS_VERSION, -1);
@@ -52,7 +52,7 @@ function run_test() {
            getService(Ci.nsINavHistoryService);
   // Check a new database has been created.
   // nsSuiteGlue will use databaseStatus to manage initialization.
-  do_check_eq(hs.databaseStatus, hs.DATABASE_STATUS_CREATE);
+  Assert.equal(hs.databaseStatus, hs.DATABASE_STATUS_CREATE);
 
   // Initialize nsSuiteGlue.
   let bg = Cc["@mozilla.org/suite/suiteglue;1"].
@@ -89,25 +89,25 @@ function continue_test() {
 
   // Check the custom bookmarks exist on menu.
   let menuItemId = bs.getIdForItemAt(bs.bookmarksMenuFolder, 0);
-  do_check_neq(menuItemId, -1);
-  do_check_eq(bs.getItemTitle(menuItemId), "Menu Link Before");
+  Assert.notEqual(menuItemId, -1);
+  Assert.equal(bs.getItemTitle(menuItemId), "Menu Link Before");
   menuItemId = bs.getIdForItemAt(bs.bookmarksMenuFolder, 1 + DEFAULT_BOOKMARKS_ON_MENU);
-  do_check_neq(menuItemId, -1);
-  do_check_eq(bs.getItemTitle(menuItemId), "Menu Link After");
+  Assert.notEqual(menuItemId, -1);
+  Assert.equal(bs.getItemTitle(menuItemId), "Menu Link After");
 
   // Check the custom bookmarks exist on toolbar.
   let toolbarItemId = bs.getIdForItemAt(bs.toolbarFolder, 0);
-  do_check_neq(toolbarItemId, -1);
-  do_check_eq(bs.getItemTitle(toolbarItemId), "Toolbar Link Before");
+  Assert.notEqual(toolbarItemId, -1);
+  Assert.equal(bs.getItemTitle(toolbarItemId), "Toolbar Link Before");
   toolbarItemId = bs.getIdForItemAt(bs.toolbarFolder, 1 + DEFAULT_BOOKMARKS_ON_TOOLBAR);
-  do_check_neq(toolbarItemId, -1);
-  do_check_eq(bs.getItemTitle(toolbarItemId), "Toolbar Link After");
+  Assert.notEqual(toolbarItemId, -1);
+  Assert.equal(bs.getItemTitle(toolbarItemId), "Toolbar Link After");
 
   // Check the bmprocessed pref has been created.
-  do_check_true(Services.prefs.getBoolPref(PREF_BMPROCESSED));
+  Assert.ok(Services.prefs.getBoolPref(PREF_BMPROCESSED));
 
   // Check distribution prefs have been created.
-  do_check_eq(Services.prefs.getCharPref(PREF_DISTRIBUTION_ID), "516444");
+  Assert.equal(Services.prefs.getCharPref(PREF_DISTRIBUTION_ID), "516444");
 
   do_test_finished();
 }
@@ -120,5 +120,5 @@ do_register_cleanup(function() {
   iniFile.append("distribution.ini");
   if (iniFile.exists())
     iniFile.remove(false);
-  do_check_false(iniFile.exists());
+  Assert.ok(!iniFile.exists());
 });

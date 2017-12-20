@@ -27,7 +27,7 @@ tests.push({
   description: "Export to bookmarks.html if autoExportHTML is true.",
   exec: function() {
     // Sanity check: we should have bookmarks on the toolbar.
-    do_check_true(bs.getIdForItemAt(bs.toolbarFolder, 0) > 0);
+    Assert.ok(bs.getIdForItemAt(bs.toolbarFolder, 0) > 0);
 
     // Set preferences.
     Services.prefs.setBoolPref(PREF_AUTO_EXPORT_HTML);
@@ -43,7 +43,7 @@ tests.push({
     check_JSON_backup();
 
     // Check preferences have not been reverted.
-    do_check_true(Services.prefs.getBoolPref(PREF_AUTO_EXPORT_HTML));
+    Assert.ok(Services.prefs.getBoolPref(PREF_AUTO_EXPORT_HTML));
     // Reset preferences.
     Services.prefs.setBoolPref(PREF_AUTO_EXPORT_HTML, false);
 
@@ -57,7 +57,7 @@ tests.push({
   description: "Export to bookmarks.html if autoExportHTML is true and a bookmarks.html exists.",
   exec: function() {
     // Sanity check: we should have bookmarks on the toolbar.
-    do_check_true(bs.getIdForItemAt(bs.toolbarFolder, 0) > 0);
+    Assert.ok(bs.getIdForItemAt(bs.toolbarFolder, 0) > 0);
 
     // Set preferences.
     Services.prefs.setBoolPref(PREF_AUTO_EXPORT_HTML, true);
@@ -76,11 +76,11 @@ tests.push({
     // Check a new bookmarks.html has been created.
     let profileBookmarksHTMLFile = check_bookmarks_html();
     //XXX not working on Linux unit boxes. Could be filestats caching issue.
-    //do_check_true(profileBookmarksHTMLFile.lastModifiedTime > lastMod);
-    do_check_neq(profileBookmarksHTMLFile.fileSize, fileSize);
+    //Assert.ok(profileBookmarksHTMLFile.lastModifiedTime > lastMod);
+    Assert.notEqual(profileBookmarksHTMLFile.fileSize, fileSize);
 
     // Check preferences have not been reverted.
-    do_check_true(Services.prefs.getBoolPref(PREF_AUTO_EXPORT_HTML));
+    Assert.ok(Services.prefs.getBoolPref(PREF_AUTO_EXPORT_HTML));
     // Reset preferences.
     Services.prefs.setBoolPref(PREF_AUTO_EXPORT_HTML, false);
 
@@ -94,7 +94,7 @@ tests.push({
   description: "Backup to JSON should be a no-op if a backup for today already exists.",
   exec: function() {
     // Sanity check: we should have bookmarks on the toolbar.
-    do_check_true(bs.getIdForItemAt(bs.toolbarFolder, 0) > 0);
+    Assert.ok(bs.getIdForItemAt(bs.toolbarFolder, 0) > 0);
 
     // Create a JSON backup in the profile.
     let profileBookmarksJSONFile = create_JSON_backup("bookmarks.glue.json");
@@ -108,9 +108,9 @@ tests.push({
                                               null);
 
     // Check a new JSON backup has not been created.
-    do_check_true(profileBookmarksJSONFile.exists());
-    do_check_eq(profileBookmarksJSONFile.lastModifiedTime, lastMod);
-    do_check_eq(profileBookmarksJSONFile.fileSize, fileSize);
+    Assert.ok(profileBookmarksJSONFile.exists());
+    Assert.equal(profileBookmarksJSONFile.lastModifiedTime, lastMod);
+    Assert.equal(profileBookmarksJSONFile.fileSize, fileSize);
 
     do_test_finished();
   }
