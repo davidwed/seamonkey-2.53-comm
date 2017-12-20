@@ -288,7 +288,7 @@ var sanTests = {
 }
 
 async function fullSanitize() {
-  do_print("Now doing a full sanitize run");
+  info("Now doing a full sanitize run");
   var prefs = Services.prefs.getBranch("privacy.item.");
 
   Services.prefs.setBoolPref("privacy.sanitize.promptOnSanitize", false);
@@ -304,7 +304,7 @@ async function fullSanitize() {
   for (var testName in sanTests) {
     var test = sanTests[testName];
     await test.check(true);
-    do_print(test.desc + " data cleared by full sanitize");
+    info(test.desc + " data cleared by full sanitize");
     try {
       prefs.clearUserPref(testName);
     } catch (ex) {}
@@ -329,7 +329,7 @@ add_task(async function test_browser_sanitizer()
     await test.check(false);
 
     Sanitizer.items[testName].clear();
-    do_print(test.desc + " data cleared");
+    info(test.desc + " data cleared");
 
     await test.check(true);
   }
