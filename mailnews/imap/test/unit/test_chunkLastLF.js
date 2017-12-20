@@ -86,8 +86,8 @@ function* verifyContentLength()
   // First, clean up line endings to avoid CRLF vs. LF differences
   let origData = IOUtils.loadFileToString(gFile).replace(/\r\n/g, "\n");
   let streamData = gStreamListener._data.replace(/\r\n/g, "\n");
-  do_check_eq(origData.length, streamData.length);
-  do_check_eq(origData, streamData);
+  Assert.equal(origData.length, streamData.length);
+  Assert.equal(origData, streamData);
 
   // Now try an attachment. &part=1.2
   // let attachmentURL = Services.io.newURI(neckoURL.value.spec + "&part=1.2",
@@ -100,7 +100,7 @@ function* verifyContentLength()
   //                                                        Ci.nsIContentPolicy.TYPE_OTHER);
   // Currently attachments have their content length set to the length of the
   // entire message
-  // do_check_eq(attachmentChannel.contentLength, gFile.fileSize);
+  // Assert.equal(attachmentChannel.contentLength, gFile.fileSize);
 
   yield true;
 }
