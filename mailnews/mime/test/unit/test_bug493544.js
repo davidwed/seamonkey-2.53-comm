@@ -81,6 +81,6 @@ function run_test() {
                                                               headers[i].defaultCharset,
                                                               headers[i].overrideCharset,
                                                               headers[i].eatContinuation);
-    do_check_eq(decoded, headers[i].decoded);
+    Assert.equal(decoded, headers[i].decoded);
   }
 }

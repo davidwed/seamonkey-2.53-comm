@@ -325,13 +325,13 @@ function synTransformBody(aSynBodyPart) {
 
 function verify_body_part_equivalence(aSynBodyPart, aMimePart) {
   // the content-type devoid of parameters should match
-  do_check_eq(aSynBodyPart._contentType, aMimePart.contentType);
+  Assert.equal(aSynBodyPart._contentType, aMimePart.contentType);
 
   // the header representation of the content-type should also match unless
   //  this is an rfc822 part, in which case it should only match for the
   //  actual contents.
   if (aMimePart.contentType != "message/rfc822")
-    do_check_eq(aSynBodyPart.contentTypeHeaderValue.replace(
+    Assert.equal(aSynBodyPart.contentTypeHeaderValue.replace(
                   deathToNewlineTypeThings, ""),
                 aMimePart.get("content-type").replace(
                   deathToNewlineTypeThings, ""));
@@ -339,7 +339,7 @@ function verify_body_part_equivalence(aSynBodyPart, aMimePart) {
   // XXX body part checking will get brittle if we ever actually encode things!
   if (aSynBodyPart.body && !aSynBodyPart._filename &&
       aSynBodyPart._contentType.startsWith("text/"))
-    do_check_eq(synTransformBody(aSynBodyPart),
+    Assert.equal(synTransformBody(aSynBodyPart),
                 aMimePart.body.trim().replace(/\r/g, "")
                 // Remove stuff added by libmime for HTML parts.
                 .replace(/[\n]*<meta http-equiv="content-type" content="text\/html; .*">[\n]*/g, "")
@@ -415,7 +415,7 @@ function* test_sane_bodies() {
     hugeString = hugeString + hugeString;
   }
   // this will come out to be 60k, of course.
-  do_check_eq(hugeString.length, 60 * Math.pow(2, powahsOfTwo));
+  Assert.equal(hugeString.length, 60 * Math.pow(2, powahsOfTwo));
 
   let synMsg = gMessageGenerator.makeMessage(
     {body: {body: hugeString, contentType: "text/plain"}});
@@ -522,18 +522,18 @@ function* test_attachments_correctness () {
         let expected = expectedAttachmentsInfo[i];
         if ("firstAttachmentName" in expected) {
           let att = aMimeMsg.allUserAttachments[0];
-          do_check_eq(att.name.length, expected.firstAttachmentName.length);
+          Assert.equal(att.name.length, expected.firstAttachmentName.length);
           for (let i = 0; i < att.name.length; ++i)
-            do_check_eq(att.name.charCodeAt(i), expected.firstAttachmentName.charCodeAt(i));
+            Assert.equal(att.name.charCodeAt(i), expected.firstAttachmentName.charCodeAt(i));
         }
 
-        do_check_eq(aMimeMsg.allAttachments.length, expected.allAttachmentsContentTypes.length);
+        Assert.equal(aMimeMsg.allAttachments.length, expected.allAttachmentsContentTypes.length);
         for (let [j, att] of aMimeMsg.allAttachments.entries())
-          do_check_eq(att.contentType, expected.allAttachmentsContentTypes[j]);
+          Assert.equal(att.contentType, expected.allAttachmentsContentTypes[j]);
 
-        do_check_eq(aMimeMsg.allUserAttachments.length, expected.allUserAttachmentsContentTypes.length);
+        Assert.equal(aMimeMsg.allUserAttachments.length, expected.allUserAttachmentsContentTypes.length);
         for (let [j, att] of aMimeMsg.allUserAttachments.entries())
-          do_check_eq(att.contentType, expected.allUserAttachmentsContentTypes[j]);
+          Assert.equal(att.contentType, expected.allUserAttachmentsContentTypes[j]);
 
         // Test
         for (let att of aMimeMsg.allUserAttachments) {
@@ -542,7 +542,7 @@ function* test_attachments_correctness () {
             GlodaFundAttr.glodaAttFromMimeAtt({ folderMessageURI: uri }, att);
           // The GlodaAttachment appends the filename, which is not always
           // present
-          do_check_true(glodaAttachment.url.startsWith(att.url));
+          Assert.ok(glodaAttachment.url.startsWith(att.url));
         }
 
       } catch (e) {
@@ -584,8 +584,8 @@ function* test_part12_not_an_attachment() {
 
   MsgHdrToMimeMessage(msgHdr, null, function(aMsgHdr, aMimeMsg) {
     try {
-      do_check_true(aMimeMsg.allUserAttachments.length == 0);
-      do_check_true(aMimeMsg.allAttachments.length == 0);
+      Assert.ok(aMimeMsg.allUserAttachments.length == 0);
+      Assert.ok(aMimeMsg.allAttachments.length == 0);
     } catch (e) {
       do_throw(e);
     }
