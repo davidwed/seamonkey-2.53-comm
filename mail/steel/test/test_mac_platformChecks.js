@@ -8,7 +8,7 @@
  */
 function run_test() {
   let steel = Cc["@mozilla.org/steel/application;1"].getService(Ci.steelIApplication);
-  do_check_false(steel.platformIsLinux);
-  do_check_true(steel.platformIsMac);
-  do_check_false(steel.platformIsWindows);
+  Assert.ok(!steel.platformIsLinux);
+  Assert.ok(steel.platformIsMac);
+  Assert.ok(!steel.platformIsWindows);
 }
