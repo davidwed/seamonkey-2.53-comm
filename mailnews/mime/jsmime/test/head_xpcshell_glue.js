@@ -96,12 +96,12 @@ function MochaSuite(name) {
 
 /// The real code for running a suite of tests, written as async function.
 MochaSuite.prototype._runSuite = async function () {
-  do_print("Running suite " + this.name);
+  info("Running suite " + this.name);
   for (let setup of this.setup) {
     await runFunction(setup);
   }
   for (let test of this.tests) {
-    do_print("Running test " + test.name);
+    info("Running test " + test.name);
     await runFunction(test.test);
   }
   for (let suite of this.suites) {
@@ -110,7 +110,7 @@ MochaSuite.prototype._runSuite = async function () {
   for (let fn of this.teardown) {
     await runFunction(fn);
   }
-  do_print("Finished suite " + this.name);
+  info("Finished suite " + this.name);
 };
 
 /// The outer call to run a test suite, which returns a promise of completion.
