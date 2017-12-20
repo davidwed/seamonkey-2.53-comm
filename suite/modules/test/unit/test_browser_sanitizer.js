@@ -23,7 +23,7 @@ var sanTests = {
         entry.close();
       }
 
-      do_check_eq(!entry, aShouldBeCleared);
+      Assert.equal(!entry, aShouldBeCleared);
     }
   },
 
@@ -46,7 +46,7 @@ var sanTests = {
         entry.close();
       }
 
-      do_check_eq(!entry, aShouldBeCleared);
+      Assert.equal(!entry, aShouldBeCleared);
     }
   },
 
@@ -62,9 +62,9 @@ var sanTests = {
 
     check: function(aShouldBeCleared) {
       if (aShouldBeCleared)
-        do_check_neq(this.cs.getCookieString(this.uri, null), "Sanitizer!");
+        Assert.notEqual(this.cs.getCookieString(this.uri, null), "Sanitizer!");
       else
-        do_check_eq(this.cs.getCookieString(this.uri, null), "Sanitizer!");
+        Assert.equal(this.cs.getCookieString(this.uri, null), "Sanitizer!");
     }
   },
 
@@ -97,7 +97,7 @@ var sanTests = {
       // Close container after reading from it
       results.containerOpen = false;
 
-      do_check_eq(rv, !aShouldBeCleared);
+      Assert.equal(rv, !aShouldBeCleared);
     }
   },
 
@@ -127,7 +127,7 @@ var sanTests = {
         locData = Services.prefs.getStringPref("general.open_location.last_url");
       } catch(ex) {}
 
-      do_check_eq(locData == "Sanitizer!", !aShouldBeCleared);
+      Assert.equal(locData == "Sanitizer!", !aShouldBeCleared);
 
       var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
       file.append("urlbarhistory.sqlite");
@@ -146,7 +146,7 @@ var sanTests = {
       }
       connection.close();
 
-      do_check_eq(urlbar, !aShouldBeCleared);
+      Assert.equal(urlbar, !aShouldBeCleared);
     }
   },
 
@@ -191,7 +191,7 @@ var sanTests = {
 
       // Checking for Sanitizer form history entry creation.
       let exists = await formNameExists("Sanitizer");
-      do_check_eq(exists, !aShouldBeCleared);
+      Assert.equal(exists, !aShouldBeCleared);
     }
   },
 
@@ -230,9 +230,9 @@ var sanTests = {
       } catch(ex) {}
 
       if (aShouldBeCleared)
-        do_check_eq(!dl, aShouldBeCleared)
+        Assert.equal(!dl, aShouldBeCleared)
       else
-        do_check_eq(dl.displayName, "Sanitizer!");
+        Assert.equal(dl.displayName, "Sanitizer!");
     }
   },
 
@@ -258,7 +258,7 @@ var sanTests = {
         }
       }
 
-      do_check_eq(rv, !aShouldBeCleared);
+      Assert.equal(rv, !aShouldBeCleared);
     }
   },
 
@@ -282,7 +282,7 @@ var sanTests = {
                                      "", domain, user, password);
       } catch(ex) {}
 
-      do_check_eq(domain.value == "Foo", !aShouldBeCleared);
+      Assert.equal(domain.value == "Foo", !aShouldBeCleared);
     }
   }
 }

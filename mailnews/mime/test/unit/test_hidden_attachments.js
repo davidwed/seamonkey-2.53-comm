@@ -102,7 +102,7 @@ var gStreamListener = {
   onStopRequest: function (aRequest, aContext, aStatusCode) {
     let expectedAttachments = this.allAttachments.filter(i => i.shouldShow).
       map(i => i.filename);
-    do_check_eq(expectedAttachments.length,
+    Assert.equal(expectedAttachments.length,
                 gMessageHeaderSink.attachments.length);
 
     for (let i = 0; i < gMessageHeaderSink.attachments.length; i++) {
@@ -110,7 +110,7 @@ var gStreamListener = {
       // name like "Part 1.2", so don't bother checking that the names match
       // (they won't).
       if (expectedAttachments[i])
-        do_check_eq(expectedAttachments[i], gMessageHeaderSink.attachments[i]);
+        Assert.equal(expectedAttachments[i], gMessageHeaderSink.attachments[i]);
     }
     this._stream = null;
 
