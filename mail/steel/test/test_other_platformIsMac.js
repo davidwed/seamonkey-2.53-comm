@@ -8,6 +8,6 @@
  */
 
 function run_test() {
-  do_check_false(Cc["@mozilla.org/steel/application;1"]
+  Assert.ok(!Cc["@mozilla.org/steel/application;1"]
                    .getService(Ci.steelIApplication).platformIsMac);
 }
