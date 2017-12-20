@@ -51,24 +51,24 @@ function* testLsub()
   // been returned if we had used LSUB instead of LIST(SUBSCRIBED)
   let rootFolder = IMAPPump.incomingServer.rootFolder;
   let folder1 = rootFolder.getChildNamed("folder1");
-  do_check_true(folder1.getFlag(nsMsgFolderFlags.ImapNoselect));
-  do_check_false(folder1.getFlag(nsMsgFolderFlags.ImapNoinferiors));
+  Assert.ok(folder1.getFlag(nsMsgFolderFlags.ImapNoselect));
+  Assert.ok(!folder1.getFlag(nsMsgFolderFlags.ImapNoinferiors));
 
   // make sure the above test was not a fluke
   let folder11 = folder1.getChildNamed("folder11");
-  do_check_false(folder11.getFlag(nsMsgFolderFlags.ImapNoselect));
-  do_check_true(folder11.getFlag(nsMsgFolderFlags.ImapNoinferiors));
+  Assert.ok(!folder11.getFlag(nsMsgFolderFlags.ImapNoselect));
+  Assert.ok(folder11.getFlag(nsMsgFolderFlags.ImapNoinferiors));
 
   // test that \NonExistent implies \Noselect
   let folder2 = rootFolder.getChildNamed("folder2");
-  do_check_true(folder1.getFlag(nsMsgFolderFlags.ImapNoselect));
+  Assert.ok(folder1.getFlag(nsMsgFolderFlags.ImapNoselect));
 
   // should not get a folder3 since it is not subscribed
   let folder3;
   try {
     folder3 = rootFolder.getChildNamed("folder3");
   } catch (ex) {}
-  //do_check_false(folder1.getFlag(nsMsgFolderFlags.Subscribed));
+  //Assert.ok(!folder1.getFlag(nsMsgFolderFlags.Subscribed));
   do_check_null(folder3);
 
   yield true;
