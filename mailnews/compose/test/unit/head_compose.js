@@ -208,6 +208,6 @@ function getAttachmentFromContent(aContent) {
   return attachments[1];
 }
 
-do_register_cleanup(function() {
+registerCleanupFunction(function() {
   load(gDEPTH + "mailnews/resources/mailShutdown.js");
 });
