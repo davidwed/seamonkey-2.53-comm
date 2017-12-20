@@ -72,7 +72,7 @@ function run_test() {
       let cObserver = {
         observe: function(aSubject, aTopic, aData) {
           os.removeObserver(this, TOPIC_CUSTOMIZATION_COMPLETE);
-          do_execute_soon(continue_test);
+          executeSoon(continue_test);
         }
       }
       os.addObserver(cObserver, TOPIC_CUSTOMIZATION_COMPLETE);
@@ -112,7 +112,7 @@ function continue_test() {
   do_test_finished();
 }
 
-do_register_cleanup(function() {
+registerCleanupFunction(function() {
   // Remove the distribution file, even if the test failed, otherwise all
   // next tests will import it.
   let iniFile = Services.dirsvc.get("XCurProcD", Ci.nsIFile);
