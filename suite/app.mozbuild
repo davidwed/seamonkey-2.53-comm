@@ -18,9 +18,6 @@ if CONFIG['MOZ_IRC']:
 if CONFIG['MOZ_DOMINSPECTOR']:
     DIRS += ['/extensions/inspector']
 
-if CONFIG['MOZ_COMPOSER']:
-    DIRS += ['/comm/editor/ui']
-
 DIRS += ['/%s' % CONFIG['MOZ_BRANDING_DIRECTORY']]
 
 if CONFIG['MOZ_CALENDAR']:
@@ -31,5 +28,6 @@ if CONFIG['MOZ_CALENDAR']:
 
 DIRS += [
     '/xpfe/components/autocomplete',
+    '/comm/editor/ui',
     '/comm/suite',
 ]
