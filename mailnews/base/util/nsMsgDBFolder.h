@@ -218,8 +218,6 @@ protected:
   nsCOMPtr<nsIFile> mPath;
   nsCString mBaseMessageURI; //The uri with the message scheme
 
-  bool mInVFEditSearchScope ; // non persistant state used by the virtual folder UI
-
   // static stuff for cross-instance objects like atoms
   static NS_MSG_BASE_STATIC_MEMBER_(nsrefcnt) gInstanceCount;
 
