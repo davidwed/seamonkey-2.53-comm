@@ -416,7 +416,7 @@ nsresult nsMsgDBView::FetchAuthor(nsIMsgDBHdr * aHdr, nsAString &aSenderString)
     if (name.IsEmpty()) {
       CopyUTF8toUTF16(emailAddress, aSenderString);
     } else {
-      uint32_t atPos;
+      int32_t atPos;
       if ((atPos = name.FindChar('@')) == kNotFound ||
           name.FindChar('.', atPos) == kNotFound) {
         aSenderString = name;
