@@ -127,8 +127,7 @@ nsMsgDBFolder::nsMsgDBFolder(void)
   mNumNewBiffMessages(0),
   mHaveParsedURI(false),
   mIsServerIsValid(false),
-  mIsServer(false),
-  mInVFEditSearchScope (false)
+  mIsServer(false)
 {
   if (mInstanceCount++ <=0) {
 #define MSGDBFOLDER_ATOM(name_, value_) name_ = MsgNewAtom(value_).take();
@@ -5406,20 +5405,6 @@ NS_IMETHODIMP nsMsgDBFolder::CompareSortKeys(nsIMsgFolder *aFolder, int32_t *sor
   PR_Free(sortKey1);
   PR_Free(sortKey2);
   return rv;
-}
-
-NS_IMETHODIMP nsMsgDBFolder::GetInVFEditSearchScope (bool *aInVFEditSearchScope)
-{
-  *aInVFEditSearchScope = mInVFEditSearchScope;
-  return NS_OK;
-}
-
-NS_IMETHODIMP nsMsgDBFolder::SetInVFEditSearchScope (bool aInVFEditSearchScope, bool aSetOnSubFolders)
-{
-  bool oldInVFEditSearchScope = mInVFEditSearchScope;
-  mInVFEditSearchScope = aInVFEditSearchScope;
-  NotifyBoolPropertyChanged(kInVFEditSearchScopeAtom, oldInVFEditSearchScope, mInVFEditSearchScope);
-  return NS_OK;
 }
 
 NS_IMETHODIMP nsMsgDBFolder::FetchMsgPreviewText(nsMsgKey *aKeysToFetch, uint32_t aNumKeys,
