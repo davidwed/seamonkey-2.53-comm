@@ -74,6 +74,18 @@ function ToLocaleFormat(aFormat, aDate) {
     return (offset < 0 ? "+" : "-") + String(tzoff).padStart(4, "0");
   }
   function timeZone() {
+//  -  let dateTimeFormatter = Services.intl.createDateTimeFormat(undefined, {
+//  +  let dateTimeFormatter = new Services.intl.DateTimeFormat(undefined, {
+//       dateStyle: "full", timeStyle: "long"
+//     });
+//  -  let dateFormatter = Services.intl.createDateTimeFormat(undefined, {
+//  +  let dateFormatter = new Services.intl.DateTimeFormat(undefined, {
+//       dateStyle: "full"
+//     });
+//  -  let timeFormatter = Services.intl.createDateTimeFormat(undefined, {
+//  +  let timeFormatter = new Services.intl.DateTimeFormat(undefined, {
+//       timeStyle: "long"
+//     });
     let dtf = Intl.DateTimeFormat("en-US", {timeZoneName: "short"});
     let timeZoneNamePart = dtf.formatToParts(aDate)
                               .find(part => part.type === "timeZoneName");
