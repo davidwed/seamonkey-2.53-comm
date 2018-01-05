@@ -195,6 +195,8 @@ LogWriter.prototype = {
       header = JSON.stringify(header) + "\n";
     }
     else {
+      // - const dateTimeFormatter = Services.intl.createDateTimeFormat("en-US", {
+      // + onst dateTimeFormatter = new Services.intl.DateTimeFormat("en-US", {
       header = "Conversation with " + this._conv.name +
                " at " + (new Date(this._conv.startDate / 1000)).toLocaleString() +
                " on " + account.name +
