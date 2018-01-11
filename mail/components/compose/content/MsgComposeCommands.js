@@ -323,6 +323,8 @@ var stateListener = {
       this.NotifyComposeBodyReadyForwardInline();
       break;
 
+    case Ci.nsIMsgCompType.EditTemplate:
+      defaultSaveOperation = "template";
     case Ci.nsIMsgCompType.Draft:
     case Ci.nsIMsgCompType.Template:
     case Ci.nsIMsgCompType.Redirect:
@@ -5387,6 +5389,7 @@ var gAttachmentNotifier =
          gComposeType == nsIMsgCompType.NewsPost ||
          gComposeType == nsIMsgCompType.Draft ||
          gComposeType == nsIMsgCompType.Template ||
+         gComposeType == nsIMsgCompType.EditTemplate ||
          gComposeType == nsIMsgCompType.EditAsNew ||
          gComposeType == nsIMsgCompType.MailToUrl))))
       mailData = subject + " " + mailData;
