@@ -2019,7 +2019,7 @@ function MsgNewMessageFromTemplate(aEvent)
 
 function MsgEditTemplateMessage(aEvent)
 {
-  composeMsgByType(Ci.nsIMsgCompType.Draft, aEvent);
+  composeMsgByType(Ci.nsIMsgCompType.EditTemplate, aEvent);
 }
 
 function MsgComposeDraftMessage()
