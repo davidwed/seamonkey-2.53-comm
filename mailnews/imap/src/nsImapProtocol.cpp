@@ -797,9 +797,9 @@ nsresult nsImapProtocol::SetupWithUrl(nsIURI * aURL, nsISupports* aConsumer)
     imapServer->GetFetchByChunks(&m_fetchByChunks);
     imapServer->GetSendID(&m_sendID);
 
-    nsAutoString trashFolderName;
-    if (NS_SUCCEEDED(imapServer->GetTrashFolderName(trashFolderName)))
-      CopyUTF16toMUTF7(trashFolderName, m_trashFolderName);
+    nsAutoString trashFolderPath;
+    if (NS_SUCCEEDED(imapServer->GetTrashFolderName(trashFolderPath)))
+      CopyUTF16toMUTF7(trashFolderPath, m_trashFolderPath);
 
     nsCOMPtr<nsIPrefBranch> prefBranch(do_GetService(NS_PREFSERVICE_CONTRACTID));
     if (prefBranch)
@@ -5125,27 +5125,22 @@ nsImapProtocol::DiscoverMailboxSpec(nsImapMailboxSpec * adoptedBoxSpec)
 
         // Don't set the Trash flag if not using the Trash model
         if (GetDeleteIsMoveToTrash() && !onlineTrashFolderExists &&
-            adoptedBoxSpec->mAllocatedPathName.Find(m_trashFolderName, /* ignoreCase = */ true) != -1)
+            adoptedBoxSpec->mAllocatedPathName.Find(m_trashFolderPath, /* ignoreCase = */ true) != -1)
         {
           bool trashExists = false;
-          nsCString trashMatch(CreatePossibleTrashName(nsPrefix));
-          nsCString serverTrashName;
-          m_runningUrl->AllocateCanonicalPath(trashMatch.get(),
-                                              ns->GetDelimiter(),
-                                              getter_Copies(serverTrashName));
-          if (StringBeginsWith(serverTrashName,
+          if (StringBeginsWith(m_trashFolderPath,
                                NS_LITERAL_CSTRING("INBOX/"),
                                nsCaseInsensitiveCStringComparator()))
           {
             nsAutoCString pathName(adoptedBoxSpec->mAllocatedPathName.get() + 6);
             trashExists =
               StringBeginsWith(adoptedBoxSpec->mAllocatedPathName,
-                               serverTrashName,
+                               m_trashFolderPath,
                                nsCaseInsensitiveCStringComparator()) && /* "INBOX/" */
-              pathName.Equals(Substring(serverTrashName, 6), nsCaseInsensitiveCStringComparator());
+              pathName.Equals(Substring(m_trashFolderPath, 6), nsCaseInsensitiveCStringComparator());
           }
           else
-            trashExists = adoptedBoxSpec->mAllocatedPathName.Equals(serverTrashName, nsCaseInsensitiveCStringComparator());
+            trashExists = adoptedBoxSpec->mAllocatedPathName.Equals(m_trashFolderPath, nsCaseInsensitiveCStringComparator());
 
           if (m_hostSessionList)
             m_hostSessionList->SetOnlineTrashFolderExistsForHost(GetImapServerKey(), trashExists);
@@ -7698,9 +7693,8 @@ void nsImapProtocol::MailboxDiscoveryFinished()
       // maybe we're not subscribed to the Trash folder
       if (personalDir)
       {
-        nsCString originalTrashName(CreatePossibleTrashName(personalDir));
         m_hierarchyNameState = kDiscoverTrashFolderInProgress;
-        List(originalTrashName.get(), true);
+        List(m_trashFolderPath.get(), true);
         m_hierarchyNameState = kNoOperationInProgress;
       }
     }
@@ -7709,9 +7703,8 @@ void nsImapProtocol::MailboxDiscoveryFinished()
     // Delete-is-move-to-Trash model, and there is a personal namespace
     if (!trashFolderExists && GetDeleteIsMoveToTrash() && ns)
     {
-      nsCString trashName(CreatePossibleTrashName(ns->GetPrefix()));
       nsCString onlineTrashName;
-      m_runningUrl->AllocateServerPath(trashName.get(), ns->GetDelimiter(),
+      m_runningUrl->AllocateServerPath(m_trashFolderPath.get(), ns->GetDelimiter(),
                                        getter_Copies(onlineTrashName));
 
       GetServerStateParser().SetReportingErrors(false);
@@ -7852,13 +7845,6 @@ void nsImapProtocol::RenameMailbox(const char *existingName,
   nsresult rv = SendData(command.get());
   if (NS_SUCCEEDED(rv))
     ParseIMAPandCheckForNewMail();
-}
-
-nsCString nsImapProtocol::CreatePossibleTrashName(const char *prefix)
-{
-  nsCString returnTrash(prefix);
-  returnTrash += m_trashFolderName;
-  return returnTrash;
 }
 
 bool nsImapProtocol::GetListSubscribedIsBrokenOnServer()
