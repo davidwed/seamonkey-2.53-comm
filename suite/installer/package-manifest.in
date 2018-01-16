@@ -130,6 +130,9 @@
 #endif
 #ifdef MOZ_GTK
 @BINPATH@/@DLL_PREFIX@mozgtk@DLL_SUFFIX@
+#ifdef MOZ_WAYLAND
+@BINPATH@/@DLL_PREFIX@mozwayland@DLL_SUFFIX@
+#endif
 #endif
 @RESPATH@/license.txt
 @RESPATH@/blocklist.xml
