@@ -61,8 +61,6 @@ messenger.jar:
     content/messenger/phishingDetector.js                                      (content/phishingDetector.js)
     content/messenger/searchBar.js                                             (content/searchBar.js)
     content/messenger/start.xhtml                                              (content/start.xhtml)
-    content/messenger/subscribe.js                                             (content/subscribe.js)
-    content/messenger/subscribe.xul                                            (content/subscribe.xul)
     content/messenger/tabmail.js                                               (content/tabmail.js)
     content/messenger/tabmail.xml                                              (content/tabmail.xml)
     content/messenger/threadPane.js                                            (content/threadPane.js)
