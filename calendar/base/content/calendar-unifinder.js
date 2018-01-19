@@ -738,8 +738,6 @@ var unifinderTreeView = {
 
     getImageSrc: function(aRow, aOrientation) {},
 
-    getProgressMode: function(aRow, aCol) {},
-
     getCellValue: function(aRow, aCol) {
         return null;
     },
