@@ -190,7 +190,7 @@ nsGNOMEShellService::IsDefaultClient(bool aStartupCheck, uint16_t aApps,
 
   nsCOMPtr<nsIGIOService> giovfs = do_GetService(NS_GIOSERVICE_CONTRACTID);
   nsAutoCString handler;
-  nsCOMPtr<nsIGIOMimeApp> app;
+  nsCOMPtr<nsIGIOMimeApp> gioApp;
 
   for (unsigned i = 0; i < ArrayLength(gProtocols); i++) {
     if (aApps & gProtocols[i].app) {
@@ -200,11 +200,14 @@ nsGNOMEShellService::IsDefaultClient(bool aStartupCheck, uint16_t aApps,
       if (giovfs) {
         handler.Truncate();
         nsDependentCString protocol(gProtocols[i].protocol);
-        giovfs->GetAppForURIScheme(protocol, getter_AddRefs(app));
-        if (!app)
+        nsCOMPtr<nsIHandlerApp> handlerApp;
+        giovfs->GetAppForURIScheme(protocol, getter_AddRefs(handlerApp));
+
+        gioApp = do_QueryInterface(handlerApp);
+        if (!gioApp)
           return NS_OK;
 
-        if (NS_SUCCEEDED(app->GetCommand(handler)) &&
+        if (NS_SUCCEEDED(gioApp->GetCommand(handler)) &&
             !CheckHandlerMatchesAppName(handler))
          return NS_OK;
       }
