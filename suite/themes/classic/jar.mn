@@ -64,6 +64,7 @@ classic.jar:
 * skin/classic/communicator/communicator.css                            (communicator/communicator.css)
   skin/classic/communicator/config.css                                  (communicator/config.css)
   skin/classic/communicator/toolbar.css                                 (communicator/toolbar.css)
+  skin/classic/communicator/scrollbars.css                              (communicator/scrollbars.css)
   skin/classic/communicator/viewSourceOverlay.css                       (communicator/viewSourceOverlay.css)
   skin/classic/communicator/bookmarks/bookmark-folder-closed.png        (communicator/bookmarks/bookmark-folder-closed.png)
   skin/classic/communicator/bookmarks/bookmark-folder-dis.png           (communicator/bookmarks/bookmark-folder-dis.png)
@@ -500,3 +501,7 @@ classic.jar:
 % override chrome://global/skin/config.css                        chrome://communicator/skin/config.css
 % override chrome://global/skin/in-content/info-pages.css         chrome://communicator/skin/communicator.css
 % override chrome://mozapps/skin/places/defaultFavicon.svg        chrome://communicator/skin/bookmarks/bookmark-item.svg
+
+#ifdef MOZ_WIDGET_GTK
+% override chrome://global/skin/scrollbars.css                      chrome://communicator/skin/scrollbars.css
+#endif
