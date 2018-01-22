@@ -8,7 +8,6 @@ DIRS += [
     'bindings',
     'console',
     'dataman',
-    'directory',
     'downloads',
     'feeds',
     'helpviewer',
