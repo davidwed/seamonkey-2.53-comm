@@ -22,8 +22,8 @@ this.EXPORTED_SYMBOLS = [
  * permission request is coming up from content by way of the
  * nsContentPermissionHelper. The system add-on could then do the following:
  *
- * Cu.import("resource://gre/modules/Integration.jsm");
- * Cu.import("resource:///modules/PermissionUI.jsm");
+ * ChromeUtils.import("resource://gre/modules/Integration.jsm");
+ * ChromeUtils.import("resource:///modules/PermissionUI.jsm");
  *
  * const SoundCardIntegration = (base) => ({
  *   __proto__: base,
@@ -59,8 +59,8 @@ this.EXPORTED_SYMBOLS = [
  * imported, subclassed, and have prompt() called directly, without
  * the caller having called into createPermissionPrompt.
  */
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "SitePermissions",
   "resource:///modules/SitePermissions.jsm");
