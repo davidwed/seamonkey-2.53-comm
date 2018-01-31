@@ -4,16 +4,16 @@
 
 this.EXPORTED_SYMBOLS = ['GlodaFundAttr'];
 
-Cu.import("resource:///modules/gloda/log4moz.js");
-Cu.import("resource:///modules/StringBundle.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/StringBundle.js");
 
-Cu.import("resource:///modules/gloda/utils.js");
-Cu.import("resource:///modules/gloda/gloda.js");
-Cu.import("resource:///modules/gloda/datastore.js");
-Cu.import("resource:///modules/gloda/datamodel.js"); // for GlodaAttachment
+ChromeUtils.import("resource:///modules/gloda/utils.js");
+ChromeUtils.import("resource:///modules/gloda/gloda.js");
+ChromeUtils.import("resource:///modules/gloda/datastore.js");
+ChromeUtils.import("resource:///modules/gloda/datamodel.js"); // for GlodaAttachment
 
-Cu.import("resource:///modules/gloda/noun_mimetype.js");
-Cu.import("resource:///modules/gloda/connotent.js");
+ChromeUtils.import("resource:///modules/gloda/noun_mimetype.js");
+ChromeUtils.import("resource:///modules/gloda/connotent.js");
 
 /**
  * @namespace The Gloda Fundamental Attribute provider is a special attribute
