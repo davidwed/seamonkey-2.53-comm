@@ -19,7 +19,7 @@
  * }
  */
 
-Cu.import("resource:///modules/errUtils.js");
+ChromeUtils.import("resource:///modules/errUtils.js");
 
 /**
  * Url listener that can wrap another listener and trigger a callback, but

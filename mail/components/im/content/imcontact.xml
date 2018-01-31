@@ -49,7 +49,7 @@
         this.contact = aContact;
         this.contact.addObserver(this);
         if (!("Status" in window))
-          Cu.import("resource:///modules/imStatusUtils.jsm");
+          ChromeUtils.import("resource:///modules/imStatusUtils.jsm");
         this.update();
       ]]>
       </body>
