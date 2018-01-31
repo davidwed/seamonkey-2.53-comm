@@ -2,8 +2,8 @@
 //
 // Original Author: David Bienvenu <dbienvenu@mozilla.com>
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 // Globals
 var gMsg1;
@@ -14,7 +14,7 @@ var gMsgId1;
 var gTestFolder;
 
 load("../../../resources/asyncTestUtils.js");
-Cu.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 load("../../../resources/messageModifier.js");
 load("../../../resources/messageGenerator.js");
 load("../../../resources/messageInjection.js");

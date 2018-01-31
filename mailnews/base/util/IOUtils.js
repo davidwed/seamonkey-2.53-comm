@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = ["IOUtils"];
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var kStringBlockSize = 4096;
 var kStreamBlockSize = 8192;

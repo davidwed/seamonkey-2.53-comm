@@ -5,7 +5,7 @@
 // Dependencies:
 // gatherTextUnder from utilityOverlay.js
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var kPhishingNotSuspicious = 0;
 var kPhishingWithIPAddress = 1;
@@ -27,7 +27,7 @@ var gPhishingDetector = {
    */
   init: function()
   {
-    Cu.import("resource:///modules/hostnameUtils.jsm", this);
+    ChromeUtils.import("resource:///modules/hostnameUtils.jsm", this);
 
     this.mCheckForIPAddresses = Services.prefs.getBoolPref("mail.phishing.detection.ipaddresses");
     this.mCheckForMismatchedHosts = Services.prefs.getBoolPref("mail.phishing.detection.mismatched_hosts");

@@ -1,12 +1,12 @@
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 var CC = Components.Constructor;
 
 // WebApps.jsm called by ProxyAutoConfig (PAC) requires a valid nsIXULAppInfo.
-Cu.import("resource://testing-common/AppInfo.jsm");
+ChromeUtils.import("resource://testing-common/AppInfo.jsm");
 updateAppInfo();
 
 // Ensure the profile directory is set up
@@ -15,8 +15,8 @@ do_get_profile();
 var gDEPTH = "../../../../";
 
 // Import the servers
-Cu.import("resource://testing-common/mailnews/maild.js");
-Cu.import("resource://testing-common/mailnews/nntpd.js");
+ChromeUtils.import("resource://testing-common/mailnews/maild.js");
+ChromeUtils.import("resource://testing-common/mailnews/nntpd.js");
 
 var kSimpleNewsArticle =
   "From: John Doe <john.doe@example.com>\n"+

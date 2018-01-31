@@ -14,7 +14,7 @@
 load("../../../resources/logHelper.js");
 load("../../../resources/asyncTestUtils.js");
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var gMsgHdr = null;
 

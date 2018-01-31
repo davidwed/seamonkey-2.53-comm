@@ -3,15 +3,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/InlineSpellChecker.jsm");
-Cu.import("resource://gre/modules/PlacesUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AppConstants.jsm");
-Cu.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
+ChromeUtils.import("resource:///modules/MailUtils.js");
 
 XPCOMUtils.defineLazyGetter(this, "PageMenuParent", function() {
   let tmp = {};
-  Cu.import("resource://gre/modules/PageMenu.jsm", tmp);
+  ChromeUtils.import("resource://gre/modules/PageMenu.jsm", tmp);
   return new tmp.PageMenuParent();
 });
 

@@ -14,11 +14,11 @@
  * - gStreamListener: an nsIStreamListener to read message text
  */
 
-Cu.import("resource:///modules/gloda/log4moz.js");
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/MailUtils.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var PERM_DIRECTORY = parseInt("0755", 8);
 var PERM_FILE = parseInt("0644", 8);

@@ -3,10 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/NetUtil.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var nsISupports              = Ci.nsISupports;
 
@@ -55,13 +55,13 @@ function resolveURIInternal(aCmdLine, aArgument) {
 
 function handleIndexerResult(aFile) {
   // Do this here because xpcshell isn't too happy with this at startup
-  Cu.import("resource:///modules/MailUtils.js");
+  ChromeUtils.import("resource:///modules/MailUtils.js");
   // Make sure the folder tree is initialized
   MailUtils.discoverFolders();
 
   // Use the search integration module to convert the indexer result into a
   // message header
-  Cu.import("resource:///modules/SearchIntegration.js");
+  ChromeUtils.import("resource:///modules/SearchIntegration.js");
   let msgHdr = SearchIntegration.handleResult(aFile);
 
   // If we found a message header, open it, otherwise throw an exception

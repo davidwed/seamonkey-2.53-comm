@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = [];
 
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 
 var LOG = Log4Moz.repository.getLogger("gloda.everybody");
 
@@ -13,7 +13,7 @@ var importNS = {};
 function loadModule(aModuleURI, aNSContrib) {
   try {
     LOG.info("... loading " + aModuleURI);
-    Cu.import(aModuleURI, importNS);
+    ChromeUtils.import(aModuleURI, importNS);
   }
   catch (ex) {
     LOG.error("!!! error loading " + aModuleURI);

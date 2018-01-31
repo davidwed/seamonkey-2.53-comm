@@ -3,7 +3,7 @@
  * Test suite for nsIMsgHeaderParser functions.
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 function run_test() {
   var checks =

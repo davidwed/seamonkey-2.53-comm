@@ -20,14 +20,14 @@
  *
  */
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 // Import the pop3 server scripts
-Cu.import("resource://testing-common/mailnews/maild.js");
-Cu.import("resource://testing-common/mailnews/auth.js");
-Cu.import("resource://testing-common/mailnews/pop3d.js");
-Cu.import("resource://gre/modules/Promise.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/maild.js");
+ChromeUtils.import("resource://testing-common/mailnews/auth.js");
+ChromeUtils.import("resource://testing-common/mailnews/pop3d.js");
+ChromeUtils.import("resource://gre/modules/Promise.jsm");
 
 function POP3Pump()
 {
