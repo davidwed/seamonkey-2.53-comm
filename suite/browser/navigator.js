@@ -17,10 +17,10 @@ this.__defineSetter__("PluralForm", function (val) {
   return this.PluralForm = val;
 });
 
-XPCOMUtils.defineLazyModuleGetter(this, "SitePermissions",
+ChromeUtils.defineModuleGetter(this, "SitePermissions",
   "resource:///modules/SitePermissions.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "SafeBrowsing",
+ChromeUtils.defineModuleGetter(this, "SafeBrowsing",
   "resource://gre/modules/SafeBrowsing.jsm");
 
 XPCOMUtils.defineLazyScriptGetter(this, "gEditItemOverlay",
