@@ -278,7 +278,7 @@
       <constructor>
         window.controllers.insertControllerAt(0, this);
         this._restoringTabState = null;
-        Cu.import("resource://gre/modules/AppConstants.jsm");
+        ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
       </constructor>
       <destructor>
         window.controllers.removeController(this);
@@ -1725,7 +1725,7 @@
     <implementation implements="nsITimerCallback, nsIDOMEventListener">
       <constructor>
         <![CDATA[
-          Cu.import("resource://gre/modules/Services.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
 
           try {
             this.mTabMinWidth = Services.prefs.getIntPref("mail.tabs.tabMinWidth");
@@ -1771,7 +1771,7 @@
 
       <destructor>
         <![CDATA[
-          Cu.import("resource://gre/modules/Services.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
 
           Services.prefs.removeObserver("mail.tabs.", this._prefObserver);
 

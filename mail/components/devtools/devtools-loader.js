@@ -4,9 +4,8 @@
 
 "use strict";
 
-const { interfaces: Ci, utils: Cu } = Components;
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "Services", "resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "Services", "resource://gre/modules/Services.jsm");
 
 function DevToolsStartup() {}
 
@@ -26,7 +25,7 @@ DevToolsStartup.prototype = {
   },
 
   handleDevToolsFlag: function (cmdLine) {
-    Cu.import("resource://devtools/client/framework/ToolboxProcess.jsm");
+    ChromeUtils.defineModuleGetter.import("resource://devtools/client/framework/ToolboxProcess.jsm");
     BrowserToolboxProcess.init();
 
     if (cmdLine.state == Ci.nsICommandLine.STATE_REMOTE_AUTO) {
@@ -35,7 +34,7 @@ DevToolsStartup.prototype = {
   },
 
   initialize: function() {
-    var { devtools, require, DevToolsLoader } = Cu.import("resource://devtools/shared/Loader.jsm", {});
+    var { devtools, require, DevToolsLoader } = ChromeUtils.defineModuleGetter.import("resource://devtools/shared/Loader.jsm", {});
     var { DebuggerServer } = require("devtools/server/main");
     var { gDevTools } = require("devtools/client/framework/devtools");
     var HUDService = require("devtools/client/webconsole/hudservice");

@@ -5,7 +5,7 @@
  *   parseEncodedHeader
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 function equalArrays(arr1, arr2) {
   do_check_eq(arr1.length, arr2.length);

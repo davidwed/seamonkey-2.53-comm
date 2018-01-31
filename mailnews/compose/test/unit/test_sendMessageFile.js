@@ -11,7 +11,7 @@
  * mangling the message.
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var type = null;
 var test = null;
