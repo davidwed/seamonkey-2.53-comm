@@ -26,8 +26,8 @@ this.EXPORTED_SYMBOLS = [
  */
 
 // Globals
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
                                   "resource://gre/modules/NetUtil.jsm");
@@ -47,7 +47,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "OS",
                                   "resource://gre/modules/osfile.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "DownloadsLogger", () => {
-  let { ConsoleAPI } = Cu.import("resource://gre/modules/Console.jsm", {});
+  let { ConsoleAPI } = ChromeUtils.import("resource://gre/modules/Console.jsm", {});
   let consoleOptions = {
     maxLogLevelPref: "browser.download.loglevel",
     prefix: "Downloads"
@@ -191,8 +191,8 @@ this.DownloadsCommon = {
    * Initializes the Downloads Manager common code.
    */
   init() {
-    Cu.import("resource://gre/modules/Downloads.jsm");
-    Cu.import("resource://gre/modules/DownloadIntegration.jsm");
+    ChromeUtils.import("resource://gre/modules/Downloads.jsm");
+    ChromeUtils.import("resource://gre/modules/DownloadIntegration.jsm");
     DownloadIntegration.shouldPersistDownload = function() { return true; }
     DownloadsData.initializeDataLink();
   },

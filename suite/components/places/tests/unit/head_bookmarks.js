@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 // Import common head.
 var commonFile = do_get_file("../head_common.js", false);
@@ -14,7 +14,7 @@ Services.scriptloader.loadSubScript(uri.spec, this);
 
 
 XPCOMUtils.defineLazyGetter(this, "PlacesUIUtils", function() {
-  Cu.import("resource:///modules/PlacesUIUtils.jsm");
+  ChromeUtils.import("resource:///modules/PlacesUIUtils.jsm");
   return PlacesUIUtils;
 });
 
@@ -24,7 +24,7 @@ const ORGANIZER_QUERY_ANNO = "PlacesOrganizer/OrganizerQuery";
 
 
 // Needed by some test that relies on having an app  registered.
-Cu.import("resource://testing-common/AppInfo.jsm", this);
+ChromeUtils.import("resource://testing-common/AppInfo.jsm", this);
 updateAppInfo({
   name: "PlacesTest",
   ID: "{230de50e-4cd1-11dc-8314-0800200c9a66}",
