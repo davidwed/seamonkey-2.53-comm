@@ -5,8 +5,8 @@
  *   - Check that verifyLogon fails
  */
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 load("../../../resources/alertTestUtils.js");
 

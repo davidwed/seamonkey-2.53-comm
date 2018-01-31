@@ -1,8 +1,8 @@
-var controller = {};  Cu.import('resource://mozmill/modules/controller.js', controller);
-var events = {}; Cu.import('resource://mozmill/modules/events.js', events);
-var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
-var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
-var frame = {}; Cu.import('resource://mozmill/modules/frame.js', frame);
+var controller = {};  ChromeUtils.import('resource://mozmill/modules/controller.js', controller);
+var events = {}; ChromeUtils.import('resource://mozmill/modules/events.js', events);
+var utils = {}; ChromeUtils.import('resource://mozmill/modules/utils.js', utils);
+var elementslib = {}; ChromeUtils.import('resource://mozmill/modules/elementslib.js', elementslib);
+var frame = {}; ChromeUtils.import('resource://mozmill/modules/frame.js', frame);
 
 var that = this;
 

@@ -4,11 +4,11 @@
 
 "use strict";
 
-Cu.import("resource:///modules/OAuth2.jsm");
-Cu.import("resource:///modules/OAuth2Providers.jsm");
-Cu.import("resource://gre/modules/Preferences.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/OAuth2.jsm");
+ChromeUtils.import("resource:///modules/OAuth2Providers.jsm");
+ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function OAuth2Module() {
   this._refreshToken = '';

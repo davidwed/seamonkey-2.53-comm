@@ -13,11 +13,11 @@ var nsActWarning = Components.Constructor("@mozilla.org/activity-warning;1",
                                           "nsIActivityWarning", "init");
 var nsMsgFolderFlags = Ci.nsMsgFolderFlags;
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/PluralForm.jsm");
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 
 // This module provides a link between the move/copy code and the activity
 // manager.

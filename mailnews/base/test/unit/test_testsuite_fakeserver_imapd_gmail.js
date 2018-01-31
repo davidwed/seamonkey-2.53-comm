@@ -12,9 +12,9 @@ load("../../../resources/asyncTestUtils.js");
 load("../../../resources/alertTestUtils.js");
 
 // IMAP pump
-Cu.import("resource://testing-common/mailnews/IMAPpump.js");
+ChromeUtils.import("resource://testing-common/mailnews/IMAPpump.js");
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 
 setupIMAPPump("GMail");
