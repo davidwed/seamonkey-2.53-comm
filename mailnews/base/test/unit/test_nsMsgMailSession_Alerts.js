@@ -4,8 +4,8 @@
  * listeners.
  */
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 load("../../../resources/alertTestUtils.js");
 

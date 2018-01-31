@@ -1,4 +1,4 @@
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function TestMailImpoter() {
 };

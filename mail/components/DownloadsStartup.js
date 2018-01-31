@@ -15,9 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 //// Globals
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadIntegration",
-                                  "resource://gre/modules/DownloadIntegration.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "DownloadIntegration",
+                               "resource://gre/modules/DownloadIntegration.jsm");
 
 /**
  * CID and Contract ID of the JavaScript implementation of nsITransfer.

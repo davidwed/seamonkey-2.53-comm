@@ -3,7 +3,7 @@
  * Authentication tests for POP3.
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 load("../../../resources/passwordStorage.js");
 
