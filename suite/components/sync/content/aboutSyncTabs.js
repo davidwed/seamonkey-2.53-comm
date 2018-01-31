@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://services-sync/main.js");
-Cu.import("resource:///modules/PlacesUIUtils.jsm");
-Cu.import("resource://gre/modules/PlacesUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://services-sync/main.js");
+ChromeUtils.import("resource:///modules/PlacesUIUtils.jsm");
+ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var RemoteTabViewer = {
   _tabsList: null,

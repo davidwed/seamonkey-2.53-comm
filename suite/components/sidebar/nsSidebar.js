@@ -35,8 +35,8 @@ const nsIClassInfo     = Ci.nsIClassInfo;
 // File extension for Sherlock search plugin description files
 const SHERLOCK_FILE_EXT_REGEXP = /\.src$/i;
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function nsSidebar()
 {
