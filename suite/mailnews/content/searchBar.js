@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/PluralForm.jsm");
-Cu.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 
 var gSearchSession = null;
 var gPreQuickSearchView = null;
