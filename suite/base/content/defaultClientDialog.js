@@ -6,8 +6,8 @@
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // this dialog can only be opened if we have a shell service
-XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
-                                  "resource:///modules/ShellService.jsm");
+ChromeUtils.defineModuleGetter(this, "ShellService",
+                               "resource:///modules/ShellService.jsm");
 
 const nsIPrefBranch = Ci.nsIPrefBranch;
 
