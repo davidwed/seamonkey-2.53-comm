@@ -6,11 +6,11 @@ ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/DownloadUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
-                                  "resource:///modules/DownloadsCommon.jsm");
+ChromeUtils.defineModuleGetter(this, "DownloadsCommon",
+  "resource:///modules/DownloadsCommon.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadHistory",
-                                  "resource://gre/modules/DownloadHistory.jsm");
+ChromeUtils.defineModuleGetter(this, "DownloadHistory",
+  "resource://gre/modules/DownloadHistory.jsm");
 
 function DownloadTreeView() {
   this._dlList = [];
