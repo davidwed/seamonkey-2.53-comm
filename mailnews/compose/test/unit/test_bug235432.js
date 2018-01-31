@@ -3,8 +3,8 @@
  * Test for bug 235432
  */
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var testmail = do_get_file("data/message1.eml");
 var expectedTemporaryFile;

@@ -1,4 +1,4 @@
-Cu.import("resource://testing-common/mailnews/MockFactory.js");
+ChromeUtils.import("resource://testing-common/mailnews/MockFactory.js");
 
 var gUuid;
 

@@ -13,13 +13,13 @@ var RELATIVE_ROOT = "../shared-modules";
 var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers"];
 
 var controller = {};
-Cu.import("resource://mozmill/modules/controller.js", controller);
+ChromeUtils.import("resource://mozmill/modules/controller.js", controller);
 var jumlib = {};
-Cu.import("resource://mozmill/modules/jum.js", jumlib);
+ChromeUtils.import("resource://mozmill/modules/jum.js", jumlib);
 
-Cu.import("resource://gre/modules/FileUtils.jsm");
-Cu.import("resource:///modules/sessionStoreManager.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
+ChromeUtils.import("resource:///modules/sessionStoreManager.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var folderA, folderB;
 

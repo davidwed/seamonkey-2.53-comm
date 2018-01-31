@@ -7,7 +7,7 @@
  */
 
 var elib = {};
-Cu.import('resource://mozmill/modules/elementslib.js', elib);
+ChromeUtils.import('resource://mozmill/modules/elementslib.js', elib);
 
 var MODULE_NAME = "test-image-insertion-dialog";
 
