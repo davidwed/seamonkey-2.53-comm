@@ -4,8 +4,8 @@
 
 this.EXPORTED_SYMBOLS = [ "SitePermissions" ];
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var gStringBundle =
   Services.strings.createBundle("chrome://communicator/locale/sitePermissions.properties");
