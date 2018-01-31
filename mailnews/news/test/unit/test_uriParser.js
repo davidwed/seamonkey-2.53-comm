@@ -1,6 +1,6 @@
 // Tests nsINntpUrl parsing.
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var localserver;
 var tests = [

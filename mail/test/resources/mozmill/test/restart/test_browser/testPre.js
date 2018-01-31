@@ -1,5 +1,5 @@
-var mozmill = {}; Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
-var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+var mozmill = {}; ChromeUtils.import('resource://mozmill/modules/mozmill.js', mozmill);
+var elementslib = {}; ChromeUtils.import('resource://mozmill/modules/elementslib.js', elementslib);
 
 var setupModule = function(module) {
   module.controller = mozmill.getBrowserController();

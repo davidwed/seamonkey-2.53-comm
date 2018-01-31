@@ -8,8 +8,8 @@
 
 this.EXPORTED_SYMBOLS = ['VirtualFolderHelper'];
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 
 var VirtualFolderHelper = {
   /**

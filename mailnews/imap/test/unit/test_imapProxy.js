@@ -2,8 +2,8 @@
  * http://creativecommons.org/publicdomain/zero/1.0/ */
 // Test that IMAP over a SOCKS proxy works.
 
-Cu.import("resource://testing-common/mailnews/NetworkTestUtils.jsm");
-Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/NetworkTestUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 load("../../../resources/messageGenerator.js");
 
 var server, daemon, incomingServer;

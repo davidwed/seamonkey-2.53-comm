@@ -7,8 +7,8 @@
 
 load("../../../resources/POP3pump.js");
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 var gFiles = ["../../../data/bugmail1"];
 var gCopyFolder;

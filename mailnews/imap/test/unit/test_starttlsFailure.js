@@ -4,8 +4,8 @@
  * it drop the connection when it's attempted.
  */
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 load("../../../resources/logHelper.js");
 load("../../../resources/alertTestUtils.js");

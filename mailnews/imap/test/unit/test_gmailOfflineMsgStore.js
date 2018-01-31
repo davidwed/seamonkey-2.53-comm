@@ -16,8 +16,8 @@
  * Original Author: Atul Jangra<atuljangra66@gmail.com>
  */
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 load("../../../resources/logHelper.js");
 load("../../../resources/asyncTestUtils.js");
