@@ -24,7 +24,7 @@ const TITLE_LENGTH_MAX = 4096;
 
 Cu.importGlobalProperties(["URL"]);
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "FileUtils",
                                   "resource://gre/modules/FileUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
@@ -49,7 +49,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "Sqlite",
                                   "resource://gre/modules/Sqlite.jsm");
 
 // This imports various other objects in addition to PlacesUtils.
-Cu.import("resource://gre/modules/PlacesUtils.jsm");
+ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "SMALLPNG_DATA_URI", function() {
   return NetUtil.newURI(

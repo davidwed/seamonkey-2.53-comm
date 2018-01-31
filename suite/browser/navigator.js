@@ -3,12 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/WindowsPreviewPerTab.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/WindowsPreviewPerTab.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 this.__defineGetter__("PluralForm", function() {
-  Cu.import("resource://gre/modules/PluralForm.jsm");
+  ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
   return this.PluralForm;
 });
 this.__defineSetter__("PluralForm", function (val) {
@@ -834,7 +834,7 @@ function Startup()
   if (!window.content.opener &&
       Services.prefs.getBoolPref("browser.doorhanger.enabled")) {
     var tmp = {};
-    Cu.import("resource://gre/modules/PopupNotifications.jsm", tmp);
+    ChromeUtils.import("resource://gre/modules/PopupNotifications.jsm", tmp);
     window.PopupNotifications = new tmp.PopupNotifications(
         getBrowser(),
         document.getElementById("notification-popup"),
