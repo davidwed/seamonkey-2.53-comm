@@ -3,21 +3,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource:///modules/FeedUtils.jsm");
-Cu.import("resource:///modules/gloda/dbview.js");
-Cu.import("resource:///modules/MailConsts.js");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/MailUtils.js");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/PluralForm.jsm");
-Cu.import("resource://gre/modules/AppConstants.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/FeedUtils.jsm");
+ChromeUtils.import("resource:///modules/gloda/dbview.js");
+ChromeUtils.import("resource:///modules/MailConsts.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "BrowserToolboxProcess", "resource://devtools/client/framework/ToolboxProcess.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "ScratchpadManager","resource://devtools/client/scratchpad/scratchpad-manager.jsm");
+ChromeUtils.defineModuleGetter(this, "BrowserToolboxProcess", "resource://devtools/client/framework/ToolboxProcess.jsm");
+ChromeUtils.defineModuleGetter(this, "ScratchpadManager","resource://devtools/client/scratchpad/scratchpad-manager.jsm");
 Object.defineProperty(this, "HUDService", {
   get: function HUDService_getter() {
-    let devtools = Cu.import("resource://devtools/shared/Loader.jsm", {}).devtools;
+    let devtools = ChromeUtils.import("resource://devtools/shared/Loader.jsm", {}).devtools;
     return devtools.require("devtools/client/webconsole/hudservice");
   },
   configurable: true,

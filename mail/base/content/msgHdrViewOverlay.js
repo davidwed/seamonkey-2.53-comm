@@ -7,13 +7,13 @@
  * message pane.
  */
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/displayNameUtils.js");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/gloda/utils.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/displayNameUtils.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/gloda/utils.js");
 var {Status: statusUtils} =
-  Cu.import("resource:///modules/imStatusUtils.jsm");
+  ChromeUtils.import("resource:///modules/imStatusUtils.jsm");
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Warning: It's critical that the code in here for displaying the message
@@ -1306,7 +1306,7 @@ function UpdateEmailNodeDetails(aEmailAddress, aDocumentNode, aCardDetails) {
   let chatContact;
   if (!("chatHandler" in window)) {
     window.chatHandler = {};
-    Cu.import("resource:///modules/chatHandler.jsm", chatHandler);
+    ChromeUtils.import("resource:///modules/chatHandler.jsm", chatHandler);
   }
   let onlineContacts = chatHandler.onlineContacts;
   for (let chatAddress of chatAddresses) {

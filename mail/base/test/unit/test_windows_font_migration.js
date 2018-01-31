@@ -9,8 +9,8 @@
  * version the test is run on.
  */
 
-Cu.import("resource:///modules/mailMigrator.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailMigrator.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
  * A list of font names to verify using |makeVerifier| and

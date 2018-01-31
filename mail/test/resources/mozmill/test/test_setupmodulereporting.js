@@ -1,7 +1,7 @@
 var elementslib = {};
-Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+ChromeUtils.import('resource://mozmill/modules/elementslib.js', elementslib);
 var mozmill = {};
-Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
+ChromeUtils.import('resource://mozmill/modules/mozmill.js', mozmill);
 
 var setupModule = function(){
   controller = mozmill.getBrowserController();

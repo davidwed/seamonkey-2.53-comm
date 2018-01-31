@@ -9,13 +9,13 @@
 // async support
 load("../../../resources/logHelper.js");
 load("../../../resources/alertTestUtils.js");
-Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 // IMAP pump
-Cu.import("resource://testing-common/mailnews/IMAPpump.js");
-Cu.import("resource://testing-common/mailnews/imapd.js");
+ChromeUtils.import("resource://testing-common/mailnews/IMAPpump.js");
+ChromeUtils.import("resource://testing-common/mailnews/imapd.js");
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 // Globals
 
@@ -34,7 +34,7 @@ var gTestArray =
   // optionally set server parameters, here enabling debug messages
   function serverParms() {
     if (typeof fsDebugAll == "undefined")
-      Cu.import("resource://testing-common/mailnews/maild.js");
+      ChromeUtils.import("resource://testing-common/mailnews/maild.js");
     IMAPPump.server.setDebugLevel(fsDebugAll);
   },
 

@@ -10,9 +10,9 @@
 load("../../../resources/logHelper.js");
 load("../../../resources/asyncTestUtils.js");
 load("../../../resources/POP3pump.js");
-Cu.import("resource:///modules/folderUtils.jsm");
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/folderUtils.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var gIMAPTrashFolder;
 var gEmptyLocal1, gEmptyLocal2;

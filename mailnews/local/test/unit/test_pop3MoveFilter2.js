@@ -7,9 +7,9 @@
 
 
 load("../../../resources/POP3pump.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 var gFiles = ["../../../data/bugmail10", "../../../data/basic1"];
 
 Services.prefs.setBoolPref("mail.server.default.leave_on_server", true);

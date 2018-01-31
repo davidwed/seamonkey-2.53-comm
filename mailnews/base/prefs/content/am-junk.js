@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/MailUtils.js");
 
 var gDeferredToAccount = "";
 
