@@ -65,8 +65,8 @@ const WINTASKBAR_CONTRACTID = "@mozilla.org/windows-taskbar;1";
 XPCOMUtils.defineLazyServiceGetter(this, "imgTools",
                                    "@mozilla.org/image/tools;1",
                                    "imgITools");
-XPCOMUtils.defineLazyModuleGetter(this, "PageThumbs",
-                                  "resource://gre/modules/PageThumbs.jsm");
+ChromeUtils.defineModuleGetter(this, "PageThumbs",
+  "resource://gre/modules/PageThumbs.jsm");
 
 // nsIURI -> imgIContainer
 function _imageFromURI(uri, privateMode, callback) {
