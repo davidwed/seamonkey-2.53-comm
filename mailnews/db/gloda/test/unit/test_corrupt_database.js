@@ -15,7 +15,7 @@
 load("../../../../resources/logHelper.js");
 load("../../../../resources/asyncTestUtils.js");
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 // -- Do configure the gloda prefs though...
 // yes to indexing
@@ -34,7 +34,7 @@ var kOriginalDatastoreID = "47e4bad6-fedc-4931-bf3f-d2f4146ac63e";
 Services.prefs.setCharPref(kDatastoreIDPref, kOriginalDatastoreID);
 
 // -- Add a logger listener that throws when we give it a warning/error.
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 
 /**
  * Count the type of each severity level observed.
@@ -98,7 +98,7 @@ function test_corrupt_databases_get_reported_and_blown_away() {
 
   // - init gloda, get warnings
   mark_sub_test_start("init gloda");
-  Cu.import("resource:///modules/gloda/public.js");
+  ChromeUtils.import("resource:///modules/gloda/public.js");
   mark_sub_test_start("gloda inited, checking");
 
   mark_action("actual", "Counting appender counts", [countingAppender.counts]);
@@ -108,7 +108,7 @@ function test_corrupt_databases_get_reported_and_blown_away() {
   do_check_eq(countingAppender.getCountForLevel(Log4Moz.Level.Error), 0);
 
   // - make sure the datastore has an actual database
-  Cu.import("resource:///modules/gloda/datastore.js");
+  ChromeUtils.import("resource:///modules/gloda/datastore.js");
 
   // Make sure that the datastoreID was overwritten
   do_check_neq(Gloda.datastoreID, kOriginalDatastoreID);

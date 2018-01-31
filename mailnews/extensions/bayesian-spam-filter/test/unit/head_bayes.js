@@ -1,15 +1,15 @@
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://testing-common/mailnews/mailTestUtils.js");
-Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/mailTestUtils.js");
+ChromeUtils.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 var CC = Components.Constructor;
 
 // Ensure the profile directory is set up
 do_get_profile();
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 function getSpec(aFileName)
 {

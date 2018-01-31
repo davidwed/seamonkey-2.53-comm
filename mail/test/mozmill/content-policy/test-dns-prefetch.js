@@ -15,11 +15,11 @@ var RELATIVE_ROOT = '../shared-modules';
 var MODULE_REQUIRES = ['folder-display-helpers', 'compose-helpers',
                        'content-tab-helpers'];
 var jumlib = {};
-Cu.import("resource://mozmill/modules/jum.js", jumlib);
+ChromeUtils.import("resource://mozmill/modules/jum.js", jumlib);
 var elib = {};
-Cu.import('resource://mozmill/modules/elementslib.js', elib);
+ChromeUtils.import('resource://mozmill/modules/elementslib.js', elib);
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var folder = null;
 var composeHelper = null;

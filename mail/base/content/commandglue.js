@@ -6,8 +6,8 @@
  * Command-specific code. This stuff should be called by the widgets
  */
 
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 function UpdateMailToolbar(caller)
 {
