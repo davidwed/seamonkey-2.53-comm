@@ -133,8 +133,8 @@ function unregisterPlayPreview() {
   gPlayPreviewRegistration.unregister();
 }
 
-Cu.import('resource://gre/modules/XPCOMUtils.jsm');
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import('resource://gre/modules/XPCOMUtils.jsm');
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 
 function test() {

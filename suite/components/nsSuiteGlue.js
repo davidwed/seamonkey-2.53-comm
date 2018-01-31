@@ -4,13 +4,13 @@
 
 const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/osfile.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource://gre/modules/LoginManagerParent.jsm");
-Cu.import("resource:///modules/Sanitizer.jsm");
-Cu.import("resource:///modules/mailnewsMigrator.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/osfile.jsm");
+ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+ChromeUtils.import("resource://gre/modules/LoginManagerParent.jsm");
+ChromeUtils.import("resource:///modules/Sanitizer.jsm");
+ChromeUtils.import("resource:///modules/mailnewsMigrator.js");
 
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
                                   "resource://gre/modules/NetUtil.jsm");
@@ -56,7 +56,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "AppConstants",
 
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   var tmp = {};
-  Cu.import("resource://devtools/shared/Loader.jsm", tmp);
+  ChromeUtils.import("resource://devtools/shared/Loader.jsm", tmp);
   return tmp.require("devtools/server/main").DebuggerServer;
 });
 
@@ -138,7 +138,7 @@ SuiteGlue.prototype = {
     }
     delay = delay <= MAX_DELAY ? delay : MAX_DELAY;
 
-    Cu.import("resource://services-sync/main.js");
+    ChromeUtils.import("resource://services-sync/main.js");
     Weave.Service.scheduler.delayedAutoConnect(delay);
   },
 
@@ -190,7 +190,7 @@ SuiteGlue.prototype = {
         Cc["@mozilla.org/globalmessagemanager;1"]
           .getService(Ci.nsIMessageListenerManager)
           .loadFrameScript("chrome://navigator/content/content.js", true);
-        Cu.import("resource://gre/modules/NotificationDB.jsm");
+        ChromeUtils.import("resource://gre/modules/NotificationDB.jsm");
         break;
       case "sessionstore-windows-restored":
         this._onBrowserStartup(subject);
@@ -599,7 +599,7 @@ SuiteGlue.prototype = {
         Cc["@mozilla.org/windows-taskbar;1"]
           .getService(Ci.nsIWinTaskbar).available) {
       let temp = {};
-      Cu.import("resource:///modules/WindowsJumpLists.jsm", temp);
+      ChromeUtils.import("resource:///modules/WindowsJumpLists.jsm", temp);
       temp.WinTaskbarJumpList.startup();
     }
 
@@ -628,7 +628,7 @@ SuiteGlue.prototype = {
     })().catch(ex => {
       Cu.reportError(ex);
     }).then(() => {
-      Cu.import("resource:///modules/DownloadsTaskbar.jsm", {})
+      ChromeUtils.import("resource:///modules/DownloadsTaskbar.jsm", {})
         .DownloadsTaskbar.registerIndicator(aWindow);
     });
   },
@@ -1255,7 +1255,7 @@ SuiteGlue.prototype = {
           gDownloadManager = null;
         });
         // Attach the taskbar progress meter to the download manager window.
-        Cu.import("resource:///modules/DownloadsTaskbar.jsm", {})
+        ChromeUtils.import("resource:///modules/DownloadsTaskbar.jsm", {})
                   .DownloadsTaskbar.attachIndicator(gDownloadManager);
       });
     } else if (!newDownload ||
