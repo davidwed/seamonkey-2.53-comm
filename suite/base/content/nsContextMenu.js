@@ -13,8 +13,8 @@
 |   longer term, this code will be restructured to make it more reusable.      |
 ------------------------------------------------------------------------------*/
 
-Cu.import("resource://gre/modules/InlineSpellChecker.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var gContextMenuContentData = null;
 
@@ -24,7 +24,7 @@ XPCOMUtils.defineLazyGetter(this, "InlineSpellCheckerUI", function() {
 
 XPCOMUtils.defineLazyGetter(this, "PageMenuParent", function() {
   let tmp = {};
-  Cu.import("resource://gre/modules/PageMenu.jsm", tmp);
+  ChromeUtils.import("resource://gre/modules/PageMenu.jsm", tmp);
   return new tmp.PageMenuParent();
 });
 
