@@ -27,14 +27,14 @@ var MODULE_REQUIRES = ['folder-display-helpers', 'window-helpers',
                          'keyboard-helpers',
                          'notificationbox-helpers'];
 var jumlib = {};
-Cu.import("resource://mozmill/modules/jum.js", jumlib);
+ChromeUtils.import("resource://mozmill/modules/jum.js", jumlib);
 var elib = {};
-Cu.import('resource://mozmill/modules/elementslib.js', elib);
+ChromeUtils.import('resource://mozmill/modules/elementslib.js', elib);
 var os = {};
-Cu.import('resource://mozmill/stdlib/os.js', os);
+ChromeUtils.import('resource://mozmill/stdlib/os.js', os);
 
-Cu.import('resource://gre/modules/Services.jsm');
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import('resource://gre/modules/Services.jsm');
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var folder = null;
 var gMsgNo = 0;

@@ -7,7 +7,7 @@
  * without having an account that points at it.
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 function run_test()
 {
