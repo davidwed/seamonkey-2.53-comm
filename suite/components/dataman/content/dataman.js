@@ -11,9 +11,9 @@ ChromeUtils.import("resource://gre/modules/DownloadUtils.jsm");
 
 // locally loaded services
 var gLocSvc = {};
-XPCOMUtils.defineLazyModuleGetter(gLocSvc, "FormHistory",
-                                  "resource://gre/modules/FormHistory.jsm",
-                                  "FormHistory");
+ChromeUtils.defineModuleGetter(gLocSvc, "FormHistory",
+  "resource://gre/modules/FormHistory.jsm",
+  "FormHistory");
 XPCOMUtils.defineLazyServiceGetter(gLocSvc, "url",
                                    "@mozilla.org/network/url-parser;1?auth=maybe",
                                    "nsIURLParser");

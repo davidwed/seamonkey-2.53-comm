@@ -6,7 +6,7 @@
 
 ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "LightweightThemeManager",
+ChromeUtils.defineModuleGetter(this, "LightweightThemeManager",
   "resource://gre/modules/LightweightThemeManager.jsm");
 
 var gThemes = [];

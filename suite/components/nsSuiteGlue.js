@@ -12,47 +12,47 @@ ChromeUtils.import("resource://gre/modules/LoginManagerParent.jsm");
 ChromeUtils.import("resource:///modules/Sanitizer.jsm");
 ChromeUtils.import("resource:///modules/mailnewsMigrator.js");
 
-XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
-                                  "resource://gre/modules/NetUtil.jsm");
+ChromeUtils.defineModuleGetter(this, "NetUtil",
+  "resource://gre/modules/NetUtil.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "FileUtils",
-                                  "resource://gre/modules/FileUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "FileUtils",
+  "resource://gre/modules/FileUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "PlacesUtils",
-                                  "resource://gre/modules/PlacesUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "PlacesUtils",
+  "resource://gre/modules/PlacesUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "PlacesBackups",
-                                  "resource://gre/modules/PlacesBackups.jsm");
+ChromeUtils.defineModuleGetter(this, "PlacesBackups",
+  "resource://gre/modules/PlacesBackups.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "AsyncShutdown",
-                                  "resource://gre/modules/AsyncShutdown.jsm");
+ChromeUtils.defineModuleGetter(this, "AsyncShutdown",
+  "resource://gre/modules/AsyncShutdown.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "AutoCompletePopup",
-                                  "resource://gre/modules/AutoCompletePopup.jsm");
+ChromeUtils.defineModuleGetter(this, "AutoCompletePopup",
+  "resource://gre/modules/AutoCompletePopup.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "BookmarkHTMLUtils",
-                                  "resource://gre/modules/BookmarkHTMLUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "BookmarkHTMLUtils",
+  "resource://gre/modules/BookmarkHTMLUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "BookmarkJSONUtils",
-                                  "resource://gre/modules/BookmarkJSONUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "BookmarkJSONUtils",
+  "resource://gre/modules/BookmarkJSONUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "RecentWindow",
-                                  "resource:///modules/RecentWindow.jsm");
+ChromeUtils.defineModuleGetter(this, "RecentWindow",
+  "resource:///modules/RecentWindow.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "Integration",
-                                  "resource://gre/modules/Integration.jsm");
+ChromeUtils.defineModuleGetter(this, "Integration",
+  "resource://gre/modules/Integration.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "PermissionUI",
-                                  "resource:///modules/PermissionUI.jsm");
+ChromeUtils.defineModuleGetter(this, "PermissionUI",
+  "resource:///modules/PermissionUI.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
-                                  "resource:///modules/DownloadsCommon.jsm");
+ChromeUtils.defineModuleGetter(this, "DownloadsCommon",
+  "resource:///modules/DownloadsCommon.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
-                                  "resource:///modules/ShellService.jsm");
+ChromeUtils.defineModuleGetter(this, "ShellService",
+  "resource:///modules/ShellService.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "AppConstants",
-                                  "resource://gre/modules/AppConstants.jsm");
+ChromeUtils.defineModuleGetter(this, "AppConstants",
+  "resource://gre/modules/AppConstants.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   var tmp = {};

@@ -64,9 +64,9 @@ var EXPORTED_SYMBOLS = [
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "SitePermissions",
+ChromeUtils.defineModuleGetter(this, "SitePermissions",
   "resource:///modules/SitePermissions.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "PrivateBrowsingUtils",
+ChromeUtils.defineModuleGetter(this, "PrivateBrowsingUtils",
   "resource://gre/modules/PrivateBrowsingUtils.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "gNotificationBundle", function() {
