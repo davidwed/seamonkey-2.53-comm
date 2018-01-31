@@ -34,7 +34,7 @@ function Startup()
 
 function prefClearGlobalHistory()
 {
-  Cu.import("resource://gre/modules/PlacesUtils.jsm");
+  ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
   PlacesUtils.history.clear();
 }
 

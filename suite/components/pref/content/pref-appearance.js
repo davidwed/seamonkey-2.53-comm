@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Load spell-checker module to properly determine language strings
-Cu.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
 
 function Startup()
 {

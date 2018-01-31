@@ -16,8 +16,8 @@
   <script type="application/javascript"
           src="chrome://global/content/globalOverlay.js"/>
   <script type="application/javascript"><![CDATA[
-    Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-    Cu.import("resource://gre/modules/PlacesUtils.jsm");
+    ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+    ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
     XPCOMUtils.defineLazyModuleGetter(window,
       "PlacesUIUtils", "resource:///modules/PlacesUIUtils.jsm");
     XPCOMUtils.defineLazyModuleGetter(window,
