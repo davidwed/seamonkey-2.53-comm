@@ -9,12 +9,12 @@
  **/
 
 // Services = object with smart getters for common XPCOM services
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // XPCOMUtils.defineLazyGetter(this, "Weave", function() {
 // let tmp = {};
-//   Cu.import("resource://services-sync/main.js", tmp);
+//   ChromeUtils.import("resource://services-sync/main.js", tmp);
 //   return tmp.Weave;
 // });
 

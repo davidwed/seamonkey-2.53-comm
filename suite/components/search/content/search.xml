@@ -539,7 +539,7 @@
 
         this._inputBox.setAttribute("suggestchecked", this._suggestEnabled);
 
-        Cu.import("resource://gre/modules/FormHistory.jsm", this);
+        ChromeUtils.import("resource://gre/modules/FormHistory.jsm", this);
       ]]></constructor>
 
       <destructor><![CDATA[

@@ -11,7 +11,7 @@
  */
 
 const nsICommandLineHandler = Ci.nsICommandLineHandler;
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function nsSetDefault() {
 }
