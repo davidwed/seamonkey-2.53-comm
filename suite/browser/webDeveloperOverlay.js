@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-XPCOMUtils.defineLazyModuleGetter(this, "BrowserToolboxProcess",
-                                  "resource://devtools/client/framework/ToolboxProcess.jsm");
+ChromeUtils.defineModuleGetter(this, "BrowserToolboxProcess",
+  "resource://devtools/client/framework/ToolboxProcess.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "DeveloperToolbar", function() {
   var tmp = {};
@@ -37,8 +37,8 @@ XPCOMUtils.defineLazyGetter(Scratchpad, "ScratchpadManager", function() {
   return tmp.ScratchpadManager;
 });
 
-XPCOMUtils.defineLazyModuleGetter(this, "gDevTools",
-                                  "resource://devtools/client/framework/gDevTools.jsm");
+ChromeUtils.defineModuleGetter(this, "gDevTools",
+  "resource://devtools/client/framework/gDevTools.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "gDevToolsBrowser",
                                   "resource://devtools/client/framework/gDevTools.jsm");
