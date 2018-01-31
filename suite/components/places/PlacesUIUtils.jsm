@@ -12,18 +12,18 @@ ChromeUtils.import("resource://gre/modules/Timer.jsm");
 // PlacesUtils exposes multiple symbols, so we can't use defineLazyModuleGetter.
 ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "PluralForm",
-                                  "resource://gre/modules/PluralForm.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "PrivateBrowsingUtils",
-                                  "resource://gre/modules/PrivateBrowsingUtils.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
-                                  "resource://gre/modules/NetUtil.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "RecentWindow",
-                                  "resource:///modules/RecentWindow.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "PlacesTransactions",
-                                  "resource://gre/modules/PlacesTransactions.jsm");
-// XPCOMUtils.defineLazyModuleGetter(this, "Weave",
-//                                  "resource://services-sync/main.js");
+ChromeUtils.defineModuleGetter(this, "PluralForm",
+  "resource://gre/modules/PluralForm.jsm");
+ChromeUtils.defineModuleGetter(this, "PrivateBrowsingUtils",
+  "resource://gre/modules/PrivateBrowsingUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "NetUtil",
+  "resource://gre/modules/NetUtil.jsm");
+ChromeUtils.defineModuleGetter(this, "RecentWindow",
+  "resource:///modules/RecentWindow.jsm");
+ChromeUtils.defineModuleGetter(this, "PlacesTransactions",
+  "resource://gre/modules/PlacesTransactions.jsm");
+// ChromeUtils.defineModuleGetter(this, "Weave",
+//   "resource://services-sync/main.js");
 
 const gInContentProcess = Services.appinfo.processType == Ci.nsIXULRuntime.PROCESS_TYPE_CONTENT;
 const FAVICON_REQUEST_TIMEOUT = 60 * 1000;
