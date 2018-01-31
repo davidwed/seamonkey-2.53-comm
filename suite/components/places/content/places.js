@@ -10,16 +10,16 @@ ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "MigrationUtils",
-                                  "resource:///modules/MigrationUtils.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "BookmarkJSONUtils",
-                                  "resource://gre/modules/BookmarkJSONUtils.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "PlacesBackups",
-                                  "resource://gre/modules/PlacesBackups.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadUtils",
-                                  "resource://gre/modules/DownloadUtils.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "OS",
-                                  "resource://gre/modules/osfile.jsm");
+ChromeUtils.defineModuleGetter(this, "MigrationUtils",
+  "resource:///modules/MigrationUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "BookmarkJSONUtils",
+  "resource://gre/modules/BookmarkJSONUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "PlacesBackups",
+  "resource://gre/modules/PlacesBackups.jsm");
+ChromeUtils.defineModuleGetter(this, "DownloadUtils",
+  "resource://gre/modules/DownloadUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "OS",
+  "resource://gre/modules/osfile.jsm");
 
 const RESTORE_FILEPICKER_FILTER_EXT = "*.json;*.jsonlz4";
 
