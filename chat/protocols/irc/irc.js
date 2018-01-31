@@ -2,18 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource:///modules/imXPCOMUtils.jsm");
-Cu.import("resource:///modules/imServices.jsm");
-Cu.import("resource:///modules/ircUtils.jsm");
-Cu.import("resource:///modules/ircHandlers.jsm");
-Cu.import("resource:///modules/jsProtoHelper.jsm");
-Cu.import("resource:///modules/NormalizedMap.jsm");
-Cu.import("resource:///modules/socket.jsm");
+ChromeUtils.import("resource:///modules/imXPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/imServices.jsm");
+ChromeUtils.import("resource:///modules/ircUtils.jsm");
+ChromeUtils.import("resource:///modules/ircHandlers.jsm");
+ChromeUtils.import("resource:///modules/jsProtoHelper.jsm");
+ChromeUtils.import("resource:///modules/NormalizedMap.jsm");
+ChromeUtils.import("resource:///modules/socket.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "PluralForm",
+ChromeUtils.defineModuleGetter(this, "PluralForm",
   "resource://gre/modules/PluralForm.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadUtils",
+ChromeUtils.defineModuleGetter(this, "DownloadUtils",
   "resource://gre/modules/DownloadUtils.jsm");
 
 /*
@@ -1944,24 +1944,24 @@ ircAccount.prototype = {
 function ircProtocol() {
   // ircCommands.jsm exports one variable: commands. Import this directly into
   // the protocol object.
-  Cu.import("resource:///modules/ircCommands.jsm", this);
+  ChromeUtils.import("resource:///modules/ircCommands.jsm", this);
   this.registerCommands();
 
   // Register the standard handlers.
   let tempScope = {};
-  Cu.import("resource:///modules/ircBase.jsm", tempScope);
-  Cu.import("resource:///modules/ircISUPPORT.jsm", tempScope);
-  Cu.import("resource:///modules/ircCAP.jsm", tempScope);
-  Cu.import("resource:///modules/ircCTCP.jsm", tempScope);
-  Cu.import("resource:///modules/ircDCC.jsm", tempScope);
-  Cu.import("resource:///modules/ircServices.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircBase.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircISUPPORT.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircCAP.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircCTCP.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircDCC.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircServices.jsm", tempScope);
 
   // Extra features.
-  Cu.import("resource:///modules/ircMultiPrefix.jsm", tempScope);
-  Cu.import("resource:///modules/ircNonStandard.jsm", tempScope);
-  Cu.import("resource:///modules/ircSASL.jsm", tempScope);
-  Cu.import("resource:///modules/ircServerTime.jsm", tempScope);
-  Cu.import("resource:///modules/ircWatchMonitor.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircMultiPrefix.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircNonStandard.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircSASL.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircServerTime.jsm", tempScope);
+  ChromeUtils.import("resource:///modules/ircWatchMonitor.jsm", tempScope);
 
   // Register default IRC handlers (IRC base, CTCP).
   ircHandlers.registerHandler(tempScope.ircBase);
