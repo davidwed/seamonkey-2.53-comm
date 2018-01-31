@@ -10,8 +10,8 @@
 
 this.EXPORTED_SYMBOLS = ["sessionStoreManager"];
 
-Cu.import("resource://gre/modules/JSONFile.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/JSONFile.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
  * asuth arbitrarily chose this value to trade-off powersaving,

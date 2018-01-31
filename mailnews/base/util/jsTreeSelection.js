@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = ['JSTreeSelection'];
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 /**
  * Partial nsITreeSelection implementation so that we can have nsMsgDBViews that

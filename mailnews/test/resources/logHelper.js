@@ -8,9 +8,9 @@
  *  or not.
  */
 
-Cu.import("resource:///modules/gloda/log4moz.js");
-Cu.import("resource:///modules/IOUtils.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/IOUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var _mailnewsTestLogger;
 var _xpcshellLogger;
