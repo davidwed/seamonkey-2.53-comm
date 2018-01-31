@@ -18,9 +18,9 @@
 
 this.EXPORTED_SYMBOLS = ["ircServices", "servicesBase"];
 
-Cu.import("resource:///modules/imXPCOMUtils.jsm");
-Cu.import("resource:///modules/ircHandlers.jsm");
-Cu.import("resource:///modules/ircUtils.jsm");
+ChromeUtils.import("resource:///modules/imXPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/ircHandlers.jsm");
+ChromeUtils.import("resource:///modules/ircUtils.jsm");
 
 /*
  * If a service is found, an extra field (serviceName) is added with the
