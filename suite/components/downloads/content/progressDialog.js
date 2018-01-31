@@ -6,8 +6,8 @@ ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/DownloadUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
-                                  "resource:///modules/DownloadsCommon.jsm");
+ChromeUtils.defineModuleGetter(this, "DownloadsCommon",
+  "resource:///modules/DownloadsCommon.jsm");
 
 var gDownload;
 var gDownloadBundle;
