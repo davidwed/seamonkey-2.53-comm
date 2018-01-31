@@ -39,15 +39,15 @@ var EXPORTED_SYMBOLS = ['loadFile','register_function','Collector','Runner','eve
                         'jsbridge', 'runTestDirectory', 'runTestFile', 'log', 'getThread',
                         'timers', 'persisted'];
 
-Cu.import('resource://mozmill/stdlib/httpd.js');
+ChromeUtils.import('resource://mozmill/stdlib/httpd.js');
 
-var os = {};      Cu.import('resource://mozmill/stdlib/os.js', os);
-var strings = {}; Cu.import('resource://mozmill/stdlib/strings.js', strings);
-var arrays = {};  Cu.import('resource://mozmill/stdlib/arrays.js', arrays);
-var withs = {};   Cu.import('resource://mozmill/stdlib/withs.js', withs);
-var utils = {};   Cu.import('resource://mozmill/modules/utils.js', utils);
+var os = {};      ChromeUtils.import('resource://mozmill/stdlib/os.js', os);
+var strings = {}; ChromeUtils.import('resource://mozmill/stdlib/strings.js', strings);
+var arrays = {};  ChromeUtils.import('resource://mozmill/stdlib/arrays.js', arrays);
+var withs = {};   ChromeUtils.import('resource://mozmill/stdlib/withs.js', withs);
+var utils = {};   ChromeUtils.import('resource://mozmill/modules/utils.js', utils);
 var securableModule = {};
-  Cu.import('resource://mozmill/stdlib/securable-module.js', securableModule);
+  ChromeUtils.import('resource://mozmill/stdlib/securable-module.js', securableModule);
 
 var aConsoleService = Cc["@mozilla.org/consoleservice;1"]
                         .getService(Ci.nsIConsoleService);
@@ -58,7 +58,7 @@ var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
 var uuidgen = Cc["@mozilla.org/uuid-generator;1"]
                 .getService(Ci.nsIUUIDGenerator);
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 var systemPrincipal = Services.scriptSecurityManager.getSystemPrincipal();
 
 var backstage = this;
@@ -78,11 +78,11 @@ mozmill = undefined; elementslib = undefined; modules = undefined;
 var loadTestResources = function () {
   if (mozmill == undefined) {
     mozmill = {};
-    Cu.import("resource://mozmill/modules/mozmill.js", mozmill);
+    ChromeUtils.import("resource://mozmill/modules/mozmill.js", mozmill);
   }
   if (elementslib == undefined) {
     elementslib = {};
-    Cu.import("resource://mozmill/modules/elementslib.js", elementslib);
+    ChromeUtils.import("resource://mozmill/modules/elementslib.js", elementslib);
   }
 }
 
@@ -317,7 +317,7 @@ var log = function (obj) {
 }
 
 try {
-  var jsbridge = {}; Cu.import('resource://jsbridge/modules/events.js', jsbridge);
+  var jsbridge = {}; ChromeUtils.import('resource://jsbridge/modules/events.js', jsbridge);
 } catch(err) {
   var jsbridge = null;
 
@@ -337,7 +337,7 @@ function Collector () {
   this.testing = [];
   this.httpd_started = false;
   this.http_port = 43336;
-  // var logging = {}; Cu.import('resource://mozmill/stdlib/logging.js', logging);
+  // var logging = {}; ChromeUtils.import('resource://mozmill/stdlib/logging.js', logging);
   // this.logger = new logging.Logger('Collector');
 }
 
@@ -508,7 +508,7 @@ function Runner (collector, invokedFromIDE) {
   events.fireEvent('startRunner', true);
   // var logging = {}; Components.utils.import('resource://mozmill/stdlib/logging.js', logging);
   // this.logger = new logging.Logger('Runner');
-  var m = {}; Cu.import('resource://mozmill/modules/mozmill.js', m);
+  var m = {}; ChromeUtils.import('resource://mozmill/modules/mozmill.js', m);
   this.platform = m.platform;
 }
 Runner.prototype.runTestDirectory = function (directory) {

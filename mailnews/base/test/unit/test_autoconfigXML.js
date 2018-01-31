@@ -16,8 +16,8 @@
 
 // Globals
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/JXON.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/JXON.js");
 
 var DOMParser = Components.Constructor("@mozilla.org/xmlextras/domparser;1");
 

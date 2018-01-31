@@ -7,7 +7,7 @@
  */
 
 load("../../../resources/POP3pump.js");
-Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 add_task(function* runPump() {
 

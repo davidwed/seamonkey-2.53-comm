@@ -12,10 +12,10 @@ var nsActEvent = Components.Constructor("@mozilla.org/activity-event;1",
 var nsActWarning = Components.Constructor("@mozilla.org/activity-warning;1",
                                             "nsIActivityWarning", "init");
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/PluralForm.jsm");
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 
 /**
  * This really, really, sucks. Due to mailnews widespread use of

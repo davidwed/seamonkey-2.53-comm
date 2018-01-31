@@ -3,11 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource:///modules/distribution.js");
-Cu.import("resource:///modules/mailMigrator.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+ChromeUtils.import("resource:///modules/distribution.js");
+ChromeUtils.import("resource:///modules/mailMigrator.js");
 
 /**
  * Glue code that should be executed before any windows are opened. Any
@@ -86,7 +86,7 @@ MailGlue.prototype = {
     const WINTASKBAR_CONTRACTID = "@mozilla.org/windows-taskbar;1";
     if (WINTASKBAR_CONTRACTID in Cc &&
         Cc[WINTASKBAR_CONTRACTID].getService(Ci.nsIWinTaskbar).available) {
-      Cu.import("resource:///modules/windowsJumpLists.js");
+      ChromeUtils.import("resource:///modules/windowsJumpLists.js");
       WinTaskbarJumpList.startup();
     }
 

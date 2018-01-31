@@ -4,7 +4,7 @@
 
 // Test of setup of localMailFolders
 
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 function run_test()
 {

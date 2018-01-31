@@ -1,13 +1,13 @@
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://testing-common/mailnews/mailTestUtils.js");
-Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/mailTestUtils.js");
+ChromeUtils.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 var CC = Components.Constructor;
 
 // WebApps.jsm called by ProxyAutoConfig (PAC) requires a valid nsIXULAppInfo.
-Cu.import("resource://testing-common/AppInfo.jsm");
+ChromeUtils.import("resource://testing-common/AppInfo.jsm");
 updateAppInfo();
 
 // Ensure the profile directory is set up
@@ -16,11 +16,11 @@ do_get_profile();
 var gDEPTH = "../../../../";
 
 // Import the pop3 server scripts
-Cu.import("resource://testing-common/mailnews/maild.js");
-Cu.import("resource://testing-common/mailnews/auth.js");
-Cu.import("resource://testing-common/mailnews/pop3d.js");
+ChromeUtils.import("resource://testing-common/mailnews/maild.js");
+ChromeUtils.import("resource://testing-common/mailnews/auth.js");
+ChromeUtils.import("resource://testing-common/mailnews/pop3d.js");
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 // Setup the daemon and server
 // If the debugOption is set, then it will be applied to the server.

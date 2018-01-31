@@ -4,14 +4,14 @@
 
 this.EXPORTED_SYMBOLS = ['GlodaABIndexer', 'GlodaABAttrs'];
 
-Cu.import("resource:///modules/gloda/collection.js");
-Cu.import("resource:///modules/gloda/datastore.js");
-Cu.import("resource:///modules/gloda/gloda.js");
-Cu.import("resource:///modules/gloda/indexer.js");
-Cu.import("resource:///modules/gloda/log4moz.js");
-Cu.import("resource:///modules/gloda/noun_freetag.js");
-Cu.import("resource:///modules/gloda/utils.js");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/gloda/collection.js");
+ChromeUtils.import("resource:///modules/gloda/datastore.js");
+ChromeUtils.import("resource:///modules/gloda/gloda.js");
+ChromeUtils.import("resource:///modules/gloda/indexer.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/gloda/noun_freetag.js");
+ChromeUtils.import("resource:///modules/gloda/utils.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 
 var GlodaABIndexer = {

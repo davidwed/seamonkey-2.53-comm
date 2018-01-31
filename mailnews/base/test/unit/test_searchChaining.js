@@ -10,10 +10,10 @@
 
 load("../../../resources/messageGenerator.js");
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://testing-common/mailnews/IMAPpump.js");
-Cu.import("resource://testing-common/mailnews/imapd.js");
-Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://testing-common/mailnews/IMAPpump.js");
+ChromeUtils.import("resource://testing-common/mailnews/imapd.js");
+ChromeUtils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 function *setupFolder()
 {

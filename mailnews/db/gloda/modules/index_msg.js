@@ -14,23 +14,23 @@
 
 this.EXPORTED_SYMBOLS = ['GlodaMsgIndexer'];
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
 
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 
-Cu.import("resource:///modules/gloda/utils.js");
-Cu.import("resource:///modules/gloda/datastore.js");
-Cu.import("resource:///modules/gloda/datamodel.js");
-Cu.import("resource:///modules/gloda/gloda.js");
-Cu.import("resource:///modules/gloda/collection.js");
-Cu.import("resource:///modules/gloda/connotent.js");
+ChromeUtils.import("resource:///modules/gloda/utils.js");
+ChromeUtils.import("resource:///modules/gloda/datastore.js");
+ChromeUtils.import("resource:///modules/gloda/datamodel.js");
+ChromeUtils.import("resource:///modules/gloda/gloda.js");
+ChromeUtils.import("resource:///modules/gloda/collection.js");
+ChromeUtils.import("resource:///modules/gloda/connotent.js");
 
-Cu.import("resource:///modules/gloda/indexer.js");
+ChromeUtils.import("resource:///modules/gloda/indexer.js");
 
-Cu.import("resource:///modules/gloda/mimemsg.js");
+ChromeUtils.import("resource:///modules/gloda/mimemsg.js");
 
 XPCOMUtils.defineLazyServiceGetter(this, "atomService",
                                    "@mozilla.org/atom-service;1",

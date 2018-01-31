@@ -13,8 +13,8 @@
    * @return href for the url being clicked
    */
 
-  Cu.import("resource://gre/modules/PlacesUtils.jsm");
-  Cu.import("resource://gre/modules/Services.jsm");
+  ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
+  ChromeUtils.import("resource://gre/modules/Services.jsm");
 
   function hRefForClickEvent(aEvent, aDontCheckInputElement)
   {
