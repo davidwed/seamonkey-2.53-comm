@@ -8,7 +8,7 @@ this.EXPORTED_SYMBOLS = [
   "TextboxSpellChecker"
 ];
 
-Cu.import("resource:///modules/imServices.jsm");
+ChromeUtils.import("resource:///modules/imServices.jsm");
 
 var MessageFormat = {
   _observedPrefs: [],
