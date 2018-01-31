@@ -31,7 +31,7 @@ THUNDERBIRD_VERSION=$MOZ_APP_VERSION
 THUNDERBIRD_VERSION_DISPLAY=$MOZ_APP_VERSION_DISPLAY
 
 MOZ_BRANDING_DIRECTORY=$commreltopsrcdir/mail/branding/nightly
-MOZ_OFFICIAL_BRANDING_DIRECTORY=$commreltopsrcdir/other-licenses/branding/thunderbird
+MOZ_OFFICIAL_BRANDING_DIRECTORY=$commreltopsrcdir/mail/branding/thunderbird
 
 MOZ_APP_ID={3550f703-e582-4d05-9a08-453d09bdfdc6}
 # This should usually be the same as the value MAR_CHANNEL_ID.
