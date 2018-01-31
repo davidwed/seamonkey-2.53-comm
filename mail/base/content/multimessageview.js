@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/gloda/gloda.js");
-Cu.import("resource:///modules/gloda/connotent.js");
-Cu.import("resource:///modules/gloda/mimemsg.js");
-Cu.import("resource:///modules/displayNameUtils.js");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/templateUtils.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/gloda/gloda.js");
+ChromeUtils.import("resource:///modules/gloda/connotent.js");
+ChromeUtils.import("resource:///modules/gloda/mimemsg.js");
+ChromeUtils.import("resource:///modules/displayNameUtils.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/templateUtils.js");
 
 var gMessenger = Cc["@mozilla.org/messenger;1"]
                    .createInstance(Ci.nsIMessenger);

@@ -13,9 +13,9 @@ var RELATIVE_ROOT = "../shared-modules";
 var MODULE_REQUIRES = ["folder-display-helpers", "compose-helpers", "window-helpers",
                          "message-helpers"];
 var jumlib = {};
-Cu.import("resource://mozmill/modules/jum.js", jumlib);
+ChromeUtils.import("resource://mozmill/modules/jum.js", jumlib);
 var elib = {};
-Cu.import("resource://mozmill/modules/elementslib.js", elib);
+ChromeUtils.import("resource://mozmill/modules/elementslib.js", elib);
 
 var composeHelper = null;
 var cwc = null; // compose window controller

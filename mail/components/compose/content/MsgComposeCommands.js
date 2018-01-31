@@ -7,22 +7,22 @@
  */
 
 // Ensure the activity modules are loaded for this window.
-Cu.import("resource:///modules/activity/activityModules.js");
-Cu.import("resource:///modules/attachmentChecker.js");
-Cu.import("resource:///modules/cloudFileAccounts.js");
-Cu.import("resource:///modules/mimeParser.jsm");
-Cu.import("resource:///modules/errUtils.js");
-Cu.import("resource:///modules/folderUtils.jsm");
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/MailUtils.js");
-Cu.import("resource://gre/modules/InlineSpellChecker.jsm");
-Cu.import("resource://gre/modules/PluralForm.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/AppConstants.jsm");
+ChromeUtils.import("resource:///modules/activity/activityModules.js");
+ChromeUtils.import("resource:///modules/attachmentChecker.js");
+ChromeUtils.import("resource:///modules/cloudFileAccounts.js");
+ChromeUtils.import("resource:///modules/mimeParser.jsm");
+ChromeUtils.import("resource:///modules/errUtils.js");
+ChromeUtils.import("resource:///modules/folderUtils.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "OS", "resource://gre/modules/osfile.jsm");
+ChromeUtils.defineModuleGetter(this, "OS", "resource://gre/modules/osfile.jsm");
 
 /**
  * interfaces

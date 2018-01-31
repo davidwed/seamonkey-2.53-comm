@@ -1,4 +1,4 @@
-Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
+ChromeUtils.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 function run_test()
 {

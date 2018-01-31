@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource:///modules/dbViewWrapper.js");
-Cu.import("resource:///modules/mailViewManager.js");
-Cu.import("resource:///modules/virtualFolderWrapper.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/dbViewWrapper.js");
+ChromeUtils.import("resource:///modules/mailViewManager.js");
+ChromeUtils.import("resource:///modules/virtualFolderWrapper.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var gInbox;
 

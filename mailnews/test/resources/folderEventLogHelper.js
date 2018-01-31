@@ -8,7 +8,7 @@
  *  for now.
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 function registerFolderEventLogHelper() {
   // Bail if there's no one on the other end who cares about our very

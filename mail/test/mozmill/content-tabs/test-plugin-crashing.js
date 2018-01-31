@@ -8,9 +8,9 @@ var RELATIVE_ROOT = '../shared-modules';
 var MODULE_REQUIRES = ['folder-display-helpers', 'content-tab-helpers'];
 
 var frame = {};
-Cu.import('resource://mozmill/modules/frame.js', frame);
+ChromeUtils.import('resource://mozmill/modules/frame.js', frame);
 
-Cu.import('resource://gre/modules/Services.jsm');
+ChromeUtils.import('resource://gre/modules/Services.jsm');
 
 var gContentWindow = null;
 var gJSObject = null;

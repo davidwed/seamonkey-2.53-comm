@@ -3,7 +3,7 @@
  * null instead of 0-length strings.
  */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 function run_test() {
   let addresses = {}, names = {}, fullAddresses = {};
