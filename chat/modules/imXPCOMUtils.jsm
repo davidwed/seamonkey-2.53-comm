@@ -14,8 +14,8 @@ this.EXPORTED_SYMBOLS = [
   "initLogModule"
 ];
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource:///modules/imServices.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/imServices.jsm");
 
 var kLogLevelPref = "purple.debug.loglevel";
 

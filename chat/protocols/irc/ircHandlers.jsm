@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = ["ircHandlers"];
 
-Cu.import("resource:///modules/ircUtils.jsm");
+ChromeUtils.import("resource:///modules/ircUtils.jsm");
 
 var ircHandlers = {
   /*
