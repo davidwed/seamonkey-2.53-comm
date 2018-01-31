@@ -5,8 +5,8 @@
 
 //NOTE: gAddressBookBundle must be defined and set or this Overlay won't work
 
-Cu.import("resource://gre/modules/PlacesUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var gProfileDirURL;
 var gFileHandler = Services.io.getProtocolHandler("file")

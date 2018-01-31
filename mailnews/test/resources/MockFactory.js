@@ -1,6 +1,6 @@
 this.EXPORTED_SYMBOLS = ["MockFactory"];
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Cm = Components.manager;
 

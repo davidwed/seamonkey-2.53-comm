@@ -4,10 +4,10 @@
 
 this.EXPORTED_SYMBOLS = ['DBViewWrapper', 'IDBViewWrapperListener'];
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/mailViewManager.js");
-Cu.import("resource:///modules/searchSpec.js");
-Cu.import("resource:///modules/virtualFolderWrapper.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailViewManager.js");
+ChromeUtils.import("resource:///modules/searchSpec.js");
+ChromeUtils.import("resource:///modules/virtualFolderWrapper.js");
 
 var nsMsgFolderFlags = Ci.nsMsgFolderFlags;
 var nsMsgViewType = Ci.nsMsgViewType;

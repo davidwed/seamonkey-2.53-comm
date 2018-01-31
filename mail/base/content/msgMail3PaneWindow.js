@@ -3,22 +3,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource:///modules/activity/activityModules.js");
-Cu.import("resource:///modules/errUtils.js");
-Cu.import("resource:///modules/folderUtils.jsm");
-Cu.import("resource:///modules/IOUtils.js");
-Cu.import("resource:///modules/jsTreeSelection.js");
-Cu.import("resource:///modules/MailConsts.js");
-Cu.import("resource:///modules/mailInstrumentation.js");
-Cu.import("resource:///modules/mailnewsMigrator.js");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/msgDBCacheManager.js");
-Cu.import("resource:///modules/sessionStoreManager.js");
-Cu.import("resource:///modules/summaryFrameManager.js");
-Cu.import("resource:///modules/MailUtils.js");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AppConstants.jsm");
-Cu.import("resource://gre/modules/Color.jsm");
+ChromeUtils.import("resource:///modules/activity/activityModules.js");
+ChromeUtils.import("resource:///modules/errUtils.js");
+ChromeUtils.import("resource:///modules/folderUtils.jsm");
+ChromeUtils.import("resource:///modules/IOUtils.js");
+ChromeUtils.import("resource:///modules/jsTreeSelection.js");
+ChromeUtils.import("resource:///modules/MailConsts.js");
+ChromeUtils.import("resource:///modules/mailInstrumentation.js");
+ChromeUtils.import("resource:///modules/mailnewsMigrator.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/msgDBCacheManager.js");
+ChromeUtils.import("resource:///modules/sessionStoreManager.js");
+ChromeUtils.import("resource:///modules/summaryFrameManager.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
+ChromeUtils.import("resource://gre/modules/Color.jsm");
 
 /* This is where functions related to the 3 pane window are kept */
 
@@ -359,7 +359,7 @@ function OnLoadMessenger()
     // On Win8 set an attribute when the window frame color is too dark for black text.
     if (window.matchMedia("(-moz-os-version: windows-win8)").matches &&
         window.matchMedia("(-moz-windows-default-theme)").matches) {
-      let windowFrameColor = new Color(...Cu.import("resource:///modules/Windows8WindowFrameColor.jsm", {})
+      let windowFrameColor = new Color(...ChromeUtils.import("resource:///modules/Windows8WindowFrameColor.jsm", {})
                                             .Windows8WindowFrameColor.get());
       // Default to black for foreground text.
       if (!windowFrameColor.isContrastRatioAcceptable(new Color(0, 0, 0))) {
@@ -463,7 +463,7 @@ function LoadPostAccountWizard()
   MigrateJunkMailSettings();
   MigrateFolderViews();
   MigrateOpenMessageBehavior();
-  Cu.import("resource:///modules/mailMigrator.js");
+  ChromeUtils.import("resource:///modules/mailMigrator.js");
   MailMigrator.migratePostAccountWizard();
 
   accountManager.setSpecialFolders();
@@ -523,7 +523,7 @@ function LoadPostAccountWizard()
 
       // Next, try loading the search integration module
       // We'll get a null SearchIntegration if we don't have one
-      Cu.import("resource:///modules/SearchIntegration.js");
+      ChromeUtils.import("resource:///modules/SearchIntegration.js");
 
       // Show the default client dialog only if
       // EITHER: we have at least one account, and we aren't already the default
@@ -1497,7 +1497,7 @@ var LightWeightThemeWebInstaller = {
 
   get _manager () {
     let temp = {};
-    Cu.import("resource://gre/modules/LightweightThemeManager.jsm", temp);
+    ChromeUtils.import("resource://gre/modules/LightweightThemeManager.jsm", temp);
     delete this._manager;
     return this._manager = temp.LightweightThemeManager;
   },

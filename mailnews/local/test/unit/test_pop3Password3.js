@@ -3,8 +3,8 @@
  * Extra tests for POP3 passwords (forgetPassword)
  */
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 load("../../../resources/passwordStorage.js");
 

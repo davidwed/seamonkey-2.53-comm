@@ -8,9 +8,9 @@ load("../../../resources/messageGenerator.js");
 
 var gEmptyLocal1, gEmptyLocal2, gEmptyLocal3, gNotEmptyLocal4;
 
-Cu.import("resource:///modules/folderUtils.jsm");
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/folderUtils.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var tests = [
   setup,

@@ -4,11 +4,11 @@
 
 var EXPORTED_SYMBOLS = ["MailUtils"];
 
-Cu.import("resource:///modules/iteratorUtils.jsm");
-Cu.import("resource:///modules/MailConsts.js");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/MailConsts.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
 
 var MC = MailConsts;
 

@@ -18,9 +18,9 @@ var MODULE_REQUIRES = [ 'attachment-helpers',
                         'prompt-helpers',
                         'window-helpers' ];
 
-var mozmill = {}; Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
-var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
-var downloads = {}; Cu.import("resource://gre/modules/Downloads.jsm", downloads);
+var mozmill = {}; ChromeUtils.import('resource://mozmill/modules/mozmill.js', mozmill);
+var elementslib = {}; ChromeUtils.import('resource://mozmill/modules/elementslib.js', elementslib);
+var downloads = {}; ChromeUtils.import("resource://gre/modules/Downloads.jsm", downloads);
 
 var downloadsTab;
 

@@ -1,5 +1,5 @@
-Cu.import("resource:///modules/distribution.js");
-Cu.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/distribution.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 function run_test()
 {

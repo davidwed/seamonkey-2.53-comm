@@ -29,8 +29,8 @@
  * do_throw().
  */
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://testing-common/mailnews/MockFactory.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/MockFactory.js");
 
 // Wrapper to the nsIPrompt interface.
 // This allows the send code to attempt to display errors to the user without

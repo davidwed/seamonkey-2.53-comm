@@ -5,8 +5,8 @@
 /* Test that the message failed to move to a local folder remains on IMAP
  * server. */
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 load("../../../resources/logHelper.js");
 load("../../../resources/asyncTestUtils.js");

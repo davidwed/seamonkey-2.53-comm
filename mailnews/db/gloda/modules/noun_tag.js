@@ -4,8 +4,8 @@
 
 this.EXPORTED_SYMBOLS = ['TagNoun'];
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource:///modules/gloda/gloda.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/gloda/gloda.js");
 
 /**
  * @namespace Tag noun provider.

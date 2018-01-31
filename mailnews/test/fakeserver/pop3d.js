@@ -13,9 +13,9 @@ var EXPORTED_SYMBOLS = [
   'POP3_RFC5034_handler'
 ];
 
-Cu.import("resource:///modules/IOUtils.js");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://testing-common/mailnews/auth.js");
+ChromeUtils.import("resource:///modules/IOUtils.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://testing-common/mailnews/auth.js");
 
 // Since we don't really need to worry about peristence, we can just
 // use a UIDL counter.
