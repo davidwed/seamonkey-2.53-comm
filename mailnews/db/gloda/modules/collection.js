@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = ['GlodaCollection', 'GlodaCollectionManager'];
 
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 
 var LOG = Log4Moz.repository.getLogger("gloda.collection");
 

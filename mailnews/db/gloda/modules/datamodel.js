@@ -6,12 +6,12 @@ this.EXPORTED_SYMBOLS = ["GlodaAttributeDBDef", "GlodaAccount",
                     "GlodaConversation", "GlodaFolder", "GlodaMessage",
                     "GlodaContact", "GlodaIdentity", "GlodaAttachment"];
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
-Cu.import("resource:///modules/gloda/log4moz.js");
+ChromeUtils.import("resource:///modules/gloda/log4moz.js");
 var LOG = Log4Moz.repository.getLogger("gloda.datamodel");
 
-Cu.import("resource:///modules/gloda/utils.js");
+ChromeUtils.import("resource:///modules/gloda/utils.js");
 
 // Make it lazy.
 var gMessenger;
