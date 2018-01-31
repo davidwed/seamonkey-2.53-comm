@@ -18,9 +18,9 @@
   <script type="application/javascript"><![CDATA[
     ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
     ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
-    XPCOMUtils.defineLazyModuleGetter(window,
+    ChromeUtils.defineModuleGetter(window,
       "PlacesUIUtils", "resource:///modules/PlacesUIUtils.jsm");
-    XPCOMUtils.defineLazyModuleGetter(window,
+    ChromeUtils.defineModuleGetter(window,
       "PlacesTransactions", "resource://gre/modules/PlacesTransactions.jsm");
   ]]></script>
   <script type="application/javascript"

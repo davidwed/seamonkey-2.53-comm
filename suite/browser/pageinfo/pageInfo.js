@@ -7,8 +7,8 @@ ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "Downloads",
-                                  "resource://gre/modules/Downloads.jsm");
+ChromeUtils.defineModuleGetter(this, "Downloads",
+  "resource://gre/modules/Downloads.jsm");
 
 //******** define a js object to implement nsITreeView
 function pageInfoTreeView(treeid, copycol)

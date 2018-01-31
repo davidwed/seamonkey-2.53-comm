@@ -28,17 +28,17 @@ XPCOMUtils.defineLazyGetter(this, "PageMenuParent", function() {
   return new tmp.PageMenuParent();
 });
 
-XPCOMUtils.defineLazyModuleGetter(this, "DevToolsShim",
-                                  "chrome://devtools-shim/content/DevToolsShim.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "findCssSelector",
-                                  "resource://gre/modules/css-selector.js");
-XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
-                                  "resource:///modules/ShellService.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
-                                  "resource://gre/modules/NetUtil.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "LoginHelper",
+ChromeUtils.defineModuleGetter(this, "DevToolsShim",
+                               "chrome://devtools-shim/content/DevToolsShim.jsm");
+ChromeUtils.defineModuleGetter(this, "findCssSelector",
+                               "resource://gre/modules/css-selector.js");
+ChromeUtils.defineModuleGetter(this, "ShellService",
+                               "resource:///modules/ShellService.jsm");
+ChromeUtils.defineModuleGetter(this, "NetUtil",
+                               "resource://gre/modules/NetUtil.jsm");
+ChromeUtils.defineModuleGetter(this, "LoginHelper",
   "resource://gre/modules/LoginHelper.jsm");
-XPCOMUtils.defineLazyModuleGetter(this, "LoginManagerContent",
+ChromeUtils.defineModuleGetter(this, "LoginManagerContent",
   "resource://gre/modules/LoginManagerContent.jsm");
 
 var gContextMenuContentData = null;
