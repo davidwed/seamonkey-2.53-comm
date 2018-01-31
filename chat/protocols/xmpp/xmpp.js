@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Cu.import("resource:///modules/imXPCOMUtils.jsm");
-Cu.import("resource:///modules/jsProtoHelper.jsm");
-Cu.import("resource:///modules/xmpp.jsm");
-Cu.import("resource:///modules/xmpp-session.jsm");
+ChromeUtils.import("resource:///modules/imXPCOMUtils.jsm");
+ChromeUtils.import("resource:///modules/jsProtoHelper.jsm");
+ChromeUtils.import("resource:///modules/xmpp.jsm");
+ChromeUtils.import("resource:///modules/xmpp-session.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "_", () =>
   l10nHelper("chrome://chat/locale/xmpp.properties")
@@ -17,7 +17,7 @@ function XMPPAccount(aProtoInstance, aImAccount) {
 XMPPAccount.prototype = XMPPAccountPrototype;
 
 function XMPPProtocol() {
-  Cu.import("resource:///modules/xmpp-commands.jsm", this);
+  ChromeUtils.import("resource:///modules/xmpp-commands.jsm", this);
   this.registerCommands();
 }
 XMPPProtocol.prototype = {
