@@ -8,9 +8,9 @@ this.EXPORTED_SYMBOLS = ['alertHook'];
 var nsActWarning = Components.Constructor("@mozilla.org/activity-warning;1",
                                             "nsIActivityWarning", "init");
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // This module provides a link between the send later service and the activity
 // manager.

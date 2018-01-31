@@ -40,13 +40,13 @@ var EXPORTED_SYMBOLS = ["Elem", "ID", "Link", "XPath", "Selector", "Name", "Anon
                         "Lookup", "_byID", "_byName", "_byAttrib", "_byAnonAttrib",
                        ];
 
-var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
-var strings = {}; Cu.import('resource://mozmill/stdlib/strings.js', strings);
-var arrays = {}; Cu.import('resource://mozmill/stdlib/arrays.js', arrays);
-var json2 = {}; Cu.import('resource://mozmill/stdlib/json2.js', json2);
-var withs = {}; Cu.import('resource://mozmill/stdlib/withs.js', withs);
-var dom = {}; Cu.import('resource://mozmill/stdlib/dom.js', dom);
-var objects = {}; Cu.import('resource://mozmill/stdlib/objects.js', objects);
+var utils = {}; ChromeUtils.import('resource://mozmill/modules/utils.js', utils);
+var strings = {}; ChromeUtils.import('resource://mozmill/stdlib/strings.js', strings);
+var arrays = {}; ChromeUtils.import('resource://mozmill/stdlib/arrays.js', arrays);
+var json2 = {}; ChromeUtils.import('resource://mozmill/stdlib/json2.js', json2);
+var withs = {}; ChromeUtils.import('resource://mozmill/stdlib/withs.js', withs);
+var dom = {}; ChromeUtils.import('resource://mozmill/stdlib/dom.js', dom);
+var objects = {}; ChromeUtils.import('resource://mozmill/stdlib/objects.js', objects);
 
 var countQuotes = function(str){
   var count = 0;

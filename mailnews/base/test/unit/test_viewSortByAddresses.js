@@ -11,8 +11,8 @@ load("../../../resources/messageModifier.js");
 load("../../../resources/messageInjection.js");
 load("../../../resources/abSetup.js");
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var gMessageGenerator = new MessageGenerator();
 var gScenarioFactory = new MessageScenarioFactory(gMessageGenerator);

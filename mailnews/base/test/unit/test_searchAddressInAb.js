@@ -10,7 +10,7 @@ load("../../../resources/searchTestUtils.js");
 // add address book setup
 load("../../../resources/abSetup.js");
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var ABUri = kPABData.URI;
 

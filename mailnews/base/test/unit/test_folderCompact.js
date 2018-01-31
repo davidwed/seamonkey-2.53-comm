@@ -15,8 +15,8 @@
   * - Compacting imap offline stores.
   */
 
-Cu.import("resource:///modules/mailServices.js");
-Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 Services.prefs.setCharPref("mail.serverDefaultStoreContractID",
                            "@mozilla.org/msgstore/berkeleystore;1");
