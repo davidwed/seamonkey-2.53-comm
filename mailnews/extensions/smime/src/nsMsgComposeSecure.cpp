@@ -944,7 +944,6 @@ nsresult nsMsgComposeSecure::MimeCryptoHackCerts(const char *aRecipients,
     if (!nsscert) {
       return NS_ERROR_FAILURE;
     }
-    // XXX: This does not respect the nsNSSShutDownObject protocol.
     if (CERT_SaveSMimeProfile(nsscert.get(), nullptr, nullptr) != SECSuccess) {
       return NS_ERROR_FAILURE;
     }
