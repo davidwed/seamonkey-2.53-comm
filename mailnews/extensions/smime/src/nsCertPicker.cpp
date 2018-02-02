@@ -22,7 +22,6 @@
 #include "nsNSSComponent.h"
 #include "nsNSSDialogHelper.h"
 #include "nsNSSHelper.h"
-#include "nsNSSShutDown.h"
 #include "nsReadableUtils.h"
 #include "nsString.h"
 #include "pkix/pkixtypes.h"
@@ -230,16 +229,6 @@ nsCertPicker::nsCertPicker()
 {
 }
 
-nsCertPicker::~nsCertPicker()
-{
-  nsNSSShutDownPreventionLock locker;
-  if (isAlreadyShutDown()) {
-    return;
-  }
-
-  shutdown(ShutdownCalledFrom::Object);
-}
-
 nsresult
 nsCertPicker::Init()
 {
@@ -309,11 +298,6 @@ NS_IMETHODIMP nsCertPicker::PickByUsage(nsIInterfaceRequestor *ctx,
                                         bool *canceled,
                                         nsIX509Cert **_retval)
 {
-  nsNSSShutDownPreventionLock locker;
-  if (isAlreadyShutDown()) {
-    return NS_ERROR_NOT_AVAILABLE;
-  }
-
   int32_t selectedIndex = -1;
   bool selectionFound = false;
   char16_t **certNicknameList = nullptr;
