@@ -203,7 +203,7 @@ backstage = this;
 
 function Session (transport) {
   this.transpart = transport;
-  this.sandbox = Cu.Sandbox(backstage);
+  this.sandbox = Cu.Sandbox(backstage, { wantGlobalProperties: ["ChromeUtils"] });
   this.sandbox.bridge = new Bridge(this);
   this.sandbox.openPreferences = hwindow.openPreferences;
   try {
