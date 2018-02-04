@@ -92,7 +92,7 @@ var loadFile = function(path, collector) {
   file.initWithPath(path);
   var uri = ios.newFileURI(file).spec;
 
-  var module = new Cu.Sandbox(systemPrincipal);
+  var module = new Cu.Sandbox(systemPrincipal, { wantGlobalProperties: ["ChromeUtils"] });
   module.registeredFunctions = registeredFunctions;
   module.collector = collector
   loadTestResources();
