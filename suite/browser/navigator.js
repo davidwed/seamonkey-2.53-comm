@@ -743,7 +743,7 @@ function Startup()
     DownloadTaskbarProgress.onBrowserWindowLoad(window);
 
     // initialize the sync UI
-    gSyncUI.init();
+    // gSyncUI.init();
 
     // initialize the session-restore service
     setTimeout(InitSessionStoreCallback, 0);
