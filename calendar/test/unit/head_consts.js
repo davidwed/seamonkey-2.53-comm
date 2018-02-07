@@ -5,7 +5,7 @@
 /* exported do_calendar_startup, do_load_calmgr, do_load_timezoneservice,
  *          readJSONFile, ics_unfoldline, compareItemsSpecific, getStorageCal,
  *          getMemoryCal, createTodoFromIcalString, createEventFromIcalString,
- *          createDate, Cc, Ci, Cr, Cu
+ *          createDate
  */
 
 ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -18,8 +18,6 @@ ChromeUtils.import("resource://testing-common/AppInfo.jsm");
 // ChromeUtils.defineModuleGetter(this, "NetUtil", "resource://gre/modules/NetUtil.jsm");
 
 updateAppInfo();
-
-var { classes: Cc, interfaces: Ci, results: Cr, utils: Cu } = Components;
 
 (function() {
     let bindir = Services.dirsvc.get("CurProcD", Components.interfaces.nsIFile);
