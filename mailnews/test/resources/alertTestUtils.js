@@ -45,7 +45,7 @@ var alertUtilsPrompts = {
     do_throw("alert unexpectedly called: " + aText + "\n");
     return;
   },
-  
+
   alertCheck: function(aDialogTitle, aText, aCheckMsg, aCheckState) {
     if (typeof alertCheck == "function") {
       alertCheck(aDialogTitle, aText, aCheckMsg, aCheckState);
@@ -55,7 +55,7 @@ var alertUtilsPrompts = {
     do_throw("alertCheck unexpectedly called: " + aText + "\n");
     return;
   },
-  
+
   confirm: function(aDialogTitle, aText) {
     if (typeof confirm == "function") {
       return confirm(aDialogTitle, aText);
@@ -64,7 +64,7 @@ var alertUtilsPrompts = {
     do_throw("confirm unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   confirmCheck: function(aDialogTitle, aText, aCheckMsg, aCheckState) {
     if (typeof confirmCheck == "function") {
       return confirmCheck(aDialogTitle, aText, aCheckMsg, aCheckState);
@@ -73,7 +73,7 @@ var alertUtilsPrompts = {
     do_throw("confirmCheck unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   confirmEx: function(aDialogTitle, aText, aButtonFlags, aButton0Title,
                       aButton1Title, aButton2Title, aCheckMsg, aCheckState) {
     if (typeof confirmEx == "function") {
@@ -84,7 +84,7 @@ var alertUtilsPrompts = {
     do_throw("confirmEx unexpectedly called: " + aText + "\n");
     return 0;
   },
-  
+
   prompt: function(aDialogTitle, aText, aValue, aCheckMsg, aCheckState) {
     if (typeof prompt == "function") {
       return prompt(aDialogTitle, aText, aValue, aCheckMsg, aCheckState);
@@ -93,7 +93,7 @@ var alertUtilsPrompts = {
     do_throw("prompt unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   promptUsernameAndPassword: function(aDialogTitle, aText, aUsername,
                                       aPassword, aCheckMsg, aCheckState) {
     if (typeof promptUsernameAndPassword == "function") {
@@ -115,7 +115,7 @@ var alertUtilsPrompts = {
     do_throw("promptPassword unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   select: function(aDialogTitle, aText, aCount, aSelectList,
                    aOutSelection) {
     if (typeof select == "function") {
@@ -126,7 +126,7 @@ var alertUtilsPrompts = {
     do_throw("select unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIPrompt])
 };
 
@@ -140,7 +140,7 @@ var alertUtilsPromptService = {
     do_throw("alertPS unexpectedly called: " + aText + "\n");
     return;
   },
-  
+
   alertCheck: function(aParent, aDialogTitle, aText, aCheckMsg, aCheckState) {
     if (typeof alertCheckPS == "function") {
       alertCheckPS(aParent, aDialogTitle, aText, aCheckMsg, aCheckState);
@@ -150,7 +150,7 @@ var alertUtilsPromptService = {
     do_throw("alertCheckPS unexpectedly called: " + aText + "\n");
     return;
   },
-  
+
   confirm: function(aParent, aDialogTitle, aText) {
     if (typeof confirmPS == "function") {
       return confirmPS(aParent, aDialogTitle, aText);
@@ -159,7 +159,7 @@ var alertUtilsPromptService = {
     do_throw("confirmPS unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   confirmCheck: function(aParent, aDialogTitle, aText, aCheckMsg, aCheckState) {
     if (typeof confirmCheckPS == "function") {
       return confirmCheckPS(aParent, aDialogTitle, aText, aCheckMsg,
@@ -169,7 +169,7 @@ var alertUtilsPromptService = {
     do_throw("confirmCheckPS unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   confirmEx: function(aParent, aDialogTitle, aText, aButtonFlags, aButton0Title,
                       aButton1Title, aButton2Title, aCheckMsg, aCheckState) {
     if (typeof confirmExPS == "function") {
@@ -181,7 +181,7 @@ var alertUtilsPromptService = {
     do_throw("confirmExPS unexpectedly called: " + aText + "\n");
     return 0;
   },
-  
+
   prompt: function(aParent, aDialogTitle, aText, aValue, aCheckMsg,
                    aCheckState) {
     if (typeof promptPS == "function") {
@@ -192,7 +192,7 @@ var alertUtilsPromptService = {
     do_throw("promptPS unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   promptUsernameAndPassword: function(aParent, aDialogTitle, aText, aUsername,
                                       aPassword, aCheckMsg, aCheckState) {
     if (typeof promptUsernameAndPasswordPS == "function") {
@@ -215,7 +215,7 @@ var alertUtilsPromptService = {
     do_throw("promptPasswordPS unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   select: function(aParent, aDialogTitle, aText, aCount, aSelectList,
                    aOutSelection) {
     if (typeof selectPS == "function") {
@@ -226,7 +226,7 @@ var alertUtilsPromptService = {
     do_throw("selectPS unexpectedly called: " + aText + "\n");
     return false;
   },
-  
+
   createInstance: function createInstance(outer, iid) {
     if (outer != null)
       throw Cr.NS_ERROR_NO_AGGREGATION;
