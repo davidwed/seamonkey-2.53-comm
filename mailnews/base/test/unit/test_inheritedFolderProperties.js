@@ -7,7 +7,7 @@
  */
 
 function run_test()
-{ 
+{
   localAccountUtils.loadLocalMailAccount();
   var rootFolder = localAccountUtils.incomingServer.rootMsgFolder;
 
@@ -95,7 +95,7 @@ function run_test()
   do_check_eq(subFolder12.getInheritedStringProperty(propertyName), rootValue);
   do_check_eq(subFolder21.getInheritedStringProperty(propertyName), folderValue2);
   do_check_eq(subFolder22.getInheritedStringProperty(propertyName), rootValue);
-  
+
   // clear the global value and the root value
   Services.prefs.clearUserPref(globalPref);
   localAccountUtils.incomingServer.setCharValue(propertyName, "");

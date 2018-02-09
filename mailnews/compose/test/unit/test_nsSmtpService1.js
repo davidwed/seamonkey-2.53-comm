@@ -47,7 +47,7 @@ function run_test() {
 
   smtpServers = smtpService.servers;
   do_check_false(smtpServers.hasMoreElements());
- 
+
   //    do_check_eq(null, smtpService.defaultServer);
 
   // Test - add multiple servers
