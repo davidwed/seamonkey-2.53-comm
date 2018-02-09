@@ -46,7 +46,7 @@ function Startup()
     try {
       fillSettings();
     } catch (ex) {
-      dump("pref-directory-add.js:Startup(): fillSettings() exception: " 
+      dump("pref-directory-add.js:Startup(): fillSettings() exception: "
            + ex + "\n");
     }
 
@@ -73,7 +73,7 @@ function Startup()
 
 function onUnload()
 {
-  if ("arguments" in window && 
+  if ("arguments" in window &&
       window.arguments[0] &&
       !Services.prefs.prefIsLocked(gCurrentDirectory.dirPrefId +
                                    ".disable_button_download")) {
@@ -98,7 +98,7 @@ var progressListener = {
       document.getElementById("download").accessKey =
         gReplicationBundle.getString("cancelDownloadButton.accesskey");
     }
-    
+
     if (aStateFlags & Ci.nsIWebProgressListener.STATE_STOP) {
       EndDownload(aStatus);
     }
@@ -119,8 +119,8 @@ var progressListener = {
   },
   QueryInterface : function(iid)
   {
-    if (iid.equals(Ci.nsIWebProgressListener) || 
-        iid.equals(Ci.nsISupportsWeakReference) || 
+    if (iid.equals(Ci.nsIWebProgressListener) ||
+        iid.equals(Ci.nsISupportsWeakReference) ||
         iid.equals(Ci.nsISupports))
       return this;
     throw Cr.NS_NOINTERFACE;
@@ -154,7 +154,7 @@ function DownloadNow()
     }
     catch (ex) {
       // XXX todo
-      // perhaps replication hasn't started yet?  This can happen if you hit cancel after attempting to replication when offline 
+      // perhaps replication hasn't started yet?  This can happen if you hit cancel after attempting to replication when offline
       dump("unexpected failure while cancelling.  ex=" + ex + "\n");
     }
   }
@@ -179,7 +179,7 @@ function EndDownload(aStatus)
                                   "replicationFailed");
 }
 
-// fill the settings panel with the data from the preferences. 
+// fill the settings panel with the data from the preferences.
 //
 function fillSettings()
 {
@@ -203,7 +203,7 @@ function fillSettings()
       sub.radioGroup.selectedItem = sub;
       break;
     }
-    
+
     var sasl = document.getElementById("saslMechanism");
     switch (gCurrentDirectory.saslMechanism) {
     case "GSSAPI":
@@ -351,7 +351,7 @@ function onAccept()
       window.opener.gNewServer = description;
       // set window.opener.gUpdate to true so that LDAP Directory Servers
       // dialog gets updated
-      window.opener.gUpdate = true; 
+      window.opener.gUpdate = true;
     } else {
       var addressBookBundle = document.getElementById("bundle_addressBook");
 
@@ -367,7 +367,7 @@ function onAccept()
 }
 
 function onCancel()
-{  
+{
   window.opener.gUpdate = false;
 }
 
