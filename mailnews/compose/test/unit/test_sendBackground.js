@@ -39,7 +39,7 @@ msll.prototype = {
   },
   onMessageSendProgress: function (aCurrentMessage, aTotalMessageCount,
                                    aMessageSendPercent, aMessageCopyPercent) {
-  }, 
+  },
   onMessageSendError: function (aCurrentMessage, aMessageHeader, aStatus,
                                 aMsg) {
     do_throw("onMessageSendError should not have been called, status: " + aStatus);
