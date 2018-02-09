@@ -9,7 +9,7 @@
 Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
 Cu.import("resource:///modules/IOUtils.js");
 
-var gTestFiles =[ 
+var gTestFiles =[
   "../../../data/bug505221",
   "../../../data/bug513543",
 ];

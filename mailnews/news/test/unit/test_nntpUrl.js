@@ -23,7 +23,7 @@ function run_test() {
     // msgkey is invalid for news:// protocol
     let hdr = getMessageHeaderFromUrl("news://localhost:119" +
                                       "/123@example.invalid?group=test.subscribe.simple&key=abcdefghijk");
-    do_check_true(false); 
+    do_check_true(false);
   } catch (e) {
     do_check_eq(e.result, Cr.NS_ERROR_MALFORMED_URI);
   }

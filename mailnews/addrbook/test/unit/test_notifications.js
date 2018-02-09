@@ -101,7 +101,7 @@ function run_test() {
   abListener.maxResults = 2;
 
   AB.addMailList(mailList);
- 
+
   do_check_eq(abListener.result.length, 2);
   do_check_eq(abListener.result[0][0], "onItemAdded");
   do_check_eq(abListener.result[0][1], AB);

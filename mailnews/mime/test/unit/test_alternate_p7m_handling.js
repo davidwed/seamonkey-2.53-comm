@@ -17,7 +17,7 @@ var p7mAttachment = "dGhpcyBpcyBub3QgYSByZWFsIHMvbWltZSBwN20gZW50aXR5";
 
 // create a message with a p7m attachment
 var messages = {
-  attachments: [{ 
+  attachments: [{
     body: p7mAttachment,
     filename: 'test.txt.p7m',
     contentType: 'application/pkcs7-mime',
@@ -35,7 +35,7 @@ function* worker(params) {
   yield add_sets_to_folder(gInbox, [synSet]);
 
   let msgHdr = synSet.getMsgHdr(0);
-  
+
   Services.prefs.setBoolPref("mailnews.p7m_external", params.all_external);
   Services.prefs.setBoolPref("mailnews.p7m_subparts_external", params.subparts_external);
 
