@@ -329,11 +329,11 @@ var abDirTreeObserver = {
   onCycleHeader: function(colID, elt)
   {
   },
-      
+
   onCycleCell: function(row, colID)
   {
   },
-      
+
   onSelectionChanged: function()
   {
   },
