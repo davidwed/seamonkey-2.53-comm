@@ -75,7 +75,7 @@ function run_test() {
 
     do_check_eq(folder.getTotalMessages(false), 1);
     do_check_true(folder.hasNewMessages);
- 
+
     server.resetTest();
 
     var message = folder.firstNewMessage;
