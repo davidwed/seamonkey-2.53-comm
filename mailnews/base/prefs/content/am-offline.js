@@ -12,9 +12,9 @@ var gPref = null;
 var gLockedPref = null;
 var gOfflineMap = null; // map of folder URLs to offline flags
 
-function onInit(aPageId, aServerId) 
+function onInit(aPageId, aServerId)
 {
-    onLockPreference();	
+    onLockPreference();
 
     // init values here
     initServerSettings();
@@ -144,7 +144,7 @@ function onPreInit(account, accountValues)
 
 function onClickSelect()
 {
-   
+
     top.window.openDialog("chrome://messenger/content/msgSelectOffline.xul", "", "centerscreen,chrome,modal,titlebar,resizable=yes");
     return true;
 
@@ -254,8 +254,8 @@ function onLockPreference()
 {
     var isDownloadLocked = false;
     var isGetNewLocked = false;
-    var initPrefString = "mail.server"; 
-    var finalPrefString; 
+    var initPrefString = "mail.server";
+    var finalPrefString;
 
     // This panel does not use the code in AccountManager.js to handle
     // the load/unload/disable.  keep in mind new prefstrings and changes
@@ -281,7 +281,7 @@ function onLockPreference()
     gPref = Services.prefs.getBranch(finalPrefString);
 
     disableIfLocked( allPrefElements );
-} 
+}
 
 function onCheckItem(changeElementId, checkElementId)
 {
