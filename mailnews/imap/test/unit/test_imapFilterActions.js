@@ -57,7 +57,7 @@ var kDeleteOrMoveMsgCompleted = Cc["@mozilla.org/atom-service;1"]
 // being tested, with "Body" appended to tests that use delayed
 // application of filters due to a body search
 var gTestArray =
-[ 
+[
   setupIMAPPump,
     // optionally set server parameters, here enabling debug messages
   //function serverParms() {
