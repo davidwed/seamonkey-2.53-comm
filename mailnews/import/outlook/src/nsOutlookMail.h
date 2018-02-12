@@ -21,7 +21,7 @@ class nsOutlookMail {
 public:
   nsOutlookMail();
   ~nsOutlookMail();
-  
+
   nsresult GetMailFolders(nsIArray **pArray);
   nsresult GetAddressBooks(nsIArray **pArray);
   nsresult ImportMailbox(uint32_t *pDoneSoFar, bool *pAbort, int32_t index,
@@ -32,14 +32,14 @@ public:
 private:
   void  OpenMessageStore(CMapiFolder *pNextFolder);
   static BOOL  WriteData(nsIOutputStream *pDest, const char *pData, int32_t len);
-  
+
   bool      IsAddressBookNameUnique(nsString& name, nsString& list);
   void      MakeAddressBookNameUnique(nsString& name, nsString& list);
   void      SanitizeValue(nsString& val);
   void      SplitString(nsString& val1, nsString& val2);
   bool      BuildCard(const char16_t *pName, nsIAddrDatabase *pDb, nsIMdbRow *newRow, LPMAPIPROP pUser, nsIImportFieldMap *pFieldMap);
   nsresult  CreateList(const char16_t * pName, nsIAddrDatabase *pDb, LPMAPIPROP pUserList, nsIImportFieldMap *pFieldMap);
-  
+
 private:
   bool              m_gotFolders;
   bool              m_gotAddresses;
