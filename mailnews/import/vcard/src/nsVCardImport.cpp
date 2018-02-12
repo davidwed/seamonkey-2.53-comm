@@ -29,7 +29,7 @@ static NS_DEFINE_IID(kISupportsIID, NS_ISUPPORTS_IID);
 class ImportVCardAddressImpl : public nsIImportAddressBooks
 {
 public:
-  ImportVCardAddressImpl(nsIStringBundle* aStringBundle); 
+  ImportVCardAddressImpl(nsIStringBundle* aStringBundle);
 
   static nsresult Create(
       nsIImportAddressBooks** aImport, nsIStringBundle* aStringBundle);
@@ -236,7 +236,7 @@ NS_IMETHODIMP ImportVCardAddressImpl::FindAddressBooks(
     return NS_ERROR_FAILURE;
 
   m_fileLoc = do_QueryInterface(pLoc);
-  
+
   /* Build an address book descriptor based on the file passed in! */
   nsCOMPtr<nsIMutableArray> array(do_CreateInstance(NS_ARRAY_CONTRACTID, &rv));
   if (NS_FAILED(rv)) {
@@ -320,10 +320,10 @@ void ImportVCardAddressImpl::ReportError(
 void ImportVCardAddressImpl::SetLogs(
     nsString& success, nsString& error,
     char16_t **pError, char16_t **pSuccess)
-{ 
-  if (pError) 
+{
+  if (pError)
     *pError = ToNewUnicode(error);
-  if (pSuccess) 
+  if (pSuccess)
     *pSuccess = ToNewUnicode(success);
 }
 
