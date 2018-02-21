@@ -2544,7 +2544,7 @@ NS_IMETHODIMP
 nsImapIncomingServer::Subscribe(const char16_t *aName)
 {
   NS_ENSURE_ARG_POINTER(aName);
-  
+
   return SubscribeToFolder(nsDependentString(aName), true, nullptr);
 }
 
