@@ -16,9 +16,9 @@ function DownloadTreeView() {
   this._dlList = [];
   this._searchTerms = [];
   this.dateTimeFormatter =
-    Services.intl.createDateTimeFormat(undefined,
-                                       {dateStyle: "short",
-                                        timeStyle: "long"});
+    new Services.intl.DateTimeFormat(undefined,
+                                     {dateStyle: "short",
+                                      timeStyle: "long"});
 }
 
 DownloadTreeView.prototype = {
