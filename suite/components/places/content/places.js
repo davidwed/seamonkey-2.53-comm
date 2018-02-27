@@ -396,7 +396,7 @@ var PlacesOrganizer = {
     const dtOptions = {
       dateStyle: "long"
     };
-    let dateFormatter = Services.intl.createDateTimeFormat(undefined, dtOptions);
+    let dateFormatter = new Services.intl.DateTimeFormat(undefined, dtOptions);
 
     // Remove existing menu items.  Last item is the restoreFromFile item.
     while (restorePopup.childNodes.length > 1)
