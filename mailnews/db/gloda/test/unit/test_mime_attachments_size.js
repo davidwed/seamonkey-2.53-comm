@@ -19,14 +19,14 @@ load("../../../../resources/messageGenerator.js");
 load("../../../../resources/messageModifier.js");
 load("../../../../resources/messageInjection.js");
 
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 // Create a message generator
 var msgGen = gMessageGenerator = new MessageGenerator();
 // Create a message scenario generator using that message generator
 var scenarios = gMessageScenarioFactory = new MessageScenarioFactory(msgGen);
 
-Components.utils.import("resource:///modules/gloda/mimemsg.js");
+Cu.import("resource:///modules/gloda/mimemsg.js");
 
 var htmlText = "<html><head></head><body>I am HTML! Woo! </body></html>";
 

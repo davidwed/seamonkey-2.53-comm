@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gSynchronizeTree = null;
 var gParentMsgWindow;
@@ -45,8 +45,8 @@ function syncOkButton()
     Services.prefs.setBoolPref("mailnews.offline_sync_work_offline", workOffline);
 
     if (syncMail || syncNews || sendMessage || workOffline) {
-        var offlineManager = Components.classes["@mozilla.org/messenger/offline-manager;1"]
-                                       .getService(Components.interfaces.nsIMsgOfflineManager);
+        var offlineManager = Cc["@mozilla.org/messenger/offline-manager;1"]
+                               .getService(Ci.nsIMsgOfflineManager);
         if(offlineManager)
             offlineManager.synchronizeForOffline(syncNews, syncMail, sendMessage, workOffline, gParentMsgWindow)
     }
@@ -68,25 +68,25 @@ function selectOkButton()
 
 function selectCancelButton()
 {
-    var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"]
-                        .getService(Components.interfaces.nsIRDFService);
+    var RDF = Cc["@mozilla.org/rdf/rdf-service;1"]
+                .getService(Ci.nsIRDFService);
     for (var resourceValue in gInitialFolderStates) {
       var resource = RDF.GetResource(resourceValue);
-      var folder = resource.QueryInterface(Components.interfaces.nsIMsgFolder);
+      var folder = resource.QueryInterface(Ci.nsIMsgFolder);
       if (gInitialFolderStates[resourceValue])
-        folder.setFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+        folder.setFlag(Ci.nsMsgFolderFlags.Offline);
       else
-        folder.clearFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+        folder.clearFlag(Ci.nsMsgFolderFlags.Offline);
     }
     return true;
 }
 
 function selectOnLoad()
 {
-    gMsgWindow = Components.classes["@mozilla.org/messenger/msgwindow;1"]
-                           .createInstance(Components.interfaces.nsIMsgWindow);
+    gMsgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
+                   .createInstance(Ci.nsIMsgWindow);
     gMsgWindow.domWindow = window;
-    gMsgWindow.rootDocShell.appType = Components.interfaces.nsIDocShell.APP_TYPE_MAIL;
+    gMsgWindow.rootDocShell.appType = Ci.nsIDocShell.APP_TYPE_MAIL;
 
     gSynchronizeTree = document.getElementById('synchronizeTree');
 
@@ -139,7 +139,7 @@ function onSynchronizeClick(event)
 
     if (elt.value == "twisty") {
         var folderResource = GetFolderResource(gSynchronizeTree, row.value);
-        var folder = folderResource.QueryInterface(Components.interfaces.nsIMsgFolder);
+        var folder = folderResource.QueryInterface(Ci.nsIMsgFolder);
 
         if (!(gSynchronizeTree.treeBoxObject.view.isContainerOpen(row.value))) {
             var serverType = folder.server.type;
@@ -151,7 +151,7 @@ function onSynchronizeClick(event)
                 server.performExpand(gMsgWindow);
             }
             else {
-                var imapFolder = folderResource.QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
+                var imapFolder = folderResource.QueryInterface(Ci.nsIMsgImapMailFolder);
                 if (imapFolder) {
                   imapFolder.performExpand(gMsgWindow);
                 }
@@ -182,16 +182,16 @@ function onSynchronizeTreeKeyPress(event)
 
 function UpdateNode(resource, row)
 {
-    var folder = resource.QueryInterface(Components.interfaces.nsIMsgFolder);
+    var folder = resource.QueryInterface(Ci.nsIMsgFolder);
 
     if (folder.isServer)
       return;
 
     if (!(resource.Value in gInitialFolderStates)) {
-      gInitialFolderStates[resource.Value] = folder.getFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+      gInitialFolderStates[resource.Value] = folder.getFlag(Ci.nsMsgFolderFlags.Offline);
     }
 
-    folder.toggleFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+    folder.toggleFlag(Ci.nsMsgFolderFlags.Offline);
 }
 
 function GetFolderResource(aTree, aIndex) {

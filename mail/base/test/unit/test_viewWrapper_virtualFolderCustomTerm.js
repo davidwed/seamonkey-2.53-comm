@@ -16,7 +16,7 @@ load("../../../../mailnews/resources/messageInjection.js");
 
 load("resources/viewWrapperTestUtils.js");
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 initViewWrapperTestUtils({mode: "imap", offline: false});
 
@@ -34,7 +34,7 @@ var gCustomSearchTermSubject = {
   },
   getAvailableOperators: function subject_getAvailableOperators(scope, length) {
     length.value = 1;
-    return [Components.interfaces.nsMsgSearchOp.Contains];
+    return [Ci.nsMsgSearchOp.Contains];
   },
   match: function subject_match(aMsgHdr, aSearchValue, aSearchOp) {
     return (aMsgHdr.subject.includes(aSearchValue));

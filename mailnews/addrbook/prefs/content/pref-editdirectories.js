@@ -3,25 +3,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 // Listener to refresh the list items if something changes. In all these
 // cases we just rebuild the list as it is easier than searching/adding in the
 // correct places an would be an infrequent operation.
 var gAddressBookAbListener = {
   onItemAdded: function(parentDir, item) {
-    if (item instanceof Components.interfaces.nsIAbDirectory) {
+    if (item instanceof Ci.nsIAbDirectory) {
       fillDirectoryList();
     }
   },
   onItemRemoved: function(parentDir, item) {
-    if (item instanceof Components.interfaces.nsIAbDirectory) {
+    if (item instanceof Ci.nsIAbDirectory) {
       fillDirectoryList();
     }
   },
   onItemPropertyChanged: function(item, property, oldValue, newValue) {
-    if (item instanceof Components.interfaces.nsIAbDirectory) {
+    if (item instanceof Ci.nsIAbDirectory) {
       fillDirectoryList();
     }
   }
@@ -39,7 +39,7 @@ function onInitEditDirectories()
   // Fill out the directory list
   fillDirectoryList();
 
-  const nsIAbListener = Components.interfaces.nsIAbListener;
+  const nsIAbListener = Ci.nsIAbListener;
   // Add a listener so we can update correctly if the list should change
   MailServices.ab.addAddressBookListener(gAddressBookAbListener,
                                          nsIAbListener.itemAdded |
@@ -65,7 +65,7 @@ function fillDirectoryList()
   let holdingArray = [];
   while (directories && directories.hasMoreElements()) {
     let ab = directories.getNext();
-    if (ab instanceof Components.interfaces.nsIAbDirectory && ab.isRemote)
+    if (ab instanceof Ci.nsIAbDirectory && ab.isRemote)
       holdingArray.push(ab);
   }
 

@@ -14,9 +14,9 @@ var RELATIVE_ROOT = "../shared-modules";
 var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers"];
 
 var elib = {};
-Components.utils.import("resource://mozmill/modules/elementslib.js", elib);
+Cu.import("resource://mozmill/modules/elementslib.js", elib);
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var folder = null;
 
@@ -37,8 +37,8 @@ function setupModule(module) {
 }
 
 function addToFolder(aSubject, aBody, aFolder) {
-  let msgId = Components.classes["@mozilla.org/uuid-generator;1"]
-                          .getService(Components.interfaces.nsIUUIDGenerator)
+  let msgId = Cc["@mozilla.org/uuid-generator;1"]
+                          .getService(Ci.nsIUUIDGenerator)
                           .generateUUID() +"@invalid";
 
   let source = "From - Sat Nov  1 12:39:54 2008\n" +
@@ -54,7 +54,7 @@ function addToFolder(aSubject, aBody, aFolder) {
                "Content-Transfer-Encoding: 7bit\n" +
                "\n" + aBody + "\n";
 
-  aFolder.QueryInterface(Components.interfaces.nsIMsgLocalMailFolder);
+  aFolder.QueryInterface(Ci.nsIMsgLocalMailFolder);
   aFolder.addMessage(source);
 
   return aFolder.msgDatabase.getMsgHdrForMessageID(msgId);

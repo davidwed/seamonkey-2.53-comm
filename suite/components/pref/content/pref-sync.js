@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://services-sync/main.js");
+Cu.import("resource://services-sync/main.js");
 
 const PAGE_NO_ACCOUNT = 0;
 const PAGE_HAS_ACCOUNT = 1;
@@ -41,8 +41,8 @@ var gSyncPane = {
 
     window.addEventListener("unload", this);
 
-    var xps = Components.classes["@mozilla.org/weave/service;1"]
-                        .getService().wrappedJSObject;
+    var xps = Cc["@mozilla.org/weave/service;1"]
+                .getService().wrappedJSObject;
     if (xps.ready)
       this.observe(null, "weave:service:ready", null);
     else

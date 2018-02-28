@@ -14,10 +14,10 @@ var RELATIVE_ROOT = "../shared-modules";
 var MODULE_REQUIRES = ["folder-display-helpers", "compose-helpers", "window-helpers",
                          "message-helpers"];
 var jumlib = {};
-Components.utils.import("resource://mozmill/modules/jum.js", jumlib);
+Cu.import("resource://mozmill/modules/jum.js", jumlib);
 var elib = {};
-Components.utils.import("resource://mozmill/modules/elementslib.js", elib);
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://mozmill/modules/elementslib.js", elib);
+Cu.import("resource://gre/modules/Services.jsm");
 
 var sig = "roses are red";
 var folder;

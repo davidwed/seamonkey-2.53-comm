@@ -10,7 +10,7 @@
 
   <script type="application/javascript">
   <![CDATA[
-    Components.utils.import("resource:///modules/mailServices.js");
+    Cu.import("resource:///modules/mailServices.js");
     function openNewCardDialog()
       {
         window.openDialog("chrome://messenger/content/addressbook/abNewCardDialog.xul",
@@ -29,8 +29,8 @@
         }
 
         MailServices.compose.OpenComposeWindow(null, null, null,
-          Components.interfaces.nsIMsgCompType.New,
-          Components.interfaces.nsIMsgCompFormat.Default,
+          Ci.nsIMsgCompType.New,
+          Ci.nsIMsgCompFormat.Default,
           null, null);
       }
 

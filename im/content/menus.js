@@ -7,9 +7,9 @@ var joinChatWindow = "chrome://instantbird/content/joinchat.xul";
 var aboutWindow = "chrome://instantbird/content/aboutDialog.xul";
 
 if (!("Services" in window))
-  Components.utils.import("resource:///modules/imServices.jsm");
+  Cu.import("resource:///modules/imServices.jsm");
 if (!("Core" in window))
-  Components.utils.import("resource:///modules/ibCore.jsm");
+  Cu.import("resource:///modules/ibCore.jsm");
 
 var menus = {
   supportsCommand: aCmd =>
@@ -31,7 +31,7 @@ var menus = {
       this.addBuddy();
     else if (aCmd == "cmd_newtab") {
       if (!("Conversations" in window))
-        Components.utils.import("resource:///modules/imWindows.jsm");
+        Cu.import("resource:///modules/imWindows.jsm");
       Conversations.showNewTab();
     }
   },
@@ -55,7 +55,7 @@ var menus = {
   },
 
   errors: function debug_errors() {
-    let { require } = Components.utils.import("resource://devtools/shared/Loader.jsm", {});
+    let { require } = Cu.import("resource://devtools/shared/Loader.jsm", {});
     let HUDService = require("devtools/client/webconsole/hudservice");
     HUDService.openBrowserConsoleOrFocus();
   },
@@ -67,11 +67,11 @@ var menus = {
   displayUpdateStatus: function menu_displayUpdateStatus() {
     // copied from buildHelpMenu in mozilla/browser/base/content/utilityOverlay.js
     var updates =
-      Components.classes["@mozilla.org/updates/update-service;1"]
-                .getService(Components.interfaces.nsIApplicationUpdateService);
+      Cc["@mozilla.org/updates/update-service;1"]
+        .getService(Ci.nsIApplicationUpdateService);
     var um =
-      Components.classes["@mozilla.org/updates/update-manager;1"]
-                .getService(Components.interfaces.nsIUpdateManager);
+      Cc["@mozilla.org/updates/update-manager;1"]
+        .getService(Ci.nsIUpdateManager);
 
     // Disable the UI if the update enabled pref has been locked by the
     // administrator or if we cannot update for some other reason
@@ -148,7 +148,7 @@ var menus = {
 
   checkCurrentStatusType: function menu_checkCurrentStatusType(aItems) {
     if (!("Status" in window))
-      Components.utils.import("resource:///modules/imStatusUtils.jsm");
+      Cu.import("resource:///modules/imStatusUtils.jsm");
     let status = Status.toAttribute(Services.core.globalUserStatus.statusType);
     if (status == "away")
       status = "unavailable";

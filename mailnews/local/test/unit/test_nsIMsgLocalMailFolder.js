@@ -5,8 +5,8 @@
 
 load("../../../resources/messageGenerator.js");
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/iteratorUtils.jsm");
 /**
  * Bug 66763
  * Test deletion of a folder with a name already existing in Trash.
@@ -131,7 +131,7 @@ function subtest_folder_operations(root) {
 
   // Test - FoldersWithFlag
 
-  const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+  const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
 
   folder.setFlag(nsMsgFolderFlags.CheckNew);
   do_check_true(folder.getFlag(nsMsgFolderFlags.CheckNew));
@@ -160,8 +160,8 @@ function subtest_folder_operations(root) {
   // Test - Move folders around
 
   var folder3 = root.createLocalSubfolder("folder3");
-  var folder3Local = folder3.QueryInterface(Components.interfaces.nsIMsgLocalMailFolder);
-  var folder1Local = folder.QueryInterface(Components.interfaces.nsIMsgLocalMailFolder);
+  var folder3Local = folder3.QueryInterface(Ci.nsIMsgLocalMailFolder);
+  var folder1Local = folder.QueryInterface(Ci.nsIMsgLocalMailFolder);
 
   // put a single message in folder1.
   let messageGenerator = new MessageGenerator();
@@ -198,7 +198,7 @@ function subtest_folder_operations(root) {
   do_check_true(db.summaryValid);
 
   // Move folders back, get them
-  var rootLocal = root.QueryInterface(Components.interfaces.nsIMsgLocalMailFolder);
+  var rootLocal = root.QueryInterface(Ci.nsIMsgLocalMailFolder);
   rootLocal.copyFolderLocal(folder1Moved, true, null, null);
   folder = root.getChildNamed("folder1");
   folder2 = folder.getChildNamed("folder2");

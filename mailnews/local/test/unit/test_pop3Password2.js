@@ -5,7 +5,7 @@
  * hostname).
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 load("../../../resources/passwordStorage.js");
 

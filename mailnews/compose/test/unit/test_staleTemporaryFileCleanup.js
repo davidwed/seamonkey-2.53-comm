@@ -7,7 +7,7 @@
  * is initialized.
  */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gExpectedFiles;
 

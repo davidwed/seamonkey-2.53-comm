@@ -12,7 +12,7 @@
 //The eventual goal is for this file to go away and its contents to be brought into
 //mailWindowOverlay.js.  This is currently being done.
 
-Components.utils.import("resource:///modules/MailUtils.js");
+Cu.import("resource:///modules/MailUtils.js");
 
 //NOTE: gMessengerBundle must be defined and set or this Overlay won't work
 
@@ -160,7 +160,7 @@ function MsgFolderProperties()
     return;
   }
 
-  if (msgFolder.flags & Components.interfaces.nsMsgFolderFlags.Virtual)
+  if (msgFolder.flags & Ci.nsMsgFolderFlags.Virtual)
   {
     // virtual folders get their own property dialog that contains all of the
     // search information related to the virtual folder.
