@@ -216,14 +216,14 @@ PlacesController.prototype = {
         PlacesUtils.transactionManager.undoTransaction();
         return;
       }
-      PlacesTransactions.undo().catch(Components.utils.reportError);
+      PlacesTransactions.undo().catch(Cu.reportError);
       break;
     case "cmd_redo":
       if (!PlacesUIUtils.useAsyncTransactions) {
         PlacesUtils.transactionManager.redoTransaction();
         return;
       }
-      PlacesTransactions.redo().catch(Components.utils.reportError);
+      PlacesTransactions.redo().catch(Cu.reportError);
       break;
     case "cmd_cut":
     case "placesCmd_cut":
@@ -235,11 +235,11 @@ PlacesController.prototype = {
       break;
     case "cmd_paste":
     case "placesCmd_paste":
-      this.paste().catch(Components.utils.reportError);
+      this.paste().catch(Cu.reportError);
       break;
     case "cmd_delete":
     case "placesCmd_delete":
-      this.remove("Remove Selection").catch(Components.utils.reportError);
+      this.remove("Remove Selection").catch(Cu.reportError);
       break;
     case "placesCmd_deleteDataHost":
       var host;
@@ -249,7 +249,7 @@ PlacesController.prototype = {
       } else
         host = NetUtil.newURI(this._view.selectedNode.uri).host;
       ForgetAboutSite.removeDataFromDomain(host)
-                     .catch(Components.utils.reportError);
+                     .catch(Cu.reportError);
       break;
     case "cmd_selectAll":
       this.selectAll();
@@ -273,7 +273,7 @@ PlacesController.prototype = {
       this.newItem("bookmark");
       break;
     case "placesCmd_new:separator":
-      this.newSeparator().catch(Components.utils.reportError);
+      this.newSeparator().catch(Cu.reportError);
       break;
     case "placesCmd_show:info":
       this.showBookmarkPropertiesForSelection();
@@ -282,7 +282,7 @@ PlacesController.prototype = {
       this.reloadSelectedLivemark();
       break;
     case "placesCmd_sortBy:name":
-      this.sortFolderByName().catch(Components.utils.reportError);
+      this.sortFolderByName().catch(Cu.reportError);
       break;
     case "placesCmd_createBookmark":
       let node = this._view.selectedNode;
@@ -698,7 +698,7 @@ PlacesController.prototype = {
       PlacesUtils.livemarks.getLivemark({ id: itemId })
         .then(aLivemark => {
           aLivemark.reload(true);
-        }, Components.utils.reportError);
+        }, Cu.reportError);
     }
   },
 
@@ -876,7 +876,7 @@ PlacesController.prototype = {
                PlacesUtils.asQuery(node.parent).queryOptions.queryType ==
                  Ci.nsINavHistoryQueryOptions.QUERY_TYPE_HISTORY) {
         // This is a uri node inside an history query.
-        PlacesUtils.history.remove(node.uri).catch(Components.utils.reportError);
+        PlacesUtils.history.remove(node.uri).catch(Cu.reportError);
         // History deletes are not undoable, so we don't have a transaction.
       } else if (node.itemId == -1 &&
                PlacesUtils.nodeIsQuery(node) &&
@@ -947,7 +947,7 @@ PlacesController.prototype = {
       }
     }
 
-    PlacesUtils.history.remove([...URIs]).catch(Components.utils.reportError);
+    PlacesUtils.history.remove([...URIs]).catch(Cu.reportError);
   },
 
   /**
@@ -1269,7 +1269,7 @@ PlacesController.prototype = {
             // source, otherwise report an error and fallback to a copy.
             if (!doCopy &&
                 !PlacesControllerDragHelper.canMoveUnwrappedNode(item)) {
-              Components.utils.reportError("Tried to move an unmovable " +
+              Cu.reportError("Tried to move an unmovable " +
                              "Places node, reverting to a copy operation.");
               doCopy = true;
             }
@@ -1305,8 +1305,8 @@ PlacesController.prototype = {
         // If this is not a copy, check for safety that we can move the source,
         // otherwise report an error and fallback to a copy.
         if (action != "copy" && !PlacesControllerDragHelper.canMoveUnwrappedNode(items[i])) {
-          Components.utils.reportError("Tried to move an unmovable Places " +
-                                       "node, reverting to a copy operation.");
+          Cu.reportError("Tried to move an unmovable Places " +
+                         "node, reverting to a copy operation.");
           action = "copy";
         }
         transactions.push(
@@ -1602,8 +1602,8 @@ var PlacesControllerDragHelper = {
           // If this is not a copy, check for safety that we can move the
           // source, otherwise report an error and fallback to a copy.
           if (!doCopy && !PlacesControllerDragHelper.canMoveUnwrappedNode(unwrapped)) {
-            Components.utils.reportError("Tried to move an unmovable Places " +
-                                         "node, reverting to a copy operation.");
+            Cu.reportError("Tried to move an unmovable Places " +
+                           "node, reverting to a copy operation.");
             doCopy = true;
           }
           if (PlacesUIUtils.useAsyncTransactions) {

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/imServices.jsm");
+Cu.import("resource:///modules/imServices.jsm");
 
 this.EXPORTED_SYMBOLS = [
   "smileImMarkup", // used to add smile:// img tags into IM markup.
@@ -36,9 +36,9 @@ var gPrefObserver = {
 
 function getSmileRealURI(aSmile)
 {
-  aSmile = Components.classes["@mozilla.org/intl/texttosuburi;1"]
-                     .getService(Components.interfaces.nsITextToSubURI)
-                     .unEscapeURIForUI("UTF-8", aSmile);
+  aSmile = Cc["@mozilla.org/intl/texttosuburi;1"]
+             .getService(Ci.nsITextToSubURI)
+             .unEscapeURIForUI("UTF-8", aSmile);
   if (aSmile in gTheme.iconsHash)
     return gTheme.baseUri + gTheme.iconsHash[aSmile].filename;
 
@@ -81,11 +81,11 @@ function getTheme(aName)
     let channel = Services.io.newChannel2(theme.baseUri + kThemeFile, null, null, null,
                                           Services.scriptSecurityManager.getSystemPrincipal(),
                                           null,
-                                          Components.interfaces.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
-                                          Components.interfaces.nsIContentPolicy.TYPE_IMAGE);
+                                          Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
+                                          Ci.nsIContentPolicy.TYPE_IMAGE);
     let stream = channel.open();
-    let json = Components.classes["@mozilla.org/dom/json;1"]
-                         .createInstance(Components.interfaces.nsIJSON);
+    let json = Cc["@mozilla.org/dom/json;1"]
+                 .createInstance(Ci.nsIJSON);
     theme.json = json.decodeFromStream(stream, stream.available());
     stream.close();
     theme.iconsHash = {};
@@ -94,7 +94,7 @@ function getTheme(aName)
         theme.iconsHash[textCode] = smiley;
     }
   } catch(e) {
-    Components.utils.reportError(e);
+    Cu.reportError(e);
   }
   return theme;
 }
@@ -111,9 +111,9 @@ function getRegexp()
     return null;
 
   if ("" in gTheme.iconsHash) {
-    Components.utils.reportError("Emoticon " +
-                                 gTheme.iconsHash[""].filename +
-                                 " matches the empty string!");
+    Cu.reportError("Emoticon " +
+                   gTheme.iconsHash[""].filename +
+                   " matches the empty string!");
     delete gTheme.iconsHash[""];
   }
 
@@ -158,7 +158,7 @@ function smileTextNode(aNode)
    */
   let testNode = aNode;
   while ((testNode = testNode.parentNode)) {
-    if (testNode instanceof Components.interfaces.nsIDOMHTMLAnchorElement &&
+    if (testNode instanceof Ci.nsIDOMHTMLAnchorElement &&
         (testNode.getAttribute("href") == testNode.textContent.trim() ||
          testNode.getAttribute("href") == aNode.data.trim() ||
          testNode.className.includes("moz-txt-link-")))
@@ -194,10 +194,10 @@ function smileNode(aNode)
 {
   for (let i = 0; i < aNode.childNodes.length; ++i) {
     let node = aNode.childNodes[i];
-    if (node instanceof Components.interfaces.nsIDOMHTMLElement) {
+    if (node instanceof Ci.nsIDOMHTMLElement) {
       // we are on a tag, recurse to process its children
       smileNode(node);
-    } else if (node instanceof Components.interfaces.nsIDOMText) {
+    } else if (node instanceof Ci.nsIDOMText) {
       // we are on a text node, process it
       smileTextNode(node);
     }

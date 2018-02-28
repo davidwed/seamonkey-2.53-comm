@@ -2,8 +2,8 @@
 //
 // Original Author: David Bienvenu <dbienvenu@mozilla.com>
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 // Globals
 var gMsg1;
@@ -14,7 +14,7 @@ var gMsgId1;
 var gTestFolder;
 
 load("../../../resources/asyncTestUtils.js");
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
 load("../../../resources/messageModifier.js");
 load("../../../resources/messageGenerator.js");
 load("../../../resources/messageInjection.js");
@@ -46,7 +46,7 @@ function run_test()
   configure_message_injection({mode: "local"});
 
   gMsgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
-                  .createInstance(Components.interfaces.nsIMsgWindow);
+                  .createInstance(Ci.nsIMsgWindow);
 
   var messageGenerator = new MessageGenerator();
   gMsg1 = messageGenerator.makeMessage();

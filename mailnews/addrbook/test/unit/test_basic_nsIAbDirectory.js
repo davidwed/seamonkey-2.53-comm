@@ -34,7 +34,7 @@ function check_ab(abConfig) {
   // Test - Is it the right type?
 
   if (abConfig.dirType == 2)
-    do_check_true(AB instanceof Components.interfaces.nsIAbMDBDirectory);
+    do_check_true(AB instanceof Ci.nsIAbMDBDirectory);
 
   // Test - Check attributes
 

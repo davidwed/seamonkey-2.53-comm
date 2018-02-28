@@ -1,17 +1,17 @@
-var controller = {};  Components.utils.import('resource://mozmill/modules/controller.js', controller);
-var events = {}; Components.utils.import('resource://mozmill/modules/events.js', events);
-var utils = {}; Components.utils.import('resource://mozmill/modules/utils.js', utils);
-var elementslib = {}; Components.utils.import('resource://mozmill/modules/elementslib.js', elementslib);
-var frame = {}; Components.utils.import('resource://mozmill/modules/frame.js', frame);
+var controller = {};  Cu.import('resource://mozmill/modules/controller.js', controller);
+var events = {}; Cu.import('resource://mozmill/modules/events.js', events);
+var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
+var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+var frame = {}; Cu.import('resource://mozmill/modules/frame.js', frame);
 
 var that = this;
 
-var hwindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-                .getService(Components.interfaces.nsIAppShellService)
+var hwindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                .getService(Ci.nsIAppShellService)
                 .hiddenDOMWindow;
 
-var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Components.interfaces.nsIWindowMediator);
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+           .getService(Ci.nsIWindowMediator);
 
 var dir = function(obj){
  for (prop in obj){
@@ -65,8 +65,8 @@ var shell = new function(){
   };
 
   this.getWindows = function(){
-     var enumerator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                      .getService(Components.interfaces.nsIWindowMediator)
+     var enumerator = Cc["@mozilla.org/appshell/window-mediator;1"]
+                      .getService(Ci.nsIWindowMediator)
                       .getEnumerator("");
       var s = "";
       //define an array we can access

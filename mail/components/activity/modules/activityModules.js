@@ -8,15 +8,15 @@
 
 this.EXPORTED_SYMBOLS = [];
 
-Components.utils.import("resource:///modules/activity/sendLater.js");
+Cu.import("resource:///modules/activity/sendLater.js");
 sendLaterModule.init();
-Components.utils.import("resource:///modules/activity/moveCopy.js");
+Cu.import("resource:///modules/activity/moveCopy.js");
 moveCopyModule.init();
-Components.utils.import("resource:///modules/activity/glodaIndexer.js");
+Cu.import("resource:///modules/activity/glodaIndexer.js");
 glodaIndexerActivity.init();
-Components.utils.import("resource:///modules/activity/autosync.js");
+Cu.import("resource:///modules/activity/autosync.js");
 autosyncModule.init();
-Components.utils.import("resource:///modules/activity/alertHook.js");
+Cu.import("resource:///modules/activity/alertHook.js");
 alertHook.init();
-Components.utils.import("resource:///modules/activity/pop3Download.js");
+Cu.import("resource:///modules/activity/pop3Download.js");
 pop3DownloadModule.init();

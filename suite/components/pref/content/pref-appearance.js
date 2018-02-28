@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Load spell-checker module to properly determine language strings
-Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
+Cu.import("resource://gre/modules/InlineSpellChecker.jsm");
 
 function Startup()
 {
@@ -20,8 +20,8 @@ function SwitchLocales_Load() {
   var menulist = document.getElementById("switchLocales");
   var pref = document.getElementById("general.useragent.locale");
 
-  var cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-                     .getService(Components.interfaces.nsIToolkitChromeRegistry);
+  var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
+             .getService(Ci.nsIToolkitChromeRegistry);
 
   var langNames = document.getElementById("languageNamesBundle");
   var regNames  = document.getElementById("regionNamesBundle");
@@ -92,8 +92,8 @@ function SelectLocale(aElement)
 function NumberLocales_Load()
 {
   const osprefs =
-    Components.classes["@mozilla.org/intl/ospreferences;1"]
-              .getService(Components.interfaces.mozIOSPreferences);
+    Cc["@mozilla.org/intl/ospreferences;1"]
+      .getService(Ci.mozIOSPreferences);
 
   let appLocale = Services.locale.getAppLocalesAsBCP47()[0];
   let rsLocale = osprefs.getRegionalPrefsLocales()[0];

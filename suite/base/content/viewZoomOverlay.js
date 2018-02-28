@@ -12,7 +12,7 @@ const MOUSE_SCROLL_ZOOM = 3;
  * Controls the "full zoom" setting and its site-specific preferences.
  */
 var FullZoom = FullZoom || {
-  contentPrefs: Services.contentPrefs.QueryInterface(Components.interfaces.nsIContentPrefService2),
+  contentPrefs: Services.contentPrefs.QueryInterface(Ci.nsIContentPrefService2),
 
   // Identifies the setting in the content prefs database.
   name: "browser.content.full-zoom",
@@ -36,12 +36,12 @@ var FullZoom = FullZoom || {
   // nsISupports
 
   QueryInterface:
-  XPCOMUtils.generateQI([Components.interfaces.nsIDOMEventListener,
-                         Components.interfaces.nsIObserver,
-                         Components.interfaces.nsIContentPrefObserver,
-                         Components.interfaces.nsIContentPrefCallback2,
-                         Components.interfaces.nsISupportsWeakReference,
-                         Components.interfaces.nsISupports]),
+  XPCOMUtils.generateQI([Ci.nsIDOMEventListener,
+                         Ci.nsIObserver,
+                         Ci.nsIContentPrefObserver,
+                         Ci.nsIContentPrefCallback2,
+                         Ci.nsISupportsWeakReference,
+                         Ci.nsISupports]),
 
   //**************************************************************************//
   // Initialization & Destruction

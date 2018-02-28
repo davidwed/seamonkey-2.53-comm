@@ -723,7 +723,7 @@ function GetPublishStringPref(prefBranch, name)
   if (prefBranch && name)
   {
     try {
-      return prefBranch.getComplexValue(name, Components.interfaces.nsISupportsString).data;
+      return prefBranch.getComplexValue(name, Ci.nsISupportsString).data;
     } catch (e) {}
   }
   return "";
@@ -734,10 +734,10 @@ function SetPublishStringPref(prefBranch, name, value)
   if (prefBranch && name)
   {
     try {
-        var str = Components.classes["@mozilla.org/supports-string;1"]
-                            .createInstance(Components.interfaces.nsISupportsString);
+        var str = Cc["@mozilla.org/supports-string;1"]
+                    .createInstance(Ci.nsISupportsString);
         str.data = value;
-        prefBranch.setComplexValue(name, Components.interfaces.nsISupportsString, str);
+        prefBranch.setComplexValue(name, Ci.nsISupportsString, str);
     } catch (e) {}
   }
 }
@@ -845,8 +845,8 @@ function SavePassword(publishData)
   // If SavePassword is true, add new password.
   if (publishData.savePassword)
   {
-    let authInfo = Components.classes["@mozilla.org/login-manager/loginInfo;1"]
-                             .createInstance(Components.interfaces.nsILoginInfo);
+    let authInfo = Cc["@mozilla.org/login-manager/loginInfo;1"]
+                     .createInstance(Ci.nsILoginInfo);
     authInfo.init(url, null, url, publishData.username, publishData.password,
                   "", "");
     Services.logins.addLogin(authInfo);

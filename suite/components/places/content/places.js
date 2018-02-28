@@ -6,9 +6,9 @@
 /* import-globals-from editBookmarkOverlay.js */
 /* import-globals-from ../../../../toolkit/content/contentAreaUtils.js */
 
-Components.utils.import("resource://gre/modules/AppConstants.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "MigrationUtils",
                                   "resource:///modules/MigrationUtils.jsm");
@@ -125,11 +125,11 @@ var PlacesOrganizer = {
   },
 
   QueryInterface: function PO_QueryInterface(aIID) {
-    if (aIID.equals(Components.interfaces.nsIDOMEventListener) ||
-        aIID.equals(Components.interfaces.nsISupports))
+    if (aIID.equals(Ci.nsIDOMEventListener) ||
+        aIID.equals(Ci.nsISupports))
       return this;
 
-    throw Components.results.NS_NOINTERFACE;
+    throw Cr.NS_NOINTERFACE;
   },
 
   handleEvent: function PO_handleEvent(aEvent) {
@@ -355,9 +355,9 @@ var PlacesOrganizer = {
     let fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
     let fpCallback = function fpCallback_done(aResult) {
       if (aResult != Ci.nsIFilePicker.returnCancel && fp.fileURL) {
-        Components.utils.import("resource://gre/modules/BookmarkHTMLUtils.jsm");
+        Cu.import("resource://gre/modules/BookmarkHTMLUtils.jsm");
         BookmarkHTMLUtils.importFromURL(fp.fileURL.spec, false)
-                         .catch(Components.utils.reportError);
+                         .catch(Cu.reportError);
       }
     };
 
@@ -374,9 +374,9 @@ var PlacesOrganizer = {
     let fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
     let fpCallback = function fpCallback_done(aResult) {
       if (aResult != Ci.nsIFilePicker.returnCancel) {
-        Components.utils.import("resource://gre/modules/BookmarkHTMLUtils.jsm");
+        Cu.import("resource://gre/modules/BookmarkHTMLUtils.jsm");
         BookmarkHTMLUtils.exportToFile(fp.file.path)
-                         .catch(Components.utils.reportError);
+                         .catch(Cu.reportError);
       }
     };
 
@@ -1197,7 +1197,7 @@ var ContentArea = {
         return view;
       }
     } catch (ex) {
-      Components.utils.reportError(ex);
+      Cu.reportError(ex);
     }
     return ContentTree.view;
   },

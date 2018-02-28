@@ -24,7 +24,7 @@
   *
   */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 Services.prefs.setCharPref("mail.serverDefaultStoreContractID",
                            "@mozilla.org/msgstore/berkeleystore;1");
@@ -44,7 +44,7 @@ function setColumnStates(folder) {
   let msgDatabase = folder.msgDatabase;
   let dbFolderInfo = msgDatabase.dBFolderInfo;
   dbFolderInfo.setCharProperty(this.PERSISTED_COLUMN_PROPERTY_NAME, columnJSON);
-  msgDatabase.Commit(Components.interfaces.nsMsgDBCommitType.kLargeCommit);
+  msgDatabase.Commit(Ci.nsMsgDBCommitType.kLargeCommit);
 }
 
 function checkPersistentState(folder) {

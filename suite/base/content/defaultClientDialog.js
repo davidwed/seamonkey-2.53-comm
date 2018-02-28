@@ -9,7 +9,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
                                   "resource:///modules/ShellService.jsm");
 
-const nsIPrefBranch = Components.interfaces.nsIPrefBranch;
+const nsIPrefBranch = Ci.nsIPrefBranch;
 
 function onLoad()
 {

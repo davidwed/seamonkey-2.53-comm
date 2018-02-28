@@ -4,15 +4,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/hostnameUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/hostnameUtils.jsm");
 
 var gCurrentDirectory = null;
 var gReplicationBundle = null;
 var gReplicationService =
-  Components.classes["@mozilla.org/addressbook/ldap-replication-service;1"].
-             getService(Components.interfaces.nsIAbLDAPReplicationService);
+  Cc["@mozilla.org/addressbook/ldap-replication-service;1"]
+    .getService(Ci.nsIAbLDAPReplicationService);
 var gReplicationCancelled = false;
 var gProgressText;
 var gProgressMeter;
@@ -86,7 +86,7 @@ function onUnload()
 var progressListener = {
   onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus)
   {
-    if (aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_START) {
+    if (aStateFlags & Ci.nsIWebProgressListener.STATE_START) {
       // start the spinning
       gProgressMeter.setAttribute("mode", "undetermined");
       gProgressText.value = gReplicationBundle.getString(aStatus ?
@@ -99,7 +99,7 @@ var progressListener = {
         gReplicationBundle.getString("cancelDownloadButton.accesskey");
     }
     
-    if (aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP) {
+    if (aStateFlags & Ci.nsIWebProgressListener.STATE_STOP) {
       EndDownload(aStatus);
     }
   },
@@ -119,11 +119,11 @@ var progressListener = {
   },
   QueryInterface : function(iid)
   {
-    if (iid.equals(Components.interfaces.nsIWebProgressListener) || 
-        iid.equals(Components.interfaces.nsISupportsWeakReference) || 
-        iid.equals(Components.interfaces.nsISupports))
+    if (iid.equals(Ci.nsIWebProgressListener) || 
+        iid.equals(Ci.nsISupportsWeakReference) || 
+        iid.equals(Ci.nsISupports))
       return this;
-    throw Components.results.NS_NOINTERFACE;
+    throw Cr.NS_NOINTERFACE;
   }
 };
 
@@ -138,7 +138,7 @@ function DownloadNow()
     gReplicationCancelled = false;
 
     try {
-      if (gCurrentDirectory instanceof Components.interfaces.nsIAbLDAPDirectory)
+      if (gCurrentDirectory instanceof Ci.nsIAbLDAPDirectory)
         gReplicationService.startReplication(gCurrentDirectory,
                                              progressListener);
       else
@@ -185,7 +185,7 @@ function fillSettings()
 {
   document.getElementById("description").value = gCurrentDirectory.dirName;
 
-  if (gCurrentDirectory instanceof Components.interfaces.nsIAbLDAPDirectory) {
+  if (gCurrentDirectory instanceof Ci.nsIAbLDAPDirectory) {
     var ldapUrl = gCurrentDirectory.lDAPURL;
 
     document.getElementById("results").value = gCurrentDirectory.maxHits;
@@ -196,7 +196,7 @@ function fillSettings()
 
     var sub = document.getElementById("sub");
     switch(ldapUrl.scope) {
-    case Components.interfaces.nsILDAPURL.SCOPE_ONELEVEL:
+    case Ci.nsILDAPURL.SCOPE_ONELEVEL:
       sub.radioGroup.selectedItem = document.getElementById("one");
       break;
     default:
@@ -309,7 +309,7 @@ function onAccept()
       // update the parts (bug 473351).
       let ldapUrl = Services.io.newURI(
         (secure.checked ? "ldaps://" : "ldap://") + "localhost/dc=???")
-        .QueryInterface(Components.interfaces.nsILDAPURL);
+        .QueryInterface(Ci.nsILDAPURL);
 
       ldapUrl.host = hostname;
       ldapUrl.port = port ? port :
@@ -317,8 +317,8 @@ function onAccept()
                                               kDefaultLDAPPort);
       ldapUrl.dn = document.getElementById("basedn").value;
       ldapUrl.scope = document.getElementById("one").selected ?
-                      Components.interfaces.nsILDAPURL.SCOPE_ONELEVEL :
-                      Components.interfaces.nsILDAPURL.SCOPE_SUBTREE;
+                      Ci.nsILDAPURL.SCOPE_ONELEVEL :
+                      Ci.nsILDAPURL.SCOPE_SUBTREE;
 
       ldapUrl.filter = document.getElementById("search").value;
       if (document.getElementById("GSSAPI").selected) {
@@ -328,7 +328,7 @@ function onAccept()
       // check if we are modifying an existing directory or adding a new directory
       if (gCurrentDirectory) {
         gCurrentDirectory.dirName = description;
-        gCurrentDirectory.lDAPURL = ldapUrl.QueryInterface(Components.interfaces.nsILDAPURL);
+        gCurrentDirectory.lDAPURL = ldapUrl.QueryInterface(Ci.nsILDAPURL);
         window.opener.gNewServerString = gCurrentDirectory.dirPrefId;
       }
       else { // adding a new directory
@@ -342,7 +342,7 @@ function onAccept()
       var targetURI = "moz-abldapdirectory://" + window.opener.gNewServerString;
       var theDirectory =
           MailServices.ab.getDirectory(targetURI)
-          .QueryInterface(Components.interfaces.nsIAbLDAPDirectory);
+          .QueryInterface(Ci.nsIAbLDAPDirectory);
 
       theDirectory.maxHits = results;
       theDirectory.authDn = document.getElementById("login").value;

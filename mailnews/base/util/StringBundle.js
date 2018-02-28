@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = ["StringBundle"];
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /**
  * A string bundle.
@@ -112,7 +112,7 @@ StringBundle.prototype = {
       // it's better to return standard JS objects that behave as consumers
       // expect JS objects to behave (f.e. you can modify them dynamically).
       let string = enumerator.getNext()
-        .QueryInterface(Components.interfaces.nsIPropertyElement);
+        .QueryInterface(Ci.nsIPropertyElement);
       strings.push({ key: string.key, value: string.value });
     }
 

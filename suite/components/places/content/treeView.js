@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const PTV_interfaces = [Ci.nsITreeView,
                         Ci.nsINavHistoryResultObserver,
@@ -869,7 +869,7 @@ PlacesTreeView.prototype = {
           let child = children[i];
           this.nodeInserted(placesNode, child, i);
         }
-      }, Components.utils.reportError);
+      }, Cu.reportError);
   },
 
   nodeTitleChanged: function PTV_nodeTitleChanged(aNode, aNewTitle) {
@@ -930,7 +930,7 @@ PlacesTreeView.prototype = {
           this._cellProperties.set(aNode, properties += " livemark");
           // The livemark attribute is set as a cell property on the title cell.
           this._invalidateCellValue(aNode, this.COLUMN_TYPE_TITLE);
-        }, Components.utils.reportError);
+        }, Cu.reportError);
     }
   },
 
@@ -959,7 +959,7 @@ PlacesTreeView.prototype = {
             let shouldInvalidate =
               !this._controller.hasCachedLivemarkInfo(aNode);
             this._controller.cacheLivemarkInfo(aNode, aLivemark);
-            if (aNewState == Components.interfaces.nsINavHistoryContainerResultNode.STATE_OPENED) {
+            if (aNewState == Ci.nsINavHistoryContainerResultNode.STATE_OPENED) {
               aLivemark.registerForUpdates(aNode, this);
               // Prioritize the current livemark.
               aLivemark.reload();
@@ -1453,7 +1453,7 @@ PlacesTreeView.prototype = {
     let ip = this._getInsertionPoint(aRow, aOrientation);
     if (ip) {
       PlacesControllerDragHelper.onDrop(ip, aDataTransfer)
-                                .catch(Components.utils.reportError);
+                                .catch(Cu.reportError);
     }
 
     PlacesControllerDragHelper.currentDropTarget = null;

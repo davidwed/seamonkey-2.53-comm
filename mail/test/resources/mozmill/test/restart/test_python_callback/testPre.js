@@ -1,4 +1,4 @@
-var jum = {}; Components.utils.import('resource://mozmill/modules/jum.js', jum);
+var jum = {}; Cu.import('resource://mozmill/modules/jum.js', jum);
 
 var testPythonCallNow = function() {
   var state = "pre"
