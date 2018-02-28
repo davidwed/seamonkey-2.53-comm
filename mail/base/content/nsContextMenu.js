@@ -3,11 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
-Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/AppConstants.jsm");
-Components.utils.import("resource:///modules/MailUtils.js");
+Cu.import("resource://gre/modules/InlineSpellChecker.jsm");
+Cu.import("resource://gre/modules/PlacesUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource:///modules/MailUtils.js");
 
 XPCOMUtils.defineLazyGetter(this, "PageMenuParent", function() {
   let tmp = {};
@@ -472,12 +472,12 @@ nsContextMenu.prototype = {
 
     // First, do checks for nodes that never have children.
     if (this.target.nodeType == Node.ELEMENT_NODE) {
-      if (this.target instanceof Components.interfaces.nsIImageLoadingContent &&
+      if (this.target instanceof Ci.nsIImageLoadingContent &&
           this.target.currentURI) {
         this.onImage = true;
         this.onMetaDataItem = true;
 
-        var request = this.target.getRequest(Components.interfaces.nsIImageLoadingContent.CURRENT_REQUEST);
+        var request = this.target.getRequest(Ci.nsIImageLoadingContent.CURRENT_REQUEST);
         if (request && (request.imageStatus & request.STATUS_SIZE_AVAILABLE))
           this.onLoadedImage = true;
 
@@ -487,15 +487,15 @@ nsContextMenu.prototype = {
       } else if (editFlags & (SpellCheckHelper.INPUT | SpellCheckHelper.TEXTAREA)) {
         if (!this.target.readOnly) {
           this.onEditableArea = true;
-          gSpellChecker.init(this.target.QueryInterface(Components.interfaces.nsIDOMNSEditableElement).editor);
+          gSpellChecker.init(this.target.QueryInterface(Ci.nsIDOMNSEditableElement).editor);
           gSpellChecker.initFromEvent(document.popupRangeParent, document.popupRangeOffset);
         }
       } else if (editFlags & (SpellCheckHelper.CONTENTEDITABLE)) {
         let targetWin = this.target.ownerDocument.defaultView;
-        let editingSession = targetWin.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                                      .getInterface(Components.interfaces.nsIWebNavigation)
-                                      .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                                      .getInterface(Components.interfaces.nsIEditingSession);
+        let editingSession = targetWin.QueryInterface(Ci.nsIInterfaceRequestor)
+                                      .getInterface(Ci.nsIWebNavigation)
+                                      .QueryInterface(Ci.nsIInterfaceRequestor)
+                                      .getInterface(Ci.nsIEditingSession);
         gSpellChecker.init(editingSession.getEditorForWindow(targetWin));
         gSpellChecker.initFromEvent(document.popupRangeParent, document.popupRangeOffset);
       } else if (this.target instanceof HTMLCanvasElement) {
@@ -637,7 +637,7 @@ nsContextMenu.prototype = {
   isLinkSaveable : function CM_isLinkSaveable() {
     try {
       const nsIScriptSecurityManager =
-        Components.interfaces.nsIScriptSecurityManager;
+        Ci.nsIScriptSecurityManager;
       Services.scriptSecurityManager.checkLoadURIWithPrincipal(this.target.nodePrincipal,
           this.linkURI, nsIScriptSecurityManager.STANDARD);
     } catch (e) {
@@ -692,16 +692,16 @@ nsContextMenu.prototype = {
     // Let's try to unescape it using a character set.
     try {
       var characterSet = this.target.ownerDocument.characterSet;
-      const textToSubURI = Components.classes["@mozilla.org/intl/texttosuburi;1"]
-                                     .getService(Components.interfaces.nsITextToSubURI);
+      const textToSubURI = Cc["@mozilla.org/intl/texttosuburi;1"]
+                             .getService(Ci.nsITextToSubURI);
       addresses = textToSubURI.unEscapeURIForUI(characterSet, addresses);
     }
     catch(ex) {
       // Do nothing.
     }
 
-    var clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                              .getService(Components.interfaces.nsIClipboardHelper);
+    var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                      .getService(Ci.nsIClipboardHelper);
     clipboard.copyString(addresses);
   },
 
@@ -956,12 +956,12 @@ nsContextMenu.prototype = {
       uri: uri,
       visits:  [{
         visitDate: Date.now() * 1000,
-        transitionType: Components.interfaces.nsINavHistoryService.TRANSITION_LINK
+        transitionType: Ci.nsINavHistoryService.TRANSITION_LINK
       }]
     });
-    Components.classes["@mozilla.org/uriloader/external-protocol-service;1"]
-              .getService(Components.interfaces.nsIExternalProtocolService)
-              .loadURI(uri);
+    Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+      .getService(Ci.nsIExternalProtocolService)
+      .loadURI(uri);
   },
 
   openLinkInBrowser: function CM_openLinkInBrowser() {
@@ -969,11 +969,11 @@ nsContextMenu.prototype = {
       uri: this.linkURI,
       visits:  [{
         visitDate: Date.now() * 1000,
-        transitionType: Components.interfaces.nsINavHistoryService.TRANSITION_LINK
+        transitionType: Ci.nsINavHistoryService.TRANSITION_LINK
       }]
     });
-    Components.classes["@mozilla.org/uriloader/external-protocol-service;1"]
-      .getService(Components.interfaces.nsIExternalProtocolService)
+    Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+      .getService(Ci.nsIExternalProtocolService)
       .loadURI(this.linkURI);
   },
 

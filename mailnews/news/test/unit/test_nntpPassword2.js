@@ -7,7 +7,7 @@
  * default port or the SSL default port. Nothing else!
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 load("../../../resources/passwordStorage.js");
 
@@ -81,7 +81,7 @@ add_task(function *() {
     do_check_transaction(transaction, ["MODE READER", "LIST",
                                        "AUTHINFO user testnews",
                                        "AUTHINFO pass newstest", "LIST"]);
-    incomingServer.QueryInterface(Components.interfaces.nsISubscribableServer)
+    incomingServer.QueryInterface(Ci.nsISubscribableServer)
                   .subscribeCleanup();
 
   } catch (e) {

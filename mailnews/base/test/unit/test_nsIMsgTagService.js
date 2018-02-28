@@ -10,7 +10,7 @@
  *
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 function run_test()
 {

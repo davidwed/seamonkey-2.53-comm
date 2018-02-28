@@ -15,8 +15,8 @@
   * - Compacting imap offline stores.
   */
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 Services.prefs.setCharPref("mail.serverDefaultStoreContractID",
                            "@mozilla.org/msgstore/berkeleystore;1");
@@ -117,7 +117,7 @@ function calculateFolderSize(folder)
     while (enumerator.hasMoreElements())
     {
       var header = enumerator.getNext();
-      if (header instanceof Components.interfaces.nsIMsgDBHdr)
+      if (header instanceof Ci.nsIMsgDBHdr)
         totalSize += header.messageSize;
     }
   }
@@ -133,7 +133,7 @@ function verifyMsgOffsets(folder)
     while (enumerator.hasMoreElements())
     {
       let header = enumerator.getNext();
-      if (header instanceof Components.interfaces.nsIMsgDBHdr) {
+      if (header instanceof Ci.nsIMsgDBHdr) {
         let storeToken = header.getStringProperty("storeToken");
         do_check_eq(storeToken, header.messageOffset);
       }

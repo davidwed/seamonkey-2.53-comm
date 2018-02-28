@@ -14,7 +14,7 @@ var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers",
                          "account-manager-helpers"];
 
 var elib = {};
-Components.utils.import("resource://mozmill/modules/elementslib.js", elib);
+Cu.import("resource://mozmill/modules/elementslib.js", elib);
 
 var gPopAccount, gOriginalAccountCount;
 
@@ -29,7 +29,7 @@ function setupModule(module) {
   // Create a POP server
   let popServer = MailServices.accounts
     .createIncomingServer("nobody", "example.invalid", "pop3")
-    .QueryInterface(Components.interfaces.nsIPop3IncomingServer);
+    .QueryInterface(Ci.nsIPop3IncomingServer);
 
   let identity = MailServices.accounts.createIdentity();
   identity.email = "tinderbox@example.invalid";
@@ -105,7 +105,7 @@ function test_account_name() {
   // Create also a NNTP server.
   let nntpServer = MailServices.accounts
     .createIncomingServer(null, "example.nntp.invalid", "nntp")
-    .QueryInterface(Components.interfaces.nsINntpIncomingServer);
+    .QueryInterface(Ci.nsINntpIncomingServer);
 
   identity = MailServices.accounts.createIdentity();
   identity.email = "tinderbox2@example.invalid";

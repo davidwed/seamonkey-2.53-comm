@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/imServices.jsm");
+Cu.import("resource:///modules/imServices.jsm");
 
 var gMinTrayR = {
   trayService: null,
@@ -35,12 +35,12 @@ var gMinTrayR = {
 #endif
 
     this.trayService =
-      Components.classes['@tn123.ath.cx/trayservice;1']
-                .getService(Components.interfaces.trayITrayService);
+      Cc['@tn123.ath.cx/trayservice;1']
+        .getService(Ci.trayITrayService);
     this.trayService.watchMinimize(window);
 
     this._prefs = Services.prefs.getBranch("extensions.mintrayr.")
-                                .QueryInterface(Components.interfaces.nsIPrefBranch2);
+                                .QueryInterface(Ci.nsIPrefBranch2);
     this._prefs.addObserver("alwaysShowTrayIcon", this, false);
 
     // Add a listener to minimize the window on startup once it has been

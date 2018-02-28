@@ -448,7 +448,7 @@ var GlodaIMIndexer = {
         GlodaIndexer.indexJob(job);
       }
       conv.logFileCount = logFiles.length;
-    }.bind(this)).catch(Components.utils.reportError);
+    }.bind(this)).catch(Cu.reportError);
 
     // Now clear the job, so we can index in the future.
     this._knownConversations[convId].scheduledIndex = null;

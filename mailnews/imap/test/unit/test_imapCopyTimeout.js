@@ -16,7 +16,7 @@ load("../../../resources/messageGenerator.js");
 // IMAP pump
 
 // Globals
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 setupIMAPPump();
 

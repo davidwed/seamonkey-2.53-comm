@@ -97,7 +97,7 @@ var statusSelector = {
           elt.removeAttribute("value");
       }
       if (!("TextboxSpellChecker" in window))
-        Components.utils.import("resource:///modules/imTextboxUtils.jsm");
+        Cu.import("resource:///modules/imTextboxUtils.jsm");
       TextboxSpellChecker.registerTextbox(elt);
       // force binding attachment by forcing layout
       elt.getBoundingClientRect();
@@ -186,9 +186,9 @@ var statusSelector = {
   },
 
   userIconClick: function ss_userIconClick() {
-    const nsIFilePicker = Components.interfaces.nsIFilePicker;
-    let fp = Components.classes["@mozilla.org/filepicker;1"]
-                       .createInstance(nsIFilePicker);
+    const nsIFilePicker = Ci.nsIFilePicker;
+    let fp = Cc["@mozilla.org/filepicker;1"]
+               .createInstance(nsIFilePicker);
     let bundle = document.getElementById("chatBundle");
     fp.init(window, bundle.getString("userIconFilePickerTitle"),
             nsIFilePicker.modeOpen);

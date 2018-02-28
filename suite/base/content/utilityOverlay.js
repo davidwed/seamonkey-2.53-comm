@@ -9,8 +9,8 @@
  **/
 
 // Services = object with smart getters for common XPCOM services
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // XPCOMUtils.defineLazyGetter(this, "Weave", function() {
 // let tmp = {};
@@ -31,10 +31,10 @@ const kProxyManual = ["network.proxy.ftp",
                       "network.proxy.http",
                       "network.proxy.socks",
                       "network.proxy.ssl"];
-const kExistingWindow = Components.interfaces.nsIBrowserDOMWindow.OPEN_CURRENTWINDOW;
-const kNewWindow = Components.interfaces.nsIBrowserDOMWindow.OPEN_NEWWINDOW;
-const kNewTab = Components.interfaces.nsIBrowserDOMWindow.OPEN_NEWTAB;
-const kExistingTab = Components.interfaces.nsIBrowserDOMWindow.OPEN_SWITCHTAB;
+const kExistingWindow = Ci.nsIBrowserDOMWindow.OPEN_CURRENTWINDOW;
+const kNewWindow = Ci.nsIBrowserDOMWindow.OPEN_NEWWINDOW;
+const kNewTab = Ci.nsIBrowserDOMWindow.OPEN_NEWTAB;
+const kExistingTab = Ci.nsIBrowserDOMWindow.OPEN_SWITCHTAB;
 const kNewPrivate = 5;
 var TAB_DROP_TYPE = "application/x-moz-tabbrowser-tab";
 var gShowBiDi = false;
@@ -139,10 +139,10 @@ function setProxyTypeUI()
 
 function SetStringPref(aPref, aValue)
 {
-  const nsISupportsString = Components.interfaces.nsISupportsString;
+  const nsISupportsString = Ci.nsISupportsString;
   try {
-    var str = Components.classes["@mozilla.org/supports-string;1"]
-                        .createInstance(nsISupportsString);
+    var str = Cc["@mozilla.org/supports-string;1"]
+                .createInstance(nsISupportsString);
     str.data = aValue;
     Services.prefs.setComplexValue(aPref, nsISupportsString, str);
   } catch (e) {}
@@ -152,7 +152,7 @@ function GetStringPref(name)
 {
   try {
     return Services.prefs.getComplexValue(name,
-               Components.interfaces.nsISupportsString).data;
+               Ci.nsISupportsString).data;
   } catch (e) {}
   return "";
 }
@@ -161,9 +161,9 @@ function GetLocalizedStringPref(aPrefName, aDefaultValue)
 {
   try {
     return Services.prefs.getComplexValue(aPrefName,
-               Components.interfaces.nsIPrefLocalizedString).data;
+               Ci.nsIPrefLocalizedString).data;
   } catch (e) {
-    Components.utils.reportError("Couldn't get " + aPrefName + " pref: " + e);
+    Cu.reportError("Couldn't get " + aPrefName + " pref: " + e);
   }
   return aDefaultValue;
 }
@@ -172,7 +172,7 @@ function GetLocalFilePref(aName)
 {
   try {
     return Services.prefs.getComplexValue(aName,
-               Components.interfaces.nsILocalFile);
+               Ci.nsILocalFile);
   } catch (e) {}
   return null;
 }
@@ -182,7 +182,7 @@ function GetLocalFilePref(aName)
   */
 function GetDesktopFolder()
 {
-  return Services.dirsvc.get("Desk", Components.interfaces.nsILocalFile);
+  return Services.dirsvc.get("Desk", Ci.nsILocalFile);
 }
 
 /**
@@ -190,7 +190,7 @@ function GetDesktopFolder()
   */
 function GetSpecialDirectory(aName)
 {
-  return Services.dirsvc.get(aName, Components.interfaces.nsIFile);
+  return Services.dirsvc.get(aName, Ci.nsIFile);
 }
 
 function GetUrlbarHistoryFile()
@@ -584,15 +584,15 @@ function getTopWin()
 function isRestricted( url )
 {
   try {
-    const nsIURIFixup = Components.interfaces.nsIURIFixup;
-    var uri = Components.classes["@mozilla.org/docshell/urifixup;1"]
-                        .getService(nsIURIFixup)
-                        .createFixupURI(url, nsIURIFixup.FIXUP_FLAG_NONE);
+    const nsIURIFixup = Ci.nsIURIFixup;
+    var uri = Cc["@mozilla.org/docshell/urifixup;1"]
+                .getService(nsIURIFixup)
+                .createFixupURI(url, nsIURIFixup.FIXUP_FLAG_NONE);
     const URI_INHERITS_SECURITY_CONTEXT =
-        Components.interfaces.nsIProtocolHandler.URI_INHERITS_SECURITY_CONTEXT;
-    return Components.classes["@mozilla.org/network/util;1"]
-                     .getService(Components.interfaces.nsINetUtil)
-                     .URIChainHasFlags(uri, URI_INHERITS_SECURITY_CONTEXT);
+        Ci.nsIProtocolHandler.URI_INHERITS_SECURITY_CONTEXT;
+    return Cc["@mozilla.org/network/util;1"]
+             .getService(Ci.nsINetUtil)
+             .URIChainHasFlags(uri, URI_INHERITS_SECURITY_CONTEXT);
   } catch (e) {
     return false;
   }
@@ -622,7 +622,7 @@ function openTopWin( url, opener )
             opener.open(url, "_top");
         else
             topWindowOfType.getBrowser().loadURIWithFlags(url,
-                Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL);
+                Ci.nsIWebNavigation.LOAD_FLAGS_FROM_EXTERNAL);
 
         topWindowOfType.content.focus();
         return topWindowOfType;
@@ -693,19 +693,19 @@ function safeModeRestart()
                                      checkboxText, checkbox);
   if (rv == 0) {
     if (checkbox.value)
-      Components.classes["@mozilla.org/process/environment;1"]
-                .getService(Components.interfaces.nsIEnvironment)
-                .set("MOZ_SAFE_MODE_RESTART", "1");
+      Cc["@mozilla.org/process/environment;1"]
+        .getService(Ci.nsIEnvironment)
+        .set("MOZ_SAFE_MODE_RESTART", "1");
     Application.restart();
   }
 }
 
 function checkForUpdates()
 {
-  var um = Components.classes["@mozilla.org/updates/update-manager;1"]
-                     .getService(Components.interfaces.nsIUpdateManager);
-  var prompter = Components.classes["@mozilla.org/updates/update-prompt;1"]
-                           .createInstance(Components.interfaces.nsIUpdatePrompt);
+  var um = Cc["@mozilla.org/updates/update-manager;1"]
+             .getService(Ci.nsIUpdateManager);
+  var prompter = Cc["@mozilla.org/updates/update-prompt;1"]
+                   .createInstance(Ci.nsIUpdatePrompt);
 
   // If there's an update ready to be applied, show the "Update Downloaded"
   // UI instead and let the user know they have to restart the browser for
@@ -730,10 +730,10 @@ function updateCheckUpdatesItem()
     return;
   }
 
-  var updates = Components.classes["@mozilla.org/updates/update-service;1"]
-                          .getService(Components.interfaces.nsIApplicationUpdateService);
-  var um = Components.classes["@mozilla.org/updates/update-manager;1"]
-                     .getService(Components.interfaces.nsIUpdateManager);
+  var updates = Cc["@mozilla.org/updates/update-service;1"]
+                  .getService(Ci.nsIApplicationUpdateService);
+  var um = Cc["@mozilla.org/updates/update-manager;1"]
+             .getService(Ci.nsIUpdateManager);
 
   // Disable the UI if the update enabled pref has been locked by the
   // administrator or if we cannot update for some other reason.
@@ -1043,7 +1043,7 @@ function openNewTabWindowOrExistingWith(aType, aURL, aNode, aLoadInBackground,
   // Make sure we are allowed to open this url
   if (aNode)
     urlSecurityCheck(aURL, aNode.nodePrincipal,
-                     Components.interfaces.nsIScriptSecurityManager.STANDARD);
+                     Ci.nsIScriptSecurityManager.STANDARD);
 
   // get referrer, if as external should be null
   var referrerURI = aReferrer;
@@ -1200,7 +1200,7 @@ function BrowserOnCommand(event)
         try {
           loadURI(Services.urlFormatter.formatURLPref("browser.safebrowsing.warning.infoURL"));
         } catch (e) {
-          Components.utils.reportError("Couldn't get phishing info URL: " + e);
+          Cu.reportError("Couldn't get phishing info URL: " + e);
         }
         break;
       case "ignoreWarningButton":
@@ -1225,7 +1225,7 @@ function getMeOutOfHere() {
   var url = "about:blank";
   try {
     url = prefs.getComplexValue("browser.startup.homepage",
-                                Components.interfaces.nsIPrefLocalizedString).data;
+                                Ci.nsIPrefLocalizedString).data;
   } catch(e) {}
   loadURI(url);
 }
@@ -1336,7 +1336,7 @@ function isValidFeed(aData, aPrincipal, aIsFeed)
   if (aIsFeed || /^application\/(?:atom|rss)\+xml$/.test(type)) {
     try {
       urlSecurityCheck(aData.href, aPrincipal,
-                       Components.interfaces.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL);
+                       Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL);
       return type || "application/rss+xml";
     }
     catch(ex) {
@@ -1375,7 +1375,7 @@ function checkForMiddleClick(node, event) {
 function closeMenus(node)
 {
   for (; node; node = node.parentNode) {
-    if (node instanceof Components.interfaces.nsIDOMXULPopupElement)
+    if (node instanceof Ci.nsIDOMXULPopupElement)
       node.hidePopup();
   }
 }
@@ -1523,7 +1523,7 @@ function openUILinkIn(url, where, aAllowThirdPartyFixup, aPostData, aReferrerURI
       allowThirdPartyFixup: aAllowThirdPartyFixup,
       postData: aPostData,
       referrerURI: aReferrerURI,
-      referrerPolicy: Components.interfaces.nsIHttpChannel.REFERRER_POLICY_UNSET,
+      referrerPolicy: Ci.nsIHttpChannel.REFERRER_POLICY_UNSET,
     };
   }
 
@@ -1769,7 +1769,7 @@ function switchToTabHavingURI(aURI, aOpenNew, aCallback) {
   }
 
   // This can be passed either nsIURI or a string.
-  if (!(aURI instanceof Components.interfaces.nsIURI))
+  if (!(aURI instanceof Ci.nsIURI))
     aURI = Services.io.newURI(aURI);
 
   // Prioritise this window.
@@ -1943,20 +1943,20 @@ function GetFileFromString(aString)
   if (!aString)
     return null;
 
-  let commandLine = Components.classes["@mozilla.org/toolkit/command-line;1"]
-                              .createInstance(Components.interfaces.nsICommandLine);
+  let commandLine = Cc["@mozilla.org/toolkit/command-line;1"]
+                      .createInstance(Ci.nsICommandLine);
   let uri = commandLine.resolveURI(aString);
-  return uri instanceof Components.interfaces.nsIFileURL ?
-         uri.file.QueryInterface(Components.interfaces.nsILocalFile) : null;
+  return uri instanceof Ci.nsIFileURL ?
+         uri.file.QueryInterface(Ci.nsILocalFile) : null;
 }
 
 function CopyImage()
 {
-  var param = Components.classes["@mozilla.org/embedcomp/command-params;1"]
-                        .createInstance(Components.interfaces.nsICommandParams);
+  var param = Cc["@mozilla.org/embedcomp/command-params;1"]
+                .createInstance(Ci.nsICommandParams);
   param.setLongValue("imageCopy",
-                     Components.interfaces.nsIContentViewerEdit.COPY_IMAGE_ALL);
+                     Ci.nsIContentViewerEdit.COPY_IMAGE_ALL);
   document.commandDispatcher.getControllerForCommand("cmd_copyImage")
-          .QueryInterface(Components.interfaces.nsICommandController)
+          .QueryInterface(Ci.nsICommandController)
           .doCommandWithParams("cmd_copyImage", param);
 }

@@ -6,7 +6,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 function getMessageHeaderFromUrl(aUrl) {
   let msgUrl = MailServices.nntp
@@ -25,6 +25,6 @@ function run_test() {
                                       "/123@example.invalid?group=test.subscribe.simple&key=abcdefghijk");
     do_check_true(false); 
   } catch (e) {
-    do_check_eq(e.result, Components.results.NS_ERROR_MALFORMED_URI);
+    do_check_eq(e.result, Cr.NS_ERROR_MALFORMED_URI);
   }
 }

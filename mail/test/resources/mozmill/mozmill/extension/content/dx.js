@@ -36,8 +36,8 @@
 //
 // ***** END LICENSE BLOCK *****
 
-var inspection = {}; Components.utils.import('resource://mozmill/modules/inspection.js', inspection);
-var utils = {}; Components.utils.import('resource://mozmill/modules/utils.js', utils);
+var inspection = {}; Cu.import('resource://mozmill/modules/inspection.js', inspection);
+var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
 
 var DomInspectorConnector = function() {
   this.lastEvent = null;
@@ -107,8 +107,8 @@ DomInspectorConnector.prototype.dxOn = function() {
     clickMethod = 'click';
   }
 
-  var enumerator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                     .getService(Components.interfaces.nsIWindowMediator)
+  var enumerator = Cc["@mozilla.org/appshell/window-mediator;1"]
+                     .getService(Ci.nsIWindowMediator)
                      .getEnumerator("");
   while(enumerator.hasMoreElements()) {
     var win = enumerator.getNext();
@@ -118,8 +118,8 @@ DomInspectorConnector.prototype.dxOn = function() {
   }
 
   var observerService =
-    Components.classes["@mozilla.org/observer-service;1"]
-      .getService(Components.interfaces.nsIObserverService);
+    Cc["@mozilla.org/observer-service;1"]
+      .getService(Ci.nsIObserverService);
 
   observerService.addObserver(this.observer, "toplevel-window-ready", false);
 };
@@ -155,8 +155,8 @@ DomInspectorConnector.prototype.dxOff = function() {
   }
 
   var observerService =
-    Components.classes["@mozilla.org/observer-service;1"]
-      .getService(Components.interfaces.nsIObserverService);
+    Cc["@mozilla.org/observer-service;1"]
+      .getService(Ci.nsIObserverService);
 
   try {
     observerService.removeObserver(this.observer, "toplevel-window-ready");

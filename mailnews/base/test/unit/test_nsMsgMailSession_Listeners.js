@@ -3,9 +3,9 @@
  * Test suite for nsMsgMailSession functions relating to listeners.
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
-var nsIFolderListener = Components.interfaces.nsIFolderListener;
+var nsIFolderListener = Ci.nsIFolderListener;
 var numListenerFunctions = 8;
 
 var gMailSessionNotifier = MailServices.mailSession.QueryInterface(nsIFolderListener);

@@ -13,7 +13,7 @@ function(event)
 
   if (element.ownerDocument != getBrowser().contentDocument ||
       !linkToolbarUI.isLinkToolbarEnabled() ||
-      !(element instanceof Components.interfaces.nsIDOMHTMLLinkElement) ||
+      !(element instanceof Ci.nsIDOMHTMLLinkElement) ||
       !element.href || (!element.rel && !element.rev))
     return;
 
@@ -56,23 +56,23 @@ LinkToolbarUI.prototype.fullSlowRefresh =
 function()
 {
   var currentNode = getBrowser().contentDocument.documentElement;
-  if (!(currentNode instanceof Components.interfaces.nsIDOMHTMLHtmlElement))
+  if (!(currentNode instanceof Ci.nsIDOMHTMLHtmlElement))
     return;
   currentNode = currentNode.firstChild;
 
   while(currentNode)
   {
-    if (currentNode instanceof Components.interfaces.nsIDOMHTMLHeadElement) {
+    if (currentNode instanceof Ci.nsIDOMHTMLHeadElement) {
       currentNode = currentNode.firstChild;
 
       while(currentNode)
       {
-        if (currentNode instanceof Components.interfaces.nsIDOMHTMLLinkElement)
+        if (currentNode instanceof Ci.nsIDOMHTMLLinkElement)
           linkToolbarUI.linkAdded({originalTarget: currentNode});
         currentNode = currentNode.nextSibling;
       }
     }
-    else if (currentNode instanceof Components.interfaces.nsIDOMElement)
+    else if (currentNode instanceof Ci.nsIDOMElement)
     {
       // head is supposed to be the first element inside html.
       // Got something else instead. returning
@@ -136,7 +136,7 @@ function(event)
   // to us by a web page from chrome, which is privileged.
   try {
     urlSecurityCheck(destURL, content.document.nodePrincipal,
-                     Components.interfaces.nsIScriptSecurityManager.STANDARD);
+                     Ci.nsIScriptSecurityManager.STANDARD);
     loadURI(destURL, content.document.documentURIObject);
   } catch (e) {
     dump("Error: it is not permitted to load this URI from a <link> element: " + e);

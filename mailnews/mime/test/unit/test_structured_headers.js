@@ -5,7 +5,7 @@
 // This tests the msgIStructuredHeaders and msgIWritableStructuredHeaders
 // interfaces.
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /// Verify that a specific XPCOM error code is thrown.
 function verifyError(block, errorCode) {
@@ -78,9 +78,9 @@ add_task(function* check_raw() {
   do_check_eq(headers.getHeader("Date"), day);
   do_check_eq(headers.getHeader("date"), day);
   verifyError(() => headers.getUnstructuredHeader("Date"),
-    Components.results.NS_ERROR_ILLEGAL_VALUE);
+    Cr.NS_ERROR_ILLEGAL_VALUE);
   verifyError(() => headers.getAddressingHeader("Date"),
-    Components.results.NS_ERROR_ILLEGAL_VALUE);
+    Cr.NS_ERROR_ILLEGAL_VALUE);
   // This is easier than trying to match the actual value for the Date header,
   // since that depends on the current timezone.
   do_check_eq(new Date(headers.getRawHeader("Date")).getTime(), day.getTime());
@@ -95,7 +95,7 @@ add_task(function* check_raw() {
   do_check_eq(headers.getUnstructuredHeader("Content-Description"),
     "A description!");
   verifyError(() => headers.getAddressingHeader("Content-Description"),
-    Components.results.NS_ERROR_ILLEGAL_VALUE);
+    Cr.NS_ERROR_ILLEGAL_VALUE);
   do_check_eq(headers.getRawHeader("Content-Description"),
     "A description!");
 

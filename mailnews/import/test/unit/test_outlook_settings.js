@@ -1,5 +1,5 @@
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 load("resources/mock_windows_reg_factory.js");
 
