@@ -6,6 +6,7 @@
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
+
 XPCOMUtils.defineLazyModuleGetter(this, "PlacesUtils",
                                   "resource://gre/modules/PlacesUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
@@ -13,10 +14,6 @@ XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Constants
-
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
 
 // This SQL query fragment provides the following:
 //   - whether the entry is bookmarked (kQueryIndexBookmarked)
