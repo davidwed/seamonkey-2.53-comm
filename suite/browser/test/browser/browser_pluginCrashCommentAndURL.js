@@ -145,7 +145,7 @@ function getPropertyBagValue(bag, key) {
   try {
     var val = bag.getProperty(key);
   }
-  catch (e if e.result == Components.results.NS_ERROR_FAILURE) {}
+  catch (e if e.result == Cr.NS_ERROR_FAILURE) {}
   return val;
 }
 

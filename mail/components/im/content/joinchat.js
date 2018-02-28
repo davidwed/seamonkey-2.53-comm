@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/imServices.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/imServices.jsm");
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;

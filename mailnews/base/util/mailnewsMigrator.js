@@ -12,9 +12,9 @@
 
 this.EXPORTED_SYMBOLS = [ "migrateMailnews" ];
 
-Components.utils.import("resource:///modules/errUtils.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/errUtils.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 var Ci = Components.interfaces;
 var kServerPrefVersion = 1;
 var kSmtpPrefVersion = 1;
@@ -137,7 +137,7 @@ function MigrateABRemoteContentSettings()
     }
 
     let addrbook = enumerator.getNext()
-      .QueryInterface(Components.interfaces.nsIAbDirectory);
+      .QueryInterface(Ci.nsIAbDirectory);
     try {
       // If it's a read-only book, don't try to find a card as we we could never
       // have set the AllowRemoteContent property.
@@ -148,7 +148,7 @@ function MigrateABRemoteContentSettings()
       while (childCards.hasMoreElements())
       {
         let card = childCards.getNext()
-                             .QueryInterface(Components.interfaces.nsIAbCard);
+                             .QueryInterface(Ci.nsIAbCard);
 
         if (card.getProperty("AllowRemoteContent", false) == false)
           continue; // not allowed for this contact
@@ -175,12 +175,12 @@ function MigrateDefaultCharsets()
   if (Services.prefs.prefHasUserValue("mail.default_charsets.migrated"))
     return;
 
-  let charsetConvertManager = Components.classes['@mozilla.org/charset-converter-manager;1']
-    .getService(Components.interfaces.nsICharsetConverterManager);
+  let charsetConvertManager = Cc['@mozilla.org/charset-converter-manager;1']
+    .getService(Ci.nsICharsetConverterManager);
 
   let sendCharsetStr = Services.prefs.getComplexValue(
       "mailnews.send_default_charset",
-      Components.interfaces.nsIPrefLocalizedString).data;
+      Ci.nsIPrefLocalizedString).data;
 
   try {
     charsetConvertManager.getCharsetTitle(sendCharsetStr);
@@ -190,7 +190,7 @@ function MigrateDefaultCharsets()
 
   let viewCharsetStr = Services.prefs.getComplexValue(
       "mailnews.view_default_charset",
-      Components.interfaces.nsIPrefLocalizedString).data;
+      Ci.nsIPrefLocalizedString).data;
 
   try {
     charsetConvertManager.getCharsetTitle(viewCharsetStr);

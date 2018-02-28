@@ -3,7 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 // vim:set ts=2 sw=2 sts=2 et ft=javascript:
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /**
  * This file exports the JSMime code, polyfilling code as appropriate for use in
@@ -29,13 +29,13 @@ function FakeTextDecoder(label="UTF-8", options = {}) {
 }
 FakeTextDecoder.prototype = {
   _reset: function (label) {
-    this._encoder = Components.classes[
+    this._encoder = Cc[
       "@mozilla.org/intl/scriptableunicodeconverter"]
-      .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+      .createInstance(Ci.nsIScriptableUnicodeConverter);
     this._encoder.isInternal = true;
-    let manager = Components.classes[
+    let manager = Cc[
       "@mozilla.org/charset-converter-manager;1"]
-      .createInstance(Components.interfaces.nsICharsetConverterManager);
+      .createInstance(Ci.nsICharsetConverterManager);
     this._encoder.charset = manager.getCharsetAlias(label);
   },
   get encoding() { return this._encoder.charset; },
@@ -69,7 +69,7 @@ TextDecoder = FallbackTextDecoder;
 // The following code loads custom MIME encoders.
 var CATEGORY_NAME = "custom-mime-encoder";
 Services.obs.addObserver(function (subject, topic, data) {
-  subject = subject.QueryInterface(Components.interfaces.nsISupportsCString)
+  subject = subject.QueryInterface(Ci.nsISupportsCString)
                    .data;
   if (data == CATEGORY_NAME) {
     let url = catman.getCategoryEntry(CATEGORY_NAME, subject);
@@ -77,13 +77,13 @@ Services.obs.addObserver(function (subject, topic, data) {
   }
 }, "xpcom-category-entry-added", false);
 
-var catman = Components.classes["@mozilla.org/categorymanager;1"]
-                       .getService(Components.interfaces.nsICategoryManager);
+var catman = Cc["@mozilla.org/categorymanager;1"]
+               .getService(Ci.nsICategoryManager);
 
 var entries = catman.enumerateCategory(CATEGORY_NAME);
 while (entries.hasMoreElements()) {
   let string = entries.getNext()
-                      .QueryInterface(Components.interfaces.nsISupportsCString)
+                      .QueryInterface(Ci.nsISupportsCString)
                       .data;
   let url = catman.getCategoryEntry(CATEGORY_NAME, string);
   Services.scriptloader.loadSubScript(url, {}, "UTF-8");

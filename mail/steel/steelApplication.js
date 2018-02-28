@@ -5,7 +5,7 @@
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "Deprecated",
                                   "resource://gre/modules/Deprecated.jsm");
 var APPLICATION_CID = Components.ID("f265021a-7f1d-4b4b-bdc6-9aedca4d8f13");
@@ -20,7 +20,7 @@ var gSingleton = null;
 var ApplicationFactory = {
   createInstance: function af_ci(aOuter, aIID) {
     if (aOuter != null)
-      throw Components.results.NS_ERROR_NO_AGGREGATION;
+      throw Cr.NS_ERROR_NO_AGGREGATION;
 
     if (gSingleton == null) {
       gSingleton = new Application();

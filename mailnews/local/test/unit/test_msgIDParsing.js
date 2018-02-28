@@ -3,11 +3,11 @@
  */
 
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://testing-common/mailnews/localAccountUtils.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
 
-var gMessenger = Cc["@mozilla.org/messenger;1"].
-                   createInstance(Ci.nsIMessenger);
+var gMessenger = Cc["@mozilla.org/messenger;1"]
+                   .createInstance(Ci.nsIMessenger);
 
 var headers =
   "from: alice@t1.example.com\r\n" +

@@ -3,15 +3,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function restartApp() {
   Services.startup.quit(Services.startup.eForceQuit | Services.startup.eRestart);
 }
 
 function deleteLocalstore() {
-  var localstoreFile = Services.dirsvc.get("LStoreS", Components.interfaces.nsIFile);
+  var localstoreFile = Services.dirsvc.get("LStoreS", Ci.nsIFile);
   if (localstoreFile.exists())
     localstoreFile.remove(false);
   // Delete the new xulstore file.

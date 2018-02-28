@@ -40,9 +40,9 @@
 var EXPORTED_SYMBOLS = ["createEventObject", "triggerEvent", "getKeyCodeFromKeySequence",
                         "triggerKeyEvent", "triggerMouseEvent", "fakeOpenPopup"];
 
-var EventUtils = {}; Components.utils.import('resource://mozmill/stdlib/EventUtils.js', EventUtils);
+var EventUtils = {}; Cu.import('resource://mozmill/stdlib/EventUtils.js', EventUtils);
 
-var utils = {}; Components.utils.import('resource://mozmill/modules/utils.js', utils);
+var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
 
 // var logging = {}; Components.utils.import('resource://mozmill/stdlib/logging.js', logging);
 

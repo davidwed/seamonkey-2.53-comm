@@ -162,7 +162,7 @@
           if (buddy && buddy.account.connected)
             statusType = buddy.statusType;
           if (!("Status" in window))
-            Components.utils.import("resource:///modules/imStatusUtils.jsm");
+            Cu.import("resource:///modules/imStatusUtils.jsm");
           this.setAttribute("status", Status.toAttribute(statusType));
         }
 
@@ -237,7 +237,7 @@
             (accelKeyPressed && aEvent.charCode == 'v'.charCodeAt(0) ||
              !aEvent.ctrlKey && !aEvent.metaKey)) {
           this.convView.focus();
-          const masks = Components.interfaces.nsIDOMNSEvent;
+          const masks = Ci.nsIDOMNSEvent;
           let modifiers = 0;
           if (aEvent.shiftKey)
             modifiers |= masks.SHIFT_MASK;
@@ -245,8 +245,8 @@
             modifiers |= masks.CONTROL_MASK;
           if (aEvent.metaKey)
             modifiers |= masks.META_MASK;
-          window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                .getInterface(Components.interfaces.nsIDOMWindowUtils)
+          window.QueryInterface(Ci.nsIInterfaceRequestor)
+                .getInterface(Ci.nsIDOMWindowUtils)
                 .sendKeyEvent(aEvent.type, aEvent.keyCode, aEvent.charCode,
                               modifiers);
           aEvent.preventDefault();

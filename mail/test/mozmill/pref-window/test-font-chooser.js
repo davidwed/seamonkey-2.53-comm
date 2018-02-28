@@ -16,7 +16,7 @@ var RELATIVE_ROOT = "../shared-modules";
 var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers",
                        "pref-window-helpers"];
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 // We can't initialize them h because the global scope is read far too
 // early.

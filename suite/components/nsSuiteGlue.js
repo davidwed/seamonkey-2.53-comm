@@ -9,13 +9,13 @@ const Cu = Components.utils;
 
 const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
-Components.utils.import("resource://gre/modules/LoginManagerParent.jsm");
-Components.utils.import("resource:///modules/Sanitizer.jsm");
-Components.utils.import("resource:///modules/mailnewsMigrator.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/osfile.jsm");
+Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/LoginManagerParent.jsm");
+Cu.import("resource:///modules/Sanitizer.jsm");
+Cu.import("resource:///modules/mailnewsMigrator.js");
 
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
                                   "resource://gre/modules/NetUtil.jsm");
@@ -58,7 +58,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
 
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   var tmp = {};
-  Components.utils.import("resource://devtools/shared/Loader.jsm", tmp);
+  Cu.import("resource://devtools/shared/Loader.jsm", tmp);
   return tmp.require("devtools/server/main").DebuggerServer;
 });
 
@@ -102,14 +102,14 @@ SuiteGlue.prototype = {
 
   _logConsoleAPI: function(aEvent)
   {
-    const nsIScriptError = Components.interfaces.nsIScriptError;
+    const nsIScriptError = Ci.nsIScriptError;
     var flg = nsIScriptError.errorFlag;
     switch (aEvent.level) {
       case "warn":
         flg = nsIScriptError.warningFlag;
       case "error":
-        var scriptError = Components.classes["@mozilla.org/scripterror;1"]
-                                    .createInstance(nsIScriptError);
+        var scriptError = Cc["@mozilla.org/scripterror;1"]
+                            .createInstance(nsIScriptError);
         scriptError.initWithWindowID(Array.from(aEvent.arguments),
                                      aEvent.filename, "", aEvent.lineNumber, 0,
                                      flg, "content javascript", aEvent.innerID);
@@ -140,7 +140,7 @@ SuiteGlue.prototype = {
     }
     delay = delay <= MAX_DELAY ? delay : MAX_DELAY;
 
-    Components.utils.import("resource://services-sync/main.js");
+    Cu.import("resource://services-sync/main.js");
     Weave.Service.scheduler.delayedAutoConnect(delay);
   },
 
@@ -189,10 +189,10 @@ SuiteGlue.prototype = {
         Services.search.init();
         LoginManagerParent.init();
 
-        Components.classes["@mozilla.org/globalmessagemanager;1"]
-                  .getService(Components.interfaces.nsIMessageListenerManager)
-                  .loadFrameScript("chrome://navigator/content/content.js", true);
-        Components.utils.import("resource://gre/modules/NotificationDB.jsm");
+        Cc["@mozilla.org/globalmessagemanager;1"]
+          .getService(Ci.nsIMessageListenerManager)
+          .loadFrameScript("chrome://navigator/content/content.js", true);
+        Cu.import("resource://gre/modules/NotificationDB.jsm");
         break;
       case "sessionstore-windows-restored":
         this._onBrowserStartup(subject);
@@ -229,7 +229,7 @@ SuiteGlue.prototype = {
 //        break;
       case "session-save":
         this._setPrefToSaveSession();
-        subject.QueryInterface(Components.interfaces.nsISupportsPRBool);
+        subject.QueryInterface(Ci.nsISupportsPRBool);
         subject.data = true;
         break;
       case "places-init-complete":
@@ -265,7 +265,7 @@ SuiteGlue.prototype = {
         Services.logins;
         break;
       case "handle-xul-text-link":
-        let linkHandled = subject.QueryInterface(Components.interfaces.nsISupportsPRBool);
+        let linkHandled = subject.QueryInterface(Ci.nsISupportsPRBool);
         if (!linkHandled.data) {
           let mostRecentBrowserWindow = Services.wm.getMostRecentWindow("navigator:browser");
           if (mostRecentBrowserWindow) {
@@ -288,10 +288,10 @@ SuiteGlue.prototype = {
   onLocationChange: function(aWebProgress, aRequest, aLocation, aFlags)
   {
     if (aWebProgress.isTopLevel &&
-        aWebProgress instanceof Components.interfaces.nsIDocShell &&
-        aWebProgress.loadType & Components.interfaces.nsIDocShell.LOAD_CMD_NORMAL &&
+        aWebProgress instanceof Ci.nsIDocShell &&
+        aWebProgress.loadType & Ci.nsIDocShell.LOAD_CMD_NORMAL &&
         aWebProgress.useGlobalHistory &&
-        aWebProgress instanceof Components.interfaces.nsILoadContext &&
+        aWebProgress instanceof Ci.nsILoadContext &&
         !aWebProgress.usePrivateBrowsing) {
       switch (aLocation.scheme) {
         case "about":
@@ -307,11 +307,11 @@ SuiteGlue.prototype = {
         case "javascript":
           break;
         default:
-          var str = Components.classes["@mozilla.org/supports-string;1"]
-                              .createInstance(Components.interfaces.nsISupportsString);
+          var str = Cc["@mozilla.org/supports-string;1"]
+                      .createInstance(Ci.nsISupportsString);
           str.data = aLocation.spec;
           Services.prefs.setComplexValue("browser.history.last_page_visited",
-                                         Components.interfaces.nsISupportsString, str);
+                                         Ci.nsISupportsString, str);
           break;
       }
     }
@@ -340,9 +340,9 @@ SuiteGlue.prototype = {
     Services.obs.addObserver(this, "notifications-open-settings", true);
     Services.prefs.addObserver("devtools.debugger.", this, true);
     Services.obs.addObserver(this, "handle-xul-text-link", true);
-    Components.classes['@mozilla.org/docloaderservice;1']
-              .getService(Components.interfaces.nsIWebProgress)
-              .addProgressListener(this, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+    Cc['@mozilla.org/docloaderservice;1']
+      .getService(Ci.nsIWebProgress)
+      .addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
   },
 
   // cleanup (called on application shutdown)
@@ -380,8 +380,8 @@ SuiteGlue.prototype = {
       Services.prefs.savePrefFile(null);
     }
 
-    var timer = Components.classes["@mozilla.org/timer;1"]
-                          .createInstance(Components.interfaces.nsITimer);
+    var timer = Cc["@mozilla.org/timer;1"]
+                  .createInstance(Ci.nsITimer);
     timer.init(this, 3000, timer.TYPE_ONE_SHOT);
   },
 
@@ -408,7 +408,7 @@ SuiteGlue.prototype = {
       // Migrate remote content exceptions for email addresses which are
       // encoded as chrome URIs.
       let permissionsDB =
-        Services.dirsvc.get("ProfD", Components.interfaces.nsILocalFile);
+        Services.dirsvc.get("ProfD", Ci.nsILocalFile);
       permissionsDB.append("permissions.sqlite");
       let db = Services.storage.openDatabase(permissionsDB);
 
@@ -436,7 +436,7 @@ SuiteGlue.prototype = {
 
         // Sadly we still need to clear the database manually. Experiments
         // showed that the permissions manager deletes only one record.
-        db.beginTransactionAs(Components.interfaces.mozIStorageConnection.TRANSACTION_EXCLUSIVE);
+        db.beginTransactionAs(Ci.mozIStorageConnection.TRANSACTION_EXCLUSIVE);
 
         try {
           db.executeSimpleSQL("delete from moz_perms where " +
@@ -500,7 +500,7 @@ SuiteGlue.prototype = {
   _copyDefaultProfileFiles: function()
   {
     // Copy default chrome example files if they do not exist in the current profile.
-    var profileDir = Services.dirsvc.get("ProfD", Components.interfaces.nsILocalFile);
+    var profileDir = Services.dirsvc.get("ProfD", Ci.nsILocalFile);
     profileDir.append("chrome");
 
     // The chrome directory in the current/new profile already exists so no copying.
@@ -508,7 +508,7 @@ SuiteGlue.prototype = {
       return;
 
     let defaultProfileDir = Services.dirsvc.get("DefRt",
-                                                Components.interfaces.nsIFile);
+                                                Ci.nsIFile);
     defaultProfileDir.append("profile");
     defaultProfileDir.append("chrome");
 
@@ -516,7 +516,7 @@ SuiteGlue.prototype = {
       try {
         this._copyDir(defaultProfileDir, profileDir);
       } catch (e) {
-        Components.utils.reportError(e);
+        Cu.reportError(e);
       }
     }
   },
@@ -527,7 +527,7 @@ SuiteGlue.prototype = {
     let enumerator = aSource.directoryEntries;
 
     while (enumerator.hasMoreElements()) {
-      let file = enumerator.getNext().QueryInterface(Components.interfaces.nsIFile);
+      let file = enumerator.getNext().QueryInterface(Ci.nsIFile);
 
       if (file.isDirectory()) {
         let subdir = aDestination.clone();
@@ -535,10 +535,10 @@ SuiteGlue.prototype = {
 
         // Create the target directory. If it already exists continue copying files.
         try {
-          subdir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE,
+          subdir.create(Ci.nsIFile.DIRECTORY_TYPE,
                         FileUtils.PERMS_DIRECTORY);
         } catch (ex) {
-           if (ex.result != Components.results.NS_ERROR_FILE_ALREADY_EXISTS)
+           if (ex.result != Cr.NS_ERROR_FILE_ALREADY_EXISTS)
             throw ex;
         }
         // Directory created. Now copy the files.
@@ -547,7 +547,7 @@ SuiteGlue.prototype = {
         try {
           file.copyTo(aDestination, null);
         } catch (e) {
-          Components.utils.reportError(e);
+          Cu.reportError(e);
         }
       }
     }
@@ -584,10 +584,10 @@ SuiteGlue.prototype = {
       this._showRightsNotification(notifyBox);
 
     if ("@mozilla.org/windows-taskbar;1" in Components.classes &&
-        Components.classes["@mozilla.org/windows-taskbar;1"]
-                  .getService(Components.interfaces.nsIWinTaskbar).available) {
+        Cc["@mozilla.org/windows-taskbar;1"]
+          .getService(Ci.nsIWinTaskbar).available) {
       let temp = {};
-      Components.utils.import("resource:///modules/WindowsJumpLists.jsm", temp);
+      Cu.import("resource:///modules/WindowsJumpLists.jsm", temp);
       temp.WinTaskbarJumpList.startup();
     }
 
@@ -640,9 +640,9 @@ SuiteGlue.prototype = {
 
     // Try to avoid the multiple master password prompts on startup scenario
     // by prompting for the master password upfront.
-    let token = Components.classes["@mozilla.org/security/pk11tokendb;1"]
-                          .getService(Components.interfaces.nsIPK11TokenDB)
-                          .getInternalKeyToken();
+    let token = Cc["@mozilla.org/security/pk11tokendb;1"]
+                  .getService(Ci.nsIPK11TokenDB)
+                  .getInternalKeyToken();
 
     // Only log in to the internal token if it is already initialized,
     // otherwise we get a "Change Master Password" dialog.
@@ -662,13 +662,13 @@ SuiteGlue.prototype = {
     if (!Services.prefs.prefHasUserValue(PREF_EM_NEW_ADDONS_LIST))
       return;
 
-    const args = Components.classes["@mozilla.org/array;1"]
-                           .createInstance(Components.interfaces.nsIMutableArray);
-    let str = Components.classes["@mozilla.org/supports-string;1"]
-                        .createInstance(Components.interfaces.nsISupportsString);
+    const args = Cc["@mozilla.org/array;1"]
+                   .createInstance(Ci.nsIMutableArray);
+    let str = Cc["@mozilla.org/supports-string;1"]
+                .createInstance(Ci.nsISupportsString);
     args.appendElement(str, false);
-    str = Components.classes["@mozilla.org/supports-string;1"]
-                    .createInstance(Components.interfaces.nsISupportsString);
+    str = Cc["@mozilla.org/supports-string;1"]
+            .createInstance(Ci.nsISupportsString);
     str.data = Services.prefs.getCharPref(PREF_EM_NEW_ADDONS_LIST);
     args.appendElement(str, false);
     const EMURL = "chrome://mozapps/content/extensions/extensions.xul";
@@ -684,7 +684,7 @@ SuiteGlue.prototype = {
   _onQuitRequest: function(aCancelQuit, aQuitType)
   {
     // If user has already dismissed quit request, then do nothing
-    if ((aCancelQuit instanceof Components.interfaces.nsISupportsPRBool) && aCancelQuit.data)
+    if ((aCancelQuit instanceof Ci.nsISupportsPRBool) && aCancelQuit.data)
       return;
 
     var windowcount = 0;
@@ -770,7 +770,7 @@ SuiteGlue.prototype = {
           Services.prefs.setBoolPref("browser.tabs.warnOnClose", false);
         break;
       case 1:
-        aCancelQuit.QueryInterface(Components.interfaces.nsISupportsPRBool);
+        aCancelQuit.QueryInterface(Ci.nsISupportsPRBool);
         aCancelQuit.data = true;
         break;
       case 0:
@@ -1127,8 +1127,8 @@ SuiteGlue.prototype = {
       Services.prefs.setCharPref(prefName, prefValue);
     }
 
-    var spellChecker = Components.classes["@mozilla.org/spellchecker/engine;1"]
-                                 .getService(Components.interfaces.mozISpellCheckingEngine);
+    var spellChecker = Cc["@mozilla.org/spellchecker/engine;1"]
+                         .getService(Ci.mozISpellCheckingEngine);
     var o1 = {};
     spellChecker.getDictionaryList(o1, {});
     var dictList = o1.value;
@@ -1147,9 +1147,9 @@ SuiteGlue.prototype = {
 
     try {
       Services.prefs.setComplexValue("browser.download.lastDir",
-                                     Components.interfaces.nsILocalFile,
+                                     Ci.nsILocalFile,
                                      Services.prefs.getComplexValue("browser.download.dir",
-                                                                    Components.interfaces.nsILocalFile));
+                                                                    Ci.nsILocalFile));
     } catch (ex) {
       // Ensure that even if we don't end up migrating to a lastDir that we
       // don't attempt another update. This will throw when QI'ed to
@@ -1405,24 +1405,24 @@ SuiteGlue.prototype = {
         mostRecentBrowserWindow.getBrowser().addTab(url, { focusNewTab: true });
         mostRecentBrowserWindow.content.focus();
       } else {
-        var args = Components.classes["@mozilla.org/supports-string;1"]
-                             .createInstance(Components.interfaces.nsISupportsString);
+        var args = Cc["@mozilla.org/supports-string;1"]
+                     .createInstance(Ci.nsISupportsString);
         args.data = url;
         var chromeURL = Services.prefs.getCharPref("browser.chromeURL");
         Services.ww.openWindow(null, chromeURL, "_blank", "chrome,all,dialog=no", args);
       }
     } catch (e) {
-      Components.utils.reportError("Error displaying tab received by Sync: " + e);
+      Cu.reportError("Error displaying tab received by Sync: " + e);
     }
   },
 
   // for XPCOM
   classID: Components.ID("{bbbbe845-5a1b-40ee-813c-f84b8faaa07c}"),
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIObserver,
-                                         Components.interfaces.nsIWebProgressListener,
-                                         Components.interfaces.nsISupportsWeakReference,
-                                         Components.interfaces.nsISuiteGlue])
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
+                                         Ci.nsIWebProgressListener,
+                                         Ci.nsISupportsWeakReference,
+                                         Ci.nsISuiteGlue])
 
 }
 
