@@ -1,8 +1,8 @@
-﻿//
+//
 // Tests if a multi-line MIME header is parsed even if it violates RFC 2047
 //
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 function run_test() {
   const headers = [

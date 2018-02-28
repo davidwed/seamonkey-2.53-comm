@@ -3,21 +3,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/FeedUtils.jsm");
-Components.utils.import("resource:///modules/gloda/dbview.js");
-Components.utils.import("resource:///modules/MailConsts.js");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/MailUtils.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
-Components.utils.import("resource://gre/modules/AppConstants.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/FeedUtils.jsm");
+Cu.import("resource:///modules/gloda/dbview.js");
+Cu.import("resource:///modules/MailConsts.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/MailUtils.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/PluralForm.jsm");
+Cu.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "BrowserToolboxProcess", "resource://devtools/client/framework/ToolboxProcess.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "ScratchpadManager","resource://devtools/client/scratchpad/scratchpad-manager.jsm");
 Object.defineProperty(this, "HUDService", {
   get: function HUDService_getter() {
-    let devtools = Components.utils.import("resource://devtools/shared/Loader.jsm", {}).devtools;
+    let devtools = Cu.import("resource://devtools/shared/Loader.jsm", {}).devtools;
     return devtools.require("devtools/client/webconsole/hudservice");
   },
   configurable: true,
@@ -76,7 +76,7 @@ function menu_new_init()
   if (Services.prefs.prefIsLocked("mail.disable_new_account_addition"))
     document.getElementById("newAccountMenuItem").setAttribute("disabled", "true");
 
-  const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+  const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
   var isInbox = folder.isSpecialFolder(nsMsgFolderFlags.Inbox);
   var showNew = (folder.canCreateSubfolders ||
                  (isInbox && !(folder.flags & nsMsgFolderFlags.Virtual))) &&
@@ -137,7 +137,7 @@ function InitEditMessagesMenu()
   if (!favoriteFolderMenu.hasAttribute("disabled")) {
     let folders = gFolderTreeView.getSelectedFolders();
     if (folders.length == 1 && !folders[0].isServer) {
-      const kFavoriteFlag = Components.interfaces.nsMsgFolderFlags.Favorite;
+      const kFavoriteFlag = Ci.nsMsgFolderFlags.Favorite;
       // Adjust the checked state on the menu item.
       favoriteFolderMenu.setAttribute("checked", folders[0].getFlag(kFavoriteFlag));
       favoriteFolderMenu.hidden = false;
@@ -158,7 +158,7 @@ function InitAppFolderViewsMenu()
   if (!favoriteAppFolderMenu.hasAttribute("disabled")) {
     let folders = gFolderTreeView.getSelectedFolders();
     if (folders.length == 1 && !folders[0].isServer) {
-      const kFavoriteFlag = Components.interfaces.nsMsgFolderFlags.Favorite;
+      const kFavoriteFlag = Ci.nsMsgFolderFlags.Favorite;
       // Adjust the checked state on the menu item.
       favoriteAppFolderMenu.setAttribute("checked", folders[0].getFlag(kFavoriteFlag));
       favoriteAppFolderMenu.hidden = false;
@@ -493,10 +493,10 @@ function InitMessageMenu()
 
   // Show "Edit Draft Message" menus only in a drafts folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_editDraftMsg",
-                             Components.interfaces.nsMsgFolderFlags.Drafts);
+                             Ci.nsMsgFolderFlags.Drafts);
   // Show "New Message from Template" menus only in a templates folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_newMsgFromTemplate",
-                             Components.interfaces.nsMsgFolderFlags.Templates);
+                             Ci.nsMsgFolderFlags.Templates);
 
   // Initialize the Open Message menuitem
   var winType = document.documentElement.getAttribute('windowtype');
@@ -558,10 +558,10 @@ function InitAppMessageMenu()
 
   // Show "Edit Draft Message" menus only in a drafts folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_editDraftMsg",
-                             Components.interfaces.nsMsgFolderFlags.Drafts);
+                             Ci.nsMsgFolderFlags.Drafts);
   // Show "New Message from Template" menus only in a templates folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_newMsgFromTemplate",
-                             Components.interfaces.nsMsgFolderFlags.Templates);
+                             Ci.nsMsgFolderFlags.Templates);
 
   // Initialize the Open Message menuitem
   let winType = document.documentElement.getAttribute('windowtype');
@@ -628,7 +628,7 @@ function initMoveToFolderAgainMenu(aMenuItem)
 
 function InitViewHeadersMenu()
 {
-  const dt = Components.interfaces.nsMimeHeaderDisplayTypes;
+  const dt = Ci.nsMimeHeaderDisplayTypes;
   var headerchoice = Services.prefs.getIntPref("mail.show_headers");
   document.getElementById("cmd_viewAllHeader")
           .setAttribute("checked", headerchoice == dt.AllHeaders);
@@ -642,7 +642,7 @@ function InitViewHeadersMenu()
  */
 function AdjustHeaderView(headermode)
 {
-  const all = Components.interfaces.nsMimeHeaderDisplayTypes.AllHeaders;
+  const all = Ci.nsMimeHeaderDisplayTypes.AllHeaders;
   document.getElementById("expandedHeaderView")
       .setAttribute("show_header_mode", headermode == all ? "all" : "normal");
 }
@@ -825,8 +825,8 @@ function RemoveAllMessageTags()
   if (!selectedMessages.length)
     return;
 
-  var messages = Components.classes["@mozilla.org/array;1"]
-                           .createInstance(Components.interfaces.nsIMutableArray);
+  var messages = Cc["@mozilla.org/array;1"]
+                   .createInstance(Ci.nsIMutableArray);
   let tagArray = MailServices.tags.getAllTags({});
 
   var allKeys = "";
@@ -897,10 +897,10 @@ function ToggleMessageTagMenu(target)
 
 function ToggleMessageTag(key, addKey)
 {
-  var messages = Components.classes["@mozilla.org/array;1"]
-                           .createInstance(Components.interfaces.nsIMutableArray);
-  var msg = Components.classes["@mozilla.org/array;1"]
-                      .createInstance(Components.interfaces.nsIMutableArray);
+  var messages = Cc["@mozilla.org/array;1"]
+                   .createInstance(Ci.nsIMutableArray);
+  var msg = Cc["@mozilla.org/array;1"]
+              .createInstance(Ci.nsIMutableArray);
   var selectedMessages = gFolderDisplay.selectedMessages;
   var toggler = addKey ? "addKeywordsToMessages" : "removeKeywordsFromMessages";
   var prevHdrFolder = null;
@@ -1133,7 +1133,7 @@ function populateHistoryMenu(menuPopup, isBackMenu)
     var msgHdr = messenger.msgHdrFromURI(historyArray[i]);
 
     var subject = "";
-    if (msgHdr.flags & Components.interfaces.nsMsgMessageFlags.HasRe)
+    if (msgHdr.flags & Ci.nsMsgMessageFlags.HasRe)
       subject = "Re: ";
     if (msgHdr.mime2DecodedSubject)
       subject += msgHdr.mime2DecodedSubject;
@@ -1375,7 +1375,7 @@ function SelectedMessagesAreDeleted()
   let firstSelectedMessage = gFolderDisplay.selectedMessage;
   return firstSelectedMessage &&
          (firstSelectedMessage.flags &
-          Components.interfaces.nsMsgMessageFlags.IMAPDeleted);
+          Ci.nsMsgMessageFlags.IMAPDeleted);
 }
 
 function SelectedMessagesAreJunk()
@@ -1423,7 +1423,7 @@ function GetInboxFolder(server)
     var rootMsgFolder = server.rootMsgFolder;
 
     // Now find the Inbox.
-    const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+    const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
     return rootMsgFolder.getFolderWithFlags(nsMsgFolderFlags.Inbox);
   }
   catch (ex) {
@@ -1478,7 +1478,7 @@ function MsgGetMessagesForAllServers(defaultServer)
     var pop3Server;
     for (var i = 0; i < allServers.length; ++i)
     {
-      var currentServer = allServers.queryElementAt(i, Components.interfaces.nsIMsgIncomingServer);
+      var currentServer = allServers.queryElementAt(i, Ci.nsIMsgIncomingServer);
       if (currentServer.protocolInfo.canLoginAtStartUp &&
           currentServer.loginAtStartUp)
       {
@@ -1492,7 +1492,7 @@ function MsgGetMessagesForAllServers(defaultServer)
         {
           CoalesceGetMsgsForPop3ServersByDestFolder(currentServer,
             pop3DownloadServersArray, localFoldersToDownloadTo);
-          pop3Server = currentServer.QueryInterface(Components.interfaces.nsIPop3IncomingServer);
+          pop3Server = currentServer.QueryInterface(Ci.nsIPop3IncomingServer);
         }
         else
         {
@@ -1578,10 +1578,10 @@ function MsgDeleteMessage(reallyDelete, fromToolbar)
 function MsgCopyMessage(aDestFolder)
 {
   if (gMessageDisplay.isDummy) {
-    let file = window.arguments[0].QueryInterface(Components.interfaces
-                                                            .nsIFileURL).file;
+    let file = window.arguments[0].QueryInterface(Ci
+                                                    .nsIFileURL).file;
     MailServices.copy.CopyFileMessage(file, aDestFolder, null, false,
-                                      Components.interfaces.nsMsgMessageFlags.Read,
+                                      Ci.nsMsgMessageFlags.Read,
                                       "", null, msgWindow);
   }
   else
@@ -1618,18 +1618,18 @@ function composeMsgByType(aCompType, aEvent) {
 
   if (aEvent && aEvent.shiftKey) {
     ComposeMessage(aCompType,
-                   Components.interfaces.nsIMsgCompFormat.OppositeOfDefault,
+                   Ci.nsIMsgCompFormat.OppositeOfDefault,
                    msgFolder, msgUris);
   }
   else {
-    ComposeMessage(aCompType, Components.interfaces.nsIMsgCompFormat.Default,
+    ComposeMessage(aCompType, Ci.nsIMsgCompFormat.Default,
                    msgFolder, msgUris);
   }
 }
 
 function MsgNewMessage(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.New, event);
+  composeMsgByType(Ci.nsIMsgCompType.New, event);
 }
 
 function CanComposeMessages()
@@ -1647,22 +1647,22 @@ function MsgReplyMessage(event)
 
 function MsgReplySender(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.ReplyToSender, event);
+  composeMsgByType(Ci.nsIMsgCompType.ReplyToSender, event);
 }
 
 function MsgReplyGroup(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.ReplyToGroup, event);
+  composeMsgByType(Ci.nsIMsgCompType.ReplyToGroup, event);
 }
 
 function MsgReplyToAllMessage(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.ReplyAll, event);
+  composeMsgByType(Ci.nsIMsgCompType.ReplyAll, event);
 }
 
 function MsgReplyToListMessage(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.ReplyToList, event);
+  composeMsgByType(Ci.nsIMsgCompType.ReplyToList, event);
 }
 
 // Message Archive function
@@ -1726,12 +1726,12 @@ BatchMessageMover.prototype = {
       }
 
       let copyBatchKey = msgHdr.folder.URI;
-      if (archiveGranularity >= Components.interfaces.nsIMsgIdentity
-                                          .perYearArchiveFolders)
+      if (archiveGranularity >= Ci.nsIMsgIdentity
+                                  .perYearArchiveFolders)
         copyBatchKey += '\0' + msgYear;
 
-      if (archiveGranularity >= Components.interfaces.nsIMsgIdentity
-                                          .perMonthArchiveFolders)
+      if (archiveGranularity >= Ci.nsIMsgIdentity
+                                  .perMonthArchiveFolders)
         copyBatchKey += '\0' + monthFolderName;
 
       if (archiveKeepFolderStructure)
@@ -1774,15 +1774,15 @@ BatchMessageMover.prototype = {
   filterBatch: function () {
     let batch = this._currentBatch;
 
-    let filterArray = Components.classes["@mozilla.org/array;1"]
-                                .createInstance(Components.interfaces.nsIMutableArray);
+    let filterArray = Cc["@mozilla.org/array;1"]
+                        .createInstance(Ci.nsIMutableArray);
     for (let message of batch.messages) {
       filterArray.appendElement(message, false);
     }
 
     // Apply filters to this batch.
     MailServices.filters.applyFilters(
-      Components.interfaces.nsMsgFilterType.Archive,
+      Ci.nsMsgFilterType.Archive,
       filterArray, batch.srcFolder, msgWindow, this);
     return; // continues with onStopOperation
   },
@@ -1790,7 +1790,7 @@ BatchMessageMover.prototype = {
   onStopOperation: function (aResult) {
     if (!Components.isSuccessCode(aResult))
     {
-      Components.utils.reportError("Archive filter failed: " + aResult);
+      Cu.reportError("Archive filter failed: " + aResult);
       // We don't want to effectively disable archiving because a filter
       // failed, so we'll continue after reporting the error.
     }
@@ -1807,13 +1807,13 @@ BatchMessageMover.prototype = {
       let archiveFolder = MailUtils.getFolderForURI(archiveFolderURI, false);
       let dstFolder = archiveFolder;
 
-      let moveArray = Components.classes["@mozilla.org/array;1"]
-                                .createInstance(Ci.nsIMutableArray);
+      let moveArray = Cc["@mozilla.org/array;1"]
+                        .createInstance(Ci.nsIMutableArray);
       // Don't move any items that the filter moves or deleted
       for (let item of batch.messages) {
         if (srcFolder.msgDatabase.ContainsKey(item.messageKey) &&
             !(srcFolder.getProcessingFlags(item.messageKey) &
-              Components.interfaces.nsMsgProcessingFlags.FilterToMove)) {
+              Ci.nsMsgProcessingFlags.FilterToMove)) {
           moveArray.appendElement(item, false);
         }
       }
@@ -1910,7 +1910,7 @@ BatchMessageMover.prototype = {
     if (Components.isSuccessCode(exitCode))
       this.continueBatch();
     else {
-      Components.utils.reportError("Archive failed to create folder: " + exitCode);
+      Cu.reportError("Archive failed to create folder: " + exitCode);
       this._batches = null;
       this.processNextBatch(); // for cleanup and exit
     }
@@ -1927,7 +1927,7 @@ BatchMessageMover.prototype = {
       return this.processNextBatch();
 
     // stop on error
-    Components.utils.reportError("Archive failed to copy: " + aStatus);
+    Cu.reportError("Archive failed to copy: " + aStatus);
     this._batches = null;
     this.processNextBatch(); // for cleanup and exit
   },
@@ -1945,11 +1945,11 @@ BatchMessageMover.prototype = {
   },
 
   QueryInterface: function(iid) {
-    if (!iid.equals(Components.interfaces.nsIUrlListener) &&
-        !iid.equals(Components.interfaces.nsIMsgCopyServiceListener) &&
-        !iid.equals(Components.interfaces.nsIMsgOperationListener) &&
-        !iid.equals(Components.interfaces.nsISupports))
-      throw Components.results.NS_ERROR_NO_INTERFACE;
+    if (!iid.equals(Ci.nsIUrlListener) &&
+        !iid.equals(Ci.nsIMsgCopyServiceListener) &&
+        !iid.equals(Ci.nsIMsgOperationListener) &&
+        !iid.equals(Ci.nsISupports))
+      throw Cr.NS_ERROR_NO_INTERFACE;
     return this;
   }
 }
@@ -1986,33 +1986,33 @@ function MsgForwardMessage(event)
 
 function MsgForwardAsAttachment(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.ForwardAsAttachment, event);
+  composeMsgByType(Ci.nsIMsgCompType.ForwardAsAttachment, event);
 }
 
 function MsgForwardAsInline(event)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.ForwardInline, event);
+  composeMsgByType(Ci.nsIMsgCompType.ForwardInline, event);
 }
 
 function MsgEditMessageAsNew(aEvent)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.EditAsNew, aEvent);
+  composeMsgByType(Ci.nsIMsgCompType.EditAsNew, aEvent);
 }
 
 function MsgEditDraftMessage(aEvent)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.Draft, aEvent);
+  composeMsgByType(Ci.nsIMsgCompType.Draft, aEvent);
 }
 
 function MsgNewMessageFromTemplate(aEvent)
 {
-  composeMsgByType(Components.interfaces.nsIMsgCompType.Template, aEvent);
+  composeMsgByType(Ci.nsIMsgCompType.Template, aEvent);
 }
 
 function MsgComposeDraftMessage()
 {
-  ComposeMessage(Components.interfaces.nsIMsgCompType.Draft,
-                 Components.interfaces.nsIMsgCompFormat.Default,
+  ComposeMessage(Ci.nsIMsgCompType.Draft,
+                 Ci.nsIMsgCompFormat.Default,
                  gFolderDisplay.displayedFolder,
                  gFolderDisplay.selectedMessageUris);
 }
@@ -2042,7 +2042,7 @@ function MsgNewFolder(callBackFunctionName)
         destinationFolder = getDestinationFolder(preselectedFolder, server);
 
         var imapServer =
-            server.QueryInterface(Components.interfaces.nsIImapIncomingServer);
+            server.QueryInterface(Ci.nsIImapIncomingServer);
         if (imapServer)
           dualUseFolders = imapServer.dualUseFolders;
       }
@@ -2132,7 +2132,7 @@ function MsgUnsubscribe(newsgroups)
 
   for (let i = 0; i < folders.length; i++) {
     let subscribableServer = folders[i].server.QueryInterface(
-      Components.interfaces.nsISubscribableServer);
+      Ci.nsISubscribableServer);
     subscribableServer.unsubscribe(folders[i].name);
     subscribableServer.commitSubscribeChanges();
   }
@@ -2141,7 +2141,7 @@ function MsgUnsubscribe(newsgroups)
 function ToggleFavoriteFolderFlag()
 {
   var folder = GetFirstSelectedMsgFolder();
-  folder.toggleFlag(Components.interfaces.nsMsgFolderFlags.Favorite);
+  folder.toggleFlag(Ci.nsMsgFolderFlags.Favorite);
 }
 
 function MsgSaveAsFile()
@@ -2240,9 +2240,9 @@ function MsgOpenSelectedMessages()
 
 function MsgOpenFromFile()
 {
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  var fp = Components.classes["@mozilla.org/filepicker;1"]
-                     .createInstance(nsIFilePicker);
+  const nsIFilePicker = Ci.nsIFilePicker;
+  var fp = Cc["@mozilla.org/filepicker;1"]
+             .createInstance(nsIFilePicker);
 
   var bundle = document.getElementById("bundle_messenger");
   var filterLabel = bundle.getString("EMLFiles");
@@ -2264,7 +2264,7 @@ function MsgOpenFromFile()
     return;
   }
 
-  var uri = fp.fileURL.QueryInterface(Components.interfaces.nsIURL);
+  var uri = fp.fileURL.QueryInterface(Ci.nsIURL);
   uri.query = "type=application/x-message-display";
 
   window.openDialog("chrome://messenger/content/messageWindow.xul", "_blank",
@@ -2345,7 +2345,7 @@ function UpdateJunkButton()
   if (!hdr || gMessageDisplay.isDummy) // .eml file
     return;
   let junkScore = hdr.getStringProperty("junkscore");
-  let hideJunk = (junkScore == Components.interfaces.nsIJunkMailPlugin.IS_SPAM_SCORE);
+  let hideJunk = (junkScore == Ci.nsIJunkMailPlugin.IS_SPAM_SCORE);
   if (!gFolderDisplay.getCommandStatus(nsMsgViewCommandType.junk))
     hideJunk = true;
   if (document.getElementById('hdrJunkButton')) {
@@ -2465,8 +2465,8 @@ function MsgFilters(emailAddress, folder, fieldName)
 function MsgApplyFilters()
 {
   let preselectedFolder = GetFirstSelectedMsgFolder();
-  let selectedFolders = Components.classes["@mozilla.org/array;1"]
-                                  .createInstance(Components.interfaces.nsIMutableArray);
+  let selectedFolders = Cc["@mozilla.org/array;1"]
+                          .createInstance(Ci.nsIMutableArray);
   selectedFolders.appendElement(preselectedFolder, false);
 
   let curFilterList = preselectedFolder.getFilterList(msgWindow);
@@ -2486,7 +2486,7 @@ function MsgApplyFilters()
     let curFilter = curFilterList.getFilterAt(i);
     // only add enabled, UI visibile filters that are in the manual context
     if (curFilter.enabled && !curFilter.temporary &&
-        (curFilter.filterType & Components.interfaces.nsMsgFilterType.Manual))
+        (curFilter.filterType & Ci.nsMsgFilterType.Manual))
     {
       tempFilterList.insertFilterAt(newFilterIndex, curFilter);
       newFilterIndex++;
@@ -2503,9 +2503,9 @@ function MsgApplyFiltersToSelection()
 
   var selectedMessages = gFolderDisplay.selectedMessages;
   if (selectedMessages.length) {
-    MailServices.filters.applyFilters(Components.interfaces.nsMsgFilterType.Manual,
+    MailServices.filters.applyFilters(Ci.nsMsgFilterType.Manual,
                                       toXPCOMArray(selectedMessages,
-                                                   Components.interfaces.nsIMutableArray),
+                                                   Ci.nsIMutableArray),
                                       gFolderDisplay.displayedFolder,
                                       msgWindow);
   }
@@ -2523,7 +2523,7 @@ function ChangeMailLayoutForCommand(aCommand)
 
 function MsgViewAllHeaders()
 {
-  const mode = Components.interfaces.nsMimeHeaderDisplayTypes.AllHeaders;
+  const mode = Ci.nsMimeHeaderDisplayTypes.AllHeaders;
   Services.prefs.setIntPref("mail.show_headers", mode); // 2
   AdjustHeaderView(mode);
   ReloadMessage();
@@ -2531,7 +2531,7 @@ function MsgViewAllHeaders()
 
 function MsgViewNormalHeaders()
 {
-  const mode = Components.interfaces.nsMimeHeaderDisplayTypes.NormalHeaders;
+  const mode = Ci.nsMimeHeaderDisplayTypes.NormalHeaders;
   Services.prefs.setIntPref("mail.show_headers", mode); // 1
   AdjustHeaderView(mode);
   ReloadMessage();
@@ -2610,13 +2610,13 @@ function PrintEnginePrintInternal(doPrintPreview, msgType)
 function PrintEnginePrint()
 {
   return PrintEnginePrintInternal(false,
-    Components.interfaces.nsIMsgPrintEngine.MNAB_PRINT_MSG);
+    Ci.nsIMsgPrintEngine.MNAB_PRINT_MSG);
 }
 
 function PrintEnginePrintPreview()
 {
   return PrintEnginePrintInternal(true,
-    Components.interfaces.nsIMsgPrintEngine.MNAB_PRINTPREVIEW_MSG);
+    Ci.nsIMsgPrintEngine.MNAB_PRINTPREVIEW_MSG);
 }
 
 function IsMailFolderSelected()
@@ -2630,7 +2630,7 @@ function IsGetNewMessagesEnabled()
 {
   let allServers = accountManager.allServers;
   for (let i = 0; i < allServers.length; ++i) {
-    let server = allServers.queryElementAt(i, Components.interfaces.nsIMsgIncomingServer);
+    let server = allServers.queryElementAt(i, Ci.nsIMsgIncomingServer);
     if (server.type == "none")
       continue;
     return true;
@@ -2646,7 +2646,7 @@ function IsGetNextNMessagesEnabled()
   var menuItem = document.getElementById("menu_getnextnmsg");
   var appMenuItem = document.getElementById("appmenu_getNextNMsgs");
   if (folder && !folder.isServer &&
-      folder.server instanceof Components.interfaces.nsINntpIncomingServer) {
+      folder.server instanceof Ci.nsINntpIncomingServer) {
     menuItem.label = PluralForm.get(folder.server.maxArticles,
                                     document.getElementById("bundle_messenger")
                                             .getString("getNextNewsMessages"))
@@ -2793,7 +2793,7 @@ function GetNewMsgs(server, folder)
   // Note that for Global Inbox folder.server != server when we want to get
   // messages for a specific account.
 
-  const nsIMsgFolder = Components.interfaces.nsIMsgFolder;
+  const nsIMsgFolder = Ci.nsIMsgFolder;
   // Whenever we do get new messages, clear the old new messages.
   folder.biffState = nsIMsgFolder.nsMsgBiffState_NoMail;
   folder.clearNewMessages();
@@ -2802,13 +2802,13 @@ function GetNewMsgs(server, folder)
 
 function SendUnsentMessages()
 {
-  let msgSendlater = Components.classes["@mozilla.org/messengercompose/sendlater;1"]
-                               .getService(Components.interfaces.nsIMsgSendLater);
+  let msgSendlater = Cc["@mozilla.org/messengercompose/sendlater;1"]
+                       .getService(Ci.nsIMsgSendLater);
 
   let allIdentities = MailServices.accounts.allIdentities;
   let identitiesCount = allIdentities.length;
   for (let i = 0; i < identitiesCount; i++) {
-    let currentIdentity = allIdentities.queryElementAt(i, Components.interfaces.nsIMsgIdentity);
+    let currentIdentity = allIdentities.queryElementAt(i, Ci.nsIMsgIdentity);
     let msgFolder = msgSendlater.getUnsentMessagesFolder(currentIdentity);
     if (msgFolder) {
       let numMessages = msgFolder.getTotalMessages(false /* include subfolders */);
@@ -2829,7 +2829,7 @@ function CoalesceGetMsgsForPop3ServersByDestFolder(currentServer,
                                                    localFoldersToDownloadTo)
 {
   var outNumFolders = new Object();
-  const kInboxFlag = Components.interfaces.nsMsgFolderFlags.Inbox;
+  const kInboxFlag = Ci.nsMsgFolderFlags.Inbox;
   var inboxFolder = currentServer.rootMsgFolder.getFolderWithFlags(kInboxFlag);
   // coalesce the servers that download into the same folder...
   var index = localFoldersToDownloadTo.indexOf(inboxFolder);
@@ -2837,7 +2837,7 @@ function CoalesceGetMsgsForPop3ServersByDestFolder(currentServer,
   {
     if (inboxFolder)
     {
-      inboxFolder.biffState =  Components.interfaces.nsIMsgFolder.nsMsgBiffState_NoMail;
+      inboxFolder.biffState =  Ci.nsIMsgFolder.nsMsgBiffState_NoMail;
       inboxFolder.clearNewMessages();
     }
     localFoldersToDownloadTo.push(inboxFolder);
@@ -2861,7 +2861,7 @@ function GetMessagesForAllAuthenticatedAccounts()
 
     for (var i = 0; i < allServers.length; ++i)
     {
-      var currentServer = allServers.queryElementAt(i, Components.interfaces.nsIMsgIncomingServer);
+      var currentServer = allServers.queryElementAt(i, Ci.nsIMsgIncomingServer);
       if (currentServer.protocolInfo.canGetMessages &&
           !currentServer.passwordPromptRequired)
       {
@@ -2869,7 +2869,7 @@ function GetMessagesForAllAuthenticatedAccounts()
         {
           CoalesceGetMsgsForPop3ServersByDestFolder(currentServer,
             pop3DownloadServersArray, localFoldersToDownloadTo);
-          pop3Server = currentServer.QueryInterface(Components.interfaces.nsIPop3IncomingServer);
+          pop3Server = currentServer.QueryInterface(Ci.nsIPop3IncomingServer);
         }
         else
         // get new messages on the server for imap or rss
@@ -2976,7 +2976,7 @@ function HandleJunkStatusChanged(folder)
     if (sanitizeJunkMail)
     {
       let junkScore = msgHdr.getStringProperty("junkscore");
-      let isJunk = (junkScore == Components.interfaces.nsIJunkMailPlugin.IS_SPAM_SCORE);
+      let isJunk = (junkScore == Ci.nsIJunkMailPlugin.IS_SPAM_SCORE);
 
       // If the current row isn't going to change, reload to show sanitized or
       // unsanitized. Otherwise we wouldn't see the reloaded version anyway.
@@ -2987,7 +2987,7 @@ function HandleJunkStatusChanged(folder)
       //    (see nsMsgDBView::DetermineActionsForJunkChange)
       // 2) When marking as junk, the msg will move or delete, if manualMark is set.
       // 3) Marking as junk in the junk folder just changes the junk status.
-      const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+      const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
       if ((!isJunk && !folder.isSpecialFolder(nsMsgFolderFlags.Junk)) ||
           (isJunk && !folder.server.spamSettings.manualMark) ||
           (isJunk && folder.isSpecialFolder(nsMsgFolderFlags.Junk)))
@@ -3027,7 +3027,7 @@ var gMessageNotificationBar =
 
     let junkScore = aMsgHdr ? aMsgHdr.getStringProperty("junkscore") : "";
     if ((junkScore == "") ||
-        (junkScore == Components.interfaces.nsIJunkMailPlugin.IS_HAM_SCORE)) {
+        (junkScore == Ci.nsIJunkMailPlugin.IS_HAM_SCORE)) {
       // not junk -> just close the notificaion then, if one was showing
       let item = this.msgNotificationBar.getNotificationWithValue("junkContent");
       if (item)
@@ -3193,7 +3193,7 @@ var gMessageNotificationBar =
    if (!msgHdr || !msgHdr.folder)
      return;
 
-   const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+   const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
    if (msgHdr.folder.isSpecialFolder(nsMsgFolderFlags.Drafts, true))
    {
     let draftMsgNote = this.stringBundle.getString("draftMessageMsg");
@@ -3368,8 +3368,8 @@ function setMsgHdrPropertyAndReload(aProperty, aValue)
 function MarkMessageAsRead(msgHdr)
 {
   ClearPendingReadTimer();
-  var headers = Components.classes["@mozilla.org/array;1"]
-                          .createInstance(Components.interfaces.nsIMutableArray);
+  var headers = Cc["@mozilla.org/array;1"]
+                  .createInstance(Ci.nsIMutableArray);
   headers.appendElement(msgHdr, false);
   msgHdr.folder.markMessagesRead(headers, true);
 }
@@ -3438,7 +3438,7 @@ function OnMsgParsed(aUrl)
     // Finally, if the document url is a message url, and the anchor href is
     // http, it needs to be adjusted so docShell finds the node.
     let messageURI = makeURI(linkNode.ownerDocument.URL);
-    if (messageURI instanceof Components.interfaces.nsIMsgMailNewsUrl &&
+    if (messageURI instanceof Ci.nsIMsgMailNewsUrl &&
         linkNode.href.startsWith("http"))
       linkNode.href = messageURI.specIgnoringRef + linkNode.hash;
   }
@@ -3546,7 +3546,7 @@ function HandleMDNResponse(aUrl)
 
   // After a msg is downloaded it's already marked READ at this point so we must check if
   // the msg has a "Disposition-Notification-To" header and no MDN report has been sent yet.
-  if (msgHdr.flags & Components.interfaces.nsMsgMessageFlags.MDNReportSent)
+  if (msgHdr.flags & Ci.nsMsgMessageFlags.MDNReportSent)
     return;
 
   var DNTHeader = mimeHdr.extractHeader("Disposition-Notification-To", false);
@@ -3555,8 +3555,8 @@ function HandleMDNResponse(aUrl)
     return;
 
   // Everything looks good so far, let's generate the MDN response.
-  var mdnGenerator = Components.classes["@mozilla.org/messenger-mdn/generator;1"]
-                               .createInstance(Components.interfaces.nsIMsgMdnGenerator);
+  var mdnGenerator = Cc["@mozilla.org/messenger-mdn/generator;1"]
+                       .createInstance(Ci.nsIMsgMdnGenerator);
   const MDN_DISPOSE_TYPE_DISPLAYED = 0;
   let askUser = mdnGenerator.process(MDN_DISPOSE_TYPE_DISPLAYED, msgWindow, msgFolder,
                                      msgHdr.messageKey, mimeHdr, false);

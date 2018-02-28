@@ -81,11 +81,11 @@ const TAB_EVENTS = ["TabOpen", "TabClose", "TabSelect", "TabShow", "TabHide"];
 #define BROKEN_WM_Z_ORDER
 #endif
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 // debug.js adds NS_ASSERT. cf. bug 669196
-Components.utils.import("resource://gre/modules/debug.js");
+Cu.import("resource://gre/modules/debug.js");
 
 #ifdef MOZ_CRASH_REPORTER
 XPCOMUtils.defineLazyServiceGetter(this, "CrashReporter",
@@ -129,10 +129,10 @@ function SessionStoreService() {
 
 SessionStoreService.prototype = {
   classID: Components.ID("{d37ccdf1-496f-4135-9575-037180af010d}"),
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISessionStore,
-                                         Components.interfaces.nsIDOMEventListener,
-                                         Components.interfaces.nsIObserver,
-                                         Components.interfaces.nsISupportsWeakReference]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsISessionStore,
+                                         Ci.nsIDOMEventListener,
+                                         Ci.nsIObserver,
+                                         Ci.nsISupportsWeakReference]),
 
   // xul:tab attributes to (re)store (extensions might want to hook in here);
   // the favicon is always saved for the about:sessionrestore page
@@ -225,16 +225,16 @@ SessionStoreService.prototype = {
     gRestoreTabsProgressListener.ss = this;
 
     // get file references
-    this._sessionFile = Services.dirsvc.get("ProfD", Components.interfaces.nsILocalFile);
+    this._sessionFile = Services.dirsvc.get("ProfD", Ci.nsILocalFile);
     this._sessionFileBackup = this._sessionFile.clone();
     this._sessionFile.append("sessionstore.json");
     this._sessionFileBackup.append("sessionstore.bak");
 
     // get string containing session state
-    var ss = Components.classes["@mozilla.org/suite/sessionstartup;1"]
-                       .getService(Components.interfaces.nsISessionStartup);
+    var ss = Cc["@mozilla.org/suite/sessionstartup;1"]
+               .getService(Ci.nsISessionStartup);
     try {
-      if (ss.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
+      if (ss.sessionType != Ci.nsISessionStartup.NO_SESSION)
         this._initialState = ss.state;
     }
     catch(ex) { dump(ex + "\n"); } // no state to restore, which is ok
@@ -243,7 +243,7 @@ SessionStoreService.prototype = {
       try {
         // If we're doing a DEFERRED session, then we want to pull pinned tabs
         // out so they can be restored.
-        if (ss.sessionType == Components.interfaces.nsISessionStartup.DEFER_SESSION) {
+        if (ss.sessionType == Ci.nsISessionStartup.DEFER_SESSION) {
           let [iniState, remainingState] = this._prepDataForDeferredRestore(this._initialState);
           // If we have a iniState with windows, that means that we have windows
           // with app tabs to restore.
@@ -300,7 +300,7 @@ SessionStoreService.prototype = {
         if (this._sessionFile.exists())
           this._sessionFile.copyTo(null, this._sessionFileBackup.leafName);
       }
-      catch (ex) { Components.utils.reportError(ex); } // file was write-locked?
+      catch (ex) { Cu.reportError(ex); } // file was write-locked?
     }
 
     // at this point, we've as good as resumed the session, so we can
@@ -431,7 +431,7 @@ SessionStoreService.prototype = {
       // give the tabbrowsers a chance to clear their histories first
       if (this._getMostRecentBrowserWindow())
         Services.tm.mainThread.dispatch(this.saveState.bind(this, true),
-          Components.interfaces.nsIThread.DISPATCH_NORMAL);
+          Ci.nsIThread.DISPATCH_NORMAL);
       else if (this._loadState == STATE_RUNNING)
         this.saveState(true);
       break;
@@ -572,7 +572,7 @@ SessionStoreService.prototype = {
       else {
         // Nothing to restore, notify observers things are complete.
         this.windowToFocus = aWindow;
-        Services.tm.mainThread.dispatch(this, Components.interfaces.nsIThread.DISPATCH_NORMAL);
+        Services.tm.mainThread.dispatch(this, Ci.nsIThread.DISPATCH_NORMAL);
 
         // the next delayed save request should execute immediately
         this._lastSaveTime -= this._interval;
@@ -924,7 +924,7 @@ SessionStoreService.prototype = {
     }
     catch (ex) { /* invalid state object - don't restore anything */ }
     if (!state || !state.windows)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     this._browserSetState = true;
 
@@ -966,19 +966,19 @@ SessionStoreService.prototype = {
       return this._toJSONString({ windows: [data] });
     }
 
-    throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+    throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
   },
 
   setWindowState: function sss_setWindowState(aWindow, aState, aOverwrite) {
     if (!aWindow.__SSi)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     this.restoreWindow(aWindow, aState, aOverwrite);
   },
 
   getTabState: function sss_getTabState(aTab) {
     if (!aTab.ownerDocument || !aTab.ownerDocument.defaultView.__SSi)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     var tabState = this._collectTabData(aTab);
 
@@ -991,7 +991,7 @@ SessionStoreService.prototype = {
   setTabState: function sss_setTabState(aTab, aState) {
     var tabState = JSON.parse(aState);
     if (!tabState.entries || !aTab.ownerDocument || !aTab.ownerDocument.defaultView.__SSi)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     var window = aTab.ownerDocument.defaultView;
     this._sendWindowStateEvent(window, "Busy");
@@ -1001,7 +1001,7 @@ SessionStoreService.prototype = {
   duplicateTab: function sss_duplicateTab(aWindow, aTab, aDelta, aRelated) {
     if (!aTab.ownerDocument || !aTab.ownerDocument.defaultView.__SSi ||
         aWindow && !aWindow.getBrowser)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     var tabState = this._collectTabData(aTab, true);
     var sourceWindow = aTab.ownerDocument.defaultView;
@@ -1043,7 +1043,7 @@ SessionStoreService.prototype = {
       return DyingWindowCache.get(aWindow)._closedTabs.length;
     }
 
-    throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+    throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
   },
 
   getClosedTabData: function sss_getClosedTabData(aWindow) {
@@ -1056,16 +1056,16 @@ SessionStoreService.prototype = {
       return this._toJSONString(data._closedTabs);
     }
 
-    throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+    throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
   },
 
   undoCloseTab: function sss_undoCloseTab(aWindow, aIndex) {
     if (!aWindow.__SSi)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     var closedTabs = this._getClosedTabs(aWindow);
     if (!(aIndex in closedTabs))
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     // fetch the data of closed tab, while removing it from the array
     let closedTab = closedTabs[aIndex];
@@ -1095,11 +1095,11 @@ SessionStoreService.prototype = {
 
   forgetClosedTab: function sss_forgetClosedTab(aWindow, aIndex) {
     if (!aWindow.__SSi)
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     var closedTabs = this._getClosedTabs(aWindow);
     if (!(aIndex in closedTabs))
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
 
     // remove closed tab from the array
     var closedTab = closedTabs[aIndex];
@@ -1139,7 +1139,7 @@ SessionStoreService.prototype = {
       let data = DyingWindowCache.get(aWindow).extData || {};
       return data[aKey] || "";
     }
-    throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+    throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
   },
 
   setWindowValue: function sss_setWindowValue(aWindow, aKey, aStringValue) {
@@ -1151,7 +1151,7 @@ SessionStoreService.prototype = {
       this.saveStateDelayed(aWindow);
     }
     else {
-      throw (Components.returnCode = Components.results.NS_ERROR_INVALID_ARG);
+      throw (Components.returnCode = Cr.NS_ERROR_INVALID_ARG);
     }
   },
 
@@ -1236,7 +1236,7 @@ SessionStoreService.prototype = {
   restoreLastSession: function sss_restoreLastSession() {
     // Use the public getter since it also checks PB mode
     if (!this.canRestoreLastSession)
-      throw (Components.returnCode = Components.results.NS_ERROR_FAILURE);
+      throw (Components.returnCode = Cr.NS_ERROR_FAILURE);
 
     // First collect each window with its id...
     let windows = {};
@@ -1249,7 +1249,7 @@ SessionStoreService.prototype = {
 
     // This shouldn't ever be the case...
     if (!lastSessionState.windows.length)
-      throw (Components.returnCode = Components.results.NS_ERROR_UNEXPECTED);
+      throw (Components.returnCode = Cr.NS_ERROR_UNEXPECTED);
 
     // We're technically doing a restore, so set things up so we send the
     // notification when we're done. We want to send "sessionstore-browser-state-restored".
@@ -1535,7 +1535,7 @@ SessionStoreService.prototype = {
     else if (tabData.extData)
       delete tabData.extData;
 
-    if (history && browser.docShell instanceof Components.interfaces.nsIDocShell)
+    if (history && browser.docShell instanceof Ci.nsIDocShell)
       this._serializeSessionStorage(tabData, history, browser.docShell, aFullData,
                                     false);
 
@@ -1564,12 +1564,12 @@ SessionStoreService.prototype = {
     if (aEntry.isSubFrame) {
       entry.subframe = true;
     }
-    if (!(aEntry instanceof Components.interfaces.nsISHEntry)) {
+    if (!(aEntry instanceof Ci.nsISHEntry)) {
       return entry;
     }
 
     var cacheKey = aEntry.cacheKey;
-    if (cacheKey && cacheKey instanceof Components.interfaces.nsISupportsPRUint32 &&
+    if (cacheKey && cacheKey instanceof Ci.nsISupportsPRUint32 &&
         cacheKey.data != 0) {
       // XXXbz would be better to have cache keys implement
       // nsISerializable or something.
@@ -1593,10 +1593,10 @@ SessionStoreService.prototype = {
       var prefPostdata = this._prefBranch.getIntPref("sessionstore.postdata");
       if (aEntry.postData && (aFullData || prefPostdata &&
             this._checkPrivacyLevel(aEntry.URI.schemeIs("https"), aIsPinned))) {
-        aEntry.postData.QueryInterface(Components.interfaces.nsISeekableStream)
-                       .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, 0);
-        var stream = Components.classes["@mozilla.org/binaryinputstream;1"]
-                               .createInstance(Components.interfaces.nsIBinaryInputStream);
+        aEntry.postData.QueryInterface(Ci.nsISeekableStream)
+                       .seek(Ci.nsISeekableStream.NS_SEEK_SET, 0);
+        var stream = Cc["@mozilla.org/binaryinputstream;1"]
+                       .createInstance(Ci.nsIBinaryInputStream);
         stream.setInputStream(aEntry.postData);
         var postBytes = stream.readByteArray(stream.available());
         var postdata = String.fromCharCode.apply(null, postBytes);
@@ -1650,7 +1650,7 @@ SessionStoreService.prototype = {
       entry.structuredCloneVersion = aEntry.stateData.formatVersion;
     }
 
-    if (!(aEntry instanceof Components.interfaces.nsISHContainer)) {
+    if (!(aEntry instanceof Ci.nsISHContainer)) {
       return entry;
     }
 
@@ -1717,10 +1717,10 @@ SessionStoreService.prototype = {
 
       let storage, storageItemCount = 0;
 
-      let window = aDocShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                            .getInterface(Components.interfaces.nsIDOMWindow);
+      let window = aDocShell.QueryInterface(Ci.nsIInterfaceRequestor)
+                            .getInterface(Ci.nsIDOMWindow);
       try {
-        let storageManager = aDocShell.QueryInterface(Components.interfaces.nsIDOMStorageManager);
+        let storageManager = aDocShell.QueryInterface(Ci.nsIDOMStorageManager);
         storage = storageManager.getStorage(window, principal);
 
         // See Bug 1232955 - storage.length can throw, catch that failure here inside the try.
@@ -1849,8 +1849,8 @@ SessionStoreService.prototype = {
 
     // get scroll position from nsIDOMWindowUtils, since it allows avoiding a
     // flush of layout
-    let domWindowUtils = aContent.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                                 .getInterface(Components.interfaces.nsIDOMWindowUtils);
+    let domWindowUtils = aContent.QueryInterface(Ci.nsIInterfaceRequestor)
+                                 .getInterface(Ci.nsIDOMWindowUtils);
     let scrollX = {}, scrollY = {};
     domWindowUtils.getScrollXY(false, scrollX, scrollY);
     aData.scroll = scrollX.value + "," + scrollY.value;
@@ -1886,7 +1886,7 @@ SessionStoreService.prototype = {
   _collectFormDataForFrame: function sss_collectFormDataForFrame(aDocument) {
     let formNodes = aDocument.evaluate(XPathHelper.restorableFormNodes, aDocument,
                                        XPathHelper.resolveNS,
-                                       Components.interfaces.nsIDOMXPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
+                                       Ci.nsIDOMXPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
     let node = formNodes.iterateNext();
     if (!node)
       return null;
@@ -1904,8 +1904,8 @@ SessionStoreService.prototype = {
       if (!nId && generatedCount > MAX_GENERATED_XPATHS)
         continue;
 
-      if (node instanceof Components.interfaces.nsIDOMHTMLInputElement ||
-          node instanceof Components.interfaces.nsIDOMHTMLTextAreaElement) {
+      if (node instanceof Ci.nsIDOMHTMLInputElement ||
+          node instanceof Ci.nsIDOMHTMLTextAreaElement) {
         switch (node.type) {
           case "checkbox":
           case "radio":
@@ -2033,7 +2033,7 @@ SessionStoreService.prototype = {
         try {
           var list = Services.cookies.getCookiesFromHost(host, {});
           while (list.hasMoreElements()) {
-            var cookie = list.getNext().QueryInterface(Components.interfaces.nsICookie2);
+            var cookie = list.getNext().QueryInterface(Ci.nsICookie2);
             // window._hosts will only have hosts with the right privacy rules,
             // so there is no need to do anything special with this call to
             // _checkPrivacyLevel.
@@ -2597,7 +2597,7 @@ SessionStoreService.prototype = {
     if (history.count > 0) {
       history.PurgeHistory(history.count);
     }
-    history.QueryInterface(Components.interfaces.nsISHistoryInternal);
+    history.QueryInterface(Ci.nsISHistoryInternal);
 
     browser.__SS_shistoryListener = new SessionStoreSHistoryListener(this, tab);
     history.addSHistoryListener(browser.__SS_shistoryListener);
@@ -2652,7 +2652,7 @@ SessionStoreService.prototype = {
     for (let name in tabData.attributes)
       tab.setAttribute(name, tabData.attributes[name]);
 
-    if (tabData.storage && browser.docShell instanceof Components.interfaces.nsIDocShell)
+    if (tabData.storage && browser.docShell instanceof Ci.nsIDocShell)
       this._deserializeSessionStorage(tabData.storage, browser.docShell);
 
     // notify the tabbrowser that the tab chrome has been restored
@@ -2662,7 +2662,7 @@ SessionStoreService.prototype = {
 
     // Restore the history in the next tab
     Services.tm.mainThread.dispatch(this.restoreHistory.bind(this, aWindow,
-      aTabs, aTabData, aIdMap, aDocIdentMap), Components.interfaces.nsIThread.DISPATCH_NORMAL);
+      aTabs, aTabData, aIdMap, aDocIdentMap), Ci.nsIThread.DISPATCH_NORMAL);
 
     // This could cause us to ignore the max_concurrent_tabs pref a bit, but
     // it ensures each window will have its selected tab loaded.
@@ -2707,7 +2707,7 @@ SessionStoreService.prototype = {
     if (tabData.storage) {
       for (let origin of Object.getOwnPropertyNames(tabData.storage)) {
         try {
-          let {frameLoader} = browser.QueryInterface(Components.interfaces.nsIFrameLoaderOwner);
+          let {frameLoader} = browser.QueryInterface(Ci.nsIFrameLoaderOwner);
           if (frameLoader.tabParent) {
             let attrs = browser.contentPrincipal.originAttributes;
             let dataPrincipal = Services.scriptSecurityManager.createCodebasePrincipalFromOrigin(origin);
@@ -2715,7 +2715,7 @@ SessionStoreService.prototype = {
             frameLoader.tabParent.transmitPermissionsForPrincipal(principal);
           }
         } catch (e) {
-          Components.utils.reportError(e);
+          Cu.reportError(e);
         }
       }
     }
@@ -2785,7 +2785,7 @@ SessionStoreService.prototype = {
         didStartLoad = true;
         browser.webNavigation
                .loadURI(tabData.userTypedValue,
-                        Components.interfaces.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP,
+                        Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP,
                         null, null, null,
                        Services.scriptSecurityManager.getSystemPrincipal());
       }
@@ -2850,22 +2850,22 @@ SessionStoreService.prototype = {
   _deserializeHistoryEntry:
     function sss_deserializeHistoryEntry(aEntry, aIdMap, aDocIdentMap) {
 
-    var shEntry = Components.classes["@mozilla.org/browser/session-history-entry;1"]
-                            .createInstance(Components.interfaces.nsISHEntry);
+    var shEntry = Cc["@mozilla.org/browser/session-history-entry;1"]
+                    .createInstance(Ci.nsISHEntry);
 
     shEntry.setURI(this._getURIFromString(aEntry.url));
     shEntry.setTitle(aEntry.title || aEntry.url);
     if (aEntry.subframe)
       shEntry.setIsSubFrame(aEntry.subframe || false);
-    shEntry.loadType = Components.interfaces.nsIDocShellLoadInfo.loadHistory;
+    shEntry.loadType = Ci.nsIDocShellLoadInfo.loadHistory;
     if (aEntry.contentType)
       shEntry.contentType = aEntry.contentType;
     if (aEntry.referrer)
       shEntry.referrerURI = this._getURIFromString(aEntry.referrer);
 
     if (aEntry.cacheKey) {
-      var cacheKey = Components.classes["@mozilla.org/supports-PRUint32;1"]
-                               .createInstance(Components.interfaces.nsISupportsPRUint32);
+      var cacheKey = Cc["@mozilla.org/supports-PRUint32;1"]
+                       .createInstance(Ci.nsISupportsPRUint32);
       cacheKey.data = aEntry.cacheKey;
       shEntry.cacheKey = cacheKey;
     }
@@ -2900,8 +2900,8 @@ SessionStoreService.prototype = {
 
     if (aEntry.structuredCloneState && aEntry.structuredCloneVersion) {
       shEntry.stateData =
-        Components.classes["@mozilla.org/docshell/structured-clone-container;1"]
-                  .createInstance(Components.interfaces.nsIStructuredCloneContainer);
+        Cc["@mozilla.org/docshell/structured-clone-container;1"]
+          .createInstance(Ci.nsIStructuredCloneContainer);
 
       shEntry.stateData.initFromBase64(aEntry.structuredCloneState,
                                        aEntry.structuredCloneVersion);
@@ -2915,8 +2915,8 @@ SessionStoreService.prototype = {
 
     if (aEntry.postdata_b64) {
       var postdata = atob(aEntry.postdata_b64);
-      var stream = Components.classes["@mozilla.org/io/string-input-stream;1"]
-                             .createInstance(Components.interfaces.nsIStringInputStream);
+      var stream = Cc["@mozilla.org/io/string-input-stream;1"]
+                     .createInstance(Ci.nsIStringInputStream);
       stream.setData(postdata, postdata.length);
       shEntry.postData = stream;
     }
@@ -2970,7 +2970,7 @@ SessionStoreService.prototype = {
        shEntry.principalToInherit = shEntry.triggeringPrincipal;
     }
 
-    if (aEntry.children && shEntry instanceof Components.interfaces.nsISHContainer) {
+    if (aEntry.children && shEntry instanceof Ci.nsISHContainer) {
       for (var i = 0; i < aEntry.children.length; i++) {
         //XXXzpao Wallpaper patch for bug 509315
         if (!aEntry.children[i].url)
@@ -3033,13 +3033,13 @@ SessionStoreService.prototype = {
         let dataPrincipal = Services.scriptSecurityManager.createCodebasePrincipalFromOrigin(origin);
         principal = Services.scriptSecurityManager.createCodebasePrincipal(dataPrincipal.URI, attrs);
       } catch (e) {
-        Components.utils.reportError(e);
+        Cu.reportError(e);
         continue;
       }
 
-      let storageManager = aDocShell.QueryInterface(Components.interfaces.nsIDOMStorageManager);
-      let window = aDocShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                            .getInterface(Components.interfaces.nsIDOMWindow);
+      let storageManager = aDocShell.QueryInterface(Ci.nsIDOMStorageManager);
+      let window = aDocShell.QueryInterface(Ci.nsIInterfaceRequestor)
+                            .getInterface(Ci.nsIDOMWindow);
 
       // There is no need to pass documentURI, it's only used to fill documentURI property of
       // domstorage event, which in this case has no consumer. Prevention of events in case
@@ -3051,7 +3051,7 @@ SessionStoreService.prototype = {
           storage.setItem(key, data[key]);
         } catch (e) {
           // Throws e.g. for URIs that can't have sessionStorage.
-          Components.utils.reportError(e);
+          Cu.reportError(e);
         }
       }
     }
@@ -3198,7 +3198,7 @@ SessionStoreService.prototype = {
         "screenX" in aWinData ? +aWinData.screenX : NaN,
         "screenY" in aWinData ? +aWinData.screenY : NaN,
         aWinData.sizemode || "", aWinData.sidebar || ""),
-      Components.interfaces.nsIThread.DISPATCH_NORMAL);
+      Ci.nsIThread.DISPATCH_NORMAL);
   },
 
   /**
@@ -3294,7 +3294,7 @@ SessionStoreService.prototype = {
                              "expiry" in cookie ? cookie.expiry : MAX_EXPIRY,
                              "originAttributes" in cookie ? cookie.originAttributes : {});
       }
-      catch (ex) { Components.utils.reportError(ex); } // don't let a single cookie stop recovering
+      catch (ex) { Cu.reportError(ex); } // don't let a single cookie stop recovering
     }
   },
 
@@ -3320,8 +3320,8 @@ SessionStoreService.prototype = {
       // if we have to wait, set a timer, otherwise saveState directly
       aDelay = Math.max(minimalDelay, aDelay || 2000);
       if (aDelay > 0) {
-        this._saveTimer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-        this._saveTimer.init(this, aDelay, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+        this._saveTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+        this._saveTimer.init(this, aDelay, Ci.nsITimer.TYPE_ONE_SHOT);
       }
       else {
         this.saveState();
@@ -3354,8 +3354,8 @@ SessionStoreService.prototype = {
    * write a state object to disk
    */
   _saveStateObject: function sss_saveStateObject(aStateObj) {
-    var stateString = Components.classes["@mozilla.org/supports-string;1"]
-                                .createInstance(Components.interfaces.nsISupportsString);
+    var stateString = Cc["@mozilla.org/supports-string;1"]
+                        .createInstance(Ci.nsISupportsString);
     // parentheses are for backwards compatibility with older sessionstore files
     stateString.data = this._toJSONString(aStateObj);
 
@@ -3461,8 +3461,8 @@ SessionStoreService.prototype = {
    *        Object containing session data
    */
   _openWindowWithState: function sss_openWindowWithState(aState) {
-    var argString = Components.classes["@mozilla.org/supports-string;1"]
-                              .createInstance(Components.interfaces.nsISupportsString);
+    var argString = Cc["@mozilla.org/supports-string;1"]
+                      .createInstance(Ci.nsISupportsString);
     argString.data = "about:blank";
 
     var features = "chrome,dialog=no,suppressanimation,all";
@@ -3516,8 +3516,8 @@ SessionStoreService.prototype = {
    * @returns bool
    */
   _isSwitchingProfile: function sss_isSwitchingProfile() {
-    var env = Components.classes["@mozilla.org/process/environment;1"]
-                        .getService(Components.interfaces.nsIEnvironment);
+    var env = Cc["@mozilla.org/process/environment;1"]
+                .getService(Ci.nsIEnvironment);
     return env.exists("XRE_PROFILE_NAME");
   },
 
@@ -3607,7 +3607,7 @@ SessionStoreService.prototype = {
     }
     catch (ex) {
       // don't make noise when crashreporter is built but not enabled
-      if (ex.result != Components.results.NS_ERROR_NOT_INITIALIZED)
+      if (ex.result != Cr.NS_ERROR_NOT_INITIALIZED)
         debug(ex);
     }
 #endif
@@ -3808,7 +3808,7 @@ SessionStoreService.prototype = {
     if (this._restoreCount) {
       this._restoreCount--;
       if (this._restoreCount == 0)
-        Services.tm.mainThread.dispatch(this, Components.interfaces.nsIThread.DISPATCH_NORMAL);
+        Services.tm.mainThread.dispatch(this, Ci.nsIThread.DISPATCH_NORMAL);
     }
   },
 
@@ -4002,13 +4002,13 @@ SessionStoreService.prototype = {
    */
   _writeFile: function sss_writeFile(aFile, aData) {
     // Initialize the file output stream.
-    var ostream = Components.classes["@mozilla.org/network/safe-file-output-stream;1"]
-                            .createInstance(Components.interfaces.nsIFileOutputStream);
+    var ostream = Cc["@mozilla.org/network/safe-file-output-stream;1"]
+                    .createInstance(Ci.nsIFileOutputStream);
     ostream.init(aFile, 0x02 | 0x08 | 0x20, parseInt("0600", 8), ostream.DEFER_OPEN);
 
     // Obtain a converter to convert our data to a UTF-8 encoded input stream.
-    var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                              .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                      .createInstance(Ci.nsIScriptableUnicodeConverter);
     converter.charset = "UTF-8";
 
     // Asynchronously copy the data to the file.
@@ -4067,7 +4067,7 @@ var XPathHelper = {
    * Resolves an XPath query generated by XPathHelper.generate
    */
   resolve: function sss_xph_resolve(aDocument, aQuery) {
-    let xptype = Components.interfaces.nsIDOMXPathResult.FIRST_ORDERED_NODE_TYPE;
+    let xptype = Ci.nsIDOMXPathResult.FIRST_ORDERED_NODE_TYPE;
     return aDocument.evaluate(aQuery, aDocument, this.resolveNS, xptype, null).singleNodeValue;
   },
 
@@ -4170,9 +4170,9 @@ var gRestoreTabsProgressListener = {
     // Ignore state changes on browsers that we've already restored and state
     // changes that aren't applicable.
     if (aBrowser.__SS_restoreState == TAB_STATE_RESTORING &&
-        aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP &&
-        aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK &&
-        aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_WINDOW) {
+        aStateFlags & Ci.nsIWebProgressListener.STATE_STOP &&
+        aStateFlags & Ci.nsIWebProgressListener.STATE_IS_NETWORK &&
+        aStateFlags & Ci.nsIWebProgressListener.STATE_IS_WINDOW) {
       // We need to reset the tab before starting the next restore.
       let tab = this.ss._getTabForBrowser(aBrowser);
       this.ss._resetTabRestoringState(tab);
@@ -4190,8 +4190,8 @@ function SessionStoreSHistoryListener(ss, aTab) {
 }
 
 SessionStoreSHistoryListener.prototype = {
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISHistoryListener,
-                                         Components.interfaces.nsISupportsWeakReference]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsISHistoryListener,
+                                         Ci.nsISupportsWeakReference]),
   browser: null,
   ss: null,
   tab: null,

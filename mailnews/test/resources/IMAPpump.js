@@ -17,14 +17,14 @@ var EXPORTED_SYMBOLS = [
   'teardownIMAPPump'
 ];
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://testing-common/mailnews/localAccountUtils.js");
-Components.utils.import("resource://testing-common/mailnews/maild.js");
-Components.utils.import("resource://testing-common/mailnews/auth.js");
-Components.utils.import("resource://testing-common/mailnews/imapd.js");
-Components.utils.import("resource://testing-common/AppInfo.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
+Cu.import("resource://testing-common/mailnews/maild.js");
+Cu.import("resource://testing-common/mailnews/auth.js");
+Cu.import("resource://testing-common/mailnews/imapd.js");
+Cu.import("resource://testing-common/AppInfo.jsm");
 
 // define globals
 var IMAPPump = {

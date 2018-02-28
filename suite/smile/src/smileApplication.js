@@ -5,8 +5,8 @@
 const Ci = Components.interfaces;
 const Cc = Components.classes;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const APPLICATION_CID = Components.ID("{c9ba8f65-c936-4ac6-a859-8936832b0c12}");
 const APPLICATION_CONTRACTID = "@mozilla.org/smile/application;1";
@@ -16,8 +16,8 @@ const APPLICATION_CONTRACTID = "@mozilla.org/smile/application;1";
 var Utilities = {
   get bookmarks() {
     let bookmarks =
-      Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
-                .getService(Components.interfaces.nsINavBookmarksService);
+      Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+        .getService(Ci.nsINavBookmarksService);
     this.__defineGetter__("bookmarks", () => bookmarks);
     return this.bookmarks;
   },
@@ -30,16 +30,16 @@ var Utilities = {
 
   get annotations() {
     let annotations =
-      Components.classes["@mozilla.org/browser/annotation-service;1"]
-                .getService(Components.interfaces.nsIAnnotationService);
+      Cc["@mozilla.org/browser/annotation-service;1"]
+        .getService(Ci.nsIAnnotationService);
     this.__defineGetter__("annotations", () => annotations);
     return this.annotations;
   },
 
   get history() {
     let history =
-      Components.classes["@mozilla.org/browser/nav-history-service;1"]
-                .getService(Components.interfaces.nsINavHistoryService);
+      Cc["@mozilla.org/browser/nav-history-service;1"]
+        .getService(Ci.nsINavHistoryService);
     this.__defineGetter__("history", () => history);
     return this.history;
   },
@@ -53,8 +53,8 @@ var Utilities = {
   makeURI: function smileutil_makeURI(aSpec) {
     if (!aSpec)
       return null;
-    var ios = Components.classes["@mozilla.org/network/io-service;1"]
-                        .getService(Components.interfaces.nsIIOService);
+    var ios = Cc["@mozilla.org/network/io-service;1"]
+                .getService(Ci.nsIIOService);
     return ios.newURI(aSpec);
   },
 
@@ -130,7 +130,7 @@ Window.prototype = {
     return getBrowserTab(this, this._tabbrowser.addTab(aURI.spec));
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.smileIWindow])
+  QueryInterface: XPCOMUtils.generateQI([Ci.smileIWindow])
 };
 
 
@@ -198,10 +198,10 @@ BrowserTab.prototype = {
 
   handleEvent: function bt_handleEvent(aEvent) {
     if (aEvent.type == "load") {
-      if (!(aEvent.originalTarget instanceof Components.interfaces.nsIDOMDocument))
+      if (!(aEvent.originalTarget instanceof Ci.nsIDOMDocument))
         return;
 
-      if (aEvent.originalTarget.defaultView instanceof Components.interfaces.nsIDOMWindow &&
+      if (aEvent.originalTarget.defaultView instanceof Ci.nsIDOMWindow &&
           aEvent.originalTarget.defaultView.frameElement)
         return;
     }
@@ -230,7 +230,7 @@ BrowserTab.prototype = {
     this._tabbrowser.moveTabTo(this._tab, this._tabbrowser.browsers.length);
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.smileIBrowserTab])
+  QueryInterface: XPCOMUtils.generateQI([Ci.smileIBrowserTab])
 };
 
 
@@ -265,7 +265,7 @@ Annotations.prototype = {
       Utilities.annotations.removeItemAnnotation(this._id, aName);
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.smileIAnnotations])
+  QueryInterface: XPCOMUtils.generateQI([Ci.smileIAnnotations])
 };
 
 
@@ -444,7 +444,7 @@ Bookmark.prototype = {
   },
 
   set description(aDesc) {
-    this._annotations.set("bookmarkProperties/description", aDesc, Components.interfaces.nsIAnnotationService.EXPIRE_NEVER);
+    this._annotations.set("bookmarkProperties/description", aDesc, Ci.nsIAnnotationService.EXPIRE_NEVER);
   },
 
   get keyword() {
@@ -574,7 +574,7 @@ BookmarkFolder.prototype = {
   },
 
   set description(aDesc) {
-    this._annotations.set("bookmarkProperties/description", aDesc, Components.interfaces.nsIAnnotationService.EXPIRE_NEVER);
+    this._annotations.set("bookmarkProperties/description", aDesc, Ci.nsIAnnotationService.EXPIRE_NEVER);
   },
 
   get type() {
@@ -703,7 +703,7 @@ BookmarkRoots.prototype = {
     return this._unfiled;
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.smileIBookmarkRoots])
+  QueryInterface: XPCOMUtils.generateQI([Ci.smileIBookmarkRoots])
 };
 
 
@@ -716,7 +716,7 @@ var gSingleton = null;
 var ApplicationFactory = {
   createInstance: function af_ci(aOuter, aIID) {
     if (aOuter != null)
-      throw Components.results.NS_ERROR_NO_AGGREGATION;
+      throw Cr.NS_ERROR_NO_AGGREGATION;
 
     if (gSingleton == null) {
       gSingleton = new Application();
@@ -748,19 +748,19 @@ Application.prototype = {
 
   // for nsISupports
   QueryInterface: XPCOMUtils.generateQI(
-                    [Components.interfaces.smileIApplication,
-                     Components.interfaces.extIApplication,
-                     Components.interfaces.nsIObserver,
-                     Components.interfaces.nsISupportsWeakReference]),
+                    [Ci.smileIApplication,
+                     Ci.extIApplication,
+                     Ci.nsIObserver,
+                     Ci.nsISupportsWeakReference]),
 
   // for nsIClassInfo
   classInfo: XPCOMUtils.generateCI({
     classID: APPLICATION_CID,
     contractID: APPLICATION_CONTRACTID,
-    interfaces: [Components.interfaces.smileIApplication,
-                 Components.interfaces.extIApplication,
-                 Components.interfaces.nsIObserver],
-    flags: Components.interfaces.nsIClassInfo.SINGLETON}),
+    interfaces: [Ci.smileIApplication,
+                 Ci.extIApplication,
+                 Ci.nsIObserver],
+    flags: Ci.nsIClassInfo.SINGLETON}),
 
   // for nsIObserver
   observe: function app_observe(aSubject, aTopic, aData) {

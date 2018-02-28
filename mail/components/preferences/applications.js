@@ -24,16 +24,16 @@ var kActionUsePlugin = 5;
 var APP_ICON_ATTR_NAME = "appHandlerIcon";
 
 // CloudFile account tools used by gCloudFileTab.
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/cloudFileAccounts.js");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/cloudFileAccounts.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 //****************************************************************************//
 // Utilities
 
 function getDisplayNameForFile(aFile) {
   if (AppConstants.platform == "win") {
-    if (aFile instanceof Components.interfaces.nsILocalFileWin) {
+    if (aFile instanceof Ci.nsILocalFileWin) {
       try {
         return aFile.getVersionInfoField("FileDescription");
       }
@@ -43,7 +43,7 @@ function getDisplayNameForFile(aFile) {
     }
   }
   else if (AppConstants.platform == "macosx") {
-    if (aFile instanceof Components.interfaces.nsILocalFileMac) {
+    if (aFile instanceof Ci.nsILocalFileMac) {
       try {
         return aFile.bundleDisplayName;
       }
@@ -57,8 +57,8 @@ function getDisplayNameForFile(aFile) {
 }
 
 function getLocalHandlerApp(aFile) {
-  var localHandlerApp = Components.classes["@mozilla.org/uriloader/local-handler-app;1"]
-                                  .createInstance(Components.interfaces.nsILocalHandlerApp);
+  var localHandlerApp = Cc["@mozilla.org/uriloader/local-handler-app;1"]
+                          .createInstance(Ci.nsILocalHandlerApp);
   localHandlerApp.name = getDisplayNameForFile(aFile);
   localHandlerApp.executable = aFile;
 
@@ -121,11 +121,11 @@ HandlerInfoWrapper.prototype = {
   //**************************************************************************//
   // Convenience Utils
 
-  _handlerSvc: Components.classes["@mozilla.org/uriloader/handler-service;1"]
-                         .getService(Components.interfaces.nsIHandlerService),
+  _handlerSvc: Cc["@mozilla.org/uriloader/handler-service;1"]
+                 .getService(Ci.nsIHandlerService),
 
-  _categoryMgr: Components.classes["@mozilla.org/categorymanager;1"]
-                          .getService(Components.interfaces.nsICategoryManager),
+  _categoryMgr: Cc["@mozilla.org/categorymanager;1"]
+                  .getService(Ci.nsICategoryManager),
 
   //**************************************************************************//
   // nsIHandlerInfo
@@ -208,12 +208,12 @@ HandlerInfoWrapper.prototype = {
     // but the alwaysAskBeforeHandling getter will detect that situation
     // and always return true in that case to override this invalid value.
     if (this.wrappedHandlerInfo.preferredAction ==
-          Components.interfaces.nsIHandlerInfo.useHelperApp &&
+          Ci.nsIHandlerInfo.useHelperApp &&
         !gApplicationsPane.isValidHandlerApp(this.preferredApplicationHandler)) {
       if (this.wrappedHandlerInfo.hasDefaultHandler)
-        return Components.interfaces.nsIHandlerInfo.useSystemDefault;
+        return Ci.nsIHandlerInfo.useSystemDefault;
       else
-        return Components.interfaces.nsIHandlerInfo.saveToDisk;
+        return Ci.nsIHandlerInfo.saveToDisk;
     }
 
     return this.wrappedHandlerInfo.preferredAction;
@@ -244,8 +244,8 @@ HandlerInfoWrapper.prototype = {
     // app, but the preferredApplicationHandler is invalid, and there isn't
     // a default handler, so the preferredAction getter returns save to disk
     // instead.
-    if (!(this.wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo) &&
-        this.preferredAction == Components.interfaces.nsIHandlerInfo.saveToDisk)
+    if (!(this.wrappedHandlerInfo instanceof Ci.nsIMIMEInfo) &&
+        this.preferredAction == Ci.nsIHandlerInfo.saveToDisk)
       return true;
 
     return this.wrappedHandlerInfo.alwaysAskBeforeHandling;
@@ -266,7 +266,7 @@ HandlerInfoWrapper.prototype = {
   // those properties for an extension?
   get primaryExtension() {
     try {
-      if (this.wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo &&
+      if (this.wrappedHandlerInfo instanceof Ci.nsIMIMEInfo &&
           this.wrappedHandlerInfo.primaryExtension)
         return this.wrappedHandlerInfo.primaryExtension;
     } catch(ex) {}
@@ -375,7 +375,7 @@ HandlerInfoWrapper.prototype = {
     if (this.primaryExtension)
       return "moz-icon://goat." + this.primaryExtension + "?size=" + aSize;
 
-    if (this.wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo)
+    if (this.wrappedHandlerInfo instanceof Ci.nsIMIMEInfo)
       return "moz-icon://goat?size=" + aSize + "&contentType=" + this.type;
 
     // FIXME: consider returning some generic icon when we can't get a URL for
@@ -693,7 +693,7 @@ var gCloudFileTab = {
       this._settingsDeck.selectedPanel = this._authErrorPanel;
     }
     else {
-      Components.utils.reportError("Unexpected connection error.");
+      Cu.reportError("Unexpected connection error.");
     }
   },
 
@@ -719,7 +719,7 @@ var gCloudFileTab = {
                 .wrappedJSObject
                 .onLoadProvider(aProvider);
         } catch(e) {
-          Components.utils.reportError(e);
+          Cu.reportError(e);
         }
       }, {capture: false, once: true});
 
@@ -808,10 +808,10 @@ var gCloudFileTab = {
     !document.getElementById("enableThreshold").checked;
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces
-                                                   .nsIObserver,
-                                         Components.interfaces
-                                                   .nsISupportsWeakReference])
+  QueryInterface: XPCOMUtils.generateQI([Ci
+                                           .nsIObserver,
+                                         Ci
+                                           .nsISupportsWeakReference])
 }
 
 //****************************************************************************//
@@ -847,14 +847,14 @@ var gApplicationsPane = {
   _list           : null,
   _filter         : null,
 
-  _mimeSvc      : Components.classes["@mozilla.org/mime;1"]
-                            .getService(Components.interfaces.nsIMIMEService),
+  _mimeSvc      : Cc["@mozilla.org/mime;1"]
+                    .getService(Ci.nsIMIMEService),
 
-  _helperAppSvc : Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
-                            .getService(Components.interfaces.nsIExternalHelperAppService),
+  _helperAppSvc : Cc["@mozilla.org/uriloader/external-helper-app-service;1"]
+                    .getService(Ci.nsIExternalHelperAppService),
 
-  _handlerSvc   : Components.classes["@mozilla.org/uriloader/handler-service;1"]
-                            .getService(Components.interfaces.nsIHandlerService),
+  _handlerSvc   : Cc["@mozilla.org/uriloader/handler-service;1"]
+                    .getService(Ci.nsIHandlerService),
 
   _loadInContent: Services.prefs.getBoolPref("mail.preferences.inContent"),
 
@@ -918,12 +918,12 @@ var gApplicationsPane = {
   // nsISupports
 
   QueryInterface: function(aIID) {
-    if (aIID.equals(Components.interfaces.nsIObserver) ||
-        aIID.equals(Components.interfaces.nsIDOMEventListener ||
-        aIID.equals(Components.interfaces.nsISupports)))
+    if (aIID.equals(Ci.nsIObserver) ||
+        aIID.equals(Ci.nsIDOMEventListener ||
+        aIID.equals(Ci.nsISupports)))
       return this;
 
-    throw Components.results.NS_ERROR_NO_INTERFACE;
+    throw Cr.NS_ERROR_NO_INTERFACE;
   },
 
 
@@ -1015,7 +1015,7 @@ var gApplicationsPane = {
     var wrappedHandlerInfos = this._handlerSvc.enumerate();
     while (wrappedHandlerInfos.hasMoreElements()) {
       let wrappedHandlerInfo =
-        wrappedHandlerInfos.getNext().QueryInterface(Components.interfaces.nsIHandlerInfo);
+        wrappedHandlerInfos.getNext().QueryInterface(Ci.nsIHandlerInfo);
       let type = wrappedHandlerInfo.type;
 
       let handlerInfoWrapper;
@@ -1055,7 +1055,7 @@ var gApplicationsPane = {
       // FIXME: should we also check the "suffixes" property of the plugin?
       // Filed as bug 395135.
       if (hidePluginsWithoutExtensions && handlerInfo.handledOnlyByPlugin &&
-          handlerInfo.wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo &&
+          handlerInfo.wrappedHandlerInfo instanceof Ci.nsIMIMEInfo &&
           !handlerInfo.primaryExtension)
         continue;
 
@@ -1140,7 +1140,7 @@ var gApplicationsPane = {
    */
   _typeDetails: function(aHandlerInfo) {
     let exts = [];
-    if (aHandlerInfo.wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo) {
+    if (aHandlerInfo.wrappedHandlerInfo instanceof Ci.nsIMIMEInfo) {
       let extIter = aHandlerInfo.wrappedHandlerInfo.getFileExtensions();
       while(extIter.hasMore()) {
         let ext = "."+extIter.getNext();
@@ -1183,19 +1183,19 @@ var gApplicationsPane = {
         return this._prefsBundle.getString("alwaysAsk");
 
     switch (aHandlerInfo.preferredAction) {
-      case Components.interfaces.nsIHandlerInfo.saveToDisk:
+      case Ci.nsIHandlerInfo.saveToDisk:
         return this._prefsBundle.getString("saveFile");
 
-      case Components.interfaces.nsIHandlerInfo.useHelperApp:
+      case Ci.nsIHandlerInfo.useHelperApp:
         var preferredApp = aHandlerInfo.preferredApplicationHandler;
         var name;
-        if (preferredApp instanceof Components.interfaces.nsILocalHandlerApp)
+        if (preferredApp instanceof Ci.nsILocalHandlerApp)
           name = getDisplayNameForFile(preferredApp.executable);
         else
           name = preferredApp.name;
         return this._prefsBundle.getFormattedString("useApp", [name]);
 
-      case Components.interfaces.nsIHandlerInfo.handleInternally:
+      case Ci.nsIHandlerInfo.handleInternally:
         // For other types, handleInternally looks like either useHelperApp
         // or useSystemDefault depending on whether or not there's a preferred
         // handler app.
@@ -1209,7 +1209,7 @@ var gApplicationsPane = {
         // then why would a preferredAction ever get set to this value
         // in the first place?
 
-      case Components.interfaces.nsIHandlerInfo.useSystemDefault:
+      case Ci.nsIHandlerInfo.useSystemDefault:
         return this._prefsBundle.getFormattedString("useDefault",
                                                     [aHandlerInfo.defaultDescription]);
 
@@ -1219,7 +1219,7 @@ var gApplicationsPane = {
                                                      this._brandShortName]);
       default:
         // Hopefully this never happens.
-        Components.utils.reportError("No description for action " + aHandlerInfo.preferredAction + " found!");
+        Cu.reportError("No description for action " + aHandlerInfo.preferredAction + " found!");
         return "";
     }
   },
@@ -1252,13 +1252,13 @@ var gApplicationsPane = {
     if (!aHandlerApp)
       return false;
 
-    if (aHandlerApp instanceof Components.interfaces.nsILocalHandlerApp)
+    if (aHandlerApp instanceof Ci.nsILocalHandlerApp)
       return this._isValidHandlerExecutable(aHandlerApp.executable);
 
-    if (aHandlerApp instanceof Components.interfaces.nsIWebHandlerApp)
+    if (aHandlerApp instanceof Ci.nsIWebHandlerApp)
       return aHandlerApp.uriTemplate;
 
-    if (aHandlerApp instanceof Components.interfaces.nsIWebContentHandlerInfo)
+    if (aHandlerApp instanceof Ci.nsIWebContentHandlerInfo)
       return aHandlerApp.uri;
 
     return false;
@@ -1312,9 +1312,9 @@ var gApplicationsPane = {
     // Create a menu item for saving to disk.
     // Note: this option isn't available to protocol types, since we don't know
     // what it means to save a URL having a certain scheme to disk.
-    if ((handlerInfo.wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo)) {
+    if ((handlerInfo.wrappedHandlerInfo instanceof Ci.nsIMIMEInfo)) {
       var saveMenuItem = document.createElement("menuitem");
-      saveMenuItem.setAttribute("action", Components.interfaces.nsIHandlerInfo.saveToDisk);
+      saveMenuItem.setAttribute("action", Ci.nsIHandlerInfo.saveToDisk);
       let label = this._prefsBundle.getString("saveFile");
       saveMenuItem.setAttribute("label", label);
       saveMenuItem.setAttribute("tooltiptext", label);
@@ -1330,7 +1330,7 @@ var gApplicationsPane = {
     // Create a menu item for the OS default application, if any.
     if (handlerInfo.hasDefaultHandler) {
       var defaultMenuItem = document.createElement("menuitem");
-      defaultMenuItem.setAttribute("action", Components.interfaces.nsIHandlerInfo.useSystemDefault);
+      defaultMenuItem.setAttribute("action", Ci.nsIHandlerInfo.useSystemDefault);
       let label = this._prefsBundle.getFormattedString("useDefault",
                                                        [handlerInfo.defaultDescription]);
       defaultMenuItem.setAttribute("label", label);
@@ -1350,9 +1350,9 @@ var gApplicationsPane = {
         continue;
 
       let menuItem = document.createElement("menuitem");
-      menuItem.setAttribute("action", Components.interfaces.nsIHandlerInfo.useHelperApp);
+      menuItem.setAttribute("action", Ci.nsIHandlerInfo.useHelperApp);
       let label;
-      if (possibleApp instanceof Components.interfaces.nsILocalHandlerApp)
+      if (possibleApp instanceof Ci.nsILocalHandlerApp)
         label = getDisplayNameForFile(possibleApp.executable);
       else
         label = possibleApp.name;
@@ -1387,9 +1387,9 @@ var gApplicationsPane = {
     if (AppConstants.platform == "win") {
       // On Windows, selecting an application to open another application
       // would be meaningless so we special case executables.
-      var executableType = Components.classes["@mozilla.org/mime;1"]
-                                     .getService(Components.interfaces.nsIMIMEService)
-                                     .getTypeFromExtension("exe");
+      var executableType = Cc["@mozilla.org/mime;1"]
+                             .getService(Ci.nsIMIMEService)
+                             .getTypeFromExtension("exe");
       if (handlerInfo.type == executableType)
         createItem = false;
     }
@@ -1428,13 +1428,13 @@ var gApplicationsPane = {
     if (handlerInfo.alwaysAskBeforeHandling)
       menu.selectedItem = askMenuItem;
     else switch (handlerInfo.preferredAction) {
-      case Components.interfaces.nsIHandlerInfo.handleInternally:
+      case Ci.nsIHandlerInfo.handleInternally:
         menu.selectedItem = internalMenuItem;
         break;
-      case Components.interfaces.nsIHandlerInfo.useSystemDefault:
+      case Ci.nsIHandlerInfo.useSystemDefault:
         menu.selectedItem = defaultMenuItem;
         break;
-      case Components.interfaces.nsIHandlerInfo.useHelperApp:
+      case Ci.nsIHandlerInfo.useHelperApp:
         if (preferredApp)
           menu.selectedItem =
             possibleAppMenuItems.filter(v => v.handlerApp.equals(preferredApp))[0];
@@ -1442,7 +1442,7 @@ var gApplicationsPane = {
       case kActionUsePlugin:
         menu.selectedItem = pluginMenuItem;
         break;
-      case Components.interfaces.nsIHandlerInfo.saveToDisk:
+      case Ci.nsIHandlerInfo.saveToDisk:
         menu.selectedItem = saveMenuItem;
         break;
     }
@@ -1558,7 +1558,7 @@ var gApplicationsPane = {
       // legacy datastores that don't have the preferred app in the list
       // of possible apps still include the preferred app in the list of apps
       // the user can choose to handle the type.
-      if (action == Components.interfaces.nsIHandlerInfo.useHelperApp)
+      if (action == Ci.nsIHandlerInfo.useHelperApp)
         handlerInfo.preferredApplicationHandler = aActionItem.handlerApp;
 
       // Set the "always ask" flag.
@@ -1650,17 +1650,17 @@ var gApplicationsPane = {
       handlerInfo.addPossibleApplicationHandler(handlerApp);
     }
     } else {
-    var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
+    var fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
     var winTitle = this._prefsBundle.getString("fpTitleChooseApp");
-    fp.init(window, winTitle, Components.interfaces.nsIFilePicker.modeOpen);
-    fp.appendFilters(Components.interfaces.nsIFilePicker.filterApps);
+    fp.init(window, winTitle, Ci.nsIFilePicker.modeOpen);
+    fp.appendFilters(Ci.nsIFilePicker.filterApps);
 
     // Prompt the user to pick an app.  If they pick one, and it's a valid
     // selection, then add it to the list of possible handlers.
-    if (fp.show() == Components.interfaces.nsIFilePicker.returnOK && fp.file &&
+    if (fp.show() == Ci.nsIFilePicker.returnOK && fp.file &&
         this._isValidHandlerExecutable(fp.file)) {
-      handlerApp = Components.classes["@mozilla.org/uriloader/local-handler-app;1"]
-                             .createInstance(Components.interfaces.nsILocalHandlerApp);
+      handlerApp = Cc["@mozilla.org/uriloader/local-handler-app;1"]
+                     .createInstance(Ci.nsILocalHandlerApp);
       handlerApp.name = getDisplayNameForFile(fp.file);
       handlerApp.executable = fp.file;
 
@@ -1744,11 +1744,11 @@ var gApplicationsPane = {
     }
 
     switch (aHandlerInfo.preferredAction) {
-      case Components.interfaces.nsIHandlerInfo.saveToDisk:
+      case Ci.nsIHandlerInfo.saveToDisk:
         aElement.setAttribute(APP_ICON_ATTR_NAME, "save");
         return true;
 
-      case Components.interfaces.nsIHandlerInfo.handleInternally:
+      case Ci.nsIHandlerInfo.handleInternally:
         break;
 
       case kActionUsePlugin:
@@ -1761,10 +1761,10 @@ var gApplicationsPane = {
 
   _getIconURLForPreferredAction: function(aHandlerInfo) {
     switch (aHandlerInfo.preferredAction) {
-      case Components.interfaces.nsIHandlerInfo.useSystemDefault:
+      case Ci.nsIHandlerInfo.useSystemDefault:
         return this._getIconURLForSystemDefault(aHandlerInfo);
 
-      case Components.interfaces.nsIHandlerInfo.useHelperApp:
+      case Ci.nsIHandlerInfo.useHelperApp:
         let preferredApp = aHandlerInfo.preferredApplicationHandler;
         if (this.isValidHandlerApp(preferredApp))
           return this._getIconURLForHandlerApp(preferredApp);
@@ -1775,13 +1775,13 @@ var gApplicationsPane = {
   },
 
   _getIconURLForHandlerApp: function(aHandlerApp) {
-    if (aHandlerApp instanceof Components.interfaces.nsILocalHandlerApp)
+    if (aHandlerApp instanceof Ci.nsILocalHandlerApp)
       return this._getIconURLForFile(aHandlerApp.executable);
 
-    if (aHandlerApp instanceof Components.interfaces.nsIWebHandlerApp)
+    if (aHandlerApp instanceof Ci.nsIWebHandlerApp)
       return this._getIconURLForWebApp(aHandlerApp.uriTemplate);
 
-    if (aHandlerApp instanceof Components.interfaces.nsIWebContentHandlerInfo)
+    if (aHandlerApp instanceof Ci.nsIWebContentHandlerInfo)
       return this._getIconURLForWebApp(aHandlerApp.uri)
 
     // We know nothing about other kinds of handler apps.
@@ -1790,7 +1790,7 @@ var gApplicationsPane = {
 
   _getIconURLForFile: function(aFile) {
     let urlSpec = Services.io.getProtocolHandler("file")
-      .QueryInterface(Components.interfaces.nsIFileProtocolHandler)
+      .QueryInterface(Ci.nsIFileProtocolHandler)
       .getURLSpecFromFile(aFile);
 
     return "moz-icon://" + urlSpec + "?size=16";
@@ -1819,8 +1819,8 @@ var gApplicationsPane = {
     if ("wrappedHandlerInfo" in aHandlerInfo) {
       let wrappedHandlerInfo = aHandlerInfo.wrappedHandlerInfo;
 
-      if (wrappedHandlerInfo instanceof Components.interfaces.nsIMIMEInfo &&
-          wrappedHandlerInfo instanceof Components.interfaces.nsIPropertyBag) {
+      if (wrappedHandlerInfo instanceof Ci.nsIMIMEInfo &&
+          wrappedHandlerInfo instanceof Ci.nsIPropertyBag) {
         try {
           let url = wrappedHandlerInfo.getProperty("defaultApplicationIconURL");
           if (url)

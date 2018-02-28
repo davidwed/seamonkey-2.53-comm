@@ -23,8 +23,8 @@
     var Cr = Components.results;
     var Cu = Components.utils;
 
-    Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-    Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
+    Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+    Cu.import("resource://gre/modules/PlacesUtils.jsm");
     XPCOMUtils.defineLazyModuleGetter(window,
       "PlacesUIUtils", "resource:///modules/PlacesUIUtils.jsm");
     XPCOMUtils.defineLazyModuleGetter(window,

@@ -2,7 +2,7 @@
 /**
  * Protocol tests for POP3.
  */
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var type = null;
 var test = null;

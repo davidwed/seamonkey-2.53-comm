@@ -385,7 +385,7 @@ QueryFromQueryCallback.prototype = {
         }
       }
       catch (e) {
-        Components.utils.reportError(e);
+        Cu.reportError(e);
         QFQ_LOG.error("Exception:", e);
       }
     }

@@ -38,7 +38,7 @@
 
 var EXPORTED_SYMBOLS = ["Server", "server", "AsyncRead", "Session", "sessions", "globalRegistry", "startServer"];
 
-var events = {}; Components.utils.import("resource://jsbridge/modules/events.js", events);
+var events = {}; Cu.import("resource://jsbridge/modules/events.js", events);
 var DEBUG_ON = false;
 var BUFFER_SIZE = 1024;
 var Cc = Components.classes;
@@ -46,16 +46,16 @@ var Ci = Components.interfaces;
 var loader = Cc['@mozilla.org/moz/jssubscript-loader;1']
     .getService(Ci.mozIJSSubScriptLoader);
 
-var hwindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-    .getService(Components.interfaces.nsIAppShellService)
+var hwindow = Cc["@mozilla.org/appshell/appShellService;1"]
+    .getService(Ci.nsIAppShellService)
     .hiddenDOMWindow;
 
-var json2 = Components.utils.import("resource://jsbridge/modules/json2.js");
+var json2 = Cu.import("resource://jsbridge/modules/json2.js");
 
 var jsonEncode = json2.JSON.stringify;
 
-var uuidgen = Components.classes["@mozilla.org/uuid-generator;1"]
-    .getService(Components.interfaces.nsIUUIDGenerator);
+var uuidgen = Cc["@mozilla.org/uuid-generator;1"]
+    .getService(Ci.nsIUUIDGenerator);
 
 function AsyncRead (session) {
   this.session = session;
@@ -205,7 +205,7 @@ backstage = this;
 
 function Session (transport) {
   this.transpart = transport;
-  this.sandbox = Components.utils.Sandbox(backstage);
+  this.sandbox = Cu.Sandbox(backstage);
   this.sandbox.bridge = new Bridge(this);
   this.sandbox.openPreferences = hwindow.openPreferences;
   try {
@@ -279,7 +279,7 @@ Session.prototype.encodeOut = function (obj) {
 
 }
 Session.prototype.receive = function(data) {
-  Components.utils.evalInSandbox(data, this.sandbox);
+  Cu.evalInSandbox(data, this.sandbox);
 }
 
 var sessions = {

@@ -46,14 +46,14 @@ var EXPORTED_SYMBOLS = ["controller", "events", "utils", "elementslib", "os",
                         "getPlacesController", 'isMac', 'isLinux', 'isWindows',
                        ];
 
-var controller = {};  Components.utils.import('resource://mozmill/modules/controller.js', controller);
-var events = {};      Components.utils.import('resource://mozmill/modules/events.js', events);
-var utils = {};       Components.utils.import('resource://mozmill/modules/utils.js', utils);
-var elementslib = {}; Components.utils.import('resource://mozmill/modules/elementslib.js', elementslib);
-var frame = {}; Components.utils.import('resource://mozmill/modules/frame.js', frame);
+var controller = {};  Cu.import('resource://mozmill/modules/controller.js', controller);
+var events = {};      Cu.import('resource://mozmill/modules/events.js', events);
+var utils = {};       Cu.import('resource://mozmill/modules/utils.js', utils);
+var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+var frame = {}; Cu.import('resource://mozmill/modules/frame.js', frame);
 
-var os = {}; Components.utils.import('resource://mozmill/stdlib/os.js', os);
-var withs = {}; Components.utils.import('resource://mozmill/stdlib/withs.js', withs);
+var os = {}; Cu.import('resource://mozmill/stdlib/os.js', os);
+var withs = {}; Cu.import('resource://mozmill/stdlib/withs.js', withs);
 
 var platform = os.getPlatform();
 
@@ -71,18 +71,18 @@ if (platform == "linux"){
   isLinux = true;
 }
 
-var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Components.interfaces.nsIWindowMediator);
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+           .getService(Ci.nsIWindowMediator);
 
-var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-               .getService(Components.interfaces.nsIXULAppInfo);
+var appInfo = Cc["@mozilla.org/xre/app-info;1"]
+               .getService(Ci.nsIXULAppInfo);
 
-var locale = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-               .getService(Components.interfaces.nsIXULChromeRegistry)
+var locale = Cc["@mozilla.org/chrome/chrome-registry;1"]
+               .getService(Ci.nsIXULChromeRegistry)
                .getSelectedLocale("global");
 
-var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-    getService(Components.interfaces.nsIConsoleService);
+var aConsoleService = Cc["@mozilla.org/consoleservice;1"]
+                        .getService(Ci.nsIConsoleService);
 
 
 applicationDictionary = {
