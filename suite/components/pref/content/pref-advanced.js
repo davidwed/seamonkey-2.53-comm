@@ -22,7 +22,7 @@ function Startup()
 function SysPrefCheck()
 {
   const kPrefService = "@mozilla.org/system-preference-service;1";
-  let visible = kPrefService in Components.classes &&
+  let visible = kPrefService in Cc &&
     Cc[kPrefService].getService() instanceof Ci.nsIPrefBranch;
   document.getElementById("systemPrefs").hidden = !visible;
 }
@@ -40,7 +40,7 @@ function ShellServiceCheck()
 
 function CrashReportsCheck()
 {
-  if ("nsICrashReporter" in Components.interfaces)
+  if ("nsICrashReporter" in Ci)
   {
     var cr = Cc["@mozilla.org/toolkit/crash-reporter;1"]
                .getService(Ci.nsICrashReporter);
