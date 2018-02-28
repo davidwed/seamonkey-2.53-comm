@@ -228,22 +228,22 @@ const STRING_CONTRACTID         = "@mozilla.org/supports-string;1";
 
 // a number of services I'll need later
 // the cache services
-const OPEN_READONLY = Components.interfaces.nsICacheStorage.OPEN_READONLY;
-const ENTRY_WANTED = Components.interfaces.nsICacheEntryOpenCallback.ENTRY_WANTED;
-const LoadContextInfo = Components.classes["@mozilla.org/load-context-info-factory;1"]
-                                  .getService(Components.interfaces.nsILoadContextInfoFactory);
+const OPEN_READONLY = Ci.nsICacheStorage.OPEN_READONLY;
+const ENTRY_WANTED = Ci.nsICacheEntryOpenCallback.ENTRY_WANTED;
+const LoadContextInfo = Cc["@mozilla.org/load-context-info-factory;1"]
+                          .getService(Ci.nsILoadContextInfoFactory);
 var loadContextInfo = opener.gPrivate ? LoadContextInfo.private :
                                         LoadContextInfo.default;
 const diskCacheStorage =
-    Components.classes["@mozilla.org/netwerk/cache-storage-service;1"]
-              .getService(Components.interfaces.nsICacheStorageService)
-              .diskCacheStorage(loadContextInfo, false);
+    Cc["@mozilla.org/netwerk/cache-storage-service;1"]
+      .getService(Ci.nsICacheStorageService)
+      .diskCacheStorage(loadContextInfo, false);
 
-const nsICertificateDialogs = Components.interfaces.nsICertificateDialogs;
+const nsICertificateDialogs = Ci.nsICertificateDialogs;
 const CERTIFICATEDIALOGS_CONTRACTID = "@mozilla.org/nsCertificateDialogs;1"
 
 // Interface for image loading content
-const nsIImageLoadingContent = Components.interfaces.nsIImageLoadingContent;
+const nsIImageLoadingContent = Ci.nsIImageLoadingContent;
 
 // namespaces, don't need all of these yet...
 const MathMLNS = "http://www.w3.org/1998/Math/MathML";
@@ -935,7 +935,7 @@ function saveMedia()
           let uri = makeURI(uriString);
 
           try {
-            uri.QueryInterface(Components.interfaces.nsIURL);
+            uri.QueryInterface(Ci.nsIURL);
             dir.append(decodeURIComponent(uri.fileName));
           } catch (ex) {
             // data:/blob: uris
@@ -1229,7 +1229,7 @@ var imagePermissionObserver = {
       return;
 
     if (aTopic == "perm-changed") {
-      var permission = aSubject.QueryInterface(Components.interfaces.nsIPermission);
+      var permission = aSubject.QueryInterface(Ci.nsIPermission);
       if (permission.type == "image") {
         var imageTree = document.getElementById("imagetree");
         var row = imageTree.currentIndex;
@@ -1381,9 +1381,9 @@ function doCopy(isLinkMode)
 {
   var text = getSelectedItems(isLinkMode);
 
-  Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-            .getService(Components.interfaces.nsIClipboardHelper)
-            .copyString(text.join("\n"));
+  Cc["@mozilla.org/widget/clipboardhelper;1"]
+    .getService(Ci.nsIClipboardHelper)
+    .copyString(text.join("\n"));
 }
 
 function doSelectAll()

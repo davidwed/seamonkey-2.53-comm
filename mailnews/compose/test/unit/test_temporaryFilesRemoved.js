@@ -6,7 +6,7 @@
  * Test that temporary files for draft are surely removed.
  */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gMsgCompose;
 var gExpectedFiles;
@@ -28,7 +28,7 @@ var progressListener = {
         iid.equals(Ci.nsISupports))
       return this;
 
-    throw Components.results.NS_NOINTERFACE;
+    throw Cr.NS_NOINTERFACE;
   }
 };
 

@@ -11,7 +11,7 @@ var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers"];
 var utils = {};
 Cu.import('resource://mozmill/modules/utils.js', utils);
 var elib = {};
-Components.utils.import("resource://mozmill/modules/elementslib.js", elib);
+Cu.import("resource://mozmill/modules/elementslib.js", elib);
 
 var wh, fdh, mc;
 

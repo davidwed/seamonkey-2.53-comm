@@ -9,11 +9,11 @@ var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers",
                        "account-manager-helpers", "keyboard-helpers" ];
 
 var mozmill = {};
-Components.utils.import("resource://mozmill/modules/mozmill.js", mozmill);
+Cu.import("resource://mozmill/modules/mozmill.js", mozmill);
 var controller = {};
-Components.utils.import("resource://mozmill/modules/controller.js", controller);
+Cu.import("resource://mozmill/modules/controller.js", controller);
 var elib = {};
-Components.utils.import("resource://mozmill/modules/elementslib.js", elib);
+Cu.import("resource://mozmill/modules/elementslib.js", elib);
 
 var PORT_NUMBERS_TO_TEST =
   [

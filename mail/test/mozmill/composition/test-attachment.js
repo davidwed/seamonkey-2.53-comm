@@ -26,7 +26,7 @@ var isWindows;
 var filePrefix;
 
 var os = {};
-Components.utils.import('resource://mozmill/stdlib/os.js', os);
+Cu.import('resource://mozmill/stdlib/os.js', os);
 
 var rawAttachment =
   "Can't make the frug contest, Helen; stomach's upset. I'll fix you, " +
@@ -51,8 +51,8 @@ function setupModule(module) {
 
   folder = create_folder('ComposeAttachmentA');
 
-  messenger = Components.classes['@mozilla.org/messenger;1']
-                        .createInstance(Components.interfaces.nsIMessenger);
+  messenger = Cc['@mozilla.org/messenger;1']
+                .createInstance(Ci.nsIMessenger);
 
   isWindows = '@mozilla.org/windows-registry-key;1' in Components.classes;
 

@@ -6,8 +6,8 @@
 // This dialog can only be opened if we have a shell service.
 
 var gSystemIntegrationDialog = {
-  _shellSvc: Components.classes["@mozilla.org/mail/shell-service;1"]
-                       .getService(Components.interfaces.nsIShellService),
+  _shellSvc: Cc["@mozilla.org/mail/shell-service;1"]
+               .getService(Ci.nsIShellService),
 
   _mailCheckbox: null,
 
@@ -23,8 +23,8 @@ var gSystemIntegrationDialog = {
   {
     // Makes Services and SearchIntegration accessible via this.Services
     // and this.SearchIntegration.
-    Components.utils.import("resource://gre/modules/Services.jsm", this);
-    Components.utils.import("resource:///modules/SearchIntegration.js", this);
+    Cu.import("resource://gre/modules/Services.jsm", this);
+    Cu.import("resource:///modules/SearchIntegration.js", this);
 
     // initialize elements
     this._mailCheckbox    = document.getElementById("checkMail");

@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 // be real hacky with document.getElementById until document.controls works
 // with the new XUL widgets
@@ -99,7 +99,7 @@ function onLockPreference()
     };
     disableIfLocked(allPrefElements);
   } catch (e) { // non-fatal
-    Components.utils.reportError("Error while getting locked prefs: " + e);
+    Cu.reportError("Error while getting locked prefs: " + e);
   }
 }
 

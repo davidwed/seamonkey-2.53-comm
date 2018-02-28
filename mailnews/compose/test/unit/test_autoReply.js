@@ -7,10 +7,10 @@
 
 // make xpcshell-tests TEST_PATH=mailnews/compose/test/unit/test_autoReply.js
 
-Components.utils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/mimeParser.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mimeParser.jsm");
 
 load("../../../resources/logHelper.js"); // watch for errors in the error console
 
@@ -93,7 +93,7 @@ add_task(function testReplyingToUnaddressedFails() {
     do_throw("Replied to a message not addressed to us!");
   }
   catch (e) {
-    if (e.result != Components.results.NS_ERROR_ABORT)
+    if (e.result != Cr.NS_ERROR_ABORT)
       throw e;
     // Ok! We didn't reply to the message not specifically addressed to
     // us (from@foo.invalid).
@@ -128,7 +128,7 @@ add_task(function testReplyingToMailWithNoFrom() {
              "with no From and no Reply-To");
   }
   catch (e) {
-    if (e.result != Components.results.NS_ERROR_FAILURE)
+    if (e.result != Cr.NS_ERROR_FAILURE)
       throw e;
   }
 });
