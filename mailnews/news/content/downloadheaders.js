@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var markreadElement = null;
 var numberElement = null;
@@ -17,7 +17,7 @@ function OnLoad()
 
   if ("arguments" in window && window.arguments[0]) {
     args = window.arguments[0]
-                 .QueryInterface(Components.interfaces.nsINewsDownloadDialogArgs);
+                 .QueryInterface(Ci.nsINewsDownloadDialogArgs);
     /* by default, act like the user hit cancel */
     args.hitOK = false;
     /* by default, act like the user did not select download all */
@@ -25,7 +25,7 @@ function OnLoad()
 
 
     nntpServer = MailServices.accounts.getIncomingServer(args.serverKey)
-               .QueryInterface(Components.interfaces.nsINntpIncomingServer);
+               .QueryInterface(Ci.nsINntpIncomingServer);
 
     document.title = newsBundle.getString("downloadHeadersTitlePrefix");
 

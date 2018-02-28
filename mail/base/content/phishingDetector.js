@@ -5,7 +5,7 @@
 // Dependencies:
 // gatherTextUnder from utilityOverlay.js
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var kPhishingNotSuspicious = 0;
 var kPhishingWithIPAddress = 1;
@@ -27,7 +27,7 @@ var gPhishingDetector = {
    */
   init: function()
   {
-    Components.utils.import("resource:///modules/hostnameUtils.jsm", this);
+    Cu.import("resource:///modules/hostnameUtils.jsm", this);
 
     this.mCheckForIPAddresses = Services.prefs.getBoolPref("mail.phishing.detection.ipaddresses");
     this.mCheckForMismatchedHosts = Services.prefs.getBoolPref("mail.phishing.detection.mismatched_hosts");
@@ -58,14 +58,14 @@ var gPhishingDetector = {
         return;
 
       // Also ignore messages in Sent/Drafts/Templates/Outbox.
-      const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+      const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
       let outgoingFlags = nsMsgFolderFlags.SentMail | nsMsgFolderFlags.Drafts |
                           nsMsgFolderFlags.Templates | nsMsgFolderFlags.Queue;
       if (folder.isSpecialFolder(outgoingFlags, true))
         return;
 
     } catch (ex) {
-        if (ex.result != Components.results.NS_ERROR_FAILURE)
+        if (ex.result != Cr.NS_ERROR_FAILURE)
           throw ex;
     }
 
@@ -151,8 +151,8 @@ var gPhishingDetector = {
      reportUrl += "&url=" + encodeURIComponent(aPhishingURL);
 
      let uri = Services.io.newURI(reportUrl);
-     let protocolSvc = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"]
-                       .getService(Components.interfaces.nsIExternalProtocolService);
+     let protocolSvc = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+                       .getService(Ci.nsIExternalProtocolService);
      protocolSvc.loadUrl(uri);
    },
 
@@ -223,7 +223,7 @@ var gPhishingDetector = {
       var dialogMsg = bundle.getFormattedString("confirmPhishingUrl",
                         [brandShortName, unobscuredHostNameValue], 2);
 
-      const nsIPS = Components.interfaces.nsIPromptService;
+      const nsIPS = Ci.nsIPromptService;
       return !Services.prompt.confirmEx(window, titleMsg, dialogMsg,
                                         nsIPS.STD_YES_NO_BUTTONS +
                                         nsIPS.BUTTON_POS_1_DEFAULT,

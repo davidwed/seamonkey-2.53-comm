@@ -388,7 +388,7 @@ var PlacesCommandHook = {
         description = docInfo.description;
         charset = aBrowser.characterSet;
       } catch (e) {
-        Components.utils.reportError(e);
+        Cu.reportError(e);
       }
 
       if (aShowEditUI && isNewBookmark) {
@@ -467,7 +467,7 @@ var PlacesCommandHook = {
 
     let ip = new InsertionPoint(aParentId,
                                 PlacesUtils.bookmarks.DEFAULT_INDEX,
-                                Components.interfaces.nsITreeView.DROP_ON);
+                                Ci.nsITreeView.DROP_ON);
     PlacesUIUtils.showBookmarkDialog({ action: "add",
                                        type: "bookmark",
                                        uri: makeURI(aURL),
@@ -548,7 +548,7 @@ var PlacesCommandHook = {
   async addLiveBookmark(url, feedTitle, feedSubtitle) {
     let toolbarIP = new InsertionPoint(PlacesUtils.toolbarFolderId,
                                        PlacesUtils.bookmarks.DEFAULT_INDEX,
-                                       Components.interfaces.nsITreeView.DROP_ON);
+                                       Ci.nsITreeView.DROP_ON);
 
     let feedURI = makeURI(url);
     let title = feedTitle || gBrowser.contentTitle;
@@ -730,13 +730,13 @@ var PlacesMenuDNDHandler = {
     if (!this._isStaticContainer(event.target))
       return;
 
-    this._loadTimer = Components.classes["@mozilla.org/timer;1"]
-                                .createInstance(Components.interfaces.nsITimer);
+    this._loadTimer = Cc["@mozilla.org/timer;1"]
+                        .createInstance(Ci.nsITimer);
     this._loadTimer.initWithCallback(function() {
       PlacesMenuDNDHandler._loadTimer = null;
       event.target.lastChild.setAttribute("autoopened", "true");
       event.target.lastChild.showPopup(event.target.lastChild);
-    }, this._springLoadDelay, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+    }, this._springLoadDelay, Ci.nsITimer.TYPE_ONE_SHOT);
     event.preventDefault();
     event.stopPropagation();
   },
@@ -755,8 +755,8 @@ var PlacesMenuDNDHandler = {
       this._loadTimer.cancel();
       this._loadTimer = null;
     }
-    let closeTimer = Components.classes["@mozilla.org/timer;1"]
-                               .createInstance(Components.interfaces.nsITimer);
+    let closeTimer = Cc["@mozilla.org/timer;1"]
+                       .createInstance(Ci.nsITimer);
     closeTimer.initWithCallback(function() {
       let node = PlacesControllerDragHelper.currentDropTarget;
       let inHierarchy = false;
@@ -769,7 +769,7 @@ var PlacesMenuDNDHandler = {
         event.target.lastChild.removeAttribute("autoopened");
         event.target.lastChild.hidePopup();
       }
-    }, this._springLoadDelay, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+    }, this._springLoadDelay, Ci.nsITimer.TYPE_ONE_SHOT);
   },
 
   /**
@@ -795,7 +795,7 @@ var PlacesMenuDNDHandler = {
   onDragOver: function PMDH_onDragOver(event) {
     let ip = new InsertionPoint(PlacesUtils.bookmarksMenuFolderId,
                                 PlacesUtils.bookmarks.DEFAULT_INDEX,
-                                Components.interfaces.nsITreeView.DROP_ON);
+                                Ci.nsITreeView.DROP_ON);
     if (ip && PlacesControllerDragHelper.canDrop(ip, event.dataTransfer))
       event.preventDefault();
 
@@ -811,7 +811,7 @@ var PlacesMenuDNDHandler = {
     // Put the item at the end of bookmark menu.
     let ip = new InsertionPoint(PlacesUtils.bookmarksMenuFolderId,
                                 PlacesUtils.bookmarks.DEFAULT_INDEX,
-                                Components.interfaces.nsITreeView.DROP_ON);
+                                Ci.nsITreeView.DROP_ON);
     PlacesControllerDragHelper.onDrop(ip, event.dataTransfer);
     event.stopPropagation();
   }
@@ -834,7 +834,7 @@ var BookmarkingUI = {
   },
 
   QueryInterface: XPCOMUtils.generateQI([
-    Components.interfaces.nsINavBookmarkObserver
+    Ci.nsINavBookmarkObserver
   ]),
 
   get _starredTooltip()
@@ -861,7 +861,7 @@ var BookmarkingUI = {
     let pendingUpdate = this._pendingUpdate = {};
 
     PlacesUtils.bookmarks.fetch({url: this._uri}, b => aItemGuids.push(b.guid))
-      .catch(Components.utils.reportError)
+      .catch(Cu.reportError)
       .then(() => {
          if (pendingUpdate != this._pendingUpdate) {
            return;
@@ -882,7 +882,7 @@ var BookmarkingUI = {
              PlacesUtils.bookmarks.addObserver(this);
              this._hasBookmarksObserver = true;
            } catch (ex) {
-             Components.utils.reportError("BookmarkingUI failed adding a bookmarks observer: " + ex);
+             Cu.reportError("BookmarkingUI failed adding a bookmarks observer: " + ex);
            }
          }
 

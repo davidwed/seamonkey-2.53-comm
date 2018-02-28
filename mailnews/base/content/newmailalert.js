@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource://gre/modules/PluralForm.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 // Copied from nsILookAndFeel.h, see comments on eMetric_AlertNotificationOrigin
 var NS_ALERT_HORIZONTAL = 1;
@@ -55,7 +55,7 @@ function prefillAlertInfo()
   let allFolders = rootFolder.descendants;
   var folderSummaryInfoEl = document.getElementById('folderSummaryInfo');
   folderSummaryInfoEl.mMaxMsgHdrsInPopup = gNumNewMsgsToShowInAlert;
-  for (let folder in fixIterator(allFolders, Components.interfaces.nsIMsgFolder))
+  for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder))
   {
     if (folder.hasNewMessages && !folder.getFlag(Ci.nsMsgFolderFlags.Virtual))
     {

@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-const nsICommandLineHandler = Components.interfaces.nsICommandLineHandler;
-const nsISupportsString     = Components.interfaces.nsISupportsString;
-const nsIWindowWatcher      = Components.interfaces.nsIWindowWatcher;
+const nsICommandLineHandler = Ci.nsICommandLineHandler;
+const nsISupportsString     = Ci.nsISupportsString;
+const nsIWindowWatcher      = Ci.nsIWindowWatcher;
 
 function nsComposerCmdLineHandler() {}
 nsComposerCmdLineHandler.prototype = {
@@ -20,8 +20,8 @@ nsComposerCmdLineHandler.prototype = {
 
   /* nsICommandLineHandler */
   handle : function handle(cmdLine) {
-    var args = Components.classes["@mozilla.org/supports-string;1"]
-                         .createInstance(nsISupportsString);
+    var args = Cc["@mozilla.org/supports-string;1"]
+                 .createInstance(nsISupportsString);
     try {
       var uristr = cmdLine.handleFlagWithParam("edit", false);
       if (uristr == null) {

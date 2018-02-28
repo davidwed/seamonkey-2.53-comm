@@ -4,8 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "PlacesUtils",
                                   "resource://gre/modules/PlacesUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
@@ -625,8 +625,8 @@ nsPlacesAutoComplete.prototype = {
 
   handleError: function PAC_handleError(aError)
   {
-    Components.utils.reportError("Places AutoComplete: An async statement encountered an " +
-                                 "error: " + aError.result + ", '" + aError.message + "'");
+    Cu.reportError("Places AutoComplete: An async statement encountered an " +
+                   "error: " + aError.result + ", '" + aError.message + "'");
   },
 
   handleCompletion: function PAC_handleCompletion(aReason)

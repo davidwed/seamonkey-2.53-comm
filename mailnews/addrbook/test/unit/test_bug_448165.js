@@ -12,6 +12,6 @@ function run_test() {
   }
   catch (e) {
     // make sure the correct error message was thrown
-    do_check_eq(e.result, Components.results.NS_ERROR_INVALID_POINTER);
+    do_check_eq(e.result, Cr.NS_ERROR_INVALID_POINTER);
   }
 }

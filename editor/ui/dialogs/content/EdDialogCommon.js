@@ -385,11 +385,11 @@ function SwitchToValidatePanel()
   // Only EdTableProps.js currently implements this
 }
 
-const nsIFilePicker = Components.interfaces.nsIFilePicker;
+const nsIFilePicker = Ci.nsIFilePicker;
 
 function GetLocalFileURL(filterType)
 {
-  var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+  var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
   var fileType = "html";
 
   if (filterType == "img")
@@ -576,7 +576,7 @@ function SetRelativeCheckbox(checkbox)
 
   var editor = GetCurrentEditor();
   // Mail never allows relative URLs, so hide the checkbox
-  if (editor && (editor.flags & Components.interfaces.nsIPlaintextEditor.eEditorMailMask))
+  if (editor && (editor.flags & Ci.nsIPlaintextEditor.eEditorMailMask))
   {
     checkbox.collapsed = true;
     return;
@@ -958,7 +958,7 @@ function FillLinkMenulist(linkMenulist, headingsArray)
     else
     {
       // Don't bother with named anchors in Mail.
-      if (editor && (editor.flags & Components.interfaces.nsIPlaintextEditor.eEditorMailMask))
+      if (editor && (editor.flags & Ci.nsIPlaintextEditor.eEditorMailMask))
       {
         menupopup.remove();
         linkMenulist.removeAttribute("enablehistory");

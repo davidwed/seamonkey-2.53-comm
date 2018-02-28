@@ -18,9 +18,9 @@ Cu.import("resource:///modules/errUtils.js");
 Cu.import("resource:///modules/mailServices.js");
 Cu.import("resource:///modules/searchSpec.js");
 
-var nsMsgSearchAttrib = Components.interfaces.nsMsgSearchAttrib;
-var nsMsgMessageFlags = Components.interfaces.nsMsgMessageFlags;
-var nsMsgSearchOp = Components.interfaces.nsMsgSearchOp;
+var nsMsgSearchAttrib = Ci.nsMsgSearchAttrib;
+var nsMsgMessageFlags = Ci.nsMsgMessageFlags;
+var nsMsgSearchOp = Ci.nsMsgSearchOp;
 
 // XXX we need to know whether the gloda indexer is enabled for upsell reasons,
 // but this should really just be exposed on the main Gloda public interface.
@@ -593,10 +593,10 @@ QuickFilterManager.defineFilter({
     term = null;
     while (enumerator.hasMoreElements()) {
       let addrbook = enumerator.getNext();
-      if (addrbook instanceof Components.interfaces.nsIAbDirectory &&
+      if (addrbook instanceof Ci.nsIAbDirectory &&
           !addrbook.isRemote) {
         term = aTermCreator.createTerm();
-        term.attrib = Components.interfaces.nsMsgSearchAttrib.Sender;
+        term.attrib = Ci.nsMsgSearchAttrib.Sender;
         value = term.value;
         value.attrib = term.attrib;
         value.str = addrbook.URI;
@@ -666,13 +666,13 @@ var TagFacetingFilter = {
     // just the true/false case
     if (this.isSimple(aFilterValue)) {
       term = aTermCreator.createTerm();
-      term.attrib = Components.interfaces.nsMsgSearchAttrib.Keywords;
+      term.attrib = Ci.nsMsgSearchAttrib.Keywords;
       value = term.value;
       value.str = "";
       term.value = value;
       term.op = aFilterValue ?
-                  Components.interfaces.nsMsgSearchOp.IsntEmpty :
-                  Components.interfaces.nsMsgSearchOp.IsEmpty;
+                  Ci.nsMsgSearchOp.IsntEmpty :
+                  Ci.nsMsgSearchOp.IsEmpty;
       term.booleanAnd = true;
       aTerms.push(term);
 
@@ -692,7 +692,7 @@ var TagFacetingFilter = {
         let shouldFilter = aFilterValue.tags[key];
         if (shouldFilter !== null) {
           term = aTermCreator.createTerm();
-          term.attrib = Components.interfaces.nsMsgSearchAttrib.Keywords;
+          term.attrib = Ci.nsMsgSearchAttrib.Keywords;
           value = term.value;
           value.attrib = term.attrib;
           value.str = key;
@@ -728,11 +728,11 @@ var TagFacetingFilter = {
         // (we need to add has a tag)
         if (!lastIncludeTerm) {
           term = aTermCreator.createTerm();
-          term.attrib = Components.interfaces.nsMsgSearchAttrib.Keywords;
+          term.attrib = Ci.nsMsgSearchAttrib.Keywords;
           value = term.value;
           value.str = "";
           term.value = value;
-          term.op = Components.interfaces.nsMsgSearchOp.IsntEmpty;
+          term.op = Ci.nsMsgSearchOp.IsntEmpty;
           term.booleanAnd = true;
           aTerms.push(term);
         }
@@ -920,10 +920,10 @@ QuickFilterManager.defineFilter({
   appendTerms: function(aTermCreator, aTerms, aFilterValue) {
     let term, value;
     term = aTermCreator.createTerm();
-    term.attrib = Components.interfaces.nsMsgSearchAttrib.MsgStatus;
+    term.attrib = Ci.nsMsgSearchAttrib.MsgStatus;
     value = term.value;
     value.attrib = term.attrib;
-    value.status = Components.interfaces.nsMsgMessageFlags.Attachment;
+    value.status = Ci.nsMsgMessageFlags.Attachment;
     term.value = value;
     term.op = aFilterValue ? nsMsgSearchOp.Is : nsMsgSearchOp.Isnt;
     term.booleanAnd = true;

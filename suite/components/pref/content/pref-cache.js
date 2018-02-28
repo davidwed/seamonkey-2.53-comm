@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/DownloadUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/DownloadUtils.jsm");
 
 function Startup()
 {
@@ -25,8 +25,8 @@ var CacheObserver = {
 
   /* nsISupports */
   QueryInterface: XPCOMUtils.generateQI(
-    [Components.interfaces.nsICacheStorageConsumptionObserver,
-     Components.interfaces.nsISupportsWeakReference])
+    [Ci.nsICacheStorageConsumptionObserver,
+     Ci.nsISupportsWeakReference])
 };
 
 // because the cache is in kilobytes, and the UI is in megabytes.
@@ -65,9 +65,9 @@ function ReadCacheFolder(aField)
 
 function CacheSelectFolder()
 {
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  let fp = Components.classes["@mozilla.org/filepicker;1"]
-                     .createInstance(nsIFilePicker);
+  const nsIFilePicker = Ci.nsIFilePicker;
+  let fp = Cc["@mozilla.org/filepicker;1"]
+             .createInstance(nsIFilePicker);
   let title = document.getElementById("bundle_prefutilities")
                       .getString("cachefolder");
 
@@ -86,8 +86,8 @@ function CacheSelectFolder()
 
 function ClearDiskAndMemCache()
 {
-  Components.classes["@mozilla.org/netwerk/cache-storage-service;1"]
-            .getService(Components.interfaces.nsICacheStorageService).clear();
+  Cc["@mozilla.org/netwerk/cache-storage-service;1"]
+    .getService(Ci.nsICacheStorageService).clear();
   updateActualCacheSize();
 }
 
@@ -107,7 +107,7 @@ function ReadSmartSizeEnabled()
 
 function updateActualCacheSize()
 {
-  Components.classes["@mozilla.org/netwerk/cache-storage-service;1"]
-            .getService(Components.interfaces.nsICacheStorageService)
-            .asyncGetDiskConsumption(CacheObserver);
+  Cc["@mozilla.org/netwerk/cache-storage-service;1"]
+    .getService(Ci.nsICacheStorageService)
+    .asyncGetDiskConsumption(CacheObserver);
 }

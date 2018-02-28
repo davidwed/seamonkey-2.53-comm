@@ -4,9 +4,9 @@
 
 this.EXPORTED_SYMBOLS = ["allContacts", "onlineContacts", "ChatCore"];
 
-Components.utils.import("resource:///modules/imServices.jsm");
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/imServices.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 var allContacts = {};
 var onlineContacts = {};
@@ -19,7 +19,7 @@ var ChatCore = {
       return;
     this._initializing = true;
 
-    Components.utils.import("resource:///modules/index_im.js");
+    Cu.import("resource:///modules/index_im.js");
 
     Services.obs.addObserver(this, "browser-request", false);
     Services.obs.addObserver(this, "contact-signed-on", false);
@@ -30,9 +30,9 @@ var ChatCore = {
     // The initialization of the im core may trigger a master password prompt,
     // so wrap it with the async prompter service. Note this service already
     // waits for the asynchronous initialization of the password service.
-    Components.classes["@mozilla.org/messenger/msgAsyncPrompter;1"]
-              .getService(Components.interfaces.nsIMsgAsyncPrompter)
-              .queueAsyncAuthPrompt("im", false, {
+    Cc["@mozilla.org/messenger/msgAsyncPrompter;1"]
+      .getService(Ci.nsIMsgAsyncPrompter)
+      .queueAsyncAuthPrompt("im", false, {
       onPromptStart: function() {
         Services.core.init();
 
@@ -44,7 +44,7 @@ var ChatCore = {
         for (let account in fixIterator(Services.accounts.getAccounts()))
           accountsById[account.numericId] = account;
         let mgr = MailServices.accounts;
-        for (let account in fixIterator(mgr.accounts, Components.interfaces.nsIMsgAccount)) {
+        for (let account in fixIterator(mgr.accounts, Ci.nsIMsgAccount)) {
           let incomingServer = account.incomingServer;
           if (!incomingServer || incomingServer.type != "im")
             continue;

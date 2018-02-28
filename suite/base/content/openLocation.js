@@ -91,8 +91,8 @@ function accept()
 
 function onChooseFile()
 {
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  let fp = Components.classes["@mozilla.org/filepicker;1"]
+  const nsIFilePicker = Ci.nsIFilePicker;
+  let fp = Cc["@mozilla.org/filepicker;1"]
              .createInstance(nsIFilePicker);
   fp.init(window, gBundle.getString("chooseFileDialogTitle"),
           nsIFilePicker.modeOpen);

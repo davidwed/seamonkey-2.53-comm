@@ -6,8 +6,8 @@ const kSpace = " ".charCodeAt(0);
 const kSlash = "/".charCodeAt(0);
 const kApostrophe = "'".charCodeAt(0);
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function findTypeController(aTypeAheadFind, aWindow)
 {
@@ -67,11 +67,11 @@ typeAheadFind.prototype = {
 
   /* nsISupports */
   QueryInterface: XPCOMUtils.generateQI([
-      Components.interfaces.nsISupportsWeakReference,
-      Components.interfaces.nsIObserver,
-      Components.interfaces.nsITimerCallback,
-      Components.interfaces.nsIDOMEventListener,
-      Components.interfaces.nsISelectionListener]),
+      Ci.nsISupportsWeakReference,
+      Ci.nsIObserver,
+      Ci.nsITimerCallback,
+      Ci.nsIDOMEventListener,
+      Ci.nsISelectionListener]),
 
   /* nsIObserver */
   observe: function(aSubject, aTopic, aData) {
@@ -81,32 +81,32 @@ typeAheadFind.prototype = {
       // We need to add our event listeners to all windows.
       Services.ww.registerNotification(this);
       // We also need to listen for find again commands
-      Components.classes["@mozilla.org/observer-service;1"]
-                .getService(Components.interfaces.nsIObserverService)
-                .addObserver(this, "nsWebBrowserFind_FindAgain", true);
+      Cc["@mozilla.org/observer-service;1"]
+        .getService(Ci.nsIObserverService)
+        .addObserver(this, "nsWebBrowserFind_FindAgain", true);
     }
     if (aTopic == "domwindowopened") {
       // Add our listeners. They get automatically removed on window teardown.
       aSubject.controllers.appendController(new findTypeController(this, aSubject));
-      Components.classes["@mozilla.org/eventlistenerservice;1"]
-                .getService(Components.interfaces.nsIEventListenerService)
-                .addSystemEventListener(aSubject, "keypress", this, false);
+      Cc["@mozilla.org/eventlistenerservice;1"]
+        .getService(Ci.nsIEventListenerService)
+        .addSystemEventListener(aSubject, "keypress", this, false);
     }
     if (aTopic == "nsWebBrowserFind_FindAgain" &&
-        aSubject instanceof Components.interfaces.nsISupportsInterfacePointer &&
-        aSubject.data instanceof Components.interfaces.nsIDOMWindow &&
+        aSubject instanceof Ci.nsISupportsInterfacePointer &&
+        aSubject.data instanceof Ci.nsIDOMWindow &&
         aSubject.data.top == this.mCurrentWindow &&
         this.mSearchString) {
       // It's a find again. Was it one that we just searched for?
       var w = aSubject.data;
-      var find = w.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                  .getInterface(Components.interfaces.nsIWebNavigation)
-                  .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                  .getInterface(Components.interfaces.nsIWebBrowserFind);
+      var find = w.QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebNavigation)
+                  .QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebBrowserFind);
       if (find.searchString.toLowerCase() == this.mSearchString) {
         var reverse = aData == "up";
         this.stopFind(false);
-        var result = Components.interfaces.nsITypeAheadFind.FIND_NOTFOUND;
+        var result = Ci.nsITypeAheadFind.FIND_NOTFOUND;
         if (!this.mBadKeysSinceMatch)
           result = this.mFind.findAgain(reverse, this.mLinks);
         this.showStatusMatch(result, reverse ? "prevmatch" : "nextmatch");
@@ -138,7 +138,7 @@ typeAheadFind.prototype = {
     }
 
     // Are we already in a find?
-    if (aEvent.eventPhase == Components.interfaces.nsIDOMEvent.CAPTURING_PHASE)
+    if (aEvent.eventPhase == Ci.nsIDOMEvent.CAPTURING_PHASE)
       return this.processKey(aEvent);
 
     // Check whether we want to start a new find.
@@ -153,20 +153,20 @@ typeAheadFind.prototype = {
     // Don't start a find if the focus is an editable element.
     var window = aEvent.currentTarget;
     var element = window.document.commandDispatcher.focusedElement;
-    if (element instanceof Components.interfaces.nsIDOMHTMLElement &&
+    if (element instanceof Ci.nsIDOMHTMLElement &&
         element.isContentEditable)
       return true;
 
     // Don't start a find if the focus is on a form element.
-    if (element instanceof Components.interfaces.nsIDOMXULElement ||
-        element instanceof Components.interfaces.nsIDOMHTMLEmbedElement ||
-        element instanceof Components.interfaces.nsIDOMHTMLObjectElement ||
-        element instanceof Components.interfaces.nsIDOMHTMLSelectElement ||
-        element instanceof Components.interfaces.nsIDOMHTMLTextAreaElement)
+    if (element instanceof Ci.nsIDOMXULElement ||
+        element instanceof Ci.nsIDOMHTMLEmbedElement ||
+        element instanceof Ci.nsIDOMHTMLObjectElement ||
+        element instanceof Ci.nsIDOMHTMLSelectElement ||
+        element instanceof Ci.nsIDOMHTMLTextAreaElement)
       return true;
 
     // Don't start a find if the focus is on an editable field
-    if (element instanceof Components.interfaces.nsIDOMHTMLInputElement &&
+    if (element instanceof Ci.nsIDOMHTMLInputElement &&
         element.mozIsTextField(false))
       return true;
 
@@ -177,12 +177,12 @@ typeAheadFind.prototype = {
     if (!w)
       return true;
 
-    var webNav = w.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                  .getInterface(Components.interfaces.nsIWebNavigation);
+    var webNav = w.QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebNavigation);
     try {
       // Don't start a find if the window is in design mode
-      if (webNav.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                .getInterface(Components.interfaces.nsIEditingSession)
+      if (webNav.QueryInterface(Ci.nsIInterfaceRequestor)
+                .getInterface(Ci.nsIEditingSession)
                 .windowIsEditable(w))
         return true;
     } catch (e) {
@@ -206,7 +206,7 @@ typeAheadFind.prototype = {
         if (!this.mPrefs.getBoolPref("autostart"))
           return true;
         // Don't start in windows that don't want autostart
-        if (webNav.QueryInterface(Components.interfaces.nsIDocShell)
+        if (webNav.QueryInterface(Ci.nsIDocShell)
                   .chromeEventHandler.getAttribute("autofind") == "false")
           return true;
         this.startFind(window, this.mPrefs.getBoolPref("linksonly"));
@@ -236,7 +236,7 @@ typeAheadFind.prototype = {
       aExtra = " " + this.mBundle.GetStringFromName(aExtra);
     var url = "";
     var string = this.mLinks ? "link" : "text";
-    if (aResult == Components.interfaces.nsITypeAheadFind.FIND_NOTFOUND)
+    if (aResult == Ci.nsITypeAheadFind.FIND_NOTFOUND)
       string += "not";
     else if (this.mFind.foundLink && this.mFind.foundLink.href)
       url = "  " + this.mBundle.GetStringFromName("openparen") +
@@ -251,24 +251,24 @@ typeAheadFind.prototype = {
   startTimer: function() {
     if (this.mPrefs.getBoolPref("enabletimeout")) {
       if (!this.mTimer)
-        this.mTimer = Components.classes["@mozilla.org/timer;1"]
-                                .createInstance(Components.interfaces.nsITimer);
+        this.mTimer = Cc["@mozilla.org/timer;1"]
+                        .createInstance(Ci.nsITimer);
       this.mTimer.initWithCallback(this,
           this.mPrefs.getIntPref("timeout"),
-          Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+          Ci.nsITimer.TYPE_ONE_SHOT);
     }
   },
   processKey: function(aEvent) {
     // Escape always cancels the find.
-    if (aEvent.keyCode == Components.interfaces.nsIDOMKeyEvent.DOM_VK_ESCAPE) {
+    if (aEvent.keyCode == Ci.nsIDOMKeyEvent.DOM_VK_ESCAPE) {
       aEvent.preventDefault();
       aEvent.stopPropagation();
       this.stopFind(false);
       return false;
     }
 
-    var result = Components.interfaces.nsITypeAheadFind.FIND_NOTFOUND;
-    if (aEvent.keyCode == Components.interfaces.nsIDOMKeyEvent.DOM_VK_BACK_SPACE) {
+    var result = Ci.nsITypeAheadFind.FIND_NOTFOUND;
+    if (aEvent.keyCode == Ci.nsIDOMKeyEvent.DOM_VK_BACK_SPACE) {
       aEvent.preventDefault();
       aEvent.stopPropagation();
       this.mSearchString = this.mSearchString.slice(0, -1);
@@ -307,12 +307,12 @@ typeAheadFind.prototype = {
       if (!this.mBadKeysSinceMatch) {
         result = this.mFind.find(this.mSearchString, this.mLinks);
         if (previousString &&
-            result == Components.interfaces.nsITypeAheadFind.FIND_NOTFOUND)
+            result == Ci.nsITypeAheadFind.FIND_NOTFOUND)
           // Use a separate find instance to rehighlight the previous match
           // until bug 463294 is fixed.
           this.mFound.find(previousString, this.mLinks);
       }
-      if (result == Components.interfaces.nsITypeAheadFind.FIND_NOTFOUND)
+      if (result == Ci.nsITypeAheadFind.FIND_NOTFOUND)
         this.mBadKeysSinceMatch++;
     }
 
@@ -322,19 +322,19 @@ typeAheadFind.prototype = {
 
     this.showStatusMatch(result, "");
     if (!this.mFindService)
-      this.mFindService = Components.classes["@mozilla.org/find/find_service;1"]
-                                    .getService(Components.interfaces.nsIFindService);
+      this.mFindService = Cc["@mozilla.org/find/find_service;1"]
+                            .getService(Ci.nsIFindService);
     this.mFindService.searchString = this.mSearchString;
     // Watch for blur changes in case the cursor leaves the current field.
     this.mEventTarget.addEventListener("blur", this, true);
     // Also watch for the cursor moving within the current field or window.
     var commandDispatcher = this.mEventTarget.ownerDocument.commandDispatcher;
     var editable = commandDispatcher.focusedElement;
-    if (editable instanceof Components.interfaces.nsIDOMNSEditableElement)
+    if (editable instanceof Ci.nsIDOMNSEditableElement)
       this.mSelection = editable.editor.selection;
     else
       this.mSelection = commandDispatcher.focusedWindow.getSelection();
-    this.mSelection.QueryInterface(Components.interfaces.nsISelectionPrivate)
+    this.mSelection.QueryInterface(Ci.nsISelectionPrivate)
                    .addSelectionListener(this);
     return false;
   },
@@ -343,12 +343,12 @@ typeAheadFind.prototype = {
       this.stopFind(true);
     // Try to get the status bar for the specified window
     this.mXULBrowserWindow =
-        aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-               .getInterface(Components.interfaces.nsIWebNavigation)
-               .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+        aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+               .getInterface(Ci.nsIWebNavigation)
+               .QueryInterface(Ci.nsIDocShellTreeItem)
                .treeOwner
-               .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-               .getInterface(Components.interfaces.nsIXULWindow)
+               .QueryInterface(Ci.nsIInterfaceRequestor)
+               .getInterface(Ci.nsIXULWindow)
                .XULBrowserWindow;
 
     // If the current window is chrome then focus content instead
@@ -357,23 +357,23 @@ typeAheadFind.prototype = {
       (w = aWindow.content).focus();
 
     // Get two toolkit typeaheadfind instances if we don't have them already.
-    var docShell = w.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                    .getInterface(Components.interfaces.nsIWebNavigation)
-                    .QueryInterface(Components.interfaces.nsIDocShell);
+    var docShell = w.QueryInterface(Ci.nsIInterfaceRequestor)
+                    .getInterface(Ci.nsIWebNavigation)
+                    .QueryInterface(Ci.nsIDocShell);
     if (!this.mFind) {
-      this.mFind = Components.classes["@mozilla.org/typeaheadfind;1"]
-                             .createInstance(Components.interfaces.nsITypeAheadFind);
+      this.mFind = Cc["@mozilla.org/typeaheadfind;1"]
+                     .createInstance(Ci.nsITypeAheadFind);
       this.mFind.init(docShell);
-      this.mFound = Components.classes["@mozilla.org/typeaheadfind;1"]
-                             .createInstance(Components.interfaces.nsITypeAheadFind);
+      this.mFound = Cc["@mozilla.org/typeaheadfind;1"]
+                             .createInstance(Ci.nsITypeAheadFind);
       this.mFound.init(docShell);
     }
 
     // Get the string bundle if we don't have it already.
     if (!this.mBundle)
-      this.mBundle = Components.classes["@mozilla.org/intl/stringbundle;1"]
-                               .getService(Components.interfaces.nsIStringBundleService)
-                               .createBundle("chrome://communicator/locale/typeaheadfind.properties");
+      this.mBundle = Cc["@mozilla.org/intl/stringbundle;1"]
+                       .getService(Ci.nsIStringBundleService)
+                       .createBundle("chrome://communicator/locale/typeaheadfind.properties");
 
     // Set up all our properties
     this.mFind.setDocShell(docShell);
@@ -395,7 +395,7 @@ typeAheadFind.prototype = {
       this.mTimer.cancel();
     if (this.mFind)
       this.mFind.setSelectionModeAndRepaint(
-          Components.interfaces.nsISelectionController.SELECTION_ON);
+          Ci.nsISelectionController.SELECTION_ON);
     if (this.mEventTarget) {
       this.mEventTarget.removeEventListener("blur", this, true);
       this.mEventTarget.removeEventListener("pagehide", this, true);

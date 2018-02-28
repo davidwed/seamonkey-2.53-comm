@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/mailViewManager.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailViewManager.js");
 
 // these constants are now authoritatively defined in mailViewManager.js (above)
 // tag views have kViewTagMarker + their key as value
@@ -26,11 +26,11 @@ var kViewTagMarker  = MailViewConstants.kViewTagMarker;
  */
 var gMailViewList = null;
 
-var nsMsgSearchScope  = Components.interfaces.nsMsgSearchScope;
-var nsMsgSearchAttrib = Components.interfaces.nsMsgSearchAttrib;
-var nsMsgSearchOp     = Components.interfaces.nsMsgSearchOp;
+var nsMsgSearchScope  = Ci.nsMsgSearchScope;
+var nsMsgSearchAttrib = Ci.nsMsgSearchAttrib;
+var nsMsgSearchOp     = Ci.nsMsgSearchOp;
 
-var nsMsgMessageFlags = Components.interfaces.nsMsgMessageFlags;
+var nsMsgMessageFlags = Ci.nsMsgMessageFlags;
 
 // perform the view/action requested by the aValue string
 // and set the view picker label to the aLabel string
@@ -188,7 +188,7 @@ function RefreshViewPopup(aViewPopup)
   if (server.type == "imap")
   {
     let imapServer =
-      server.QueryInterface(Components.interfaces.nsIImapIncomingServer);
+      server.QueryInterface(Ci.nsIImapIncomingServer);
     if (imapServer.deleteModel == 0) { // nsMsgImapDeleteModels.IMAPDelete
       viewNotDeleted.setAttribute("hidden", false);
       viewNotDeleted.setAttribute("checked",
@@ -202,8 +202,8 @@ function RefreshCustomViewsPopup(aMenupopup)
 {
   // for each mail view in the msg view list, add an entry in our combo box
   if (!gMailViewList)
-    gMailViewList = Components.classes["@mozilla.org/messenger/mailviewlist;1"]
-                              .getService(Components.interfaces.nsIMsgMailViewList);
+    gMailViewList = Cc["@mozilla.org/messenger/mailviewlist;1"]
+                      .getService(Ci.nsIMsgMailViewList);
   // remove all menuitems
   while (aMenupopup.hasChildNodes())
     aMenupopup.lastChild.remove();
