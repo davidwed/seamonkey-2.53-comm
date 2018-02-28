@@ -780,16 +780,15 @@ nsContextMenu.prototype = {
     try {
       var show = false;
       // is it a popup window?
-      const CI = Components.interfaces;
       var xulwin = window
-                  .QueryInterface(CI.nsIInterfaceRequestor)
-                  .getInterface(CI.nsIWebNavigation)
-                  .QueryInterface(CI.nsIDocShellTreeItem)
+                  .QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebNavigation)
+                  .QueryInterface(Ci.nsIDocShellTreeItem)
                   .treeOwner
-                  .QueryInterface(CI.nsIInterfaceRequestor)
-                  .getInterface(CI.nsIXULWindow);
+                  .QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIXULWindow);
       if (xulwin.contextFlags &
-          CI.nsIWindowCreator2.PARENT_IS_LOADING_OR_RUNNING_TIMEOUT) {
+          Ci.nsIWindowCreator2.PARENT_IS_LOADING_OR_RUNNING_TIMEOUT) {
         // do the pref settings allow site-by-site popup management?
         show = !Services.prefs.getBoolPref("dom.disable_open_during_load");
       }
