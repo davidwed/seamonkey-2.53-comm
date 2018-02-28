@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/StringBundle.js");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/StringBundle.js");
 
 var EXPORTED_SYMBOLS = [
   "GetCardForEmail", "FormatDisplayName", "FormatDisplayNameList",
@@ -29,7 +29,7 @@ function GetCardForEmail(aEmailAddress) {
   // the cardForEmailAddress function.
   // Future expansion could be to domain matches
   let books = MailServices.ab.directories;
-  for (let book in fixIterator(books, Components.interfaces.nsIAbDirectory)) {
+  for (let book in fixIterator(books, Ci.nsIAbDirectory)) {
     try {
       let card = book.cardForEmailAddress(aEmailAddress);
       if (card)
@@ -44,7 +44,7 @@ function GetCardForEmail(aEmailAddress) {
 function _getIdentityForAddress(aEmailAddress) {
   let emailAddress = aEmailAddress.toLowerCase();
   for (let identity in fixIterator(MailServices.accounts.allIdentities,
-                                   Components.interfaces.nsIMsgIdentity)) {
+                                   Ci.nsIMsgIdentity)) {
     if (!identity.email)
       continue;
     if (emailAddress == identity.email.toLowerCase())

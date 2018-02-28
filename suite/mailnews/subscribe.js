@@ -19,7 +19,7 @@ var gSubscribeDeck = null;
 var gSearchView = null;
 var gSearchTreeBoxObject = null;
 // the rdf service
-var RDF = Components.classes['@mozilla.org/rdf/rdf-service;1'].getService(Components.interfaces.nsIRDFService);
+var RDF = Cc['@mozilla.org/rdf/rdf-service;1'].getService(Ci.nsIRDFService);
 var subscribeDS = RDF.GetDataSource("rdf:subscribe");
 
 var gSubscribeBundle;
@@ -101,7 +101,7 @@ function SetUpTree(forceToServer, getOnlyNew)
   try
   {
     CleanUpSearchView();
-    gSubscribableServer = server.QueryInterface(Components.interfaces.nsISubscribableServer);
+    gSubscribableServer = server.QueryInterface(Ci.nsISubscribableServer);
     gSubscribeTree.setAttribute('ref', '');
 
     // enable (or disable) the search related UI
@@ -171,12 +171,12 @@ function SubscribeOnLoad()
 
   gSubscribeDeck = document.getElementById("subscribedeck");
 
-  msgWindow = Components.classes["@mozilla.org/messenger/msgwindow;1"]
-                        .createInstance(Components.interfaces.nsIMsgWindow);
+  msgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
+                .createInstance(Ci.nsIMsgWindow);
   msgWindow.domWindow = window;
   msgWindow.statusFeedback = gStatusFeedback;
   msgWindow.rootDocShell.allowAuth = true;
-  msgWindow.rootDocShell.appType = Components.interfaces.nsIDocShell.APP_TYPE_MAIL;
+  msgWindow.rootDocShell.appType = Ci.nsIDocShell.APP_TYPE_MAIL;
 
   // look in arguments[0] for parameters
   if (window.arguments && window.arguments[0]) {
@@ -188,7 +188,7 @@ function SubscribeOnLoad()
   gServerURI = null;
   CleanUpSearchView();
   var folder = window.arguments[0].folder;
-  if (folder && folder.server instanceof Components.interfaces.nsISubscribableServer)
+  if (folder && folder.server instanceof Ci.nsISubscribableServer)
   {
     gSubscribableServer = folder.server;
     gServerURI = folder.server.serverURI;
@@ -380,7 +380,7 @@ function GetRDFProperty(aRes, aProp)
 {
   var propRes = RDF.GetResource("http://home.netscape.com/NC-rdf#"+aProp);
   var valueRes = gSubscribeTree.database.GetTarget(aRes, propRes, true);
-  return valueRes ? valueRes.QueryInterface(Components.interfaces.nsIRDFLiteral).Value : null;
+  return valueRes ? valueRes.QueryInterface(Ci.nsIRDFLiteral).Value : null;
 }
 
 function SubscribeOnClick(event)
@@ -484,7 +484,7 @@ function Search()
     gSubscribableServer.setSearchValue(searchValue);
 
     if (!gSearchView && gSubscribableServer) {
-    gSearchView = gSubscribableServer.QueryInterface(Components.interfaces.nsITreeView);
+    gSearchView = gSubscribableServer.QueryInterface(Ci.nsITreeView);
       gSearchView.selection = null;
     gSearchTreeBoxObject.view = gSearchView;
   }

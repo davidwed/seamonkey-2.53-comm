@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/errUtils.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/errUtils.js");
 
 var gPrefTab = null;
 
@@ -18,8 +18,8 @@ var preferencesTabType = {
   lastBrowserId: 0,
   bundle: Services.strings.createBundle(
     "chrome://messenger/locale/messenger.properties"),
-  protoSvc: Components.classes["@mozilla.org/uriloader/external-protocol-service;1"]
-                      .getService(Components.interfaces.nsIExternalProtocolService),
+  protoSvc: Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+              .getService(Ci.nsIExternalProtocolService),
 
   get loadingTabString() {
     delete this.loadingTabString;

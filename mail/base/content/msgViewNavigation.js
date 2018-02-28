@@ -5,8 +5,8 @@
 
 /*  This file contains the js functions necessary to implement view navigation within the 3 pane. */
 
-Components.utils.import("resource:///modules/folderUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/folderUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function GetSubFoldersInFolderPaneOrder(folder)
 {
@@ -16,7 +16,7 @@ function GetSubFoldersInFolderPaneOrder(folder)
   // get all the subfolders
   while (subFolders.hasMoreElements()) {
     msgFolders[msgFolders.length] =
-      subFolders.getNext().QueryInterface(Components.interfaces.nsIMsgFolder);
+      subFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
   }
 
   function compareFolderSortKey(folder1, folder2) {
@@ -43,7 +43,7 @@ function FindNextChildFolder(aParent, aAfter)
     while (folder != aAfter)
       folder = subFolders[i++];
 
-    const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+    const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
     let ignoreFlags = nsMsgFolderFlags.Trash | nsMsgFolderFlags.SentMail |
                       nsMsgFolderFlags.Drafts | nsMsgFolderFlags.Queue |
                       nsMsgFolderFlags.Templates | nsMsgFolderFlags.Junk;

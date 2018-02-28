@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // local static variables
 
@@ -31,7 +31,7 @@ nsMsgTraitService.prototype =
   classID: Components.ID("{A2E95F4F-DA72-4a41-9493-661AD353C00A}"),
 
   QueryInterface: XPCOMUtils.generateQI([
-      Components.interfaces.nsIMsgTraitService]),
+      Ci.nsIMsgTraitService]),
 
   // nsIMsgTraitService implementation
 

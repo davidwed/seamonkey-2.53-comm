@@ -105,7 +105,7 @@ OAuth2.prototype = {
                 }
 
                 this.account.finishAuthorizationRequest();
-                this.account.onAuthorizationFailed(Components.results.NS_ERROR_ABORT, '{ "error": "cancelled"}');
+                this.account.onAuthorizationFailed(Cr.NS_ERROR_ABORT, '{ "error": "cancelled"}');
             },
 
             loaded: function (aWindow, aWebProgress) {

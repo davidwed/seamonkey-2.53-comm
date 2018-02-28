@@ -3,14 +3,14 @@
  * Test suite for nsIMsgFolder functions.
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 function run_test() {
   // Create a local mail account (we need this first)
   MailServices.accounts.createLocalMailAccount();
 
   // Get the account
-  let account = MailServices.accounts.accounts.queryElementAt(0, Components.interfaces.nsIMsgAccount);
+  let account = MailServices.accounts.accounts.queryElementAt(0, Ci.nsIMsgAccount);
 
   // Get the root folder
   var root = account.incomingServer.rootFolder;

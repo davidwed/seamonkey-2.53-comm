@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/MailUtils.js");
+Cu.import("resource:///modules/MailUtils.js");
 
 var gFccRadioElemChoice, gDraftsRadioElemChoice, gArchivesRadioElemChoice, gTmplRadioElemChoice;
 var gFccRadioElemChoiceLocked, gDraftsRadioElemChoiceLocked, gArchivesRadioElemChoiceLocked, gTmplRadioElemChoiceLocked;
@@ -417,7 +417,7 @@ function SetRadioButtons(selectPickerId, unselectPickerId)
 function updateArchiveHierarchyButton(archiveFolder) {
   let isGmailImap = (archiveFolder.server.type == "imap" &&
                      archiveFolder.server.QueryInterface(
-                       Components.interfaces.nsIImapIncomingServer)
+                       Ci.nsIImapIncomingServer)
                      .isGMailServer);
   document.getElementById("archiveHierarchyButton").disabled = isGmailImap;
 }

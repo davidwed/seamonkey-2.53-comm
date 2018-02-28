@@ -5,8 +5,8 @@
 var CONVERSATION_WINDOW_URI = "chrome://instantbird/content/instantbird.xul";
 this.EXPORTED_SYMBOLS = ["Conversations"];
 
-Components.utils.import("resource:///modules/imServices.jsm");
-Components.utils.import("resource:///modules/ibInterruptions.jsm");
+Cu.import("resource:///modules/imServices.jsm");
+Cu.import("resource:///modules/ibInterruptions.jsm");
 
 var Conversations = {
   _unreadCount: 0,
@@ -84,9 +84,9 @@ var Conversations = {
       doc.getElementById("conversations").selectPanel(conv);
       doc.defaultView.focus();
 #ifdef XP_MACOSX
-      Components.classes["@mozilla.org/widget/macdocksupport;1"]
-                .getService(Components.interfaces.nsIMacDockSupport)
-                .activateApplication(true);
+      Cc["@mozilla.org/widget/macdocksupport;1"]
+        .getService(Ci.nsIMacDockSupport)
+        .activateApplication(true);
 #endif
     }
     return uiConv;

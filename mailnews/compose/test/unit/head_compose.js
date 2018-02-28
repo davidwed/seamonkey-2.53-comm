@@ -1,10 +1,10 @@
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/IOUtils.js");
-Components.utils.import("resource://gre/modules/Promise.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://testing-common/mailnews/mailTestUtils.js");
-Components.utils.import("resource://testing-common/mailnews/localAccountUtils.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/IOUtils.js");
+Cu.import("resource://gre/modules/Promise.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://testing-common/mailnews/mailTestUtils.js");
+Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -12,7 +12,7 @@ var Cr = Components.results;
 var CC = Components.Constructor;
 
 // WebApps.jsm called by ProxyAutoConfig (PAC) requires a valid nsIXULAppInfo.
-Components.utils.import("resource://testing-common/AppInfo.jsm");
+Cu.import("resource://testing-common/AppInfo.jsm");
 updateAppInfo();
 
 // Ensure the profile directory is set up
@@ -24,11 +24,11 @@ var gDEPTH = "../../../../";
 load("../../../resources/abSetup.js");
 
 // Import the smtp server scripts
-Components.utils.import("resource://testing-common/mailnews/maild.js");
-Components.utils.import("resource://testing-common/mailnews/smtpd.js");
-Components.utils.import("resource://testing-common/mailnews/auth.js");
+Cu.import("resource://testing-common/mailnews/maild.js");
+Cu.import("resource://testing-common/mailnews/smtpd.js");
+Cu.import("resource://testing-common/mailnews/auth.js");
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var gDraftFolder;
 
@@ -102,7 +102,7 @@ var copyListener = {
         iid.equals(Ci.nsISupports))
       return this;
 
-    throw Components.results.NS_ERROR_NO_INTERFACE;
+    throw Cr.NS_ERROR_NO_INTERFACE;
   }
 };
 
@@ -124,7 +124,7 @@ var progressListener = {
         iid.equals(Ci.nsISupports))
       return this;
 
-    throw Components.results.NS_NOINTERFACE;
+    throw Cr.NS_NOINTERFACE;
   }
 };
 

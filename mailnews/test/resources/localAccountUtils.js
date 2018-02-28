@@ -5,8 +5,8 @@
 this.EXPORTED_SYMBOLS = ['localAccountUtils'];
 
 // MailServices
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;

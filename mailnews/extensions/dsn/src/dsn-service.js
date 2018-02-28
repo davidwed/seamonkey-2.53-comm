@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function DSNService() {}
 
@@ -16,7 +16,7 @@ DSNService.prototype = {
             server.type != "none");
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIMsgAccountManagerExtension]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIMsgAccountManagerExtension]),
   classID: Components.ID("{849dab91-9bc9-4508-a0ee-c2453e7c092d}"),
 };
 

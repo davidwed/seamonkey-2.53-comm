@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function browserWindowsCount() {
   let count = 0;
@@ -28,7 +28,7 @@ function test() {
 
     var origWin;
     function windowObserver(aSubject, aTopic, aData) {
-      let theWin = aSubject.QueryInterface(Components.interfaces.nsIDOMWindow);
+      let theWin = aSubject.QueryInterface(Ci.nsIDOMWindow);
       if (origWin && theWin != origWin)
         return;
 

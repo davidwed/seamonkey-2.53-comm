@@ -9,11 +9,11 @@ var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers",
                        "account-manager-helpers"];
 
 var mozmill = {};
-Components.utils.import("resource://mozmill/modules/mozmill.js", mozmill);
+Cu.import("resource://mozmill/modules/mozmill.js", mozmill);
 var controller = {};
-Components.utils.import("resource://mozmill/modules/controller.js", controller);
+Cu.import("resource://mozmill/modules/controller.js", controller);
 var elib = {};
-Components.utils.import("resource://mozmill/modules/elementslib.js", elib);
+Cu.import("resource://mozmill/modules/elementslib.js", elib);
 
 var defaultIdentity;
 
@@ -50,7 +50,7 @@ function test_archive_options_enabled() {
   // First, create an IMAP server
   let imapServer = MailServices.accounts
     .createIncomingServer("nobody", "example.com", "imap")
-    .QueryInterface(Components.interfaces.nsIImapIncomingServer);
+    .QueryInterface(Ci.nsIImapIncomingServer);
 
   let identity = MailServices.accounts.createIdentity();
   identity.email = "tinderbox@example.com";

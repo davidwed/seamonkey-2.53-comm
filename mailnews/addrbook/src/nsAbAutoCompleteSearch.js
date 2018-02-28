@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/ABQueryUtils.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/ABQueryUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-var ACR = Components.interfaces.nsIAutoCompleteResult;
-var nsIAbAutoCompleteResult = Components.interfaces.nsIAbAutoCompleteResult;
+var ACR = Ci.nsIAutoCompleteResult;
+var nsIAbAutoCompleteResult = Ci.nsIAbAutoCompleteResult;
 
 function nsAbAutoCompleteResult(aSearchString) {
   // Can't create this in the prototype as we'd get the same array for
@@ -124,7 +124,7 @@ nsAbAutoCompleteSearch.prototype = {
           aDirectory.modifyCard(aCard);
         }
         catch (ex) {
-          Components.utils.reportError(ex);
+          Cu.reportError(ex);
         }
       }
     }
@@ -189,7 +189,7 @@ nsAbAutoCompleteSearch.prototype = {
     try {
       childCards = this._abManager.getDirectory(directory.URI + searchQuery).childCards;
     } catch (e) {
-      Components.utils.reportError("Error running addressbook query '" + searchQuery + "': " + e);
+      Cu.reportError("Error running addressbook query '" + searchQuery + "': " + e);
       return;
     }
 
@@ -200,7 +200,7 @@ nsAbAutoCompleteSearch.prototype = {
     while (childCards.hasMoreElements()) {
       var card = childCards.getNext();
 
-      if (card instanceof Components.interfaces.nsIAbCard) {
+      if (card instanceof Ci.nsIAbCard) {
         if (card.isMailList)
           this._addToResult(commentColumn, directory, card, "", true, result);
         else {
@@ -422,7 +422,7 @@ nsAbAutoCompleteSearch.prototype = {
       // just going to find duplicates.
       while (allABs.hasMoreElements()) {
         let dir = allABs.getNext();
-        if (dir instanceof Components.interfaces.nsIAbDirectory &&
+        if (dir instanceof Ci.nsIAbDirectory &&
             dir.useForAutocomplete(("idKey" in params) ? params.idKey : null)) {
           this._searchCards(searchQuery, dir, result);
         }
@@ -456,8 +456,8 @@ nsAbAutoCompleteSearch.prototype = {
 
   // nsISupports
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces
-                                                   .nsIAutoCompleteSearch])
+  QueryInterface: XPCOMUtils.generateQI([Ci
+                                           .nsIAutoCompleteSearch])
 };
 
 // Module

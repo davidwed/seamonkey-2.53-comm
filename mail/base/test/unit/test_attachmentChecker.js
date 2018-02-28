@@ -14,7 +14,7 @@
 
 // Globals
 
-Components.utils.import("resource:///modules/attachmentChecker.js");
+Cu.import("resource:///modules/attachmentChecker.js");
 
 /*
  * UTILITIES

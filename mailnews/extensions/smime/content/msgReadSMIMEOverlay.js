@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gEncryptionStatus = -1;
 var gSignatureStatus = -1;
@@ -47,10 +47,10 @@ function showMessageReadSecurityInfo()
     return;
   }
 
-  let params = Components.classes["@mozilla.org/embedcomp/dialogparam;1"]
-    .createInstance(Components.interfaces.nsIDialogParamBlock);
-  params.objects = Components.classes["@mozilla.org/array;1"]
-    .createInstance(Components.interfaces.nsIMutableArray);
+  let params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
+    .createInstance(Ci.nsIDialogParamBlock);
+  params.objects = Cc["@mozilla.org/array;1"]
+    .createInstance(Ci.nsIMutableArray);
   // Append even if null... the receiver must handle that.
   params.objects.appendElement(gSignerCert, false);
   params.objects.appendElement(gEncryptionCert, false);

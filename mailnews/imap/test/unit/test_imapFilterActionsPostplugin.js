@@ -5,10 +5,10 @@
  * adapted from test_imapFilterActions.js
  */
 
-Components.utils.import("resource:///modules/folderUtils.jsm");
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Task.jsm");
+Cu.import("resource:///modules/folderUtils.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Task.jsm");
 
 var nsMsgSearchScope = Ci.nsMsgSearchScope;
 var nsMsgSearchAttrib = Ci.nsMsgSearchAttrib;
@@ -38,8 +38,8 @@ var gMessageSubject = "Hello, did you receive my bugmail?";
 var gMessageInBody = "an HTML message";
 
 // various object references
-var gDbService = Components.classes["@mozilla.org/msgDatabase/msgDBService;1"]
-                             .getService(Components.interfaces.nsIMsgDBService);
+var gDbService = Cc["@mozilla.org/msgDatabase/msgDBService;1"]
+                             .getService(Ci.nsIMsgDBService);
 var kDeleteOrMoveMsgCompleted = Cc["@mozilla.org/atom-service;1"]
                                     .getService(Ci.nsIAtomService)
                                     .getAtom("DeleteOrMoveMsgCompleted");

@@ -1,4 +1,4 @@
-Components.utils.import("resource://testing-common/mailnews/localAccountUtils.js");
+Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
 
 function run_test()
 {
