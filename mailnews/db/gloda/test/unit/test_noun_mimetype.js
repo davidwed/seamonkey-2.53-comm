@@ -11,7 +11,7 @@
 
 load("resources/glodaTestHelper.js");
 
-Components.utils.import("resource:///modules/gloda/noun_mimetype.js");
+Cu.import("resource:///modules/gloda/noun_mimetype.js");
 
 /* ===== Tests ===== */
 

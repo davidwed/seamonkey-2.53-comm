@@ -115,7 +115,7 @@ SubDialog.prototype = {
       try {
         this._closingCallback.call(null, aEvent);
       } catch (ex) {
-        Components.utils.reportError(ex);
+        Cu.reportError(ex);
       }
       this._closingCallback = null;
     }
@@ -299,7 +299,7 @@ SubDialog.prototype = {
     } else if (frameHeight.endsWith("px")) {
       comparisonFrameHeight = parseFloat(frameHeight, 10);
     } else {
-      Components.utils.reportError(
+      Cu.reportError(
                      "This dialog (" + this._frame.contentWindow.location.href + ") " +
                      "set a height in non-px-non-em units ('" + frameHeight + "'), " +
                      "which is likely to lead to bad sizing in in-content preferences. " +
@@ -476,9 +476,9 @@ SubDialog.prototype = {
   },
 
   _getBrowser() {
-    return window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                 .getInterface(Components.interfaces.nsIWebNavigation)
-                 .QueryInterface(Components.interfaces.nsIDocShell)
+    return window.QueryInterface(Ci.nsIInterfaceRequestor)
+                 .getInterface(Ci.nsIWebNavigation)
+                 .QueryInterface(Ci.nsIDocShell)
                  .chromeEventHandler;
   },
 };

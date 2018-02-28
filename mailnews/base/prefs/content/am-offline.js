@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
 
 var gIncomingServer;
 var gServerType;
@@ -43,7 +43,7 @@ function initServerSettings()
         document.getElementById("offline.notDownloadMin").value = "50";
 
     if(gServerType == "imap") {
-        gImapIncomingServer = gIncomingServer.QueryInterface(Components.interfaces.nsIImapIncomingServer);
+        gImapIncomingServer = gIncomingServer.QueryInterface(Ci.nsIImapIncomingServer);
         document.getElementById("offline.folders").checked =  gImapIncomingServer.offlineDownload;
     }
 }
@@ -129,7 +129,7 @@ function onPreInit(account, accountValues)
   document.title = prefBundle.getString(titleStringID);
 
   if (gServerType == "pop3") {
-    var pop3Server = gIncomingServer.QueryInterface(Components.interfaces.nsIPop3IncomingServer);
+    var pop3Server = gIncomingServer.QueryInterface(Ci.nsIPop3IncomingServer);
     // hide retention settings for deferred accounts
     if (pop3Server.deferredToAccount.length) {
       var retentionRadio = document.getElementById("retention.keepMsg");
@@ -204,8 +204,8 @@ function onCancel()
 function onSave()
 {
     var downloadSettings =
-      Components.classes["@mozilla.org/msgDatabase/downloadSettings;1"]
-                .createInstance(Components.interfaces.nsIMsgDownloadSettings);
+      Cc["@mozilla.org/msgDatabase/downloadSettings;1"]
+        .createInstance(Ci.nsIMsgDownloadSettings);
 
     gIncomingServer.limitOfflineMessageSize = document.getElementById("offline.notDownload").checked;
     gIncomingServer.maxMessageSize = document.getElementById("offline.notDownloadMin").value;
@@ -299,11 +299,11 @@ function toggleOffline()
 {
     let offline = document.getElementById("offline.folders").checked;
     let allFolders = gIncomingServer.rootFolder.descendants;
-    for (let folder in fixIterator(allFolders, Components.interfaces.nsIMsgFolder)) {
+    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder)) {
       if (offline)
-        folder.setFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+        folder.setFlag(Ci.nsMsgFolderFlags.Offline);
       else
-        folder.clearFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+        folder.clearFlag(Ci.nsMsgFolderFlags.Offline);
     }
 }
 
@@ -311,8 +311,8 @@ function collectOfflineFolders()
 {
     let offlineFolderMap = {};
     let allFolders = gIncomingServer.rootFolder.descendants;
-    for (let folder in fixIterator(allFolders, Components.interfaces.nsIMsgFolder))
-      offlineFolderMap[folder.folderURL] = folder.getFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder))
+      offlineFolderMap[folder.folderURL] = folder.getFlag(Ci.nsMsgFolderFlags.Offline);
 
     return offlineFolderMap;
 }
@@ -320,11 +320,11 @@ function collectOfflineFolders()
 function restoreOfflineFolders(offlineFolderMap)
 {
     let allFolders = gIncomingServer.rootFolder.descendants;
-    for (let folder in fixIterator(allFolders, Components.interfaces.nsIMsgFolder)) {
+    for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder)) {
       if (offlineFolderMap[folder.folderURL])
-        folder.setFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+        folder.setFlag(Ci.nsMsgFolderFlags.Offline);
       else
-        folder.clearFlag(Components.interfaces.nsMsgFolderFlags.Offline);
+        folder.clearFlag(Ci.nsMsgFolderFlags.Offline);
     }
 }
 

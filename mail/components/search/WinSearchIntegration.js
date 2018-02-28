@@ -7,7 +7,7 @@
 
 var EXPORTED_SYMBOLS = ["SearchIntegration"];
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var MSG_DB_LARGE_COMMIT = 1;
 var CRLF="\r\n";

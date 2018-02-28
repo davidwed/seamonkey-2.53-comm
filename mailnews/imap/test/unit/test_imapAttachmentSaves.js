@@ -12,8 +12,8 @@ load("../../../resources/messageGenerator.js");
 
 // javascript mime emitter functions
 var mimeMsg = {};
-Components.utils.import("resource:///modules/gloda/mimemsg.js", mimeMsg);
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/gloda/mimemsg.js", mimeMsg);
+Cu.import("resource:///modules/mailServices.js");
 
 // IMAP pump
 

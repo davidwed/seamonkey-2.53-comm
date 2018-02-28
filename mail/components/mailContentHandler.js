@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
@@ -19,7 +19,7 @@ mailContentHandler.prototype = {
   _xpcom_factory: {
     createInstance: function mch_factory_ci(outer, iid) {
       if (outer)
-        throw Components.results.NS_ERROR_NO_AGGREGATION;
+        throw Cr.NS_ERROR_NO_AGGREGATION;
       return gMailContentHandler.QueryInterface(iid);
     }
   },
@@ -62,7 +62,7 @@ mailContentHandler.prototype = {
   // nsIFactory
   createInstance: function mch_CI(outer, iid) {
     if (outer != null)
-      throw Components.results.NS_ERROR_NO_AGGREGATION;
+      throw Cr.NS_ERROR_NO_AGGREGATION;
 
     return this.QueryInterface(iid);
   },

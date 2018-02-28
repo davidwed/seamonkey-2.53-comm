@@ -3,12 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/WindowsPreviewPerTab.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/WindowsPreviewPerTab.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 this.__defineGetter__("PluralForm", function() {
-  Components.utils.import("resource://gre/modules/PluralForm.jsm");
+  Cu.import("resource://gre/modules/PluralForm.jsm");
   return this.PluralForm;
 });
 this.__defineSetter__("PluralForm", function (val) {
@@ -124,8 +124,8 @@ const gPopupPermListener = {
 };
 
 const gFormSubmitObserver = {
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIFormSubmitObserver,
-                                         Components.interfaces.nsIObserver]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIFormSubmitObserver,
+                                         Ci.nsIObserver]),
 
   panel: null,
 
@@ -148,7 +148,7 @@ const gFormSubmitObserver = {
       return;
     }
 
-    let element = aInvalidElements.queryElementAt(0, Components.interfaces.nsISupports);
+    let element = aInvalidElements.queryElementAt(0, Ci.nsISupports);
 
     if (!(element instanceof HTMLInputElement ||
           element instanceof HTMLTextAreaElement ||
@@ -194,8 +194,8 @@ const gFormSubmitObserver = {
 
     var win = element.ownerDocument.defaultView;
     var style = win.getComputedStyle(element, null);
-    var scale = win.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                   .getInterface(Components.interfaces.nsIDOMWindowUtils)
+    var scale = win.QueryInterface(Ci.nsIInterfaceRequestor)
+                   .getInterface(Ci.nsIDOMWindowUtils)
                    .fullZoom;
 
     var offset = style.direction == 'rtl' ? parseInt(style.paddingRight) +
@@ -322,7 +322,7 @@ function BrowserReloadWithFlags(reloadFlags)
   try {
     let sh = webNav.sessionHistory;
     if (sh)
-      webNav = sh.QueryInterface(Components.interfaces.nsIWebNavigation);
+      webNav = sh.QueryInterface(Ci.nsIWebNavigation);
   } catch (e) {
   }
 
@@ -575,8 +575,8 @@ function UpdateBackForwardButtons()
   }
 }
 
-const nsIBrowserDOMWindow = Components.interfaces.nsIBrowserDOMWindow;
-const nsIInterfaceRequestor = Components.interfaces.nsIInterfaceRequestor;
+const nsIBrowserDOMWindow = Ci.nsIBrowserDOMWindow;
+const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 
 function nsBrowserAccess() {
 }
@@ -588,9 +588,9 @@ nsBrowserAccess.prototype = {
     var isExternal = !!(aFlags & nsIBrowserDOMWindow.OPEN_EXTERNAL);
 
     if (aOpener && isExternal) {
-      Components.utils.reportError("nsBrowserAccess.openURI did not expect an opener to be " +
-                                   "passed if the context is OPEN_EXTERNAL.");
-      throw Components.results.NS_ERROR_FAILURE;
+      Cu.reportError("nsBrowserAccess.openURI did not expect an opener to be " +
+                     "passed if the context is OPEN_EXTERNAL.");
+      throw Cr.NS_ERROR_FAILURE;
     }
 
     if (aWhere == nsIBrowserDOMWindow.OPEN_DEFAULTWINDOW) {
@@ -603,7 +603,7 @@ nsBrowserAccess.prototype = {
     let referrer = aOpener ? aOpener.QueryInterface(nsIInterfaceRequestor)
                                     .getInterface(nsIWebNavigation)
                                     .currentURI : null;
-    let referrerPolicy = Components.interfaces.nsIHttpChannel.REFERRER_POLICY_UNSET;
+    let referrerPolicy = Ci.nsIHttpChannel.REFERRER_POLICY_UNSET;
     var uri = aURI ? aURI.spec : "about:blank";
 
     switch (aWhere) {
@@ -617,7 +617,7 @@ nsBrowserAccess.prototype = {
         // to the nsIDOMWindow of the opened tab right away.
         let userContextId = aOpener && aOpener.document
                             ? aOpener.document.nodePrincipal.originAttributes.userContextId
-                            : Components.interfaces.nsIScriptSecurityManager.DEFAULT_USER_CONTEXT_ID;
+                            : Ci.nsIScriptSecurityManager.DEFAULT_USER_CONTEXT_ID;
         let openerWindow = (aFlags & nsIBrowserDOMWindow.OPEN_NO_OPENER) ? null : aOpener;
 
         var newTab = gBrowser.loadOneTab(uri, {triggeringPrincipal: aTriggeringPrincipal,
@@ -733,9 +733,9 @@ function Startup()
   // set home button tooltip text
   updateHomeButtonTooltip();
 
-  var lc = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                 .getInterface(Components.interfaces.nsIWebNavigation)
-                 .QueryInterface(Components.interfaces.nsILoadContext);
+  var lc = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                 .getInterface(Ci.nsIWebNavigation)
+                 .QueryInterface(Ci.nsILoadContext);
   if (lc.usePrivateBrowsing) {
     gPrivate = window;
     document.documentElement.removeAttribute("windowtype");
@@ -748,16 +748,16 @@ function Startup()
   }
 
   // initialize observers and listeners
-  var xw = lc.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+  var xw = lc.QueryInterface(Ci.nsIDocShellTreeItem)
              .treeOwner
-             .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-             .getInterface(Components.interfaces.nsIXULWindow);
+             .QueryInterface(Ci.nsIInterfaceRequestor)
+             .getInterface(Ci.nsIXULWindow);
   xw.XULBrowserWindow = window.XULBrowserWindow = new nsBrowserStatusHandler();
 
   if (!window.content.opener &&
       Services.prefs.getBoolPref("browser.doorhanger.enabled")) {
     var tmp = {};
-    Components.utils.import("resource://gre/modules/PopupNotifications.jsm", tmp);
+    Cu.import("resource://gre/modules/PopupNotifications.jsm", tmp);
     window.PopupNotifications = new tmp.PopupNotifications(
         getBrowser(),
         document.getElementById("notification-popup"),
@@ -767,7 +767,7 @@ function Startup()
     gBrowser.getNotificationBox().destroy();
     gBrowser.setAttribute("popupnotification", "true");
     // The rebind also resets popup window scrollbar visibility, so override it.
-    if (!(xw.chromeFlags & Components.interfaces.nsIWebBrowserChrome.CHROME_SCROLLBARS))
+    if (!(xw.chromeFlags & Ci.nsIWebBrowserChrome.CHROME_SCROLLBARS))
       gBrowser.selectedBrowser.style.overflow = "hidden";
   }
 
@@ -884,10 +884,10 @@ function Startup()
         }
       }
       let referrerPolicy = (window.arguments[5] != undefined ?
-          window.arguments[5] : Components.interfaces.nsIHttpChannel.REFERRER_POLICY_UNSET);
+          window.arguments[5] : Ci.nsIHttpChannel.REFERRER_POLICY_UNSET);
 
       let userContextId = (window.arguments[6] != undefined ?
-          window.arguments[6] : Components.interfaces.nsIScriptSecurityManager.DEFAULT_USER_CONTEXT_ID);
+          window.arguments[6] : Ci.nsIScriptSecurityManager.DEFAULT_USER_CONTEXT_ID);
 
       try {
         openLinkIn(uriToLoad, "current",
@@ -929,13 +929,13 @@ function Startup()
   // hook up remote support
   if (!gPrivate && REMOTESERVICE_CONTRACTID in Components.classes) {
     var remoteService =
-      Components.classes[REMOTESERVICE_CONTRACTID]
-                .getService(Components.interfaces.nsIRemoteService);
+      Cc[REMOTESERVICE_CONTRACTID]
+        .getService(Ci.nsIRemoteService);
     remoteService.registerWindow(window);
   }
 
   // ensure login manager is loaded
-  Components.classes["@mozilla.org/login-manager;1"].getService();
+  Cc["@mozilla.org/login-manager;1"].getService();
 
   // called when we go into full screen, even if it is
   // initiated by a web page script
@@ -1054,8 +1054,8 @@ function updateWindowState()
 function InitSessionStoreCallback()
 {
   try {
-    var ss = Components.classes["@mozilla.org/suite/sessionstore;1"]
-                       .getService(Components.interfaces.nsISessionStore);
+    var ss = Cc["@mozilla.org/suite/sessionstore;1"]
+               .getService(Ci.nsISessionStore);
     ss.init(window);
 
     //Check if we have "Deferred Session Restore"
@@ -1078,10 +1078,10 @@ function WindowFocusTimerCallback(element)
     // set the element in command dispatcher so focus will restore properly
     // when the window does become active
 
-    if (element instanceof Components.interfaces.nsIDOMWindow) {
+    if (element instanceof Ci.nsIDOMWindow) {
       document.commandDispatcher.focusedWindow = element;
       document.commandDispatcher.focusedElement = null;
-    } else if (element instanceof Components.interfaces.nsIDOMElement) {
+    } else if (element instanceof Ci.nsIDOMElement) {
       document.commandDispatcher.focusedWindow = element.ownerDocument.defaultView;
       document.commandDispatcher.focusedElement = element;
     }
@@ -1107,11 +1107,11 @@ function Shutdown()
 
   window.XULBrowserWindow.destroy();
   window.XULBrowserWindow = null;
-  window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-        .getInterface(Components.interfaces.nsIWebNavigation)
-        .QueryInterface(Components.interfaces.nsIDocShellTreeItem).treeOwner
-        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-        .getInterface(Components.interfaces.nsIXULWindow)
+  window.QueryInterface(Ci.nsIInterfaceRequestor)
+        .getInterface(Ci.nsIWebNavigation)
+        .QueryInterface(Ci.nsIDocShellTreeItem).treeOwner
+        .QueryInterface(Ci.nsIInterfaceRequestor)
+        .getInterface(Ci.nsIXULWindow)
         .XULBrowserWindow = null;
 
   // unregister us as a pref listener
@@ -1143,7 +1143,7 @@ function GetTypePermFromId(aId)
   // Get type and action from splitting id, first is type, second is action.
   var [type, action] = aId.split("_");
   var perm = "ACCESS_" + action.toUpperCase();
-  return [type, Components.interfaces.nsICookiePermission[perm]];
+  return [type, Ci.nsICookiePermission[perm]];
 }
 
 function CheckForVisibility(aEvent, aNode)
@@ -1197,9 +1197,9 @@ function OpenSessionHistoryIn(aWhere, aDelta, aTab)
 {
   var win = aWhere == "window" ? null : window;
   aTab = aTab || getBrowser().selectedTab;
-  var tab = Components.classes["@mozilla.org/suite/sessionstore;1"]
-                      .getService(Components.interfaces.nsISessionStore)
-                      .duplicateTab(win, aTab, aDelta, true);
+  var tab = Cc["@mozilla.org/suite/sessionstore;1"]
+              .getService(Ci.nsISessionStore)
+              .duplicateTab(win, aTab, aDelta, true);
 
   var loadInBackground = Services.prefs.getBoolPref("browser.tabs.loadInBackground");
 
@@ -1613,13 +1613,13 @@ var BrowserSearch = {
         var contentProp = RDF.GetResource("http://home.netscape.com/NC-rdf#content");
         var content = datasource.GetTarget(aboutValue, contentProp, true);
 
-        if (content instanceof Components.interfaces.nsIRDFLiteral) {
+        if (content instanceof Ci.nsIRDFLiteral) {
           // the search panel entry exists, now check if it is excluded
           // for navigator
           var excludeProp = RDF.GetResource("http://home.netscape.com/NC-rdf#exclude");
           var exclude = datasource.GetTarget(aboutValue, excludeProp, true);
 
-          if (exclude instanceof Components.interfaces.nsIRDFLiteral) {
+          if (exclude instanceof Ci.nsIRDFLiteral) {
             searchPanelExists = (exclude.Value.indexOf("navigator:browser") < 0);
           } else {
             // panel exists and no exclude set
@@ -1753,7 +1753,7 @@ class RememberLastDir {
     if (!this._lastDir || !this._lastDir.exists()) {
       try {
         this._lastDir = Services.prefs.getComplexValue(this._prefLastDir,
-                                                       Components.interfaces.nsIFile);
+                                                       Ci.nsIFile);
         if (!this._lastDir.exists()) {
           this._lastDir = null;
         }
@@ -1775,7 +1775,7 @@ class RememberLastDir {
     // Don't save the last open directory pref inside the Private Browsing mode
     if (!gPrivate) {
       Services.prefs.setComplexValue(this._prefLastDir,
-                                     Components.interfaces.nsIFile,
+                                     Ci.nsIFile,
                                      this._lastDir);
     }
   }
@@ -1817,8 +1817,8 @@ function BrowserOpenFileWindow() {
 
   // Get filepicker component.
   try {
-    const nsIFilePicker = Components.interfaces.nsIFilePicker;
-    let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+    const nsIFilePicker = Ci.nsIFilePicker;
+    let fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
     let fpCallback = function fpCallback_done(aResult) {
       if (aResult == nsIFilePicker.returnOK) {
         try {
@@ -1826,7 +1826,7 @@ function BrowserOpenFileWindow() {
           if (fp.file) {
             gLastOpenDirectory.filterIndex = fp.filterIndex;
             gLastOpenDirectory.path =
-              fp.file.parent.QueryInterface(Components.interfaces.nsIFile);
+              fp.file.parent.QueryInterface(Ci.nsIFile);
           }
         } catch (ex) {
         }
@@ -1871,8 +1871,8 @@ function updateCloseItems()
 function updateRecentMenuItems()
 {
   var browser = getBrowser();
-  var ss = Components.classes["@mozilla.org/suite/sessionstore;1"]
-                     .getService(Components.interfaces.nsISessionStore);
+  var ss = Cc["@mozilla.org/suite/sessionstore;1"]
+             .getService(Ci.nsISessionStore);
 
   var recentTabsItem = document.getElementById("menu_recentTabs");
   recentTabsItem.setAttribute("disabled", !browser || browser.getUndoList().length == 0);
@@ -1907,8 +1907,8 @@ function updateRecentTabs(menupopup)
 
 function updateRecentWindows(menupopup)
 {
-  var ss = Components.classes["@mozilla.org/suite/sessionstore;1"]
-                     .getService(Components.interfaces.nsISessionStore);
+  var ss = Cc["@mozilla.org/suite/sessionstore;1"]
+             .getService(Ci.nsISessionStore);
 
   while (menupopup.hasChildNodes())
     menupopup.lastChild.remove();
@@ -1933,15 +1933,15 @@ function updateRecentWindows(menupopup)
 
 function undoCloseWindow(aIndex)
 {
-  var ss = Components.classes["@mozilla.org/suite/sessionstore;1"]
-                     .getService(Components.interfaces.nsISessionStore);
+  var ss = Cc["@mozilla.org/suite/sessionstore;1"]
+             .getService(Ci.nsISessionStore);
 
   return ss.undoCloseWindow(aIndex);
 }
 
 function restoreLastSession() {
-  let ss = Components.classes["@mozilla.org/suite/sessionstore;1"]
-                     .getService(Components.interfaces.nsISessionStore);
+  let ss = Cc["@mozilla.org/suite/sessionstore;1"]
+             .getService(Ci.nsISessionStore);
   ss.restoreLastSession();
 }
 
@@ -2116,10 +2116,10 @@ function handleURLBarCommand(aUserAction, aTriggeringEvent)
     } else if (saveModifier) {
       try {
         // Firstly, fixup the url so that (e.g.) "www.foo.com" works
-        const nsIURIFixup = Components.interfaces.nsIURIFixup;
+        const nsIURIFixup = Ci.nsIURIFixup;
         if (!gURIFixup)
-          gURIFixup = Components.classes["@mozilla.org/docshell/urifixup;1"]
-                                .getService(nsIURIFixup);
+          gURIFixup = Cc["@mozilla.org/docshell/urifixup;1"]
+                        .getService(nsIURIFixup);
         url = gURIFixup.createFixupURI(data.url, nsIURIFixup.FIXUP_FLAGS_MAKE_ALTERNATE_URI).spec;
         // Open filepicker to save the url
         saveURL(url, null, null, false, true, null, document);
@@ -2173,7 +2173,7 @@ function getShortcutOrURIAndPostData(url) {
     try {
       entry = await PlacesUtils.keywords.fetch(keyword);
     } catch (ex) {
-      Components.utils.reportError(`Unable to fetch Places keyword "${keyword}": ${ex}`);
+      Cu.reportError(`Unable to fetch Places keyword "${keyword}": ${ex}`);
     }
     if (!entry || !entry.url) {
       // This is not a Places keyword.
@@ -2204,17 +2204,17 @@ function getShortcutOrURIAndPostData(url) {
 
 function getPostDataStream(aStringData, aKeyword, aEncKeyword, aType)
 {
-  var dataStream = Components.classes["@mozilla.org/io/string-input-stream;1"]
-                             .createInstance(Components.interfaces.nsIStringInputStream);
+  var dataStream = Cc["@mozilla.org/io/string-input-stream;1"]
+                     .createInstance(Ci.nsIStringInputStream);
   aStringData = aStringData.replace(/%s/g, aEncKeyword).replace(/%S/g, aKeyword);
   dataStream.data = aStringData;
 
-  var mimeStream = Components.classes["@mozilla.org/network/mime-input-stream;1"]
-                             .createInstance(Components.interfaces.nsIMIMEInputStream);
+  var mimeStream = Cc["@mozilla.org/network/mime-input-stream;1"]
+                     .createInstance(Ci.nsIMIMEInputStream);
   mimeStream.addHeader("Content-Type", aType);
   mimeStream.addContentLength = true;
   mimeStream.setData(dataStream);
-  return mimeStream.QueryInterface(Components.interfaces.nsIInputStream);
+  return mimeStream.QueryInterface(Ci.nsIInputStream);
 }
 
 // handleDroppedLink has the following 2 overloads:
@@ -2279,12 +2279,12 @@ function readFromClipboard()
 
   try {
     // Get the clipboard.
-    var clipboard = Components.classes["@mozilla.org/widget/clipboard;1"]
-                              .getService(Components.interfaces.nsIClipboard);
+    var clipboard = Cc["@mozilla.org/widget/clipboard;1"]
+                      .getService(Ci.nsIClipboard);
 
     // Create a transferable that will transfer the text.
-    var trans = Components.classes["@mozilla.org/widget/transferable;1"]
-                          .createInstance(Components.interfaces.nsITransferable);
+    var trans = Cc["@mozilla.org/widget/transferable;1"]
+                  .createInstance(Ci.nsITransferable);
 
     trans.init(null);
     trans.addDataFlavor("text/unicode");
@@ -2298,7 +2298,7 @@ function readFromClipboard()
     trans.getTransferData("text/unicode", data, {});
 
     if (data.value) {
-      data = data.value.QueryInterface(Components.interfaces.nsISupportsString);
+      data = data.value.QueryInterface(Ci.nsISupportsString);
       url = data.data;
     }
   } catch (ex) {
@@ -2334,17 +2334,17 @@ function readFromClipboard()
 function BrowserViewSourceOfDocument(aArgsOrDocument) {
   if (aArgsOrDocument instanceof Document) {
     // Deprecated API - callers should pass args object instead.
-    if (Components.utils.isCrossProcessWrapper(aArgsOrDocument)) {
+    if (Cu.isCrossProcessWrapper(aArgsOrDocument)) {
       throw new Error("BrowserViewSourceOfDocument cannot accept a CPOW " +
                       "as a document.");
     }
 
     let requestor = aArgsOrDocument.defaultView
-                                   .QueryInterface(Components.interfaces.nsIInterfaceRequestor);
-    let browser = requestor.getInterface(Components.interfaces.nsIWebNavigation)
-                           .QueryInterface(Components.interfaces.nsIDocShell)
+                                   .QueryInterface(Ci.nsIInterfaceRequestor);
+    let browser = requestor.getInterface(Ci.nsIWebNavigation)
+                           .QueryInterface(Ci.nsIDocShell)
                            .chromeEventHandler;
-    let outerWindowID = requestor.getInterface(Components.interfaces.nsIDOMWindowUtils)
+    let outerWindowID = requestor.getInterface(Ci.nsIDOMWindowUtils)
                                  .outerWindowID;
     let URL = browser.currentURI.spec;
     aArgsOrDocument = { browser, outerWindowID, URL };
@@ -2438,7 +2438,7 @@ function hiddenWindowStartup()
 function checkForDirectoryListing()
 {
   if ( "HTTPIndex" in content &&
-       content.HTTPIndex instanceof Components.interfaces.nsIHTTPIndex ) {
+       content.HTTPIndex instanceof Ci.nsIHTTPIndex ) {
     var forced = getBrowser().docShell.forcedCharset;
     if (forced) {
       content.defaultCharacterset = forced;
@@ -2453,8 +2453,8 @@ function URLBarSetURI(aURI, aValid) {
   // If the url has "wyciwyg://" as the protocol, strip it off.
   // Nobody wants to see it on the urlbar for dynamically generated pages.
   if (!gURIFixup)
-    gURIFixup = Components.classes["@mozilla.org/docshell/urifixup;1"]
-                          .getService(Components.interfaces.nsIURIFixup);
+    gURIFixup = Cc["@mozilla.org/docshell/urifixup;1"]
+                  .getService(Ci.nsIURIFixup);
   try {
     uri = gURIFixup.createExposableURI(uri);
   } catch (ex) {}
@@ -2855,8 +2855,8 @@ function WindowIsClosing()
   var reallyClose = true;
 
   if (!gPrivate && !/Mac/.test(navigator.platform) && isClosingLastBrowser()) {
-    let closingCanceled = Components.classes["@mozilla.org/supports-PRBool;1"]
-                                    .createInstance(Components.interfaces.nsISupportsPRBool);
+    let closingCanceled = Cc["@mozilla.org/supports-PRBool;1"]
+                            .createInstance(Ci.nsISupportsPRBool);
     Services.obs.notifyObservers(closingCanceled, "browser-lastwindow-close-requested", null);
     if (closingCanceled.data)
       return false;
@@ -2946,8 +2946,8 @@ function BrowserUploadFile()
     gLastOpenUploadDirectory = new RememberLastDir("browser.upload");
   };
 
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+  const nsIFilePicker = Ci.nsIFilePicker;
+  let fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
   fp.init(window, gNavigatorBundle.getString("uploadFile"), nsIFilePicker.modeOpen);
   fp.appendFilters(nsIFilePicker.filterAll | nsIFilePicker.filterText | nsIFilePicker.filterImages |
                    nsIFilePicker.filterXML | nsIFilePicker.filterHTML);
@@ -2963,7 +2963,7 @@ function BrowserUploadFile()
       return;
     }
     gLastOpenUploadDirectory.filterIndex = fp.filterIndex;
-    gLastOpenUploadDirectory.path = fp.file.parent.QueryInterface(Components.interfaces.nsIFile);
+    gLastOpenUploadDirectory.path = fp.file.parent.QueryInterface(Ci.nsIFile);
 
     try {
       var targetBaseURI = getCurrentURI();
@@ -2973,7 +2973,7 @@ function BrowserUploadFile()
       // properly formatted URI spec.  we pass null for the origin charset
       // parameter since we want the URI to inherit the origin charset
       // property from targetBaseURI.
-      var leafName = fp.fileURL.QueryInterface(Components.interfaces.nsIFileURL).file.leafName;
+      var leafName = fp.fileURL.QueryInterface(Ci.nsIFileURL).file.leafName;
       var targetURI = Services.io.newURI(leafName, null, targetBaseURI);
 
        // ok, start uploading...
@@ -3036,9 +3036,8 @@ function updateSavePageItems()
 function convertFromUnicode(charset, str)
 {
   try {
-    var unicodeConverter = Components
-       .classes["@mozilla.org/intl/scriptableunicodeconverter"]
-       .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+    var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                             .createInstance(Ci.nsIScriptableUnicodeConverter);
     unicodeConverter.charset = charset;
     str = unicodeConverter.ConvertFromUnicode(str);
     return str + unicodeConverter.Finish();
@@ -3049,9 +3048,9 @@ function convertFromUnicode(charset, str)
 
 function getNotificationBox(aWindow)
 {
-  return aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                .getInterface(Components.interfaces.nsIWebNavigation)
-                .QueryInterface(Components.interfaces.nsIDocShell)
+  return aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                .getInterface(Ci.nsIWebNavigation)
+                .QueryInterface(Ci.nsIDocShell)
                 .chromeEventHandler.parentNode.wrappedJSObject;
 }
 
@@ -3259,7 +3258,7 @@ function AddKeywordForSearchField() {
 function getCert()
 {
   var sslStatus = getBrowser().securityUI
-                              .QueryInterface(Components.interfaces.nsISSLStatusProvider)
+                              .QueryInterface(Ci.nsISSLStatusProvider)
                               .SSLStatus;
 
   return sslStatus && sslStatus.serverCert;
@@ -3271,9 +3270,9 @@ function viewCertificate()
 
   if (cert)
   {
-    Components.classes["@mozilla.org/nsCertificateDialogs;1"]
-              .getService(Components.interfaces.nsICertificateDialogs)
-              .viewCert(window, cert);
+    Cc["@mozilla.org/nsCertificateDialogs;1"]
+      .getService(Ci.nsICertificateDialogs)
+      .viewCert(window, cert);
   }
 }
 

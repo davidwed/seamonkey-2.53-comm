@@ -84,7 +84,7 @@ function run_test() {
 
   while (cards.hasMoreElements()) {
     i++;
-    card = cards.getNext().QueryInterface(Components.interfaces.nsIAbCard);
+    card = cards.getNext().QueryInterface(Ci.nsIAbCard);
     do_check_eq(card.lastName, 'Doe');
     var index = data.indexOf(card.firstName);
     do_check_neq(index, -1);

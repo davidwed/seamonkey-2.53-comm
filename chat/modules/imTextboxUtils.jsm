@@ -8,7 +8,7 @@ this.EXPORTED_SYMBOLS = [
   "TextboxSpellChecker"
 ];
 
-Components.utils.import("resource:///modules/imServices.jsm");
+Cu.import("resource:///modules/imServices.jsm");
 var Ci = Components.interfaces;
 
 var MessageFormat = {

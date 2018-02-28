@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
   * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/cloudFileAccounts.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/cloudFileAccounts.js");
 
 var kUploadNotificationValue = "bigAttachmentUploading";
 var kPrivacyWarningNotificationValue = "bigAttachmentPrivacyWarning";
@@ -83,7 +83,7 @@ var gBigFileObserver = {
                     "mail.compose.big_attachments.threshold_kb") * 1024;
 
     for (let attachment in fixIterator(
-         aAttachments, Components.interfaces.nsIMsgAttachment)) {
+         aAttachments, Ci.nsIMsgAttachment)) {
       if (attachment.size >= threshold && !attachment.sendViaCloud)
         this.bigFiles.push(attachment);
     }
@@ -91,7 +91,7 @@ var gBigFileObserver = {
 
   attachmentsRemoved: function(aAttachments) {
     for (let attachment in fixIterator(
-         aAttachments, Components.interfaces.nsIMsgAttachment)) {
+         aAttachments, Ci.nsIMsgAttachment)) {
       let index = this.bigFiles.indexOf(attachment);
       if (index != -1)
         this.bigFiles.splice(index, 1);
@@ -102,7 +102,7 @@ var gBigFileObserver = {
     let uploaded = [];
 
     for (let attachment in fixIterator(
-         aAttachments, Components.interfaces.nsIMsgAttachment)) {
+         aAttachments, Ci.nsIMsgAttachment)) {
       if (attachment.sendViaCloud) {
         this.attachmentsRemoved([attachment]);
         uploaded.push(attachment);

@@ -1,7 +1,7 @@
 function test() {
   function quitRequestObserver(aSubject, aTopic, aData) {
     ok(aTopic == "quit-application-requested" &&
-       aSubject instanceof Components.interfaces.nsISupportsPRBool,
+       aSubject instanceof Ci.nsISupportsPRBool,
        "Received a quit request we're going to deny");
     aSubject.data = true;
   }

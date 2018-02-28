@@ -6,7 +6,7 @@
 /* functions for disabling front end elements when the appropriate
    back-end preference is locked. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /**
  * Prefs in MailNews require dynamic portions to indicate
@@ -99,7 +99,7 @@ function onCheckItem(aChangeElementId, aCheckElementIds)
     else if ("selected" in notifyElement)
       notifyElementState = notifyElement.selected;
     else
-      Components.utils.reportError("Unknown type of control element: " + notifyElement.id);
+      Cu.reportError("Unknown type of control element: " + notifyElement.id);
 
     if (!notifyElementState) {
       disabled = true;
