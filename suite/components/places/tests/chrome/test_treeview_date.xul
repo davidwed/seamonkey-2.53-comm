@@ -51,9 +51,7 @@
      *
      * Ensures that date in places treeviews is correctly formatted.
      */
-      Cu.import("resource://gre/modules/Services.jsm");
-      const Cc = Components.classes;
-      const Ci = Components.interfaces;
+    Cu.import("resource://gre/modules/Services.jsm");
 
     SimpleTest.waitForExplicitFinish();
 
@@ -64,14 +62,14 @@
 
     function continue_test() {
 
-      var hs = Cc["@mozilla.org/browser/nav-history-service;1"].
-               getService(Ci.nsINavHistoryService);
+      var hs = Cc["@mozilla.org/browser/nav-history-service;1"]
+                 .getService(Ci.nsINavHistoryService);
       var bh = hs.QueryInterface(Ci.nsIBrowserHistory);
-      var bs = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].
-               getService(Ci.nsINavBookmarksService);
+      var bs = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+                 .getService(Ci.nsINavBookmarksService);
 
-      var iosvc = Cc["@mozilla.org/network/io-service;1"].
-                  getService(Ci.nsIIOService);
+      var iosvc = Cc["@mozilla.org/network/io-service;1"]
+                    .getService(Ci.nsIIOService);
       function uri(spec) {
         return iosvc.newURI(spec, null, null);
       }
