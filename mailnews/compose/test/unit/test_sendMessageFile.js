@@ -11,7 +11,7 @@
  * mangling the message.
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var type = null;
 var test = null;
@@ -98,7 +98,7 @@ msl.prototype = {
         iid.equals(Ci.nsISupports))
       return this;
 
-    throw Components.results.NS_ERROR_NO_INTERFACE;
+    throw Cr.NS_ERROR_NO_INTERFACE;
   }
 }
 

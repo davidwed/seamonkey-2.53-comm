@@ -70,9 +70,9 @@
                                      this._prefObserver, false);
 
           this.glodaCompleter =
-            Components.classes["@mozilla.org/autocomplete/search;1?name=gloda"]
-                      .getService()
-                      .wrappedJSObject;
+            Cc["@mozilla.org/autocomplete/search;1?name=gloda"]
+              .getService()
+              .wrappedJSObject;
           Services.obs.addObserver(this, "autocomplete-did-enter-text", false);
 
           this.glodaEnabled =
@@ -89,7 +89,7 @@
 
       <destructor>
         <![CDATA[
-          Components.utils.import("resource://gre/modules/Services.jsm");
+          Cu.import("resource://gre/modules/Services.jsm");
 
           Services.prefs.removeObserver("mailnews.database.global.indexer.enabled",
                                         this._prefObserver);
@@ -218,7 +218,7 @@
 
       <method name="doSearch">
         <body><![CDATA[
-          Components.utils.import("resource://gre/modules/Services.jsm");
+          Cu.import("resource://gre/modules/Services.jsm");
 
           try {
             if (this.value) {

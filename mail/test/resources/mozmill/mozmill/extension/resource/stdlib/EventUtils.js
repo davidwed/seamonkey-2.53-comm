@@ -188,11 +188,11 @@ function __doEventDispatch(aTarget, aCharCode, aKeyCode, aHasShift) {
  */
 function _parseModifiers(aEvent)
 {
-  var hwindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-                          .getService(Components.interfaces.nsIAppShellService)
-                          .hiddenDOMWindow;
+  var hwindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                  .getService(Ci.nsIAppShellService)
+                  .hiddenDOMWindow;
 
-  const masks = Components.interfaces.nsIDOMNSEvent;
+  const masks = Ci.nsIDOMNSEvent;
   var mval = 0;
   if (aEvent.shiftKey)
     mval |= masks.SHIFT_MASK;
@@ -227,8 +227,8 @@ function synthesizeMouse(aTarget, aOffsetX, aOffsetY, aEvent, aWindow)
   if (!aWindow)
     aWindow = window;
 
-  var utils = aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-                      getInterface(Components.interfaces.nsIDOMWindowUtils);
+  var utils = aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIDOMWindowUtils);
   if (utils) {
     var button = aEvent.button || 0;
     var clickCount = aEvent.clickCount || 1;
@@ -275,8 +275,8 @@ function synthesizeMouseScroll(aTarget, aOffsetX, aOffsetY, aEvent, aWindow)
   if (!aWindow)
     aWindow = window;
 
-  var utils = aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-                      getInterface(Components.interfaces.nsIDOMWindowUtils);
+  var utils = aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIDOMWindowUtils);
   if (utils) {
     // See nsMouseScrollFlags in nsGUIEvent.h
     const kIsVertical = 0x02;
@@ -322,8 +322,8 @@ function synthesizeKey(aKey, aEvent, aWindow)
   if (!aWindow)
     aWindow = window;
 
-  var utils = aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-                      getInterface(Components.interfaces.nsIDOMWindowUtils);
+  var utils = aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIDOMWindowUtils);
   if (utils) {
     var keyCode = 0, charCode = 0;
     if (aKey.indexOf("VK_") == 0)
@@ -575,8 +575,8 @@ function synthesizeDrop(srcElement, destElement, dragData, dropEffect, aWindow)
 function disableNonTestMouseEvents(aDisable)
 {
   var utils =
-    window.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-           getInterface(Components.interfaces.nsIDOMWindowUtils);
+    window.QueryInterface(Ci.nsIInterfaceRequestor)
+          .getInterface(Ci.nsIDOMWindowUtils);
   if (utils)
     utils.disableNonTestMouseEvents(aDisable);
 }
@@ -586,8 +586,8 @@ function _getDOMWindowUtils(aWindow)
   if (!aWindow) {
     aWindow = window;
   }
-  return aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-                 getInterface(Components.interfaces.nsIDOMWindowUtils);
+  return aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                .getInterface(Ci.nsIDOMWindowUtils);
 }
 
 /**

@@ -1,7 +1,7 @@
 // Bug 37465 -- assertions with no accounts
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function run_test() {
   var daemon = setupNNTPDaemon();

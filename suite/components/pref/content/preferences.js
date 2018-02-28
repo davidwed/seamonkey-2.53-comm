@@ -6,7 +6,7 @@
 // The content of this file is loaded into the scope of the
 // prefwindow and will be available to all prefpanes!
 
-Components.utils.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource://gre/modules/AppConstants.jsm");
 
 function OnLoad()
 {
@@ -59,9 +59,9 @@ function WriteSoundField(aField, aValue)
 function SelectSound(aSoundUrlPref)
 {
   var soundUrlPref = aSoundUrlPref;
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  let fp = Components.classes["@mozilla.org/filepicker;1"]
-                     .createInstance(nsIFilePicker);
+  const nsIFilePicker = Ci.nsIFilePicker;
+  let fp = Cc["@mozilla.org/filepicker;1"]
+             .createInstance(nsIFilePicker);
   var prefutilitiesBundle = document.getElementById("bundle_prefutilities");
   fp.init(window, prefutilitiesBundle.getString("choosesound"),
           nsIFilePicker.modeOpen);
@@ -87,9 +87,9 @@ function SelectSound(aSoundUrlPref)
 
 function PlaySound(aValue, aMail)
 {
-  const nsISound = Components.interfaces.nsISound;
-  var sound = Components.classes["@mozilla.org/sound;1"]
-                        .createInstance(nsISound);
+  const nsISound = Ci.nsISound;
+  var sound = Cc["@mozilla.org/sound;1"]
+                .createInstance(nsISound);
 
   if (aValue)
     sound.play(Services.io.newURI(aValue));

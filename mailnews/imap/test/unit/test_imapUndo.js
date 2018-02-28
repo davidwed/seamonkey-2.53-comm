@@ -10,7 +10,7 @@
 load("../../../resources/logHelper.js");
 load("../../../resources/asyncTestUtils.js");
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var gRootFolder;
 var gLastKey;
@@ -18,7 +18,7 @@ var gMessages = Cc["@mozilla.org/array;1"].createInstance(Ci.nsIMutableArray);
 var gCopyService = MailServices.copy;
 var gMsgWindow;
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
 
 var gMsgFile1 = do_get_file("../../../data/bugmail10");
 var gMsgFile2 = do_get_file("../../../data/bugmail11");
@@ -116,7 +116,7 @@ function setup() {
   Services.prefs.setBoolPref("mail.server.server1.offline_download", false);
 
   gMsgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
-                  .createInstance(Components.interfaces.nsIMsgWindow);
+                  .createInstance(Ci.nsIMsgWindow);
 
   gRootFolder = IMAPPump.incomingServer.rootFolder;
   // these hacks are required because we've created the inbox before

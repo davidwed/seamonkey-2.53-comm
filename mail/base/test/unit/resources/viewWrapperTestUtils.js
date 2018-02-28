@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/dbViewWrapper.js");
-Components.utils.import("resource:///modules/mailViewManager.js");
-Components.utils.import("resource:///modules/virtualFolderWrapper.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/dbViewWrapper.js");
+Cu.import("resource:///modules/mailViewManager.js");
+Cu.import("resource:///modules/virtualFolderWrapper.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gInbox;
 
@@ -347,16 +347,16 @@ function dump_view_state(aViewWrapper, aDoNotDumpContents) {
   dump("View: " + aViewWrapper.dbView + "\n");
   dump("  View Type: " +
        _lookupValueNameInInterface(aViewWrapper.dbView.viewType,
-                                   Components.interfaces.nsMsgViewType) +
+                                   Ci.nsMsgViewType) +
        "   " +
        "View Flags: " + aViewWrapper.dbView.viewFlags + "\n");
   dump("  Sort Type: " +
        _lookupValueNameInInterface(aViewWrapper.dbView.sortType,
-                                   Components.interfaces.nsMsgViewSortType) +
+                                   Ci.nsMsgViewSortType) +
        "   " +
        "Sort Order: " +
        _lookupValueNameInInterface(aViewWrapper.dbView.sortOrder,
-                                   Components.interfaces.nsMsgViewSortOrder) +
+                                   Ci.nsMsgViewSortOrder) +
        "\n");
 
   dump(aViewWrapper.search.prettyString());

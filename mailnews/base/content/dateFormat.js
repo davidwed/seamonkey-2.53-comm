@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gSearchDateFormat = 0;
 var gSearchDateSeparator;
@@ -83,7 +83,7 @@ function initializeSearchDateFormat()
   try {
     gSearchDateFormat =
       Services.prefs.getComplexValue("mailnews.search_date_format",
-                                     Components.interfaces.nsIPrefLocalizedString);
+                                     Ci.nsIPrefLocalizedString);
     gSearchDateFormat = parseInt(gSearchDateFormat);
 
     // if the option is 0 then try to use the format of the current locale
@@ -97,17 +97,17 @@ function initializeSearchDateFormat()
 
       gSearchDateSeparator =
         Services.prefs.getComplexValue("mailnews.search_date_separator",
-                                       Components.interfaces.nsIPrefLocalizedString);
+                                       Ci.nsIPrefLocalizedString);
 
       gSearchDateLeadingZeros =
         (Services.prefs.getComplexValue(
            "mailnews.search_date_leading_zeros",
-           Components.interfaces.nsIPrefLocalizedString).data == "true");
+           Ci.nsIPrefLocalizedString).data == "true");
     }
   }
   catch (e)
   {
-    Components.utils.reportError("initializeSearchDateFormat: caught an exception: " + e);
+    Cu.reportError("initializeSearchDateFormat: caught an exception: " + e);
     // set to mm/dd/yyyy in case of error
     gSearchDateFormat = 3;
     gSearchDateSeparator = "/";

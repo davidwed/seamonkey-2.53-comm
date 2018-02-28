@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/MailUtils.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/MailUtils.js");
 
 var gFolderPickerTree = null;
 
@@ -66,7 +66,7 @@ function generateFoldersToSearchList()
 {
   let uriSearchString = "";
   let allFolders = MailServices.accounts.allFolders;
-  for (let folder in fixIterator(allFolders, Components.interfaces.nsIMsgFolder))
+  for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder))
     uriSearchString = processSearchSettingForFolder(folder, uriSearchString);
 
   return uriSearchString;
@@ -77,13 +77,13 @@ function resetFolderToSearchAttribute()
   // iterates over all accounts and all folders, clearing out the inVFEditScope property in case
   // we set it.
   let allFolders = MailServices.accounts.allFolders;
-  for (let folder in fixIterator(allFolders, Components.interfaces.nsIMsgFolder))
+  for (let folder in fixIterator(allFolders, Ci.nsIMsgFolder))
     folder.setInVFEditSearchScope(false, false);
 }
 
 function ReverseStateFromNode(row)
 {
-  var folder = GetFolderResource(row).QueryInterface(Components.interfaces.nsIMsgFolder);
+  var folder = GetFolderResource(row).QueryInterface(Ci.nsIMsgFolder);
   var currentState = folder.inVFEditSearchScope;
 
   folder.setInVFEditSearchScope(!currentState, false);
@@ -91,7 +91,7 @@ function ReverseStateFromNode(row)
 
 function GetFolderResource(rowIndex)
 {
-  return gFolderPickerTree.builder.QueryInterface(Components.interfaces.nsIXULTreeBuilder).getResourceAtIndex(rowIndex);
+  return gFolderPickerTree.builder.QueryInterface(Ci.nsIXULTreeBuilder).getResourceAtIndex(rowIndex);
 }
 
 function selectFolderTreeOnClick(event)

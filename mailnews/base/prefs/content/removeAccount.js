@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gServer;
 var gDialog;
@@ -24,13 +24,13 @@ function onLoad(event) {
     localDirectory.normalize();
 
     // Do not allow removal if localPath is outside of profile folder.
-    let profilePath = Services.dirsvc.get("ProfD", Components.interfaces.nsIFile);
+    let profilePath = Services.dirsvc.get("ProfD", Ci.nsIFile);
     profilePath.normalize();
 
     // TODO: bug 77652, decide what to do for deferred accounts.
     // And inform the user if the account localPath is outside the profile.
     if ((gServer.isDeferredTo ||
-        (gServer instanceof Components.interfaces.nsIPop3IncomingServer &&
+        (gServer instanceof Ci.nsIPop3IncomingServer &&
          gServer.deferredToAccount)) ||
          !profilePath.contains(localDirectory)) {
       document.getElementById("removeData").disabled = true;
@@ -116,7 +116,7 @@ function removeAccount() {
   } catch (ex) {
     document.getElementById("status").selectedPanel =
       document.getElementById("failure");
-    Components.utils.reportError("Failure to remove account: " + ex);
+    Cu.reportError("Failure to remove account: " + ex);
     window.arguments[0].result = false;
   }
 }

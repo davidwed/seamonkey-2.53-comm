@@ -4,8 +4,8 @@
 
 // This tests that we use IMAP move if the IMAP server supports it.
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 load("../../../resources/logHelper.js");
 load("../../../resources/messageGenerator.js");

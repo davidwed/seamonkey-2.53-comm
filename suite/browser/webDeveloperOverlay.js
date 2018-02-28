@@ -8,7 +8,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "BrowserToolboxProcess",
 
 XPCOMUtils.defineLazyGetter(this, "DeveloperToolbar", function() {
   var tmp = {};
-  Components.utils.import("resource://devtools/shared/Loader.jsm", tmp);
+  Cu.import("resource://devtools/shared/Loader.jsm", tmp);
   var DeveloperToolbar =  tmp.require("devtools/client/shared/developer-toolbar").DeveloperToolbar;
   return new DeveloperToolbar(window);
 });
@@ -21,7 +21,7 @@ var ResponsiveUI = {
 
 XPCOMUtils.defineLazyGetter(ResponsiveUI, "ResponsiveUIManager", function() {
   var tmp = {};
-  Components.utils.import("resource://devtools/client/responsivedesign/responsivedesign.jsm", tmp);
+  Cu.import("resource://devtools/client/responsivedesign/responsivedesign.jsm", tmp);
   return tmp.ResponsiveUIManager;
 });
 
@@ -33,7 +33,7 @@ var Scratchpad = {
 
 XPCOMUtils.defineLazyGetter(Scratchpad, "ScratchpadManager", function() {
   var tmp = {};
-  Components.utils.import("resource://devtools/client/scratchpad/scratchpad-manager.jsm", tmp);
+  Cu.import("resource://devtools/client/scratchpad/scratchpad-manager.jsm", tmp);
   return tmp.ScratchpadManager;
 });
 
@@ -52,7 +52,7 @@ function openEyedropper() {
 Object.defineProperty(this, "Eyedropper", {
   get() {
     var tmp = {};
-    Components.utils.import("resource://devtools/shared/Loader.jsm", tmp);
+    Cu.import("resource://devtools/shared/Loader.jsm", tmp);
     return tmp.require("devtools/client/eyedropper/eyedropper").Eyedropper;
   },
   configurable: true,
@@ -62,7 +62,7 @@ Object.defineProperty(this, "Eyedropper", {
 Object.defineProperty(this, "HUDService", {
   get() {
     var tmp = {};
-    Components.utils.import("resource://devtools/shared/Loader.jsm", tmp);
+    Cu.import("resource://devtools/shared/Loader.jsm", tmp);
     return tmp.require("devtools/client/webconsole/hudservice");
   },
   configurable: true,

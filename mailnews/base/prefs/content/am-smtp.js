@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 var gSmtpServerListWindow =
 {
@@ -114,8 +114,8 @@ var gSmtpServerListWindow =
       this.mBundle.getString("smtpServer-ConnectionSecurityType-" +
       aServer.socketType);
 
-    const AuthMethod = Components.interfaces.nsMsgAuthMethod;
-    const SocketType = Components.interfaces.nsMsgSocketType;
+    const AuthMethod = Ci.nsMsgAuthMethod;
+    const SocketType = Ci.nsMsgSocketType;
     var authStr = "";
     switch (aServer.authMethod)
     {
@@ -145,7 +145,7 @@ var gSmtpServerListWindow =
         break;
       default:
         // leave empty
-        Components.utils.reportError("Warning: unknown value for smtpserver... authMethod: " +
+        Cu.reportError("Warning: unknown value for smtpserver... authMethod: " +
           aServer.authMethod);
     }
     if (authStr)
@@ -181,7 +181,7 @@ var gSmtpServerListWindow =
     {
       var server = aServers.getNext();
 
-      if (server instanceof Components.interfaces.nsISmtpServer)
+      if (server instanceof Ci.nsISmtpServer)
       {
         var isDefault = (aDefaultServer.key == server.key);
 

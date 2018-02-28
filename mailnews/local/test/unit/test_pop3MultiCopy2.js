@@ -7,8 +7,8 @@
  */
 
 load("../../../resources/POP3pump.js");
-Components.utils.import("resource://gre/modules/Promise.jsm");
-Components.utils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+Cu.import("resource://gre/modules/Promise.jsm");
+Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 Services.prefs.setCharPref("mail.serverDefaultStoreContractID",
                            "@mozilla.org/msgstore/maildirstore;1");

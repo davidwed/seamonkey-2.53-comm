@@ -7,11 +7,11 @@ var EXPORTED_SYMBOLS = ["MailUtils"];
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/MailConsts.js");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/MailConsts.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/PluralForm.jsm");
 
 var MC = MailConsts;
 
