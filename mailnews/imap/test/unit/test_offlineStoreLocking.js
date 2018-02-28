@@ -9,8 +9,8 @@ load("../../../resources/asyncTestUtils.js");
 load("../../../resources/messageGenerator.js");
 load("../../../resources/alertTestUtils.js");
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 
 // Globals
@@ -48,7 +48,7 @@ function checkOfflineStore(prevOfflineStoreSize) {
       let header = enumerator.getNext();
       // this will verify that the message in the offline store
       // starts with "From " - otherwise, it returns an error.
-      if (header instanceof Components.interfaces.nsIMsgDBHdr &&
+      if (header instanceof Ci.nsIMsgDBHdr &&
          (header.flags & Ci.nsMsgMessageFlags.Offline))
         IMAPPump.inbox.getOfflineFileStream(header.messageKey, offset, size).close();
     }

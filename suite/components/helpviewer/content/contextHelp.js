@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 # Set the default content pack to the Mozilla content pack. Use the
 # setHelpFileURI function to set this value.
@@ -26,8 +26,8 @@ function openHelp(topic, contentPack)
     topWindow.displayTopic(topic);
   } else {
 # Open topic in new window.
-    const params = Components.classes["@mozilla.org/embedcomp/dialogparam;1"]
-                             .createInstance(Components.interfaces.nsIDialogParamBlock);
+    const params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
+                     .createInstance(Ci.nsIDialogParamBlock);
     params.SetNumberStrings(2);
     params.SetString(0, helpFileURI);
     params.SetString(1, topic);

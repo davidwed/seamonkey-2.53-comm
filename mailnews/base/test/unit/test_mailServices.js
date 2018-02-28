@@ -6,7 +6,7 @@
  * Tests for the MailServices module.
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 function check_service(aService, aInterface) {
   do_check_true(aService in MailServices);

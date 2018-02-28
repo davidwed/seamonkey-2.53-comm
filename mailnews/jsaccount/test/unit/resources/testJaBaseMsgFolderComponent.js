@@ -6,9 +6,9 @@
 // This file is the component definition for a demo base implementation of a
 // javascript msgFolder.
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/jsaccount/JSAccountUtils.jsm");
-Components.utils.import("resource://testing-common/mailnews/testJaBaseMsgFolder.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/jsaccount/JSAccountUtils.jsm");
+Cu.import("resource://testing-common/mailnews/testJaBaseMsgFolder.jsm");
 
 // Constructor
 function JaBaseMsgFolderConstructor() {

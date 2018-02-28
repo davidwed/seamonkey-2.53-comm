@@ -13,7 +13,7 @@ var messenger;
 var epsilon;
 
 var os = {};
-Components.utils.import('resource://mozmill/stdlib/os.js', os);
+Cu.import('resource://mozmill/stdlib/os.js', os);
 
 var textAttachment =
   "Can't make the frug contest, Helen; stomach's upset. I'll fix you, " +
@@ -148,8 +148,8 @@ function setupModule(module) {
   let ah = collector.getModule('attachment-helpers');
   ah.installInto(module);
 
-  messenger = Components.classes['@mozilla.org/messenger;1']
-                        .createInstance(Components.interfaces.nsIMessenger);
+  messenger = Cc['@mozilla.org/messenger;1']
+                .createInstance(Ci.nsIMessenger);
 
   /* Today's gory details (thanks to Jonathan Protzenko): libmime somehow
    * counts the trailing newline for an attachment MIME part. Most of the time,

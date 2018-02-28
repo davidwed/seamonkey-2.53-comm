@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gLogView;
 var gLogFile;
@@ -13,7 +13,7 @@ function onLoad()
   gLogView = document.getElementById("logView");
   gLogView.docShell.allowJavascript = false; // for security, disable JS
 
-  gLogFile = Services.dirsvc.get("ProfD", Components.interfaces.nsIFile);
+  gLogFile = Services.dirsvc.get("ProfD", Ci.nsIFile);
   gLogFile.append("junklog.html");
 
   if (gLogFile.exists())

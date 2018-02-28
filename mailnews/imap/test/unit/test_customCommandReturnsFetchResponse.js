@@ -13,7 +13,7 @@ load("../../../resources/asyncTestUtils.js");
 
 // IMAP pump
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 // Globals
 

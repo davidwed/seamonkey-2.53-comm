@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gListBox;
 var gViewButton;
@@ -16,9 +16,9 @@ var gCerts;
 var gCount;
 
 var gSMimeContractID = "@mozilla.org/messenger-smime/smimejshelper;1";
-var gISMimeJSHelper = Components.interfaces.nsISMimeJSHelper;
-var gIX509Cert = Components.interfaces.nsIX509Cert;
-var nsICertificateDialogs = Components.interfaces.nsICertificateDialogs;
+var gISMimeJSHelper = Ci.nsISMimeJSHelper;
+var gIX509Cert = Ci.nsIX509Cert;
+var nsICertificateDialogs = Ci.nsICertificateDialogs;
 var nsCertificateDialogs = "@mozilla.org/nsCertificateDialogs;1"
 
 function getStatusExplanation(value)
@@ -54,7 +54,7 @@ function onLoad()
   if (!params)
     return;
 
-  var helper = Components.classes[gSMimeContractID].createInstance(gISMimeJSHelper);
+  var helper = Cc[gSMimeContractID].createInstance(gISMimeJSHelper);
 
   if (!helper)
     return;
@@ -217,7 +217,7 @@ function onSelectionChange(event)
 }
 
 function viewCertHelper(parent, cert) {
-  var cd = Components.classes[nsCertificateDialogs].getService(nsICertificateDialogs);
+  var cd = Cc[nsCertificateDialogs].getService(nsICertificateDialogs);
   cd.viewCert(parent, cert);
 }
 

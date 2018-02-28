@@ -6,8 +6,8 @@
  */
 
 load("../../../resources/POP3pump.js");
-Components.utils.import("resource://gre/modules/Promise.jsm");
-Components.utils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+Cu.import("resource://gre/modules/Promise.jsm");
+Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 var testSubjects = ["[Bug 397009] A filter will let me tag, but not untag",
                     "Hello, did you receive my bugmail?"];
