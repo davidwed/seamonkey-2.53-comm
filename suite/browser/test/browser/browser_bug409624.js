@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "FormHistory",
                                   "resource://gre/modules/FormHistory.jsm");
 
@@ -20,14 +20,14 @@ function test() {
 
 function test2()
 {
-  let prefService = Components.classes["@mozilla.org/preferences-service;1"]
-                              .getService(Components.interfaces.nsIPrefBranch);
+  let prefService = Cc["@mozilla.org/preferences-service;1"]
+                      .getService(Ci.nsIPrefBranch);
 
   let findBar = document.getElementById("FindToolbar");
   let textbox = findBar.getElement("findbar-textbox");
 
   let temp = {};
-  Components.utils.import("resource:///modules/Sanitizer.jsm", temp);
+  Cu.import("resource:///modules/Sanitizer.jsm", temp);
   let s = temp.Sanitizer;
   let prefBranch = prefService.getBranch("privacy.item.");
 

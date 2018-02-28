@@ -37,8 +37,8 @@ createAccountObserver.prototype = {
       }
       else {
         // Something went seriously wrong here...
-        Components.utils.reportError("Cloud account creation failed, and " +
-                                     "provider instance missing!");
+        Cu.reportError("Cloud account creation failed, and " +
+                       "provider instance missing!");
       }
 
       addAccountDialog._accept.disabled = false;

@@ -70,7 +70,7 @@
         <body>
         <![CDATA[
           if (!("Services" in window))
-            Components.utils.import("resource:///modules/imServices.jsm");
+            Cu.import("resource:///modules/imServices.jsm");
           let accounts = Services.accounts.getAccounts();
           while (accounts.hasMoreElements()) {
             let acc = accounts.getNext();
@@ -92,9 +92,9 @@
       <method name="copyDebugLog">
         <body>
         <![CDATA[
-          Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                    .getService(Components.interfaces.nsIClipboardHelper)
-                    .copyString(this.browser.contentDocument.body.textContent);
+          Cc["@mozilla.org/widget/clipboardhelper;1"]
+            .getService(Ci.nsIClipboardHelper)
+            .copyString(this.browser.contentDocument.body.textContent);
         ]]>
         </body>
       </method>

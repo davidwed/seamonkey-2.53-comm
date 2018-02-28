@@ -1,4 +1,4 @@
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var nsIMsgDBHdr = Ci.nsIMsgDBHdr;
 var nsIArray = Ci.nsIArray;

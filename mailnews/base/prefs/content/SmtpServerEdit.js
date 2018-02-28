@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/hostnameUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/hostnameUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 var gSmtpServer;
 
@@ -38,7 +38,7 @@ function onAccept()
 
     saveSmtpSettings(gSmtpServer);
   } catch (ex) {
-    Components.utils.reportError("Error saving smtp server: " + ex);
+    Cu.reportError("Error saving smtp server: " + ex);
   }
 
   window.arguments[0].result = true;
