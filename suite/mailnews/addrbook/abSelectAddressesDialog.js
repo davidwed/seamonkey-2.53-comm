@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/ABQueryUtils.jsm");
+Cu.import("resource:///modules/ABQueryUtils.jsm");
 
 var addressbook = 0;
 var composeWindow = 0;
@@ -25,8 +25,8 @@ var gBccButton;
 
 var gActivatedButton;
 
-var gDragService = Components.classes["@mozilla.org/widget/dragservice;1"]
-                             .getService(Components.interfaces.nsIDragService);
+var gDragService = Cc["@mozilla.org/widget/dragservice;1"]
+                     .getService(Ci.nsIDragService);
 
 var gSelectAddressesAbViewListener = {
 	onSelectionChanged: function() {

@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/hostnameUtils.jsm");
+Cu.import("resource:///modules/hostnameUtils.jsm");
 
 var gOnMailServersPage;
 var gOnNewsServerPage;
@@ -138,8 +138,8 @@ function incomingPageInit() {
   // pageData.server is not a real nsMsgIncomingServer so it does not have
   // protocolInfo property implemented.
   let type = parent.getCurrentServerType(pageData);
-  gProtocolInfo = Components.classes["@mozilla.org/messenger/protocol/info;1?type=" + type]
-                            .getService(Components.interfaces.nsIMsgProtocolInfo);
+  gProtocolInfo = Cc["@mozilla.org/messenger/protocol/info;1?type=" + type]
+                    .getService(Ci.nsIMsgProtocolInfo);
   var loginNameInput = document.getElementById("username");
 
   if (loginNameInput.value == "") {

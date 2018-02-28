@@ -19,14 +19,14 @@ const NC_NAME               = NC_NS + "Name";
 const NC_URL                = NC_NS + "URL";
 const NC_LOADING            = NC_NS + "loading";
 
-const nsIHTTPIndex          = Components.interfaces.nsIHTTPIndex;
-const nsIDragService        = Components.interfaces.nsIDragService;
-const nsITransferable       = Components.interfaces.nsITransferable;
-const nsIXULSortService     = Components.interfaces.nsIXULSortService;
-const nsIRDFService         = Components.interfaces.nsIRDFService;
-const nsIRDFLiteral         = Components.interfaces.nsIRDFLiteral;
-const nsIMutableArray      = Components.interfaces.nsIMutableArray;
-const nsISupportsString    = Components.interfaces.nsISupportsString;
+const nsIHTTPIndex          = Ci.nsIHTTPIndex;
+const nsIDragService        = Ci.nsIDragService;
+const nsITransferable       = Ci.nsITransferable;
+const nsIXULSortService     = Ci.nsIXULSortService;
+const nsIRDFService         = Ci.nsIRDFService;
+const nsIRDFLiteral         = Ci.nsIRDFLiteral;
+const nsIMutableArray      = Ci.nsIMutableArray;
+const nsISupportsString    = Ci.nsISupportsString;
 
 // By the time this runs, The 'HTTPIndex' variable will have been
 // magically set on the global object by the native code.
@@ -133,8 +133,8 @@ function Init()
   }
 
   // Note: set encoding BEFORE setting "ref" (important!)
-  var RDF = Components.classes[RDFSERVICE_CONTRACTID]
-                      .getService(nsIRDFService);
+  var RDF = Cc[RDFSERVICE_CONTRACTID]
+              .getService(nsIRDFService);
   if (RDF) {
     loadingArc = RDF.GetResource(NC_LOADING, true);
 
@@ -199,7 +199,7 @@ function doSort(aTarget)
   var sortDirection = aTarget.getAttribute("sortDirection") == "ascending" ? "descending" : "ascending";
 
 	try {
-	  var sortService = Components.classes[XULSORTSERVICE_CONTRACTID].getService(nsIXULSortService);
+	  var sortService = Cc[XULSORTSERVICE_CONTRACTID].getService(nsIXULSortService);
 		sortService.sort(aTarget, sortResource, sortDirection);
 	} catch(ex) { }
 }
@@ -222,13 +222,13 @@ function BeginDragTree (event)
     var desc = item.getAttributeNS(NC_NS, "desc");
 
     var transferable =
-      Components.classes[TRANSFERABLE_CONTRACTID].createInstance(nsITransferable);
+      Cc[TRANSFERABLE_CONTRACTID].createInstance(nsITransferable);
     var genDataURL =
-      Components.classes[WSTRING_CONTRACTID].createInstance(nsISupportsString);
+      Cc[WSTRING_CONTRACTID].createInstance(nsISupportsString);
     var genDataHTML =
-      Components.classes[WSTRING_CONTRACTID].createInstance(nsISupportsString);
+      Cc[WSTRING_CONTRACTID].createInstance(nsISupportsString);
     var genData =
-      Components.classes[WSTRING_CONTRACTID].createInstance(nsISupportsString);
+      Cc[WSTRING_CONTRACTID].createInstance(nsISupportsString);
 
     transferable.init(null);
     transferable.addDataFlavor("text/x-moz-url");
@@ -244,14 +244,14 @@ function BeginDragTree (event)
     transferable.setTransferData("text/unicode", genData, genData.data.length * 2);
 
     var transArray =
-      Components.classes[ARRAY_CONTRACTID].createInstance(nsIMutableArray);
+      Cc[ARRAY_CONTRACTID].createInstance(nsIMutableArray);
 
     // put it into the transferable as an |nsISupports|
-    var genTrans = transferable.QueryInterface(Components.interfaces.nsISupports);
+    var genTrans = transferable.QueryInterface(Ci.nsISupports);
     transArray.appendElement(genTrans, /* weak = */ false);
 
     var dragService =
-      Components.classes[DRAGSERVICE_CONTRACTID].getService(nsIDragService);
+      Cc[DRAGSERVICE_CONTRACTID].getService(nsIDragService);
 
     dragService.invokeDragSession(event.target, transArray, null, nsIDragService.DRAGDROP_ACTION_COPY +
                                   nsIDragService.DRAGDROP_ACTION_MOVE);

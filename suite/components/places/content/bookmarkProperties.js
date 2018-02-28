@@ -59,7 +59,7 @@
 
 /* import-globals-from editBookmarkOverlay.js */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "PrivateBrowsingUtils",
                                   "resource://gre/modules/PrivateBrowsingUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "PromiseUtils",
@@ -445,7 +445,7 @@ var BookmarkPropertiesPanel = {
     gEditItemOverlay.uninitPanel(true);
     this._endBatch();
     if (PlacesUIUtils.useAsyncTransactions)
-      PlacesTransactions.undo().catch(Components.utils.reportError);
+      PlacesTransactions.undo().catch(Cu.reportError);
     else
       PlacesUtils.transactionManager.undoTransaction();
     window.arguments[0].performed = false;

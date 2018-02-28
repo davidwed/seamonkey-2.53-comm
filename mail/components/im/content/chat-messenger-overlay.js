@@ -3,10 +3,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var imServices = {};
-Components.utils.import("resource:///modules/chatNotifications.jsm");
-Components.utils.import("resource:///modules/imServices.jsm", imServices);
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource:///modules/chatNotifications.jsm");
+Cu.import("resource:///modules/imServices.jsm", imServices);
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/AppConstants.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "OS", "resource://gre/modules/osfile.jsm");
 
@@ -330,8 +330,8 @@ var chatHandler = {
       chatButton.removeAttribute("unreadMessages");
 
     if (unreadTargettedCount != this._notifiedUnreadCount) {
-      let unreadInt = Components.classes["@mozilla.org/supports-PRInt32;1"]
-                                .createInstance(Ci.nsISupportsPRInt32);
+      let unreadInt = Cc["@mozilla.org/supports-PRInt32;1"]
+                        .createInstance(Ci.nsISupportsPRInt32);
       unreadInt.data = unreadTargettedCount;
       Services.obs.notifyObservers(unreadInt, "unread-im-count-changed", unreadTargettedCount);
       this._notifiedUnreadCount = unreadTargettedCount;
@@ -1140,7 +1140,7 @@ var chatHandler = {
     document.getElementById("conversationsGroup").sortComparator =
       (a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase());
 
-    Components.utils.import("resource:///modules/chatHandler.jsm", this);
+    Cu.import("resource:///modules/chatHandler.jsm", this);
     if (this.ChatCore.initialized)
       this.initAfterChatCore();
     else {

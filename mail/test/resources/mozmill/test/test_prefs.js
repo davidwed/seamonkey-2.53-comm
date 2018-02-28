@@ -1,6 +1,6 @@
-var elementslib = {}; Components.utils.import('resource://mozmill/modules/elementslib.js', elementslib);
-var mozmill = {}; Components.utils.import('resource://mozmill/modules/mozmill.js', mozmill);
-var controller = {};  Components.utils.import('resource://mozmill/modules/controller.js', controller);
+var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+var mozmill = {}; Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
+var controller = {};  Cu.import('resource://mozmill/modules/controller.js', controller);
 
 var setupModule = function(module) {
   module.controller = new controller.MozMillController(mozmill.utils.getWindowByType("Browser:Preferences"));

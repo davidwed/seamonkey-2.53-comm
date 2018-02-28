@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gMailListView;
 var gListBox;
@@ -12,7 +12,7 @@ var gDeleteButton;
 
 function mailViewListOnLoad()
 {
-  gMailListView = Components.classes["@mozilla.org/messenger/mailviewlist;1"].getService(Components.interfaces.nsIMsgMailViewList);;
+  gMailListView = Cc["@mozilla.org/messenger/mailviewlist;1"].getService(Ci.nsIMsgMailViewList);;
   gListBox = document.getElementById('mailViewList');
 
   // Construct list view based on current mail view list data

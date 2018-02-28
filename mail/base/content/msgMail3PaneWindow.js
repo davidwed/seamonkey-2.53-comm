@@ -3,22 +3,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/activity/activityModules.js");
-Components.utils.import("resource:///modules/errUtils.js");
-Components.utils.import("resource:///modules/folderUtils.jsm");
-Components.utils.import("resource:///modules/IOUtils.js");
-Components.utils.import("resource:///modules/jsTreeSelection.js");
-Components.utils.import("resource:///modules/MailConsts.js");
-Components.utils.import("resource:///modules/mailInstrumentation.js");
-Components.utils.import("resource:///modules/mailnewsMigrator.js");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/msgDBCacheManager.js");
-Components.utils.import("resource:///modules/sessionStoreManager.js");
-Components.utils.import("resource:///modules/summaryFrameManager.js");
-Components.utils.import("resource:///modules/MailUtils.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/AppConstants.jsm");
-Components.utils.import("resource://gre/modules/Color.jsm");
+Cu.import("resource:///modules/activity/activityModules.js");
+Cu.import("resource:///modules/errUtils.js");
+Cu.import("resource:///modules/folderUtils.jsm");
+Cu.import("resource:///modules/IOUtils.js");
+Cu.import("resource:///modules/jsTreeSelection.js");
+Cu.import("resource:///modules/MailConsts.js");
+Cu.import("resource:///modules/mailInstrumentation.js");
+Cu.import("resource:///modules/mailnewsMigrator.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/msgDBCacheManager.js");
+Cu.import("resource:///modules/sessionStoreManager.js");
+Cu.import("resource:///modules/summaryFrameManager.js");
+Cu.import("resource:///modules/MailUtils.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/AppConstants.jsm");
+Cu.import("resource://gre/modules/Color.jsm");
 
 /* This is where functions related to the 3 pane window are kept */
 
@@ -83,7 +83,7 @@ var folderListener = {
       var eventType = event.toString();
       if (eventType == "ImapHdrDownloaded") {
         if (folder) {
-          var imapFolder = folder.QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
+          var imapFolder = folder.QueryInterface(Ci.nsIMsgImapMailFolder);
           if (imapFolder) {
             var hdrParser = imapFolder.hdrParser;
             if (hdrParser) {
@@ -92,8 +92,8 @@ var folderListener = {
               {
                 var hdrs = hdrParser.headers;
                 if (hdrs && hdrs.indexOf("X-attachment-size:") > 0) {
-                  msgHdr.OrFlags(Components.interfaces.nsMsgMessageFlags
-                                           .Attachment);
+                  msgHdr.OrFlags(Ci.nsMsgMessageFlags
+                                   .Attachment);
                 }
                 if (hdrs && hdrs.indexOf("X-image-size:") > 0) {
                   msgHdr.setStringProperty("imageSize", "1");
@@ -464,14 +464,14 @@ function LoadPostAccountWizard()
   MigrateJunkMailSettings();
   MigrateFolderViews();
   MigrateOpenMessageBehavior();
-  Components.utils.import("resource:///modules/mailMigrator.js");
+  Cu.import("resource:///modules/mailMigrator.js");
   MailMigrator.migratePostAccountWizard();
 
   accountManager.setSpecialFolders();
 
   try {
     accountManager.loadVirtualFolders();
-  } catch (e) {Components.utils.reportError(e);}
+  } catch (e) {Cu.reportError(e);}
   accountManager.addIncomingServerListener(gThreePaneIncomingServerListener);
 
   gPhishingDetector.init();
@@ -491,8 +491,8 @@ function LoadPostAccountWizard()
       // filter our any feed urls that came in as arguments to the new window...
       if (arg0.toLowerCase().startsWith("feed:"))
       {
-        let feedHandler = Components.classes["@mozilla.org/newsblog-feed-downloader;1"]
-          .getService(Components.interfaces.nsINewsBlogFeedDownloader);
+        let feedHandler = Cc["@mozilla.org/newsblog-feed-downloader;1"]
+          .getService(Ci.nsINewsBlogFeedDownloader);
         if (feedHandler)
           feedHandler.subscribeToFeed(arg0, null, msgWindow);
       }
@@ -513,18 +513,18 @@ function LoadPostAccountWizard()
   function completeStartup() {
     // Check whether we need to show the default client dialog
     // First, check the shell service
-    var nsIShellService = Components.interfaces.nsIShellService;
+    var nsIShellService = Ci.nsIShellService;
     if (nsIShellService) {
       var shellService;
       var defaultAccount;
       try {
-        shellService = Components.classes["@mozilla.org/mail/shell-service;1"].getService(nsIShellService);
+        shellService = Cc["@mozilla.org/mail/shell-service;1"].getService(nsIShellService);
         defaultAccount = accountManager.defaultAccount;
       } catch (ex) {}
 
       // Next, try loading the search integration module
       // We'll get a null SearchIntegration if we don't have one
-      Components.utils.import("resource:///modules/SearchIntegration.js");
+      Cu.import("resource:///modules/SearchIntegration.js");
 
       // Show the default client dialog only if
       // EITHER: we have at least one account, and we aren't already the default
@@ -825,7 +825,7 @@ function loadStartFolder(initialUri)
             {
                 //now find Inbox
                 var outNumFolders = new Object();
-                const kInboxFlag = Components.interfaces.nsMsgFolderFlags.Inbox;
+                const kInboxFlag = Ci.nsMsgFolderFlags.Inbox;
                 var inboxFolder = rootMsgFolder.getFolderWithFlags(kInboxFlag);
                 if (!inboxFolder) return;
 
@@ -866,7 +866,7 @@ function loadStartFolder(initialUri)
         return;
       }
 
-      Components.utils.reportError(ex);
+      Cu.reportError(ex);
     }
 
     MsgGetMessagesForAllServers(defaultServer);
@@ -897,7 +897,7 @@ function loadStartFolder(initialUri)
 
 function AddToSession()
 {
-  var nsIFolderListener = Components.interfaces.nsIFolderListener;
+  var nsIFolderListener = Ci.nsIFolderListener;
   var notifyFlags = nsIFolderListener.intPropertyChanged | nsIFolderListener.event;
   MailServices.mailSession.AddFolderListener(folderListener, notifyFlags);
 }
@@ -1255,12 +1255,12 @@ function MigrateFolderViews()
      var inbox;
      for (var index = 0; index < servers.length; index++)
      {
-       server = servers.queryElementAt(index, Components.interfaces.nsIMsgIncomingServer);
+       server = servers.queryElementAt(index, Ci.nsIMsgIncomingServer);
        if (server)
        {
          inbox = GetInboxFolder(server);
          if (inbox)
-           inbox.setFlag(Components.interfaces.nsMsgFolderFlags.Favorite);
+           inbox.setFlag(Ci.nsMsgFolderFlags.Favorite);
        }
      }
     Services.prefs.setIntPref("mail.folder.views.version", 1);
@@ -1318,7 +1318,7 @@ function ThreadPaneOnDragStart(aEvent) {
     let msgService = messenger.messageServiceFromURI(msgUri);
     let msgHdr = msgService.messageURIToMsgHdr(msgUri);
     let subject = msgHdr.mime2DecodedSubject || "";
-    if (msgHdr.flags & Components.interfaces.nsMsgMessageFlags.HasRe)
+    if (msgHdr.flags & Ci.nsMsgMessageFlags.HasRe)
         subject = "Re: " + subject;
 
     let uniqueFileName;
@@ -1369,8 +1369,8 @@ function messageFlavorDataProvider() {
 }
 
 messageFlavorDataProvider.prototype = {
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIFlavorDataProvider,
-                       Components.interfaces.nsISupports]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIFlavorDataProvider,
+                       Ci.nsISupports]),
 
   getFlavorData : function(aTransferable, aFlavor, aData, aDataLen) {
     if (aFlavor !== "application/x-moz-file-promise") {
@@ -1381,21 +1381,21 @@ messageFlavorDataProvider.prototype = {
     aTransferable.getTransferData("application/x-moz-file-promise-url",
                                   fileUriPrimitive, dataSize);
 
-    let fileUriStr = fileUriPrimitive.value.QueryInterface(Components.interfaces.nsISupportsString);
+    let fileUriStr = fileUriPrimitive.value.QueryInterface(Ci.nsISupportsString);
     let fileUri = Services.io.newURI(fileUriStr.data);
-    let fileUrl = fileUri.QueryInterface(Components.interfaces.nsIURL);
+    let fileUrl = fileUri.QueryInterface(Ci.nsIURL);
     let fileName = fileUrl.fileName;
 
     let destDirPrimitive = {};
     aTransferable.getTransferData("application/x-moz-file-promise-dir",
                                   destDirPrimitive, dataSize);
-    let destDirectory = destDirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
+    let destDirectory = destDirPrimitive.value.QueryInterface(Ci.nsILocalFile);
     let file = destDirectory.clone();
     file.append(fileName);
 
     let messageUriPrimitive = {};
     aTransferable.getTransferData("text/x-moz-message", messageUriPrimitive, dataSize);
-    let messageUri = messageUriPrimitive.value.QueryInterface(Components.interfaces.nsISupportsString);
+    let messageUri = messageUriPrimitive.value.QueryInterface(Ci.nsISupportsString);
 
     messenger.saveAs(messageUri.data, true, null, decodeURIComponent(file.path), true);
   }
@@ -1430,9 +1430,9 @@ function suggestUniqueFileName(aIdentifier, aType, aExistingNames) {
 }
 
 function ThreadPaneOnDragOver(aEvent) {
-  let ds = Components.classes["@mozilla.org/widget/dragservice;1"]
-                     .getService(Components.interfaces.nsIDragService)
-                     .getCurrentSession();
+  let ds = Cc["@mozilla.org/widget/dragservice;1"]
+             .getService(Ci.nsIDragService)
+             .getCurrentSession();
   ds.canDrop = false;
   if (!gFolderDisplay.displayedFolder.canFileMessages)
     return;
@@ -1440,7 +1440,7 @@ function ThreadPaneOnDragOver(aEvent) {
   let dt = aEvent.dataTransfer;
   if (Array.from(dt.mozTypesAt(0)).includes("application/x-moz-file")) {
     let extFile = dt.mozGetDataAt("application/x-moz-file", 0)
-                    .QueryInterface(Components.interfaces.nsIFile);
+                    .QueryInterface(Ci.nsIFile);
     if (extFile.isFile()) {
       let len = extFile.leafName.length;
       if (len > 4 && extFile.leafName.toLowerCase().endsWith(".eml"))
@@ -1453,7 +1453,7 @@ function ThreadPaneOnDrop(aEvent) {
   let dt = aEvent.dataTransfer;
   for (let i = 0; i < dt.mozItemCount; i++) {
     let extFile = dt.mozGetDataAt("application/x-moz-file", i)
-                    .QueryInterface(Components.interfaces.nsIFile);
+                    .QueryInterface(Ci.nsIFile);
     if (extFile.isFile()) {
       let len = extFile.leafName.length;
       if (len > 4 && extFile.leafName.toLowerCase().endsWith(".eml"))
@@ -1498,7 +1498,7 @@ var LightWeightThemeWebInstaller = {
 
   get _manager () {
     let temp = {};
-    Components.utils.import("resource://gre/modules/LightweightThemeManager.jsm", temp);
+    Cu.import("resource://gre/modules/LightweightThemeManager.jsm", temp);
     delete this._manager;
     return this._manager = temp.LightweightThemeManager;
   },

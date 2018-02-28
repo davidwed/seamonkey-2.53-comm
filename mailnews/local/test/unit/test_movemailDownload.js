@@ -2,10 +2,10 @@
  * The intent of this file is to test that movemail download code
  * works correctly.
  */
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/Task.jsm");
-Components.utils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Task.jsm");
+Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 var gPluggableStores = [
   "@mozilla.org/msgstore/berkeleystore;1",

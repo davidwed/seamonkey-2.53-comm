@@ -2,15 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function nsAbAutoCompleteMyDomain() {}
 
 nsAbAutoCompleteMyDomain.prototype = {
   classID: Components.ID("{5b259db2-e451-4de9-8a6f-cfba91402973}"),
   QueryInterface: XPCOMUtils.generateQI([
-      Components.interfaces.nsIAutoCompleteSearch]),
+      Ci.nsIAutoCompleteSearch]),
 
   cachedIdKey: "",
   cachedIdentity: null,
@@ -20,7 +20,7 @@ nsAbAutoCompleteMyDomain.prototype = {
   startSearch: function(aString, aSearchParam, aResult, aListener) {
     let params = aSearchParam ? JSON.parse(aSearchParam) : {};
     let applicable = ("type" in params) && this.applicableHeaders.has(params.type);
-    const ACR = Components.interfaces.nsIAutoCompleteResult;
+    const ACR = Ci.nsIAutoCompleteResult;
     var address = null;
     if (applicable && aString && !aString.includes(",")) {
       if (("idKey" in params) && (params.idKey != this.cachedIdKey)) {

@@ -253,7 +253,7 @@
                         Services.prefs.getCharPref("browser.display.background_color");
           if (b.contentDocument instanceof ImageDocument &&
               !(b.contentDocument.imageRequest.imageStatus &
-                Components.interfaces.imgIRequest.STATUS_ERROR)) {
+                Ci.imgIRequest.STATUS_ERROR)) {
             ctx.fillStyle = bgColor;
             ctx.fillRect(0, 0, canvasW, canvasH);
             var img = b.contentDocument.body.firstChild;
@@ -392,7 +392,7 @@
                   p[aMethod].apply(p, aArguments);
                 } catch (e) {
                   // don't inhibit other listeners
-                  Components.utils.reportError(e);
+                  Cu.reportError(e);
                 }
               }
             });
@@ -407,7 +407,7 @@
                   p[aMethod].apply(p, aArguments);
                 } catch (e) {
                   // don't inhibit other listeners
-                  Components.utils.reportError(e);
+                  Cu.reportError(e);
                 }
               }
             });
@@ -450,7 +450,7 @@
 
               // Don't show progress indicators in tabs for about: URIs
               // pointing to local resources.
-              if ((aRequest instanceof Components.interfaces.nsIChannel) &&
+              if ((aRequest instanceof Ci.nsIChannel) &&
                   aRequest.originalURI.schemeIs("about") &&
                   (aRequest.URI.schemeIs("jar") || aRequest.URI.schemeIs("file")))
                 return false;
@@ -489,8 +489,8 @@
 
               var oldBlank = this.mBlank;
 
-              const nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
-              const nsIChannel = Components.interfaces.nsIChannel;
+              const nsIWebProgressListener = Ci.nsIWebProgressListener;
+              const nsIChannel = Ci.nsIChannel;
               let location, originalLocation;
               try {
                 aRequest.QueryInterface(nsIChannel)
@@ -543,7 +543,7 @@
                       // Remove favicon. This shows busy and progress indicators even during a reload.
                       this.mTab.removeAttribute("image");
 
-                      if (!(aWebProgress.loadType & Components.interfaces.nsIDocShell.LOAD_CMD_RELOAD))
+                      if (!(aWebProgress.loadType & Ci.nsIDocShell.LOAD_CMD_RELOAD))
                         this.mTabBrowser.setTabTitleLoading(this.mTab);
                     }
                   }
@@ -627,7 +627,7 @@
 
               if (topLevel) {
                 let isSameDocument =
-                  !!(aFlags & Components.interfaces.nsIWebProgressListener.LOCATION_CHANGE_SAME_DOCUMENT);
+                  !!(aFlags & Ci.nsIWebProgressListener.LOCATION_CHANGE_SAME_DOCUMENT);
                 // We need to clear the typed value
                 // if the document failed to load, to make sure the urlbar reflects the
                 // failed URI (particularly for SSL errors). However, don't clear the value
@@ -636,7 +636,7 @@
                 // Another reason to clear the userTypedValue is if this was an anchor
                 // navigation initiated by the user.
                 if (this.mBrowser.didStartLoadSinceLastUserTyping() ||
-                    ((aFlags & Components.interfaces.nsIWebProgressListener.LOCATION_CHANGE_ERROR_PAGE) &&
+                    ((aFlags & Ci.nsIWebProgressListener.LOCATION_CHANGE_ERROR_PAGE) &&
                      aLocation.spec != "about:blank") ||
                     (isSameDocument && this.mBrowser.inLoadURI))
                   this.mBrowser.userTypedValue = null;
@@ -685,7 +685,7 @@
                         if (!element.onRefreshAttempted(aWebProgress, aURI, aDelay, aSameURI))
                           allowRefresh = false;
                       } catch (e) {
-                        Components.utils.reportError(e);
+                        Cu.reportError(e);
                       }
                     }
                   }
@@ -699,7 +699,7 @@
                       if (!element.onRefreshAttempted(this.mBrowser, aWebProgress, aURI, aDelay, aSameURI))
                         allowRefresh = false;
                     } catch (e) {
-                      Components.utils.reportError(e);
+                      Cu.reportError(e);
                     }
                   }
                 }
@@ -713,12 +713,12 @@
             },
 
             QueryInterface: function(aIID) {
-              if (aIID.equals(Components.interfaces.nsIWebProgressListener) ||
-                  aIID.equals(Components.interfaces.nsIWebProgressListener2) ||
-                  aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-                  aIID.equals(Components.interfaces.nsISupports))
+              if (aIID.equals(Ci.nsIWebProgressListener) ||
+                  aIID.equals(Ci.nsIWebProgressListener2) ||
+                  aIID.equals(Ci.nsISupportsWeakReference) ||
+                  aIID.equals(Ci.nsISupports))
                 return this;
-              throw Components.results.NS_NOINTERFACE;
+              throw Cr.NS_NOINTERFACE;
             }
           });
         ]]>
@@ -742,14 +742,14 @@
 
             onStateChange : function(aWebProgress, aRequest, aStateFlags, aStatus)
             {
-              const nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
+              const nsIWebProgressListener = Ci.nsIWebProgressListener;
               if ((aStateFlags & nsIWebProgressListener.STATE_IS_NETWORK) &&
                   (aStateFlags & nsIWebProgressListener.STATE_STOP)) {
                 function refresh(closure) {
                   closure.mBrowser.webNavigation.sessionHistory = closure.mSH;
                   closure.mBrowser.webProgress.removeProgressListener(closure);
                   delete closure.mBrowser._SHListener;
-                  closure.mSH.QueryInterface(Components.interfaces.nsIWebNavigation)
+                  closure.mSH.QueryInterface(Ci.nsIWebNavigation)
                          .gotoIndex(closure.mSH.index);
                 }
                 setTimeout(refresh, 0, this);
@@ -770,11 +770,11 @@
 
             QueryInterface : function(aIID)
             {
-              if (aIID.equals(Components.interfaces.nsIWebProgressListener) ||
-                  aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-                  aIID.equals(Components.interfaces.nsISupports))
+              if (aIID.equals(Ci.nsIWebProgressListener) ||
+                  aIID.equals(Ci.nsISupportsWeakReference) ||
+                  aIID.equals(Ci.nsISupports))
                 return this;
-              throw Components.results.NS_NOINTERFACE;
+              throw Cr.NS_NOINTERFACE;
             }
           });
         ]]>
@@ -952,8 +952,8 @@
             // in case the URI is not ASCII.
             try {
               let characterSet = this.mCurrentBrowser.contentDocument.characterSet;
-              let textToSubURI = Components.classes["@mozilla.org/intl/texttosuburi;1"]
-                                           .getService(Components.interfaces.nsITextToSubURI);
+              let textToSubURI = Cc["@mozilla.org/intl/texttosuburi;1"]
+                                   .getService(Ci.nsITextToSubURI);
               aURI = textToSubURI.unEscapeNonAsciiURI(characterSet, aURI);
             } catch (e) {
               // Do nothing.
@@ -994,7 +994,7 @@
                     }
                   }
                 } catch (e) {
-                  Components.utils.reportError(e);
+                  Cu.reportError(e);
                 }
               }
             );
@@ -1059,9 +1059,9 @@
           <![CDATA[
             var newTitle = this.getWindowTitleForBrowser(this.mCurrentBrowser);
             document.title = newTitle;
-            window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                  .getInterface(Components.interfaces.nsIWebNavigation)
-                  .QueryInterface(Components.interfaces.nsIBaseWindow).title = newTitle;
+            window.QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebNavigation)
+                  .QueryInterface(Ci.nsIBaseWindow).title = newTitle;
           ]]>
         </body>
       </method>
@@ -1128,7 +1128,7 @@
               this.mCurrentBrowser.updateBlockedPopups();
 
             // Update the URL bar.
-            const nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
+            const nsIWebProgressListener = Ci.nsIWebProgressListener;
             this.updateUrlBar(newBrowser.webProgress,
                               null,
                               newBrowser.currentURI,
@@ -1262,7 +1262,7 @@
                     try {
                       element.onFeedAvailable(link);
                     } catch (e) {
-                      Components.utils.reportError(e);
+                      Cu.reportError(e);
                     }
                   }
                 }
@@ -1295,11 +1295,11 @@
           }
 
           // Security says okay, now ask content policy
-          const nsIContentPolicy = Components.interfaces.nsIContentPolicy;
+          const nsIContentPolicy = Ci.nsIContentPolicy;
           try {
             var contentPolicy =
-              Components.classes['@mozilla.org/layout/content-policy;1']
-                        .getService(nsIContentPolicy);
+              Cc['@mozilla.org/layout/content-policy;1']
+                .getService(nsIContentPolicy);
           } catch (e) {
             return null; // Refuse to load if we can't do a security check.
           }
@@ -1407,7 +1407,7 @@
         <body>
           <![CDATA[
             var params = aReferrerURI;
-            if (!params || params instanceof Components.interfaces.nsIURI) {
+            if (!params || params instanceof Ci.nsIURI) {
               params = {
                 triggeringPrincipal: Services.scriptSecurityManager
                                              .getSystemPrincipal(),
@@ -1477,10 +1477,10 @@
             browser = this.mCurrentBrowser;
             targetTabIndex = this.tabContainer.selectedIndex;
 
-            let flags = Components.interfaces.nsIWebNavigation.LOAD_FLAGS_NONE;
+            let flags = Ci.nsIWebNavigation.LOAD_FLAGS_NONE;
             if (aAllowThirdPartyFixup) {
-              flags |= Components.interfaces.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP |
-                       Components.interfaces.nsIWebNavigation.LOAD_FLAGS_FIXUP_SCHEME_TYPOS;
+              flags |= Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP |
+                       Ci.nsIWebNavigation.LOAD_FLAGS_FIXUP_SCHEME_TYPOS;
             }
             try {
               browser.loadURIWithFlags(aURIs[0], {
@@ -1542,7 +1542,7 @@
             if (arguments.length == 2 &&
                 arguments[1] != null &&
                 typeof arguments[1] == "object" &&
-                !(arguments[1] instanceof Components.interfaces.nsIURI)) {
+                !(arguments[1] instanceof Ci.nsIURI)) {
               let params = arguments[1];
               aTriggeringPrincipal  = params.triggeringPrincipal;
               aReferrerURI          = params.referrerURI;
@@ -1619,10 +1619,10 @@
             // wire up a progress listener for the new browser object.
             var position = this.tabs.length - 1;
             var tabListener = this.mTabProgressListener(t, b, blank);
-            const filter = Components.classes["@mozilla.org/appshell/component/browser-status-filter;1"]
-                                     .createInstance(Components.interfaces.nsIWebProgress);
-            filter.addProgressListener(tabListener, Components.interfaces.nsIWebProgress.NOTIFY_ALL);
-            b.webProgress.addProgressListener(filter, Components.interfaces.nsIWebProgress.NOTIFY_ALL);
+            const filter = Cc["@mozilla.org/appshell/component/browser-status-filter;1"]
+                             .createInstance(Ci.nsIWebProgress);
+            filter.addProgressListener(tabListener, Ci.nsIWebProgress.NOTIFY_ALL);
+            b.webProgress.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL);
             this.mTabListeners[position] = tabListener;
             this.mTabFilters[position] = filter;
 
@@ -1631,7 +1631,7 @@
               // the document successfully loads
               b.userTypedValue = aURI;
 
-              let nsIWebNavigation = Components.interfaces.nsIWebNavigation;
+              let nsIWebNavigation = Ci.nsIWebNavigation;
               let flags = nsIWebNavigation.LOAD_FLAGS_NONE;
               if (aAllowThirdPartyFixup)
                 flags = nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP |
@@ -1697,8 +1697,8 @@
               var reallyClose = true;
 
               if (shouldPrompt) {
-                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-                                              .getService(Components.interfaces.nsIPromptService);
+                var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                                      .getService(Ci.nsIPromptService);
 
                 //default to true: if it were false, we wouldn't get this far
                 var warnOnClose = { value:true };
@@ -1808,14 +1808,14 @@
             b.addEventListener("DOMTitleChanged", this.onTitleChanged, true);
 
             // add back the filters, security first (bug 313335)
-            const nsIWebProgress = Components.interfaces.nsIWebProgress;
+            const nsIWebProgress = Ci.nsIWebProgress;
             var secFlags = nsIWebProgress.NOTIFY_STATE_ALL | nsIWebProgress.NOTIFY_LOCATION | nsIWebProgress.NOTIFY_SECURITY;
             b.webProgress.addProgressListener(b.securityUI, secFlags);
 
             var position = this.tabs.length - 1;
             var tabListener = this.mTabProgressListener(t, b, false);
-            const filter = Components.classes["@mozilla.org/appshell/component/browser-status-filter;1"]
-                                     .createInstance(nsIWebProgress);
+            const filter = Cc["@mozilla.org/appshell/component/browser-status-filter;1"]
+                             .createInstance(nsIWebProgress);
             filter.addProgressListener(tabListener, nsIWebProgress.NOTIFY_ALL);
             b.webProgress.addProgressListener(filter, nsIWebProgress.NOTIFY_ALL);
             this.mTabListeners[position] = tabListener;
@@ -1988,11 +1988,11 @@
             };
             this.savedBrowsers.unshift(tabData);
 
-            var newSH = Components.classes["@mozilla.org/browser/shistory;1"]
-                                  .createInstance(Components.interfaces.nsISHistoryInternal);
+            var newSH = Cc["@mozilla.org/browser/shistory;1"]
+                          .createInstance(Ci.nsISHistoryInternal);
             oldBrowser.webNavigation.sessionHistory = newSH;
             var entry = oldSH.getEntryAtIndex(oldSH.index, false)
-                             .QueryInterface(Components.interfaces.nsISHEntry)
+                             .QueryInterface(Ci.nsISHEntry)
                              .clone();
             // The bfcache entry is tightly coupled to the original shistory it
             // belongs to, better to drop it.
@@ -2075,10 +2075,10 @@
         <body>
           <![CDATA[
             if (!aListener)
-              throw Components.results.NS_ERROR_INVALID_ARG;
+              throw Cr.NS_ERROR_INVALID_ARG;
 
             if (this.mProgressListeners.indexOf(aListener) != -1)
-              throw Components.results.NS_ERROR_FAILURE;
+              throw Cr.NS_ERROR_FAILURE;
 
             // push() does not disturb possibly ongoing iterations.
             this.mProgressListeners.push(aListener);
@@ -2091,7 +2091,7 @@
         <body>
           <![CDATA[
             if (this.mProgressListeners.indexOf(aListener) == -1)
-              throw Components.results.NS_ERROR_FAILURE;
+              throw Cr.NS_ERROR_FAILURE;
 
             // Create a new array, not to disturb possibly ongoing iterations.
             this.mProgressListeners =
@@ -2109,10 +2109,10 @@
         <body>
           <![CDATA[
             if (!aListener)
-              throw Components.results.NS_ERROR_INVALID_ARG;
+              throw Cr.NS_ERROR_INVALID_ARG;
 
             if (this.mTabsProgressListeners.indexOf(aListener) != -1)
-              throw Components.results.NS_ERROR_FAILURE;
+              throw Cr.NS_ERROR_FAILURE;
 
             // push() does not disturb possibly ongoing iterations.
             this.mTabsProgressListeners.push(aListener);
@@ -2125,7 +2125,7 @@
         <body>
           <![CDATA[
             if (this.mTabsProgressListeners.indexOf(aListener) == -1)
-              throw Components.results.NS_ERROR_FAILURE;
+              throw Cr.NS_ERROR_FAILURE;
 
             // Create a new array, not to disturb possibly ongoing iterations.
             this.mTabsProgressListeners =
@@ -2197,7 +2197,7 @@
               if (this.tabs[i] == aTab)
                 return i;
 
-            throw Components.results.NS_ERROR_ILLEGAL_VALUE;
+            throw Cr.NS_ERROR_ILLEGAL_VALUE;
           ]]>
         </body>
       </method>
@@ -2378,8 +2378,8 @@
             }
 
             var url;
-            var linkHandler = Components.classes["@mozilla.org/content/dropped-link-handler;1"]
-                                        .getService(Components.interfaces.nsIDroppedLinkHandler);
+            var linkHandler = Cc["@mozilla.org/content/dropped-link-handler;1"]
+                                .getService(Ci.nsIDroppedLinkHandler);
             try {
               // Pass true to disallow dropping javascript: or data: urls.
               url = linkHandler.dropLink(aEvent, {}, true);
@@ -2629,7 +2629,7 @@
                 // addProgressListener only has a weak pointer to it
                 browser._SHListener =
                     this.mInstallSH(browser, aGroup[i].sessionHistory);
-                browser.webProgress.addProgressListener(browser._SHListener, Components.interfaces.nsIWebProgress.NOTIFY_ALL);
+                browser.webProgress.addProgressListener(browser._SHListener, Ci.nsIWebProgress.NOTIFY_ALL);
               } else {
                 var referrerURI = "referrerURI" in data ? data.referrerURI : null;
                 this.addTab(data.URI, referrerURI);
@@ -3036,8 +3036,8 @@
         <getter>
         <![CDATA[
           if (!this._fastFind) {
-            this._fastFind = Components.classes["@mozilla.org/typeaheadfind;1"]
-                                       .createInstance(Components.interfaces.nsITypeAheadFind);
+            this._fastFind = Cc["@mozilla.org/typeaheadfind;1"]
+                               .createInstance(Ci.nsITypeAheadFind);
             this._fastFind.init(this.docShell);
           }
           return this._fastFind;
@@ -3074,12 +3074,12 @@
             this.mCurrentBrowser.init();
 
           // Wire up the tab's progress listener and filter.
-          const nsIWebProgress = Components.interfaces.nsIWebProgress;
+          const nsIWebProgress = Ci.nsIWebProgress;
           var tabListener = this.mTabProgressListener(this.mCurrentTab,
                                                       this.mCurrentBrowser,
                                                       false);
-          var filter = Components.classes["@mozilla.org/appshell/component/browser-status-filter;1"]
-                                 .createInstance(nsIWebProgress);
+          var filter = Cc["@mozilla.org/appshell/component/browser-status-filter;1"]
+                         .createInstance(nsIWebProgress);
           filter.addProgressListener(tabListener, nsIWebProgress.NOTIFY_ALL);
           this.webProgress.addProgressListener(filter,
                                                nsIWebProgress.NOTIFY_ALL);
@@ -3103,8 +3103,8 @@
           t.setAttribute("onerror", "this.parentNode.parentNode.parentNode.parentNode.addToMissedIconCache(this.getAttribute('image')); this.removeAttribute('image');");
           this.referenceTab = t;
 
-          var os = Components.classes["@mozilla.org/observer-service;1"]
-                             .getService(Components.interfaces.nsIObserverService);
+          var os = Cc["@mozilla.org/observer-service;1"]
+                     .getService(Ci.nsIObserverService);
           os.addObserver(this, "browser:purge-session-history", false);
           Services.prefs.addObserver("browser.tabs.max_tabs_undo", this, false);
 
@@ -3129,8 +3129,8 @@
             // eventListeners are removed from the browsers in display order of the browsers
             this.browsers[i].removeEventListener("DOMTitleChanged", this.onTitleChanged, true);
           }
-          var os = Components.classes["@mozilla.org/observer-service;1"]
-                             .getService(Components.interfaces.nsIObserverService);
+          var os = Cc["@mozilla.org/observer-service;1"]
+                     .getService(Ci.nsIObserverService);
           os.removeObserver(this, "browser:purge-session-history");
           Services.prefs.removeObserver("browser.tabs.max_tabs_undo", this);
           this.savedBrowsers.forEach(function(aTabData) {

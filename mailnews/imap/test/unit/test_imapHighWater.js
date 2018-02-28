@@ -4,9 +4,9 @@
  * marks.
  */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
 load("../../../resources/logHelper.js");
 load("../../../resources/alertTestUtils.js");
 load("../../../resources/asyncTestUtils.js");
@@ -96,7 +96,7 @@ function* doMoves() {
   gIMAPInbox.updateFolderWithListener(null, UrlListener);
   yield false;
   gFolder1 = gRootFolder.getChildNamed("folder 1")
-               .QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
+               .QueryInterface(Ci.nsIMsgImapMailFolder);
   gFolder1.updateFolderWithListener(null, UrlListener);
   yield false;
   // get five messages to move from Inbox to folder 1.
@@ -106,7 +106,7 @@ function* doMoves() {
   for (let i = 0; i < 5 && msgEnumerator.hasMoreElements(); i++)
   {
     let header = msgEnumerator.getNext();
-    if (header instanceof Components.interfaces.nsIMsgDBHdr)
+    if (header instanceof Ci.nsIMsgDBHdr)
       headers1.appendElement(header, false);
   }
   // this will add dummy headers with keys > 0xffffff80
@@ -126,7 +126,7 @@ function* doMoves() {
   for (let i = 0; i < 5 && msgEnumerator.hasMoreElements(); i++)
   {
     let header = msgEnumerator.getNext();
-    if (header instanceof Components.interfaces.nsIMsgDBHdr)
+    if (header instanceof Ci.nsIMsgDBHdr)
       headers1.appendElement(header, false);
   }
   // Check that CopyMessages will handle having a high highwater mark.

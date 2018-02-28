@@ -205,9 +205,9 @@ function UpdateHomePageList(aSingleURL)
 
 function SelectFile()
 {
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  let fp = Components.classes["@mozilla.org/filepicker;1"]
-                     .createInstance(nsIFilePicker);
+  const nsIFilePicker = Ci.nsIFilePicker;
+  let fp = Cc["@mozilla.org/filepicker;1"]
+             .createInstance(nsIFilePicker);
   let title = document.getElementById("bundle_prefutilities")
                       .getString("choosehomepage");
   fp.init(window, title, nsIFilePicker.modeOpen);

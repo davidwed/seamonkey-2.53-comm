@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function SMIMEService() {}
 
@@ -16,7 +16,7 @@ SMIMEService.prototype = {
             server.type != "im" && server.type != "none");
   },
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIMsgAccountManagerExtension]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIMsgAccountManagerExtension]),
   classID: Components.ID("{f2809796-1dd1-11b2-8c1b-8f15f007c699}"),
 };
 

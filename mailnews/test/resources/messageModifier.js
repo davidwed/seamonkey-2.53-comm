@@ -7,8 +7,8 @@
  *  for testing purposes.
  */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 /**
  * Represents a set of synthetic messages, also supporting insertion into and
@@ -146,7 +146,7 @@ SyntheticMessageSet.prototype = {
    */
   get xpcomHdrArray() {
     return toXPCOMArray(this.msgHdrs(),
-                        Components.interfaces.nsIMutableArray);
+                        Ci.nsIMutableArray);
   },
   /**
    * @return a list where each item is a list with two elements; the first is
@@ -171,7 +171,7 @@ SyntheticMessageSet.prototype = {
   foldersWithXpcomHdrArrays: function*() {
     for (let [folder, msgHdrs] of this.foldersWithMsgHdrs) {
       yield [folder, toXPCOMArray(msgHdrs,
-                                  Components.interfaces.nsIMutableArray)];
+                                  Ci.nsIMutableArray)];
     }
   },
   /**

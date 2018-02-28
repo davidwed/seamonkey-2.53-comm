@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gIdentityListBox;                 // the root <listbox> node
 var gAddButton;
@@ -46,7 +46,7 @@ function refreshIdentityList(aSelectIndex)
   // Build the list from the identities array.
   let identities = gAccount.identities;
   for (let identity in fixIterator(identities,
-                                   Components.interfaces.nsIMsgIdentity))
+                                   Ci.nsIMsgIdentity))
   {
     if (identity.valid)
     {
@@ -94,7 +94,7 @@ function getSelectedIdentity()
   var identityKey = gIdentityListBox.selectedItems[0].getAttribute("key");
   let identities = gAccount.identities;
   for (let identity in fixIterator(identities,
-                                   Components.interfaces.nsIMsgIdentity))
+                                   Ci.nsIMsgIdentity))
   {
     if (identity.valid && identity.key == identityKey)
       return identity;

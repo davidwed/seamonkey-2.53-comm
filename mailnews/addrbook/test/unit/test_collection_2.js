@@ -6,7 +6,7 @@
  * in other address books.
  */
 
-var nsIAbPMF = Components.interfaces.nsIAbPreferMailFormat;
+var nsIAbPMF = Ci.nsIAbPreferMailFormat;
 
 function run_test()
 {
@@ -14,8 +14,8 @@ function run_test()
 
   // Get the actual collecter
   var addressCollect =
-    Components.classes["@mozilla.org/addressbook/services/addressCollector;1"]
-              .getService(Components.interfaces.nsIAbAddressCollector);
+    Cc["@mozilla.org/addressbook/services/addressCollector;1"]
+      .getService(Ci.nsIAbAddressCollector);
 
   // Set the new pref afterwards to ensure we change correctly
   Services.prefs.setCharPref("mail.collect_addressbook", kCABData.URI);
@@ -39,7 +39,7 @@ function run_test()
 
   do_check_true(childCards.hasMoreElements());
 
-  var card = childCards.getNext().QueryInterface(Components.interfaces.nsIAbCard);
+  var card = childCards.getNext().QueryInterface(Ci.nsIAbCard);
 
   do_check_eq(card.displayName, "Other Book");
   do_check_eq(card.primaryEmail, "other@book.invalid");
