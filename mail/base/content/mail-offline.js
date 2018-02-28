@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var MailOfflineMgr = {
   offlineManager: null,
@@ -13,8 +13,8 @@ var MailOfflineMgr = {
   {
     Services.obs.addObserver(this, "network:offline-status-changed", false);
 
-    this.offlineManager = Components.classes["@mozilla.org/messenger/offline-manager;1"]
-                        .getService(Components.interfaces.nsIMsgOfflineManager);
+    this.offlineManager = Cc["@mozilla.org/messenger/offline-manager;1"]
+                        .getService(Ci.nsIMsgOfflineManager);
     this.offlineBundle = document.getElementById("bundle_offlinePrompts");
 
     // initialize our offline state UI
@@ -74,9 +74,9 @@ var MailOfflineMgr = {
    */
   haveUnsentMessages: function()
   {
-    return Components.classes["@mozilla.org/messengercompose/sendlater;1"]
-                     .getService(Components.interfaces.nsIMsgSendLater)
-                     .hasUnsentMessages();
+    return Cc["@mozilla.org/messengercompose/sendlater;1"]
+             .getService(Ci.nsIMsgSendLater)
+             .hasUnsentMessages();
   },
 
   /**

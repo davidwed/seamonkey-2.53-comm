@@ -7,7 +7,7 @@ var MODULE_NAME = 'test-plugin-outdated';
 var RELATIVE_ROOT = '../shared-modules';
 var MODULE_REQUIRES = ['folder-display-helpers', 'content-tab-helpers'];
 
-Components.utils.import('resource://gre/modules/Services.jsm');
+Cu.import('resource://gre/modules/Services.jsm');
 
 var gOldStartUrl = null;
 var gOldPluginUpdateUrl = null;
@@ -41,7 +41,7 @@ function setupModule(module) {
   Services.prefs.setCharPref(kPluginsUpdatePref, kPluginUpdateUrl);
 
   let plugin = get_test_plugin();
-  plugin.enabledState = Components.interfaces.nsIPluginTag.STATE_ENABLED;
+  plugin.enabledState = Ci.nsIPluginTag.STATE_ENABLED;
 }
 
 function teardownModule(module) {

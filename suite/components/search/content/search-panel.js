@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/FormHistory.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/FormHistory.jsm");
 
 const kXULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const SEARCH_ENGINE_TOPIC = "browser-search-engine-modified";
@@ -63,7 +63,7 @@ function doSearch() {
       value: textValue
     }, {
       handleError: function(aError) {
-        Components.utils.reportError("Saving search to form history failed: " + aError.message);
+        Cu.reportError("Saving search to form history failed: " + aError.message);
       }
     });
   }
@@ -74,8 +74,8 @@ function doSearch() {
 }
 
 var engineObserver = {
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIObserver,
-                                         Components.interfaces.nsISupportsWeakReference]),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
+                                         Ci.nsISupportsWeakReference]),
 
   observe: function(aEngine, aTopic, aVerb) {
     if (aTopic == SEARCH_ENGINE_TOPIC) {

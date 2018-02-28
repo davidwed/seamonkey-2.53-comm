@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/gloda/utils.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/gloda/utils.js");
 
 /* This is where functions related to displaying the headers for a selected message in the
    message pane live. */
@@ -44,8 +44,8 @@ var gExtraExpandedHeaders;
 // Show the friendly display names for people I know, instead of the name + email address.
 var gShowCondensedEmailAddresses;
 
-var msgHeaderParser = Components.classes["@mozilla.org/messenger/headerparser;1"]
-                                .getService(Components.interfaces.nsIMsgHeaderParser);
+var msgHeaderParser = Cc["@mozilla.org/messenger/headerparser;1"]
+                        .getService(Ci.nsIMsgHeaderParser);
 var abAddressCollector = null;
 
 // other components may listen to on start header & on end header notifications for each message we display
@@ -119,9 +119,9 @@ var currentHeaderData = {};
 // isExternalAttachment --> boolean flag stating whether the attachment is external or not.
 var currentAttachments = new Array();
 
-const nsIAbDirectory = Components.interfaces.nsIAbDirectory;
-const nsIAbListener = Components.interfaces.nsIAbListener;
-const nsIAbCard = Components.interfaces.nsIAbCard;
+const nsIAbDirectory = Ci.nsIAbDirectory;
+const nsIAbListener = Ci.nsIAbListener;
+const nsIAbCard = Ci.nsIAbCard;
 
 // createHeaderEntry --> our constructor method which creates a header Entry
 // based on an entry in one of the header lists. A header entry is different from a header list.
@@ -243,9 +243,9 @@ function OnLoadMsgHeaderPane()
 
   // Add an address book listener so we can update the header view when things
   // change.
-  Components.classes["@mozilla.org/abmanager;1"]
-            .getService(Components.interfaces.nsIAbManager)
-            .addAddressBookListener(AddressBookListener, nsIAbListener.all);
+  Cc["@mozilla.org/abmanager;1"]
+    .getService(Ci.nsIAbManager)
+    .addAddressBookListener(AddressBookListener, nsIAbListener.all);
 
   var toggleHeaderView = GetHeaderPane();
   var initialCollapsedSetting = toggleHeaderView.getAttribute("state");
@@ -261,9 +261,9 @@ function OnUnloadMsgHeaderPane()
 {
   Services.prefs.removeObserver("mail.showCondensedAddresses", MsgHdrViewObserver);
 
-  Components.classes["@mozilla.org/abmanager;1"]
-            .getService(Components.interfaces.nsIAbManager)
-            .removeAddressBookListener(AddressBookListener);
+  Cc["@mozilla.org/abmanager;1"]
+    .getService(Ci.nsIAbManager)
+    .removeAddressBookListener(AddressBookListener);
 
   // dispatch an event letting any listeners know that we have unloaded the message pane
   GetHeaderPane().dispatchEvent(new Event('messagepane-unloaded',
@@ -338,7 +338,7 @@ function OnAddressBookDataChanged(aAction, aParentDir, aItem)
 
 var messageHeaderSink = {
     QueryInterface: XPCOMUtils.generateQI(
-      [Components.interfaces.nsIMsgHeaderSink]),
+      [Ci.nsIMsgHeaderSink]),
     onStartHeaders: function()
     {
       this.mSaveHdr = null;
@@ -602,7 +602,7 @@ var messageHeaderSink = {
       // if we don't have any attachments, turn off the attachments flag
       if (!this.mSaveHdr)
       {
-        var messageUrl = url.QueryInterface(Components.interfaces.nsIMsgMessageUrl);
+        var messageUrl = url.QueryInterface(Ci.nsIMsgMessageUrl);
         try
         {
           this.mSaveHdr = messenger.msgHdrFromURI(messageUrl.uri);
@@ -666,8 +666,8 @@ var messageHeaderSink = {
     get properties()
     {
       if (!this.mProperties)
-        this.mProperties = Components.classes["@mozilla.org/hash-property-bag;1"].
-          createInstance(Components.interfaces.nsIWritablePropertyBag2);
+        this.mProperties = Cc["@mozilla.org/hash-property-bag;1"]
+                             .createInstance(Ci.nsIWritablePropertyBag2);
       return this.mProperties;
     },
 
@@ -693,8 +693,8 @@ function SetTagHeader()
   }
 
   // get the list of known tags
-  var tagService = Components.classes["@mozilla.org/messenger/tagservice;1"]
-                   .getService(Components.interfaces.nsIMsgTagService);
+  var tagService = Cc["@mozilla.org/messenger/tagservice;1"]
+                   .getService(Ci.nsIMsgTagService);
   var tagArray = tagService.getAllTags({});
   var tagKeys = {};
   for (var tagInfo of tagArray)
@@ -742,9 +742,9 @@ function EnsureSubjectValue()
 function collectAddresses(aAddresses, aCreateCard)
 {
   if (!abAddressCollector)
-    abAddressCollector = Components.classes["@mozilla.org/addressbook/services/addressCollector;1"]
-                                   .getService(Components.interfaces.nsIAbAddressCollector);
-  var sendFormat = Components.interfaces.nsIAbPreferMailFormat.unknown;
+    abAddressCollector = Cc["@mozilla.org/addressbook/services/addressCollector;1"]
+                           .getService(Ci.nsIAbAddressCollector);
+  var sendFormat = Ci.nsIAbPreferMailFormat.unknown;
   abAddressCollector.collectAddress(aAddresses, aCreateCard, sendFormat);
 }
 
@@ -1149,7 +1149,7 @@ function setFromBuddyIcon(email)
         if (!gFileHandler)
         {
           gFileHandler = Services.io.getProtocolHandler("file")
-                                    .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+                                    .QueryInterface(Ci.nsIFileProtocolHandler);
 
           gProfileDirURL = Services.io.newFileURI(GetSpecialDirectory("ProfD"));
         }
@@ -1321,9 +1321,9 @@ function SetupEmailAddressPopup(aAddressNode)
  */
 function GetCardForEmail(aEmailAddress)
 {
-  var books = Components.classes["@mozilla.org/abmanager;1"]
-                        .getService(Components.interfaces.nsIAbManager)
-                        .directories;
+  var books = Cc["@mozilla.org/abmanager;1"]
+                .getService(Ci.nsIAbManager)
+                .directories;
 
   var result = { book: null, card: null};
 
@@ -1447,8 +1447,8 @@ createNewAttachmentInfo.prototype.openAttachment = function openAttachment()
   }
 
   var webNavigationInfo =
-        Components.classes["@mozilla.org/webnavigation-info;1"]
-                  .getService(Components.interfaces.nsIWebNavigationInfo);
+        Cc["@mozilla.org/webnavigation-info;1"]
+          .getService(Ci.nsIWebNavigationInfo);
 
   if (webNavigationInfo.isTypeSupported(this.contentType, null))
     openAsExternal(this.url);
@@ -1864,7 +1864,7 @@ function ShowEditMessageBox()
     var msgHdr = gDBView.hdrForFirstSelectedMessage;
     if (!msgHdr || !msgHdr.folder)
      return;
-    const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+    const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
     if (msgHdr.folder.isSpecialFolder(nsMsgFolderFlags.Drafts, true))
       document.getElementById("editMessageBox").collapsed = false;
   }
@@ -1887,8 +1887,8 @@ function CopyWebsiteAddress(websiteAddressNode)
     var websiteAddress = websiteAddressNode.getAttribute("value");
 
     var contractid = "@mozilla.org/widget/clipboardhelper;1";
-    var iid = Components.interfaces.nsIClipboardHelper;
-    var clipboard = Components.classes[contractid].getService(iid);
+    var iid = Ci.nsIClipboardHelper;
+    var clipboard = Cc[contractid].getService(iid);
     clipboard.copyString(websiteAddress);
   }
 }
@@ -1934,7 +1934,7 @@ var attachmentAreaDNDObserver = {
                                attachment.url);
         data.addDataForFlavour("application/x-moz-file-promise",
                                new nsFlavorDataProvider(), 0,
-                               Components.interfaces.nsISupports);
+                               Ci.nsISupports);
       }
       aAttachmentData.data = data;
     }
@@ -1949,10 +1949,10 @@ nsFlavorDataProvider.prototype =
 {
   QueryInterface : function(iid)
   {
-      if (iid.equals(Components.interfaces.nsIFlavorDataProvider) ||
-          iid.equals(Components.interfaces.nsISupports))
+      if (iid.equals(Ci.nsIFlavorDataProvider) ||
+          iid.equals(Ci.nsISupports))
         return this;
-      throw Components.results.NS_NOINTERFACE;
+      throw Cr.NS_NOINTERFACE;
   },
 
   getFlavorData : function(aTransferable, aFlavor, aData, aDataLen)
@@ -1964,12 +1964,12 @@ nsFlavorDataProvider.prototype =
       var dataSize = { };
       aTransferable.getTransferData("application/x-moz-file-promise-url", urlPrimitive, dataSize);
 
-      var srcUrlPrimitive = urlPrimitive.value.QueryInterface(Components.interfaces.nsISupportsString);
+      var srcUrlPrimitive = urlPrimitive.value.QueryInterface(Ci.nsISupportsString);
 
       // now get the destination file location from kFilePromiseDirectoryMime
       var dirPrimitive = {};
       aTransferable.getTransferData("application/x-moz-file-promise-dir", dirPrimitive, dataSize);
-      var destDirectory = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
+      var destDirectory = dirPrimitive.value.QueryInterface(Ci.nsILocalFile);
 
       // now save the attachment to the specified location
       // XXX: we need more information than just the attachment url to save it, fortunately, we have an array
@@ -1987,7 +1987,7 @@ nsFlavorDataProvider.prototype =
       if (attachment)
       {
         var destFilePath = messenger.saveAttachmentToFolder(attachment.contentType, attachment.url, encodeURIComponent(attachment.displayName), attachment.uri, destDirectory);
-        aData.value = destFilePath.QueryInterface(Components.interfaces.nsISupports);
+        aData.value = destFilePath.QueryInterface(Ci.nsISupports);
         aDataLen.value = 4;
       }
     }

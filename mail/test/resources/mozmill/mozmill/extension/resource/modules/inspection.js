@@ -37,18 +37,18 @@
 
 var EXPORTED_SYMBOLS = ["inspectElement"]
 
-var elementslib = {}; Components.utils.import('resource://mozmill/modules/elementslib.js', elementslib);
-var mozmill = {}; Components.utils.import('resource://mozmill/modules/mozmill.js', mozmill);
-var utils = {}; Components.utils.import('resource://mozmill/modules/utils.js', utils);
+var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+var mozmill = {}; Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
+var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
 
-var arrays = {}; Components.utils.import('resource://mozmill/stdlib/arrays.js', arrays);
-var dom = {}; Components.utils.import('resource://mozmill/stdlib/dom.js', dom);
-var objects = {}; Components.utils.import('resource://mozmill/stdlib/objects.js', objects);
-var json2 = {}; Components.utils.import('resource://mozmill/stdlib/json2.js', json2);
-var withs = {}; Components.utils.import('resource://mozmill/stdlib/withs.js', withs);
+var arrays = {}; Cu.import('resource://mozmill/stdlib/arrays.js', arrays);
+var dom = {}; Cu.import('resource://mozmill/stdlib/dom.js', dom);
+var objects = {}; Cu.import('resource://mozmill/stdlib/objects.js', objects);
+var json2 = {}; Cu.import('resource://mozmill/stdlib/json2.js', json2);
+var withs = {}; Cu.import('resource://mozmill/stdlib/withs.js', withs);
 
-var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Components.interfaces.nsIWindowMediator);
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+           .getService(Ci.nsIWindowMediator);
 
 var isNotAnonymous = function (elem, result) {
   if (result == undefined) {
@@ -261,7 +261,7 @@ var isMagicAnonymousDiv = function (_document, node) {
 }
 
 var copyToClipboard = function(str){
-  const gClipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"] .getService(Components.interfaces.nsIClipboardHelper);
+  const gClipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"] .getService(Ci.nsIClipboardHelper);
   gClipboardHelper.copyString(str);
 }
 

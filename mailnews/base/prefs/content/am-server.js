@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
-Components.utils.import("resource:///modules/MailUtils.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/MailUtils.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gServer;
 
@@ -165,7 +165,7 @@ function onAdvanced()
   {
     document.getElementById("pop3.deferGetNewMail").checked = serverSettings.deferGetNewMail;
     document.getElementById("pop3.deferredToAccount").setAttribute("value", serverSettings.deferredToAccount);
-    let pop3Server = gServer.QueryInterface(Components.interfaces.nsIPop3IncomingServer);
+    let pop3Server = gServer.QueryInterface(Ci.nsIPop3IncomingServer);
     // we're explicitly setting this so we'll go through the SetDeferredToAccount method
     pop3Server.deferredToAccount = serverSettings.deferredToAccount;
     // Setting the server to be deferred causes a rebuild of the account tree,
@@ -185,7 +185,7 @@ function onAdvanced()
                                            .incomingServer.serverURI;
 
     for (let account in fixIterator(MailServices.accounts.accounts,
-                                    Components.interfaces.nsIMsgAccount)) {
+                                    Ci.nsIMsgAccount)) {
       let accountValues = parent.getValueArrayFor(account);
       let type = parent.getAccountValue(account, accountValues, "server", "type",
                                         null, false);
@@ -279,19 +279,19 @@ function setupFixedUI()
 
 function BrowseForNewsrc()
 {
-  const nsIFilePicker = Components.interfaces.nsIFilePicker;
-  const nsIFile = Components.interfaces.nsIFile;
+  const nsIFilePicker = Ci.nsIFilePicker;
+  const nsIFile = Ci.nsIFile;
 
   var newsrcTextBox = document.getElementById("nntp.newsrcFilePath");
-  var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+  var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
   fp.init(window,
           document.getElementById("browseForNewsrc").getAttribute("filepickertitle"),
           nsIFilePicker.modeSave);
 
   var currentNewsrcFile;
   try {
-    currentNewsrcFile = Components.classes["@mozilla.org/file/local;1"]
-                                  .createInstance(nsIFile);
+    currentNewsrcFile = Cc["@mozilla.org/file/local;1"]
+                          .createInstance(nsIFile);
     currentNewsrcFile.initWithPath(newsrcTextBox.value);
   } catch (e) {
     dump("Failed to create nsIFile instance for the current newsrc file.\n");

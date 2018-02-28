@@ -8,7 +8,7 @@
  *  for now.
  */
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 function registerFolderEventLogHelper() {
   // Bail if there's no one on the other end who cares about our very
@@ -49,7 +49,7 @@ var _folderEventLogHelper_msgFolderListener = {
       aJunkProcessed ? "junk processed" : "did not junk process",
       aTraitProcessed ? "trait processed" : "did not trait process"
     ];
-    for (let msgHdr in fixIterator(aMsgs, Components.interfaces.nsIMsgDBHdr)) {
+    for (let msgHdr in fixIterator(aMsgs, Ci.nsIMsgDBHdr)) {
       args.push(msgHdr);
     }
     mark_action("msgEvent", "msgsClassified", args);
@@ -57,7 +57,7 @@ var _folderEventLogHelper_msgFolderListener = {
 
   msgsDeleted: function felh_msgsDeleted(aMsgs) {
     let args = [];
-    for (let msgHdr in fixIterator(aMsgs, Components.interfaces.nsIMsgDBHdr)) {
+    for (let msgHdr in fixIterator(aMsgs, Ci.nsIMsgDBHdr)) {
       args.push(msgHdr);
     }
     mark_action("msgEvent", "msgsDeleted", args);
@@ -67,14 +67,14 @@ var _folderEventLogHelper_msgFolderListener = {
                                                              aDestFolder,
                                                              aDestMsgs) {
     let args = [aMove ? "moved" : "copied"];
-    for (let msgHdr in fixIterator(aSrcMsgs, Components.interfaces.nsIMsgDBHdr)) {
+    for (let msgHdr in fixIterator(aSrcMsgs, Ci.nsIMsgDBHdr)) {
       args.push(msgHdr);
     }
     args.push("to");
     args.push(aDestFolder);
     if (aDestMsgs) {
       args.push("dest headers:");
-      for (let msgHdr in fixIterator(aDestMsgs, Components.interfaces.nsIMsgDBHdr)) {
+      for (let msgHdr in fixIterator(aDestMsgs, Ci.nsIMsgDBHdr)) {
         args.push(msgHdr);
       }
     }
@@ -143,7 +143,7 @@ var _folderEventLogHelper_folderListener = {
                  "had property " + aProperty.toString() + " have the " +
                  "following bits change: " +
                  _explode_flags(aOldValue ^ aNewValue,
-                                Components.interfaces.nsMsgMessageFlags)]);
+                                Ci.nsMsgMessageFlags)]);
   },
 
   /**
