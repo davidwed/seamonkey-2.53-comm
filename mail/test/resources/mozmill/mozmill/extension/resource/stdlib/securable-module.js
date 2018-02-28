@@ -197,13 +197,11 @@
        var self = this;
        return function require(module) {
          if (module == "chrome") {
-           var chrome = { Cc: Components.classes,
-                          Ci: Components.interfaces,
-                          Cu: Components.utils,
-                          Cr: Components.results,
-                          Cm: Components.manager,
-                          components: Components
-                        };
+           var chrome = { 
+             Cc, Ci, Cu, Cr, 
+             Cm: Components.manager,
+             components: Components
+           };
            return chrome;
          }
          var path = self.fs.resolveModule(rootDir, module);

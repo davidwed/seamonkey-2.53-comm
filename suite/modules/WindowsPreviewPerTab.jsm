@@ -642,7 +642,7 @@ this.AeroPeek = {
   cacheLifespan: 20,
 
   initialize: function () {
-    if (!(WINTASKBAR_CONTRACTID in Components.classes))
+    if (!(WINTASKBAR_CONTRACTID in Cc))
       return;
     this.taskbar = Cc[WINTASKBAR_CONTRACTID]
                      .getService(Ci.nsIWinTaskbar);
