@@ -1,5 +1,5 @@
-Components.utils.import("resource:///modules/distribution.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/distribution.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function run_test()
 {
@@ -63,7 +63,7 @@ function run_test()
     aboutLocale = testIni.getString("Global", "about.en-US");
   }
   catch (e) {
-    Components.utils.reportError(e);
+    Cu.reportError(e);
   }
 
   if (aboutLocale == undefined)

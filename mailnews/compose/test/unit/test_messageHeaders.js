@@ -2,9 +2,9 @@
  * Test suite for ensuring that the headers of messages are set properly.
  */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/mimeParser.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mimeParser.jsm");
 
 var CompFields = CC("@mozilla.org/messengercompose/composefields;1",
                     Ci.nsIMsgCompFields);
@@ -194,7 +194,7 @@ function* testDraftInfo() {
       "vcard=1; receipt=1; DSN=1; uuencode=0; attachmentreminder=1; deliveryformat=4",
   });
 
-  fields.deliveryFormat = Components.interfaces.nsIMsgCompSendFormat.Both;
+  fields.deliveryFormat = Ci.nsIMsgCompSendFormat.Both;
   yield richCreateMessage(fields, [], identity);
   checkDraftHeaders({
     "X-Mozilla-Draft-Info": "internal/draft; " +

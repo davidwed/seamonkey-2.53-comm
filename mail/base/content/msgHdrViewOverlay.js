@@ -7,13 +7,13 @@
  * message pane.
  */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/displayNameUtils.js");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/gloda/utils.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/displayNameUtils.js");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/gloda/utils.js");
 var {Status: statusUtils} =
-  Components.utils.import("resource:///modules/imStatusUtils.jsm");
+  Cu.import("resource:///modules/imStatusUtils.jsm");
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Warning: It's critical that the code in here for displaying the message
@@ -117,9 +117,9 @@ var currentHeaderData = {};
  */
 var currentAttachments = new Array();
 
-var nsIAbDirectory = Components.interfaces.nsIAbDirectory;
-var nsIAbListener = Components.interfaces.nsIAbListener;
-var nsIAbCard = Components.interfaces.nsIAbCard;
+var nsIAbDirectory = Ci.nsIAbDirectory;
+var nsIAbListener = Ci.nsIAbListener;
+var nsIAbCard = Ci.nsIAbCard;
 
 /**
  * Our constructor method which creates a header Entry based on an entry
@@ -231,7 +231,7 @@ function OnLoadMsgHeaderPane()
   // Add an address book listener so we can update the header view when things
   // change.
   MailServices.ab.addAddressBookListener(AddressBookListener,
-                                         Components.interfaces.nsIAbListener.all);
+                                         Ci.nsIAbListener.all);
 
   // If an invalid index is selected; reset to 0.  One way this can happen
   // is if a value of 1 was persisted to localStore.rdf by Tb2 (when there were
@@ -380,7 +380,7 @@ var AddressBookListener =
   onItemPropertyChanged: function(aItem, aProperty, aOldValue, aNewValue) {
     // We only need updates for card changes, address book and mailing list
     // ones don't affect us here.
-    if (aItem instanceof Components.interfaces.nsIAbCard)
+    if (aItem instanceof Ci.nsIAbCard)
       OnAddressBookDataChanged(nsIAbListener.itemChanged, null, aItem);
   }
 };
@@ -405,7 +405,7 @@ function OnAddressBookDataChanged(aAction, aParentDir, aItem) {
  */
 var messageHeaderSink = {
     QueryInterface: XPCOMUtils.generateQI(
-      [Components.interfaces.nsIMsgHeaderSink]),
+      [Ci.nsIMsgHeaderSink]),
     onStartHeaders: function()
     {
       this.mSaveHdr = null;
@@ -602,7 +602,7 @@ var messageHeaderSink = {
       var size = null;
       if (isExternalAttachment && url.startsWith("file:")) {
         let fileHandler = Services.io.getProtocolHandler("file")
-          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+          .QueryInterface(Ci.nsIFileProtocolHandler);
         try {
           let file = fileHandler.getFileFromURLSpec(url);
           // Can't get size for detached attachments which are no longer
@@ -611,8 +611,8 @@ var messageHeaderSink = {
             size = file.fileSize;
         }
         catch(e) {
-          Components.utils.reportError("Couldn't open external attachment; " +
-                                       "url=" + url + "; " + e);
+          Cu.reportError("Couldn't open external attachment; " +
+                         "url=" + url + "; " + e);
         }
       }
 
@@ -705,7 +705,7 @@ var messageHeaderSink = {
 
       // if we don't have any attachments, turn off the attachments flag
       if (!this.mSaveHdr) {
-        var messageUrl = url.QueryInterface(Components.interfaces.nsIMsgMessageUrl);
+        var messageUrl = url.QueryInterface(Ci.nsIMsgMessageUrl);
         this.mSaveHdr = messenger.msgHdrFromURI(messageUrl.uri);
       }
       if (!currentAttachments.length && this.mSaveHdr)
@@ -776,8 +776,8 @@ var messageHeaderSink = {
     get properties()
     {
       if (!this.mProperties)
-        this.mProperties = Components.classes["@mozilla.org/hash-property-bag;1"].
-          createInstance(Components.interfaces.nsIWritablePropertyBag2);
+        this.mProperties = Cc["@mozilla.org/hash-property-bag;1"]
+                             .createInstance(Ci.nsIWritablePropertyBag2);
       return this.mProperties;
     },
 
@@ -1313,7 +1313,7 @@ function UpdateEmailNodeDetails(aEmailAddress, aDocumentNode, aCardDetails) {
   let chatContact;
   if (!("chatHandler" in window)) {
     window.chatHandler = {};
-    Components.utils.import("resource:///modules/chatHandler.jsm", chatHandler);
+    Cu.import("resource:///modules/chatHandler.jsm", chatHandler);
   }
   let onlineContacts = chatHandler.onlineContacts;
   for (let chatAddress of chatAddresses) {
@@ -1589,8 +1589,8 @@ function AddContact(emailAddressNode)
   const kPersonalAddressbookURI = "moz-abmdbdirectory://abook.mab";
   let addressBook = MailServices.ab.getDirectory(kPersonalAddressbookURI);
 
-  let card = Components.classes["@mozilla.org/addressbook/cardproperty;1"]
-                       .createInstance(Components.interfaces.nsIAbCard);
+  let card = Cc["@mozilla.org/addressbook/cardproperty;1"]
+               .createInstance(Ci.nsIAbCard);
   card.displayName = emailAddressNode.getAttribute("displayName");
   card.primaryEmail = emailAddressNode.getAttribute("emailAddress");
 
@@ -1616,10 +1616,10 @@ function EditContact(emailAddressNode)
  */
 function SendMailToNode(addressNode, aEvent)
 {
-  let fields = Components.classes["@mozilla.org/messengercompose/composefields;1"]
-                         .createInstance(Components.interfaces.nsIMsgCompFields);
-  let params = Components.classes["@mozilla.org/messengercompose/composeparams;1"]
-                         .createInstance(Components.interfaces.nsIMsgComposeParams);
+  let fields = Cc["@mozilla.org/messengercompose/composefields;1"]
+                 .createInstance(Ci.nsIMsgCompFields);
+  let params = Cc["@mozilla.org/messengercompose/composeparams;1"]
+                 .createInstance(Ci.nsIMsgComposeParams);
 
   fields.newsgroups = addressNode.getAttribute("newsgroup");
   if (addressNode.hasAttribute("fullAddress")) {
@@ -1629,13 +1629,13 @@ function SendMailToNode(addressNode, aEvent)
       fields.to = MailServices.headerParser.makeMimeHeader(addresses, 1);
   }
 
-  params.type = Components.interfaces.nsIMsgCompType.New;
+  params.type = Ci.nsIMsgCompType.New;
 
   // If aEvent is passed, check if Shift key was pressed for composition in
   // non-default format (HTML vs. plaintext).
   params.format = (aEvent && aEvent.shiftKey) ?
-    Components.interfaces.nsIMsgCompFormat.OppositeOfDefault :
-    Components.interfaces.nsIMsgCompFormat.Default;
+    Ci.nsIMsgCompFormat.OppositeOfDefault :
+    Ci.nsIMsgCompFormat.Default;
 
   if (gFolderDisplay.displayedFolder) {
     params.identity = accountManager.getFirstIdentityForServer(
@@ -1656,8 +1656,8 @@ function SendMailToNode(addressNode, aEvent)
  */
 function CopyEmailNewsAddress(addressNode, aIncludeName = false)
 {
-  let clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                            .getService(Components.interfaces.nsIClipboardHelper);
+  let clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                    .getService(Ci.nsIClipboardHelper);
   let address = addressNode.getAttribute(aIncludeName ? "fullAddress"
                                                       : "emailAddress") ||
                 addressNode.getAttribute("newsgroup");
@@ -1693,7 +1693,7 @@ function GetNewsgroupServer()
   if (gFolderDisplay.selectedMessageIsNews) {
     let server = gFolderDisplay.selectedMessage.folder.server;
     if (server)
-      return server.QueryInterface(Components.interfaces.nsISubscribableServer);
+      return server.QueryInterface(Ci.nsISubscribableServer);
   }
   return null;
 }
@@ -1714,7 +1714,7 @@ function setupNewsgroupPopup(newsgroupNode)
   if (server) {
     // XXX Why is this necessary when nsISubscribableServer contains
     // |isSubscribed|?
-    server = server.QueryInterface(Components.interfaces.nsINntpIncomingServer);
+    server = server.QueryInterface(Ci.nsINntpIncomingServer);
     if (!server.containsNewsgroup(newsgroup)) {
       document.getElementById("subscribeToNewsgroupItem")
               .removeAttribute("hidden");
@@ -1752,8 +1752,8 @@ function SubscribeToNewsgroup(newsgroupNode)
  */
 function CopyNewsgroupName(newsgroupNode)
 {
-  let clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                            .getService(Components.interfaces.nsIClipboardHelper);
+  let clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                    .getService(Ci.nsIClipboardHelper);
   clipboard.copyString(newsgroupNode.getAttribute("newsgroup"));
 }
 
@@ -1772,25 +1772,25 @@ function CopyNewsgroupURL(newsgroupNode)
   let ng = newsgroupNode.getAttribute("newsgroup");
 
   let url;
-  if (server.socketType != Components.interfaces.nsMsgSocketType.SSL) {
+  if (server.socketType != Ci.nsMsgSocketType.SSL) {
     url = "news://" + server.hostName;
-    if (server.port != Components.interfaces.nsINntpUrl.DEFAULT_NNTP_PORT)
+    if (server.port != Ci.nsINntpUrl.DEFAULT_NNTP_PORT)
       url += ":" + server.port;
     url += "/" + ng;
   } else {
     url = "snews://" + server.hostName;
-    if (server.port != Components.interfaces.nsINntpUrl.DEFAULT_NNTPS_PORT)
+    if (server.port != Ci.nsINntpUrl.DEFAULT_NNTPS_PORT)
       url += ":" + server.port;
     url += "/" + ng;
   }
 
   try {
     let uri = Services.io.newURI(url);
-    let clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                              .getService(Components.interfaces.nsIClipboardHelper);
+    let clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                      .getService(Ci.nsIClipboardHelper);
     clipboard.copyString(decodeURI(uri.spec));
   } catch(e) {
-     Components.utils.reportError("Invalid URL: "+ url);
+     Cu.reportError("Invalid URL: "+ url);
   }
 }
 
@@ -1930,12 +1930,12 @@ AttachmentInfo.prototype = {
                                                  null,
                                                  Services.scriptSecurityManager.getSystemPrincipal(),
                                                  null,
-                                                 Components.interfaces.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
-                                                 Components.interfaces.nsIContentPolicy.TYPE_OTHER);
+                                                 Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
+                                                 Ci.nsIContentPolicy.TYPE_OTHER);
     let stream = channel.open();
 
-    let inputStream = Components.classes["@mozilla.org/binaryinputstream;1"]
-                                .createInstance(Components.interfaces.nsIBinaryInputStream);
+    let inputStream = Cc["@mozilla.org/binaryinputstream;1"]
+                        .createInstance(Ci.nsIBinaryInputStream);
     inputStream.setInputStream(stream);
 
     let bytesAvailable = 0;
@@ -1950,7 +1950,7 @@ AttachmentInfo.prototype = {
       try {
         chunk = inputStream.readBytes(1);
       } catch (ex) {
-        if (ex.result == Components.results.NS_BASE_STREAM_WOULD_BLOCK) {
+        if (ex.result == Cr.NS_BASE_STREAM_WOULD_BLOCK) {
           bytesAvailable = 1;
         } else {
           throw ex;
@@ -2626,7 +2626,7 @@ function TryHandleAllAttachments(action)
     HandleAllAttachments(action)
   }
   catch (e) {
-    Components.utils.reportError(e);
+    Cu.reportError(e);
   }
 }
 
@@ -2734,8 +2734,8 @@ function HandleMultipleAttachments(attachments, action)
     case "copyUrl":
       // Copy external http url(s) to clipboard. The menuitem is hidden unless
       // all selected attachment urls are http.
-      let clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                                .getService(Components.interfaces.nsIClipboardHelper);
+      let clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                        .getService(Ci.nsIClipboardHelper);
       clipboard.copyString(attachmentUrlArray.join("\n"));
       return;
     default:
@@ -2798,8 +2798,8 @@ function CopyWebsiteAddress(websiteAddressNode)
     var websiteAddress = websiteAddressNode.textContent;
 
     var contractid = "@mozilla.org/widget/clipboardhelper;1";
-    var iid = Components.interfaces.nsIClipboardHelper;
-    var clipboard = Components.classes[contractid].getService(iid);
+    var iid = Ci.nsIClipboardHelper;
+    var clipboard = Cc[contractid].getService(iid);
     clipboard.copyString(websiteAddress);
   }
 }
@@ -2902,8 +2902,8 @@ ConversationOpener.prototype = {
   onQueryCompleted: function(aCollection) {
     try {
       if (!aCollection.items.length) {
-        Components.utils.reportError("Couldn't find a collection for msg: " +
-                                     this._msgHdr);
+        Cu.reportError("Couldn't find a collection for msg: " +
+                       this._msgHdr);
       } else {
         let aMessage = aCollection.items[0];
         let tabmail = document.getElementById("tabmail");

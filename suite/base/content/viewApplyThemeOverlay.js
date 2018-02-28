@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/AddonManager.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "LightweightThemeManager",
   "resource://gre/modules/LightweightThemeManager.jsm");
 
@@ -107,8 +107,8 @@ function previewTheme(event)
 function restartApp()
 {
   // Notify all windows that an application quit has been requested.
-  var cancelQuit = Components.classes["@mozilla.org/supports-PRBool;1"]
-                             .createInstance(Components.interfaces.nsISupportsPRBool);
+  var cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
+                     .createInstance(Ci.nsISupportsPRBool);
 
   Services.obs.notifyObservers(cancelQuit, "quit-application-requested", "restart");
 
@@ -117,10 +117,10 @@ function restartApp()
     return;
 
   Services.prefs.setBoolPref("browser.sessionstore.resume_session_once", true);
-  const nsIAppStartup = Components.interfaces.nsIAppStartup;
-  Components.classes["@mozilla.org/toolkit/app-startup;1"]
-            .getService(nsIAppStartup)
-            .quit(nsIAppStartup.eRestart | nsIAppStartup.eAttemptQuit);
+  const nsIAppStartup = Ci.nsIAppStartup;
+  Cc["@mozilla.org/toolkit/app-startup;1"]
+    .getService(nsIAppStartup)
+    .quit(nsIAppStartup.eRestart | nsIAppStartup.eAttemptQuit);
 }
 
 function applyTheme(menuitem)

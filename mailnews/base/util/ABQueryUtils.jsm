@@ -9,7 +9,7 @@
 this.EXPORTED_SYMBOLS = ["getSearchTokens", "getModelQuery",
                          "modelQueryHasUserValue", "generateQueryURI",
                          "encodeABTermValue"];
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 /**
  * Parse the multiword search string to extract individual search terms
@@ -67,7 +67,7 @@ function getSearchTokens(aSearchString) {
 function getModelQuery(aBasePrefName) {
   let modelQuery = "";
   if (Services.prefs.getComplexValue("mail.addr_book.show_phonetic_fields",
-      Components.interfaces.nsIPrefLocalizedString).data == "true") {
+      Ci.nsIPrefLocalizedString).data == "true") {
     modelQuery = Services.prefs.getCharPref(aBasePrefName + ".phonetic");
   } else {
     modelQuery = Services.prefs.getCharPref(aBasePrefName);
@@ -89,7 +89,7 @@ function getModelQuery(aBasePrefName) {
  */
 function modelQueryHasUserValue(aBasePrefName) {
   if (Services.prefs.getComplexValue("mail.addr_book.show_phonetic_fields",
-      Components.interfaces.nsIPrefLocalizedString).data == "true")
+      Ci.nsIPrefLocalizedString).data == "true")
     return Services.prefs.prefHasUserValue(aBasePrefName + ".phonetic");
   return Services.prefs.prefHasUserValue(aBasePrefName);
 }

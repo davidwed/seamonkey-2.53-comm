@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function browserWindowsCount() {
   let count = 0;
@@ -21,7 +21,7 @@ function test() {
 
   waitForExplicitFinish();
 
-  let cs = Components.classes["@mozilla.org/cookiemanager;1"].getService(Components.interfaces.nsICookieManager2);
+  let cs = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager2);
   cs.removeAll();
 
   // make sure that sessionstore.js can be forced to be created by setting
@@ -51,7 +51,7 @@ function test() {
       let cookie;
       let i = 0;
       while (e.hasMoreElements()) {
-        cookie = e.getNext().QueryInterface(Components.interfaces.nsICookie);
+        cookie = e.getNext().QueryInterface(Ci.nsICookie);
        i++;
       }
       is(i, 1, "expected one cookie");
@@ -66,7 +66,7 @@ function test() {
       e = cs.enumerator;
       let cookie2;
       while (e.hasMoreElements()) {
-        cookie2 = e.getNext().QueryInterface(Components.interfaces.nsICookie);
+        cookie2 = e.getNext().QueryInterface(Ci.nsICookie);
         if (cookie.name == cookie2.name)
           break;
       }

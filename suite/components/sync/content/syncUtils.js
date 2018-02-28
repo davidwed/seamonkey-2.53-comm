@@ -155,12 +155,12 @@ var gSyncUtils = {
     let dialogTitle = this._stringBundle.GetStringFromName("save.recoverykey.title");
     let defaultSaveName = this._stringBundle.GetStringFromName("save.recoverykey.defaultfilename");
     this._preparePPiframe(elid, function(iframe) {
-      let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
+      let fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
       let fpCallback = function fpCallback_done(aResult) {
-        if (aResult == Components.interfaces.nsIFilePicker.returnOK ||
-            aResult == Components.interfaces.nsIFilePicker.returnReplace) {
-          let stream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-                         .createInstance(Components.interfaces.nsIFileOutputStream);
+        if (aResult == Ci.nsIFilePicker.returnOK ||
+            aResult == Ci.nsIFilePicker.returnReplace) {
+          let stream = Cc["@mozilla.org/network/file-output-stream;1"]
+                         .createInstance(Ci.nsIFileOutputStream);
           stream.init(filepicker.file, -1, parseInt("0600", 8), 0);
 
           let serializer = new XMLSerializer();
@@ -173,8 +173,8 @@ var gSyncUtils = {
         }
       };
 
-      fp.init(window, dialogTitle, Components.interfaces.nsIFilePicker.modeSave);
-      fp.appendFilters(Components.interfaces.nsIFilePicker.filterHTML);
+      fp.init(window, dialogTitle, Ci.nsIFilePicker.modeSave);
+      fp.appendFilters(Ci.nsIFilePicker.filterHTML);
       fp.defaultString = defaultSaveName;
       fp.open(fpCallback);
       return false;
@@ -218,9 +218,9 @@ var gSyncUtils = {
   }
 };
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyGetter(gSyncUtils, "_stringBundle", function() {
-  return Components.classes["@mozilla.org/intl/stringbundle;1"]
-                   .getService(Components.interfaces.nsIStringBundleService)
-                   .createBundle("chrome://communicator/locale/sync/syncSetup.properties");
+  return Cc["@mozilla.org/intl/stringbundle;1"]
+           .getService(Ci.nsIStringBundleService)
+           .createBundle("chrome://communicator/locale/sync/syncSetup.properties");
 });

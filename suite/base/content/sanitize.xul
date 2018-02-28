@@ -23,7 +23,7 @@
 
   <script type="application/javascript">
   <![CDATA[
-    Components.utils.import("resource:///modules/Sanitizer.jsm");
+    Cu.import("resource:///modules/Sanitizer.jsm");
 
     function onLoad()
     {

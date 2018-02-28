@@ -8,12 +8,12 @@ var RELATIVE_ROOT = '../shared-modules';
 var MODULE_REQUIRES = ['folder-display-helpers', 'content-tab-helpers'];
 
 var controller = {};
-Components.utils.import('resource://mozmill/modules/controller.js', controller);
+Cu.import('resource://mozmill/modules/controller.js', controller);
 var mozmill = {};
-Components.utils.import('resource://mozmill/modules/mozmill.js', mozmill);
+Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
 var elementslib = {};
-Components.utils.import('resource://mozmill/modules/elementslib.js', elementslib);
-Components.utils.import('resource://gre/modules/Services.jsm');
+Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+Cu.import('resource://gre/modules/Services.jsm');
 
 // RELATIVE_ROOT messes with the collector, so we have to bring the path back
 // so we get the right path for the resources.

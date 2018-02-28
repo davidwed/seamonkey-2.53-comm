@@ -19,7 +19,7 @@ var SAVE = 0
 var CANCEL = 1
 var DONT_SAVE = 2;
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var cwc = null; // compose window controller
 var folder = null;
@@ -38,9 +38,9 @@ function setupModule(module) {
 }
 
 function msgSource(aSubject, aContentType) {
-  let msgId = Components.classes["@mozilla.org/uuid-generator;1"]
-                        .getService(Components.interfaces.nsIUUIDGenerator)
-                        .generateUUID() + "@invalid";
+  let msgId = Cc["@mozilla.org/uuid-generator;1"]
+                .getService(Ci.nsIUUIDGenerator)
+                .generateUUID() + "@invalid";
 
   return "From - Sun Apr 07 22:47:11 2013\r\n" +
          "X-Mozilla-Status: 0001\r\n" +
@@ -74,7 +74,7 @@ function test_can_cancel_quit_on_changes() {
   cwc.type(cwc.eid("content-frame"), "Hey check out this megalol link");
 
   let cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
-                   .createInstance(Components.interfaces.nsISupportsPRBool);
+                   .createInstance(Ci.nsISupportsPRBool);
 
   // Set the Mock Prompt Service to return false, so that we
   // cancel the quit.
@@ -118,7 +118,7 @@ function test_can_quit_on_changes() {
   cwc.type(cwc.eid("content-frame"), "Hey check out this megalol link");
 
   let cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
-                   .createInstance(Components.interfaces.nsISupportsPRBool);
+                   .createInstance(Ci.nsISupportsPRBool);
 
   // Set the Mock Prompt Service to return true, so that we're
   // allowing the quit to occur.
@@ -162,7 +162,7 @@ function test_window_quit_state_reset_on_aborted_quit() {
   cwc2.type(cwc2.eid("content-frame"), "Polo!");
 
   let cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
-                   .createInstance(Components.interfaces.nsISupportsPRBool);
+                   .createInstance(Ci.nsISupportsPRBool);
 
   // This is a hacky method for making sure that the second window
   // receives a CANCEL click in the popup dialog.

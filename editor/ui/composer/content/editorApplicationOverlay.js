@@ -127,7 +127,7 @@ function CheckOpenWindowForURIMatch(uri, win)
   try {
     var contentWindow = win.content;
     var contentDoc = contentWindow.document;
-    var htmlDoc = contentDoc.QueryInterface(Components.interfaces.nsIDOMHTMLDocument);
+    var htmlDoc = contentDoc.QueryInterface(Ci.nsIDOMHTMLDocument);
     var winuri = createURI(htmlDoc.URL);
     return winuri.equals(uri);
   } catch (e) {}

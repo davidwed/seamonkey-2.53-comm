@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource:///modules/imXPCOMUtils.jsm");
-Components.utils.import("resource:///modules/jsProtoHelper.jsm");
+Cu.import("resource:///modules/imXPCOMUtils.jsm");
+Cu.import("resource:///modules/jsProtoHelper.jsm");
 
 function Conversation(aAccount)
 {
@@ -50,7 +50,7 @@ Account.prototype = {
   },
   _conv: null,
   disconnect: function(aSilent) {
-    this.reportDisconnecting(Components.interfaces.prplIAccount.NO_ERROR, "");
+    this.reportDisconnecting(Ci.prplIAccount.NO_ERROR, "");
     if (!aSilent)
       this._conv.writeMessage("jstest", "You have disconnected.", {system: true});
     if (this._conv) {

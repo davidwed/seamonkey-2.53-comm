@@ -7,10 +7,10 @@
 
 
 load("../../../resources/POP3pump.js");
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://testing-common/mailnews/PromiseTestUtils.jsm");
 
 var gFiles = ["../../../data/bugmail10", "../../../data/bugmail11"];
 

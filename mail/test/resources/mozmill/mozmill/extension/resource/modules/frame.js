@@ -39,26 +39,26 @@ var EXPORTED_SYMBOLS = ['loadFile','register_function','Collector','Runner','eve
                         'jsbridge', 'runTestDirectory', 'runTestFile', 'log', 'getThread',
                         'timers', 'persisted'];
 
-Components.utils.import('resource://mozmill/stdlib/httpd.js');
+Cu.import('resource://mozmill/stdlib/httpd.js');
 
-var os = {};      Components.utils.import('resource://mozmill/stdlib/os.js', os);
-var strings = {}; Components.utils.import('resource://mozmill/stdlib/strings.js', strings);
-var arrays = {};  Components.utils.import('resource://mozmill/stdlib/arrays.js', arrays);
-var withs = {};   Components.utils.import('resource://mozmill/stdlib/withs.js', withs);
-var utils = {};   Components.utils.import('resource://mozmill/modules/utils.js', utils);
+var os = {};      Cu.import('resource://mozmill/stdlib/os.js', os);
+var strings = {}; Cu.import('resource://mozmill/stdlib/strings.js', strings);
+var arrays = {};  Cu.import('resource://mozmill/stdlib/arrays.js', arrays);
+var withs = {};   Cu.import('resource://mozmill/stdlib/withs.js', withs);
+var utils = {};   Cu.import('resource://mozmill/modules/utils.js', utils);
 var securableModule = {};
-  Components.utils.import('resource://mozmill/stdlib/securable-module.js', securableModule);
+  Cu.import('resource://mozmill/stdlib/securable-module.js', securableModule);
 
-var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-     getService(Components.interfaces.nsIConsoleService);
-var ios = Components.classes["@mozilla.org/network/io-service;1"]
-                    .getService(Components.interfaces.nsIIOService);
-var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-                    .getService(Components.interfaces.mozIJSSubScriptLoader);
-var uuidgen = Components.classes["@mozilla.org/uuid-generator;1"]
-                    .getService(Components.interfaces.nsIUUIDGenerator);
+var aConsoleService = Cc["@mozilla.org/consoleservice;1"]
+                        .getService(Ci.nsIConsoleService);
+var ios = Cc["@mozilla.org/network/io-service;1"]
+            .getService(Ci.nsIIOService);
+var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
+               .getService(Ci.mozIJSSubScriptLoader);
+var uuidgen = Cc["@mozilla.org/uuid-generator;1"]
+                .getService(Ci.nsIUUIDGenerator);
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 var systemPrincipal = Services.scriptSecurityManager.getSystemPrincipal();
 
 var backstage = this;
@@ -78,21 +78,21 @@ mozmill = undefined; elementslib = undefined; modules = undefined;
 var loadTestResources = function () {
   if (mozmill == undefined) {
     mozmill = {};
-    Components.utils.import("resource://mozmill/modules/mozmill.js", mozmill);
+    Cu.import("resource://mozmill/modules/mozmill.js", mozmill);
   }
   if (elementslib == undefined) {
     elementslib = {};
-    Components.utils.import("resource://mozmill/modules/elementslib.js", elementslib);
+    Cu.import("resource://mozmill/modules/elementslib.js", elementslib);
   }
 }
 
 var loadFile = function(path, collector) {
-  var file = Components.classes["@mozilla.org/file/local;1"]
-                       .createInstance(Components.interfaces.nsILocalFile);
+  var file = Cc["@mozilla.org/file/local;1"]
+               .createInstance(Ci.nsILocalFile);
   file.initWithPath(path);
   var uri = ios.newFileURI(file).spec;
 
-  var module = new Components.utils.Sandbox(systemPrincipal);
+  var module = new Cu.Sandbox(systemPrincipal);
   module.registeredFunctions = registeredFunctions;
   module.collector = collector
   loadTestResources();
@@ -322,7 +322,7 @@ var log = function (obj) {
 }
 
 try {
-  var jsbridge = {}; Components.utils.import('resource://jsbridge/modules/events.js', jsbridge);
+  var jsbridge = {}; Cu.import('resource://jsbridge/modules/events.js', jsbridge);
 } catch(err) {
   var jsbridge = null;
 
@@ -400,8 +400,8 @@ Collector.prototype.addHttpResource = function (directory, ns) {
     ns = '/' + ns + '/';
   }
 
-  var lp = Components.classes["@mozilla.org/file/local;1"].
-           createInstance(Components.interfaces.nsILocalFile);
+  var lp = Cc["@mozilla.org/file/local;1"]
+             .createInstance(Ci.nsILocalFile);
   lp.initWithPath(os.abspath(directory, this.current_file));
   this.httpd.registerDirectory(ns, lp);
 
@@ -495,13 +495,13 @@ AppQuitObserver.prototype = {
     events.appQuit = true;
   },
   register: function() {
-    var obsService = Components.classes["@mozilla.org/observer-service;1"]
-                     .getService(Components.interfaces.nsIObserverService);
+    var obsService = Cc["@mozilla.org/observer-service;1"]
+                     .getService(Ci.nsIObserverService);
     obsService.addObserver(this, "quit-application", false);
   },
   unregister: function() {
-    var obsService = Components.classes["@mozilla.org/observer-service;1"]
-                     .getService(Components.interfaces.nsIObserverService);
+    var obsService = Cc["@mozilla.org/observer-service;1"]
+                     .getService(Ci.nsIObserverService);
     obsService.removeObserver(this, "quit-application");
   }
 }
@@ -513,7 +513,7 @@ function Runner (collector, invokedFromIDE) {
   events.fireEvent('startRunner', true);
   // var logging = {}; Components.utils.import('resource://mozmill/stdlib/logging.js', logging);
   // this.logger = new logging.Logger('Runner');
-  var m = {}; Components.utils.import('resource://mozmill/modules/mozmill.js', m);
+  var m = {}; Cu.import('resource://mozmill/modules/mozmill.js', m);
   this.platform = m.platform;
 }
 Runner.prototype.runTestDirectory = function (directory) {
@@ -561,9 +561,9 @@ Runner.prototype.getDependencies = function (module) {
 }
 
 Runner.prototype.wrapper = function (func, arg) {
-  thread = Components.classes["@mozilla.org/thread-manager;1"]
-                     .getService(Components.interfaces.nsIThreadManager)
-                     .currentThread;
+  thread = Cc["@mozilla.org/thread-manager;1"]
+             .getService(Ci.nsIThreadManager)
+             .currentThread;
 
   if (func.EXCLUDED_PLATFORMS != undefined) {
     if (arrays.inArray(func.EXCLUDED_PLATFORMS, this.platform)) {
@@ -602,7 +602,7 @@ Runner.prototype.wrapper = function (func, arg) {
     // Allow the exception if a user shutdown was expected
     if (!events.isUserShutdown()) {
       events.fail({'exception': e, 'test':func})
-      Components.utils.reportError(e);
+      Cu.reportError(e);
     }
   }
 }
@@ -721,10 +721,10 @@ var getThread = function () {
 
 function registerModule(name, path) {
   let protocolHandler = Services.io.getProtocolHandler("resource")
-                                .QueryInterface(Components.interfaces.nsIResProtocolHandler);
+                                .QueryInterface(Ci.nsIResProtocolHandler);
 
-  let modulesFile = Components.classes["@mozilla.org/file/local;1"]
-                              .createInstance(Components.interfaces.nsILocalFile);
+  let modulesFile = Cc["@mozilla.org/file/local;1"]
+                      .createInstance(Ci.nsILocalFile);
   modulesFile.initWithPath(path);
   protocolHandler.setSubstitution(name, ios.newFileURI(modulesFile));
 }

@@ -1,5 +1,5 @@
-var jum = {}; Components.utils.import('resource://mozmill/modules/jum.js', jum);
-var mozmill = {}; Components.utils.import('resource://mozmill/modules/mozmill.js', mozmill);
+var jum = {}; Cu.import('resource://mozmill/modules/jum.js', jum);
+var mozmill = {}; Cu.import('resource://mozmill/modules/mozmill.js', mozmill);
 
 
 var testAsserts = function() {
