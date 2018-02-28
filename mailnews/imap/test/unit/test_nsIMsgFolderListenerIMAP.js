@@ -17,7 +17,7 @@
 
 load("../../../resources/msgFolderListenerSetup.js");
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 // Globals
 var gRootFolder;
@@ -36,7 +36,7 @@ var gMsgId3 = "4849BF7B.2030800@example.com";
 var gMsgId4 = "bugmail7.m47LtAEf007542@mrapp51.mozilla.org";
 var gMsgId5 = "bugmail6.m47LtAEf007542@mrapp51.mozilla.org";
 var gMsgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
-                  .createInstance(Components.interfaces.nsIMsgWindow);
+                  .createInstance(Ci.nsIMsgWindow);
 
 
 function addFolder(parent, folderName, storeIn)

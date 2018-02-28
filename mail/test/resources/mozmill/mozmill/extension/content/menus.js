@@ -36,7 +36,7 @@
 //
 // ***** END LICENSE BLOCK *****
 
-var frame = {}; Components.utils.import('resource://mozmill/modules/frame.js', frame);
+var frame = {}; Cu.import('resource://mozmill/modules/frame.js', frame);
 
 
 function getBasename(path){
@@ -96,8 +96,8 @@ function closeFile() {
 }
 
 function runFile(){
-  var nsIFilePicker = Components.interfaces.nsIFilePicker;
-  var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+  var nsIFilePicker = Ci.nsIFilePicker;
+  var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
   fp.init(window, "Select a File", nsIFilePicker.modeOpen);
   fp.appendFilter("JavaScript Files","*.js");
   var res = fp.show();
@@ -109,8 +109,8 @@ function runFile(){
 }
 
 function runDirectory(){
-  var nsIFilePicker = Components.interfaces.nsIFilePicker;
-  var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+  var nsIFilePicker = Ci.nsIFilePicker;
+  var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
   fp.init(window, "Select a Directory", nsIFilePicker.modeGetFolder);
   var res = fp.show();
   if (res == nsIFilePicker.returnOK){
@@ -147,8 +147,8 @@ function tabSelected(selector) {
 }
 
 function openHelp() {
-  var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                         .getService(Components.interfaces.nsIWindowMediator);
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                         .getService(Ci.nsIWindowMediator);
   var browser = wm.getMostRecentWindow("navigator:browser").gBrowser;
   browser.selectedTab =
     browser.addTab("http://quality.mozilla.org/docs/mozmill/getting-started/");

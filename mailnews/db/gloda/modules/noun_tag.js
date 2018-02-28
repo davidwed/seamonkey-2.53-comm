@@ -4,7 +4,7 @@
 
 this.EXPORTED_SYMBOLS = ['TagNoun'];
 
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/mailServices.js");
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;

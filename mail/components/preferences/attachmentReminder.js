@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 var gAttachmentReminderOptionsDialog = {
   keywordListBox: null,
@@ -20,7 +20,7 @@ var gAttachmentReminderOptionsDialog = {
   {
     var keywordsInCsv = Services.prefs
       .getComplexValue("mail.compose.attachment_reminder_keywords",
-                       Components.interfaces.nsIPrefLocalizedString);
+                       Ci.nsIPrefLocalizedString);
     if (!keywordsInCsv)
       return;
     var keywordsInCsv = keywordsInCsv.data;
@@ -77,10 +77,10 @@ var gAttachmentReminderOptionsDialog = {
         keywordList += ",";
     }
 
-    var str = Components.classes["@mozilla.org/supports-string;1"]
-                        .createInstance(Components.interfaces.nsISupportsString);
+    var str = Cc["@mozilla.org/supports-string;1"]
+                .createInstance(Ci.nsISupportsString);
     str.data = keywordList;
     Services.prefs.setComplexValue("mail.compose.attachment_reminder_keywords",
-                                   Components.interfaces.nsISupportsString, str);
+                                   Ci.nsISupportsString, str);
   }
 };

@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource:///modules/mailServices.js");
+Cu.import("resource://gre/modules/PluralForm.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource:///modules/mailServices.js");
 
 var mailtolength = 7;
 
@@ -82,10 +82,10 @@ function fillMailContextMenu(event)
 
   // Show "Edit Draft Message" menus only in a drafts folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_editDraftMsg",
-                             Components.interfaces.nsMsgFolderFlags.Drafts);
+                             Ci.nsMsgFolderFlags.Drafts);
   // Show "New Message from Template" menus only in a templates folder; otherwise hide them.
   showCommandInSpecialFolder("cmd_newMsgFromTemplate",
-                             Components.interfaces.nsMsgFolderFlags.Templates);
+                             Ci.nsMsgFolderFlags.Templates);
 
   gContextMenu = new nsContextMenu(event.target, event.shiftKey);
   return gContextMenu.shouldDisplay;
@@ -114,8 +114,8 @@ function FillMessageIdContextMenu(messageIdNode)
 
 function CopyMessageId(messageId)
 {
-   var clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                             .getService(Components.interfaces.nsIClipboardHelper);
+   var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                     .getService(Ci.nsIClipboardHelper);
 
    clipboard.copyString(messageId);
 }
@@ -140,7 +140,7 @@ function GetMessageIdFromNode(messageIdNode, cleanMessageId)
 function OpenBrowserWithMessageId(messageId)
 {
   var browserURL = Services.prefs.getComplexValue("mailnews.messageid_browser.url",
-                                                  Components.interfaces.nsIPrefLocalizedString).data;
+                                                  Ci.nsIPrefLocalizedString).data;
   browserURL = browserURL.replace(/%mid/, messageId);
   try
   {
@@ -148,8 +148,8 @@ function OpenBrowserWithMessageId(messageId)
   }
   catch (ex)
   {
-    Components.utils.reportError("Failed to open message-id in browser; " +
-                                 "browserURL=" + browserURL);
+    Cu.reportError("Failed to open message-id in browser; " +
+                   "browserURL=" + browserURL);
   }
 }
 
@@ -179,7 +179,7 @@ function OpenMessageForMessageId(messageId)
     for (let i = 0; i < allServers.length && !messageHeader; i++)
     {
       let currentServer =
-        allServers.queryElementAt(i, Components.interfaces.nsIMsgIncomingServer);
+        allServers.queryElementAt(i, Ci.nsIMsgIncomingServer);
       if (currentServer && startServer != currentServer &&
           currentServer.canSearchMessages && !currentServer.isDeferredTo)
       {
@@ -268,7 +268,7 @@ function SearchForMessageIdInSubFolder(folder, messageId)
   {
     // search in current folder
     var currentFolder =
-      subFolders.getNext().QueryInterface(Components.interfaces.nsIMsgFolder);
+      subFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
     messageHeader = CheckForMessageIdInFolder(currentFolder, messageId);
 
     // search in its subfolder
@@ -293,11 +293,11 @@ function CheckForMessageIdInFolder(folder, messageId)
   }
   catch (ex)
   {
-    Components.utils.reportError("Failed to find message-id in folder; " +
-                                 "messageId=" + messageId);
+    Cu.reportError("Failed to find message-id in folder; " +
+                   "messageId=" + messageId);
   }
 
-  const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+  const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
   if (!MailServices.mailSession.IsFolderOpenInWindow(folder) &&
       !(folder.flags & (nsMsgFolderFlags.Trash | nsMsgFolderFlags.Inbox)))
   {
@@ -343,7 +343,7 @@ function fillFolderPaneContextMenu(aEvent)
   var numSelected = folders.length;
 
   function checkIsVirtualFolder(folder) {
-    const kVirtualFlag = Components.interfaces.nsMsgFolderFlags.Virtual;
+    const kVirtualFlag = Ci.nsMsgFolderFlags.Virtual;
     return folder.flags & kVirtualFlag;
   }
   var haveAnyVirtualFolders = folders.some(checkIsVirtualFolder);
@@ -388,7 +388,7 @@ function fillFolderPaneContextMenu(aEvent)
   var haveOnlyMailFolders = folders.every(checkIsMailFolder);
 
   function checkCanGetMessages(folder) {
-    const kTrashFlag = Components.interfaces.nsMsgFolderFlags.Trash;
+    const kTrashFlag = Ci.nsMsgFolderFlags.Trash;
     return (folder.isServer && (folder.server.type != "none")) ||
            checkIsNewsgroup(folder) ||
            ((folder.server.type == "rss") && !folder.isSpecialFolder(kTrashFlag, true) &&
@@ -502,7 +502,7 @@ function fillFolderPaneContextMenu(aEvent)
 
   // --- Set up the compact folder menu item.
   function checkCanCompactFolder(folder) {
-    const kVirtualFlag = Components.interfaces.nsMsgFolderFlags.Virtual;
+    const kVirtualFlag = Ci.nsMsgFolderFlags.Virtual;
     return folder.canCompact && !(folder.flags & kVirtualFlag) &&
            folder.isCommandEnabled("cmd_compactFolder");
   }
@@ -520,7 +520,7 @@ function fillFolderPaneContextMenu(aEvent)
                numSelected == 1 && !folders[0].isServer);
   if (numSelected == 1 && !folders[0].isServer)
   {
-    const kFavoriteFlag = Components.interfaces.nsMsgFolderFlags.Favorite;
+    const kFavoriteFlag = Ci.nsMsgFolderFlags.Favorite;
      // Adjust the checked state on the menu item.
     document.getElementById("folderPaneContext-favoriteFolder")
             .setAttribute("checked", folders[0].getFlag(kFavoriteFlag));
@@ -639,13 +639,13 @@ function addEmail()
 
 function composeEmailTo()
 {
-  let fields = Components.classes["@mozilla.org/messengercompose/composefields;1"]
-                         .createInstance(Components.interfaces.nsIMsgCompFields);
-  let params = Components.classes["@mozilla.org/messengercompose/composeparams;1"]
-                         .createInstance(Components.interfaces.nsIMsgComposeParams);
+  let fields = Cc["@mozilla.org/messengercompose/composefields;1"]
+                 .createInstance(Ci.nsIMsgCompFields);
+  let params = Cc["@mozilla.org/messengercompose/composeparams;1"]
+                 .createInstance(Ci.nsIMsgComposeParams);
   fields.to = getEmail(gContextMenu.linkURL);
-  params.type = Components.interfaces.nsIMsgCompType.New;
-  params.format = Components.interfaces.nsIMsgCompFormat.Default;
+  params.type = Ci.nsIMsgCompType.New;
+  params.format = Ci.nsIMsgCompFormat.Default;
   if (gFolderDisplay.displayedFolder) {
     params.identity = accountManager.getFirstIdentityForServer(
                         gFolderDisplay.displayedFolder.server);
@@ -667,8 +667,8 @@ function getEmail (url)
   // Let's try to unescape it using a character set
   try {
     var characterSet = gContextMenu.target.ownerDocument.characterSet;
-    const textToSubURI = Components.classes["@mozilla.org/intl/texttosuburi;1"]
-                                 .getService(Components.interfaces.nsITextToSubURI);
+    const textToSubURI = Cc["@mozilla.org/intl/texttosuburi;1"]
+                                 .getService(Ci.nsITextToSubURI);
     addresses = textToSubURI.unEscapeURIForUI(characterSet, addresses);
   }
   catch(ex) {
@@ -684,12 +684,12 @@ function CopyMessageUrl()
     var server = hdr.folder.server;
 
     // TODO let backend construct URL and return as attribute
-    var url = (server.socketType == Components.interfaces.nsMsgSocketType.SSL) ?
+    var url = (server.socketType == Ci.nsMsgSocketType.SSL) ?
               "snews://" : "news://";
     url += server.hostName + ":" + server.port + "/" + hdr.messageId;
 
-    var clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                              .getService(Components.interfaces.nsIClipboardHelper);
+    var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                      .getService(Ci.nsIClipboardHelper);
     clipboard.copyString(url);
   }
   catch (ex) {
