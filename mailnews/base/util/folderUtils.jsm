@@ -10,8 +10,8 @@ this.EXPORTED_SYMBOLS = ["getFolderProperties", "getSpecialFolderString",
                           "getFolderFromUri", "allAccountsSorted",
                           "getMostRecentFolders", "folderNameCompare"];
 
-Components.utils.import("resource:///modules/mailServices.js");
-Components.utils.import("resource:///modules/iteratorUtils.jsm");
+Cu.import("resource:///modules/mailServices.js");
+Cu.import("resource:///modules/iteratorUtils.jsm");
 
 /**
  * Returns a string representation of a folder's "special" type.
@@ -19,7 +19,7 @@ Components.utils.import("resource:///modules/iteratorUtils.jsm");
  * @param aFolder  the nsIMsgFolder whose special type should be returned
  */
 function getSpecialFolderString(aFolder) {
-  const nsMsgFolderFlags = Components.interfaces.nsMsgFolderFlags;
+  const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
   let flags = aFolder.flags;
   if (flags & nsMsgFolderFlags.Inbox)
     return "Inbox";
@@ -53,7 +53,7 @@ function getSpecialFolderString(aFolder) {
  * @return         A string of the property names, delimited by space.
  */
 function getFolderProperties(aFolder, aOpen) {
-  const nsIMsgFolder = Components.interfaces.nsIMsgFolder;
+  const nsIMsgFolder = Ci.nsIMsgFolder;
   let properties = [];
 
   properties.push("folderNameCol");
@@ -154,7 +154,7 @@ function compareAccounts(aAccount1, aAccount2) {
 function allAccountsSorted(aExcludeIMAccounts) {
   // Get the account list, and add the proper items.
   let accountList = toArray(fixIterator(MailServices.accounts.accounts,
-                                        Components.interfaces.nsIMsgAccount));
+                                        Ci.nsIMsgAccount));
 
   // This is a HACK to work around bug 41133. If we have one of the
   // dummy "news" accounts there, that account won't have an

@@ -15,8 +15,8 @@ load("../../../../resources/messageInjection.js");
 
 var msgGen = gMessageGenerator = new MessageGenerator();
 
-Components.utils.import("resource://gre/modules/FileUtils.jsm");
-Components.utils.import("resource:///modules/gloda/mimemsg.js");
+Cu.import("resource://gre/modules/FileUtils.jsm");
+Cu.import("resource:///modules/gloda/mimemsg.js");
 
 function initNSS() {
   // Copy the NSS database files over.

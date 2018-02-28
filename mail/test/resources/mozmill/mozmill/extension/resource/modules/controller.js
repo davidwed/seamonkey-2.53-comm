@@ -41,18 +41,18 @@
 var EXPORTED_SYMBOLS = ["MozMillController", "waitForEval", "MozMillAsyncTest",
                         "globalEventRegistry", "sleep", "windowMap"];
 
-var EventUtils = {}; Components.utils.import('resource://mozmill/stdlib/EventUtils.js', EventUtils);
+var EventUtils = {}; Cu.import('resource://mozmill/stdlib/EventUtils.js', EventUtils);
 
-var events = {}; Components.utils.import('resource://mozmill/modules/events.js', events);
-var utils = {}; Components.utils.import('resource://mozmill/modules/utils.js', utils);
-var elementslib = {}; Components.utils.import('resource://mozmill/modules/elementslib.js', elementslib);
-var frame = {}; Components.utils.import('resource://mozmill/modules/frame.js', frame);
+var events = {}; Cu.import('resource://mozmill/modules/events.js', events);
+var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
+var elementslib = {}; Cu.import('resource://mozmill/modules/elementslib.js', elementslib);
+var frame = {}; Cu.import('resource://mozmill/modules/frame.js', frame);
 
-var hwindow = Components.classes["@mozilla.org/appshell/appShellService;1"]
-                .getService(Components.interfaces.nsIAppShellService)
+var hwindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                .getService(Ci.nsIAppShellService)
                 .hiddenDOMWindow;
-var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-     getService(Components.interfaces.nsIConsoleService);
+var aConsoleService = Cc["@mozilla.org/consoleservice;1"]
+                        .getService(Ci.nsIConsoleService);
 
 // The window map which is used to store information e.g. loaded state of each
 // open chrome and content window.
@@ -343,7 +343,7 @@ var MozMillController = function (window) {
   this.window = window;
 
   this.mozmillModule = {};
-  Components.utils.import('resource://mozmill/modules/mozmill.js', this.mozmillModule);
+  Cu.import('resource://mozmill/modules/mozmill.js', this.mozmillModule);
 
   utils.waitFor(function() {
     return window != null && this.isLoaded();
@@ -1338,7 +1338,7 @@ controllerAdditions = {
   'navigator:browser'  :browserAdditions,
 }
 
-var withs = {}; Components.utils.import('resource://mozmill/stdlib/withs.js', withs);
+var withs = {}; Cu.import('resource://mozmill/stdlib/withs.js', withs);
 
 MozMillAsyncTest = function (timeout) {
   if (timeout == undefined) {
