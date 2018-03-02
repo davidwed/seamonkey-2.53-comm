@@ -977,7 +977,7 @@ RFC2231ParmFolding(const char *parmName, const nsCString& charset,
   bool needEscape;
   nsCString dupParm;
 
-  if (!NS_IsAscii(parmValue.get()) || is7bitCharset(charset)) {
+  if (!NS_IsAscii(static_cast<const char16_t*>(parmValue.get())) || is7bitCharset(charset)) {
     needEscape = true;
     nsAutoCString nativeParmValue;
     nsMsgI18NConvertFromUnicode(charset, parmValue, nativeParmValue);
