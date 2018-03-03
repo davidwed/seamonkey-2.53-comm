@@ -7,6 +7,8 @@ LOCALE_RELATIVEDIR=suite/locales
 
 include $(topsrcdir)/config/config.mk
 
+MERGE_FILES = $(foreach f,$(1),$(call MERGE_FILE,$(f)))
+
 SUBMAKEFILES += \
 	$(DEPTH)/$(MOZ_BRANDING_DIRECTORY)/Makefile \
 	$(DEPTH)/$(MOZ_BRANDING_DIRECTORY)/locales/Makefile \
