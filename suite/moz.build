@@ -12,6 +12,7 @@ if 'pre' in CONFIG['MOZ_APP_VERSION'] or 'a' in CONFIG['MOZ_APP_VERSION']:
 DIRS += [
     'browser',
     'common',
+    'components',
     'feeds/public',
     'feeds/src',
     'locales',
@@ -21,8 +22,6 @@ DIRS += [
     'themes/modern',
     'profile',
     'security',
-    'shell/public',
-    'shell/src',
     'smile',
 ]
 
