@@ -18,7 +18,6 @@ DIRS += [
     'modules',
     'themes/classic',
     'themes/modern',
-    'profile',
     'security',
     'smile',
 ]
