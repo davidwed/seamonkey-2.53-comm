@@ -16,7 +16,6 @@ FINAL_LIBRARY = 'xul'
 
 LOCAL_INCLUDES += [
     '/suite/components/feeds',
+    '/suite/components/profile',
     '/suite/components/shell',
-    '/suite/profile',
-    '/suite/profile/migration/src',
 ]
