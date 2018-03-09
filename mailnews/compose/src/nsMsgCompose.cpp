@@ -1342,12 +1342,11 @@ NS_IMETHODIMP nsMsgCompose::SendMsg(MSG_DeliverMode deliverMode, nsIMsgIdentity 
   }
   if (!msgBody.IsEmpty())
   {
+    bool isAsciiOnly = NS_IsAscii(static_cast<const char16_t*>(msgBody.get()));
     // Convert body to mail charset
     nsCString outCString;
     rv = nsMsgI18NConvertFromUnicode(charset ? nsDependentCString(charset) : EmptyCString(),
                                      msgBody, outCString, true);
-    bool isAsciiOnly = NS_IsAscii(outCString.get()) &&
-      !nsMsgI18Nstateful_charset(m_compFields->GetCharacterSet());
     if (m_compFields->GetForceMsgEncoding())
       isAsciiOnly = false;
     if (NS_SUCCEEDED(rv) && !outCString.IsEmpty())
