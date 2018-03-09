@@ -847,7 +847,7 @@ nsStreamConverter::GetOrigMsgHdr(nsIMsgDBHdr * *aMsgHdr)
   if (!aMsgHdr) return NS_ERROR_NULL_POINTER;
   NS_IF_ADDREF(*aMsgHdr = mOrigMsgHdr);
   return NS_OK;
-} 
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Methods for nsIStreamListener...
