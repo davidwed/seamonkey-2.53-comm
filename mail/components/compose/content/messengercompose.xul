@@ -6,6 +6,7 @@
 <?xml-stylesheet href="chrome://messenger/skin/messengercompose/messengercompose.css" type="text/css"?>
 <?xml-stylesheet href="chrome://messenger/skin/folderMenus.css" type="text/css"?>
 <?xml-stylesheet href="chrome://messenger/skin/attachmentList.css" type="text/css"?>
+<?xml-stylesheet href="chrome://messenger/skin/smime/msgCompSMIMEOverlay.css" type="text/css"?>
 <?xul-overlay href="chrome://editor/content/editorOverlay.xul"?>
 #ifdef XP_MACOSX
 <?xul-overlay href="chrome://messenger/content/macMenuOverlay.xul"?>
@@ -26,6 +27,8 @@
   %textcontextDTD;
   <!ENTITY % viewZoomOverlayDTD SYSTEM "chrome://messenger/locale/viewZoomOverlay.dtd">
   %viewZoomOverlayDTD;
+  <!ENTITY % msgCompSMIMEDTD SYSTEM "chrome://messenger-smime/locale/msgCompSMIMEOverlay.dtd">
+  %msgCompSMIMEDTD;
 ]>
 
 <window id="msgcomposeWindow"
@@ -47,6 +50,7 @@
   <stringbundle id="bundle_composeMsgs" src="chrome://messenger/locale/messengercompose/composeMsgs.properties"/>
   <stringbundle id="bundle_messenger"   src="chrome://messenger/locale/messenger.properties"/>
   <stringbundle id="brandBundle"        src="chrome://branding/locale/brand.properties"/>
+  <stringbundle id="bundle_comp_smime"  src="chrome://messenger-smime/locale/msgCompSMIMEOverlay.properties"/>
 </stringbundleset>
 
 <script type="application/javascript" src="chrome://global/content/printUtils.js"/>
@@ -69,6 +73,7 @@
 <script type="application/javascript" src="chrome://global/content/viewZoomOverlay.js"/>
 <script type="application/javascript" src="chrome://communicator/content/utilityOverlay.js"/>
 <script type="application/javascript" src="chrome://messenger/content/toolbarIconColor.js"/>
+<script type="application/javascript" src="chrome://messenger-smime/content/msgCompSMIMEOverlay.js"/>
 
 <commandset id="composeCommands">
   <commandset id="msgComposeCommandUpdate"
@@ -155,6 +160,8 @@
   <!-- Options Menu -->
   <command id="cmd_quoteMessage" oncommand="goDoCommand('cmd_quoteMessage')"/>
   <command id="cmd_insert"/>
+  <command id="cmd_viewSecurityStatus"
+           oncommand="showMessageComposeSecurityStatus();"/>
 
 #ifdef XP_MACOSX
   <!-- Mac Window menu -->
@@ -179,7 +186,11 @@
 <broadcasterset id="composeBroadcasters">
   <broadcaster id="args" value="editorType=default"/>
   <broadcaster id="viewAddressPicker" autoCheck="false" type="checkbox" oncommand="toggleAddressPicker();"/>
+  <broadcaster id="securityStatus" crypto="" signing=""/>
 </broadcasterset>
+
+<observes element="securityStatus" attribute="crypto" />
+<observes element="securityStatus" attribute="signing" />
 
 <keyset id="tasksKeys">
   <!-- File Menu -->
@@ -638,6 +649,11 @@
           <menuitem id="menu_AddressSidebar"
                     label="&addressSidebar.label;" accesskey="&addressSidebar.accesskey;"
                     key="key_addressSidebar" observes="viewAddressPicker"/>
+          <menuseparator id="viewMenuBeforeSecurityStatusSeparator"/>
+          <menuitem id="menu_viewSecurityStatus"
+                    label="&menu_viewSecurityStatus.label;"
+                    accesskey="&menu_viewSecurityStatus.accesskey;"
+                    command="cmd_viewSecurityStatus"/>
         </menupopup>
       </menu>
 
@@ -653,7 +669,7 @@
       </menu>
 
       <menu id="optionsMenu" label="&optionsMenu.label;" accesskey="&optionsMenu.accesskey;">
-        <menupopup id="optionsMenuPopup">
+        <menupopup id="optionsMenuPopup" onpopupshowing="setSecuritySettings(1);">
           <menuitem label="&checkSpellingCmd2.label;" id="menu_checkspelling" accesskey="&checkSpellingCmd2.accesskey;" key="key_checkspelling" command="cmd_spelling"/>
           <menuitem label="&enableInlineSpellChecker.label;" id="menu_inlineSpellCheck"
                            accesskey="&enableInlineSpellChecker.accesskey;" checked="false"
@@ -693,6 +709,18 @@
           <menuseparator/>
           <menuitem type="checkbox" command="cmd_customizeFromAddress"
                     accesskey="&customizeFromAddress.accesskey;"/>
+          <menuseparator id="smimeOptionsSeparator"/>
+
+          <menuitem id="menu_securityEncryptRequire1"
+                    type="checkbox"
+                    label="&menu_securityEncryptRequire.label;"
+                    accesskey="&menu_securityEncryptRequire.accesskey;"
+                    oncommand="toggleEncryptMessage();"/>
+          <menuitem id="menu_securitySign1"
+                    type="checkbox"
+                    label="&menu_securitySign.label;"
+                    accesskey="&menu_securitySign.accesskey;"
+                    oncommand="toggleSignMessage();"/>
         </menupopup>
       </menu>
 
@@ -790,6 +818,31 @@
       </menupopup>
     </toolbarbutton>
 
+    <toolbarbutton id="button-security"
+                   type="menu-button"
+                   class="toolbarbutton-1"
+                   label="&securityButton.label;"
+                   tooltiptext="&securityButton.tooltip;"
+                   oncommand="doSecurityButton();">
+      <menupopup onpopupshowing="setSecuritySettings(2);">
+        <menuitem id="menu_securityEncryptRequire2"
+                  type="checkbox"
+                  label="&menu_securityEncryptRequire.label;"
+                  accesskey="&menu_securityEncryptRequire.accesskey;"
+                  oncommand="setNextCommand('encryptMessage');"/>
+        <menuitem id="menu_securitySign2"
+                  type="checkbox"
+                  label="&menu_securitySign.label;"
+                  accesskey="&menu_securitySign.accesskey;"
+                  oncommand="setNextCommand('signMessage');"/>
+        <menuseparator id="smimeToolbarButtonSeparator"/>
+        <menuitem id="menu_securityStatus2"
+                  label="&menu_securityStatus.label;"
+                  accesskey="&menu_securityStatus.accesskey;"
+                  oncommand="setNextCommand('show');"/>
+      </menupopup>
+    </toolbarbutton>
+
     <toolbarbutton class="toolbarbutton-1" type="menu-button"
                id="spellingButton" label="&spellingButton.label;"
                tooltiptext="&spellingButton.tooltip;"
@@ -798,7 +851,7 @@
       <menupopup id="languageMenuList" oncommand="ChangeLanguage(event);"
                  onpopupshowing="OnShowDictionaryMenu(event.target);"/>
     </toolbarbutton>
-
+ 
     <toolbarbutton class="toolbarbutton-1" type="menu-button"
                id="button-save" label="&saveButton.label;"
                tooltiptext="&saveButton.tooltip;"
@@ -1105,6 +1158,16 @@
                     class="statusbarpanel-progress"
                     collapsed="true">
       <progressmeter id="compose-progressmeter" class="progressmeter-statusbar" mode="normal" value="0"/>
+    </statusbarpanel>
+    <statusbarpanel class="statusbarpanel-iconic"
+                    collapsed="true"
+                    id="signing-status"
+                    oncommand="showMessageComposeSecurityStatus();">
+    </statusbarpanel>
+    <statusbarpanel class="statusbarpanel-iconic"
+                    collapsed="true"
+                    id="encryption-status"
+                    oncommand="showMessageComposeSecurityStatus();">
     </statusbarpanel>
     <statusbarpanel id="statusLanguageText" tooltiptext="&statusLanguageText.tooltip;"/>
   </statusbar>
