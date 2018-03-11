@@ -35,6 +35,34 @@ dialog[systemcolors] {
 }
 
 /*--------------------------------------------------------------------
+ *   Event dialog toolbar buttons
+ *-------------------------------------------------------------------
+// #button-save[mode="send"] {
+//    list-style-image: url("chrome://messenger/skin/icons/send.svg");
+// }
+
+// #saveandcloseButton,
+// ...
+// #button-saveandclose[mode="send"] {
+//    list-style-image: url("chrome://messenger/skin/icons/send.svg");
+// }
+//
+// ...
+// #deleteButton,
+// ...
+// #acceptButton {
+//     list-style-image: url(chrome://calendar-common/skin/icons/complete.svg);
+// }
+// 
+// #tentativeButton {
+//     list-style-image: url(chrome://calendar-common/skin/icons/tentative.svg);
+// }
+// 
+// #declineButton {
+//     list-style-image: url(chrome://calendar-common/skin/icons/decline.svg);
+// } */
+
+/*--------------------------------------------------------------------
  *   Event dialog counter box section
  *-------------------------------------------------------------------*/
 
@@ -528,6 +556,13 @@ freebusy-day > box {
 /*--------------------------------------------------------------------
  *   Event summary dialog
  *-------------------------------------------------------------------*/
+
+#summary-toolbox {
+    margin-top: -8px;
+    margin-inline-start: -8px;
+    margin-inline-end: -10px;
+    margin-bottom: 10px;
+}
 
 #calendar-summary-dialog,
 #calendar-event-summary-dialog,
