@@ -4,12 +4,8 @@
 
 this.EXPORTED_SYMBOLS = [];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/gloda/log4moz.js");
+
 var LOG = Log4Moz.repository.getLogger("gloda.everybody");
 
 var importNS = {};
