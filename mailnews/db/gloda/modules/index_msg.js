@@ -14,11 +14,6 @@
 
 this.EXPORTED_SYMBOLS = ['GlodaMsgIndexer'];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource:///modules/iteratorUtils.jsm");
 Cu.import("resource:///modules/mailServices.js");
@@ -41,7 +36,7 @@ XPCOMUtils.defineLazyServiceGetter(this, "atomService",
                                    "@mozilla.org/atom-service;1",
                                    "nsIAtomService");
 
-// Components.results does not have mailnews error codes!
+// Cr does not have mailnews error codes!
 var NS_MSG_ERROR_FOLDER_SUMMARY_OUT_OF_DATE = 0x80550005;
 
 var GLODA_MESSAGE_ID_PROPERTY = "gloda-id";

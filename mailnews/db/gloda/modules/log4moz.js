@@ -6,11 +6,6 @@ this.EXPORTED_SYMBOLS = ['Log4Moz'];
 
 Cu.import("resource://gre/modules/Services.jsm");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 var MODE_RDONLY   = 0x01;
 var MODE_WRONLY   = 0x02;
 var MODE_CREATE   = 0x08;
@@ -678,7 +673,7 @@ function ConsoleAppender(formatter) {
 ConsoleAppender.prototype = {
   __proto__: Appender.prototype,
 
-  // override to send Error and higher level messages to Components.utils.reportError()
+  // override to send Error and higher level messages to Cu.reportError()
   append: function CApp_append(message) {
     let stringMessage = this._formatter.format(message);
     if (message.level > Log4Moz.Level.Warn) {

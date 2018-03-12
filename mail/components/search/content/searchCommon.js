@@ -1,4 +1,3 @@
-#if 0
 /* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,11 +13,6 @@
  * - gPrefBase: the base for preferences that are stored
  * - gStreamListener: an nsIStreamListener to read message text
  */
-#endif
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
 
 Cu.import("resource:///modules/gloda/log4moz.js");
 Cu.import("resource:///modules/iteratorUtils.jsm");

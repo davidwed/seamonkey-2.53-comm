@@ -44,7 +44,7 @@ var EventUtils = {}; Cu.import('resource://mozmill/stdlib/EventUtils.js', EventU
 
 var utils = {}; Cu.import('resource://mozmill/modules/utils.js', utils);
 
-// var logging = {}; Components.utils.import('resource://mozmill/stdlib/logging.js', logging);
+// var logging = {}; Cu.import('resource://mozmill/stdlib/logging.js', logging);
 
 // var eventsLogger = logging.getLogger('eventsLogger');
 

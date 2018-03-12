@@ -43,15 +43,13 @@ var EXPORTED_SYMBOLS = ["openFile", "saveFile", "saveAsFile", "genBoiler",
                         "tempfile", "getMethodInWindows", "getPreference", "setPreference",
                         "sleep", "assert", "unwrapNode", "TimeoutError", "waitFor", "waitForEval"];
 
-var Ci = Components.interfaces;
-
 
 var hwindow = Cc["@mozilla.org/appshell/appShellService;1"]
-              .getService(Ci.nsIAppShellService)
-              .hiddenDOMWindow;
+                .getService(Ci.nsIAppShellService)
+                .hiddenDOMWindow;
 
 var uuidgen = Cc["@mozilla.org/uuid-generator;1"]
-    .getService(Ci.nsIUUIDGenerator);
+                .getService(Ci.nsIUUIDGenerator);
 
 function Copy (obj) {
   for (var n in obj) {
@@ -60,14 +58,13 @@ function Copy (obj) {
 }
 
 function getChromeWindow(aWindow) {
-  var chromeWin = aWindow
-           .QueryInterface(Ci.nsIInterfaceRequestor)
-           .getInterface(Ci.nsIWebNavigation)
-           .QueryInterface(Ci.nsIDocShellTreeItem)
-           .rootTreeItem
-           .QueryInterface(Ci.nsIInterfaceRequestor)
-           .getInterface(Ci.nsIDOMWindow)
-           .QueryInterface(Ci.nsIDOMChromeWindow);
+  var chromeWin = aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                         .getInterface(Ci.nsIWebNavigation)
+                         .QueryInterface(Ci.nsIDocShellTreeItem)
+                         .rootTreeItem
+                         .QueryInterface(Ci.nsIInterfaceRequestor)
+                         .getInterface(Ci.nsIDOMWindow)
+                         .QueryInterface(Ci.nsIDOMChromeWindow);
   return chromeWin;
 }
 
@@ -117,9 +114,9 @@ function getWindowByType(type) {
 function getWindowId(aWindow) {
   try {
     // Normally we can retrieve the id via window utils
-    return aWindow.QueryInterface(Ci.nsIInterfaceRequestor).
-                   getInterface(Ci.nsIDOMWindowUtils).
-                   outerWindowID;
+    return aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIDOMWindowUtils)
+                  .outerWindowID;
   } catch (e) {
     // ... but for observer notifications we need another interface
     return aWindow.QueryInterface(Ci.nsISupportsPRUint64).data;
@@ -130,13 +127,15 @@ function tempfile(appention) {
   if (appention == undefined) {
     var appention = "mozmill.utils.tempfile"
   }
-	var tempfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
-	tempfile.append(uuidgen.generateUUID().toString().replace('-', '').replace('{', '').replace('}',''))
-	tempfile.create(Ci.nsIFile.DIRECTORY_TYPE, 0o777);
-	tempfile.append(appention);
-	tempfile.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0o666);
-	// do whatever you need to the created file
-	return tempfile.clone()
+  var tempfile = Cc["@mozilla.org/file/directory_service;1"]
+                   .getService(Ci.nsIProperties)
+                   .get("TmpD", Ci.nsIFile);
+  tempfile.append(uuidgen.generateUUID().toString().replace('-', '').replace('{', '').replace('}',''))
+  tempfile.create(Ci.nsIFile.DIRECTORY_TYPE, 0o777);
+  tempfile.append(appention);
+  tempfile.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0o666);
+  // do whatever you need to the created file
+  return tempfile.clone()
 }
 
 var checkChrome = function() {
@@ -150,13 +149,13 @@ var checkChrome = function() {
 }
 
 /*var openFile = function(){
- const nsIFilePicker = Components.interfaces.nsIFilePicker;
+ const nsIFilePicker = Ci.nsIFilePicker;
 
- var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+ var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
  fp.init(window, "Select a Test Directory", nsIFilePicker.modeGetFolder);
 
  var rv = fp.show();
- if (rv == Components.interfaces.nsIFilePicker.returnOK){
+ if (rv == Ci.nsIFilePicker.returnOK){
    // file is the given directory (nsIFile)
    var array = [];
    //iterate directories recursively
@@ -165,7 +164,7 @@ var checkChrome = function() {
        while(entries.hasMoreElements())
        {
          var entry = entries.getNext();
-         entry.QueryInterface(Components.interfaces.nsIFile);
+         entry.QueryInterface(Ci.nsIFile);
          if ((entry.isDirectory()) && (entry.path.indexOf('.svn') == -1)){
            recurseDir(entry.directoryEntries);
          }
