@@ -10,10 +10,6 @@
 
 this.EXPORTED_SYMBOLS = ["msgDBCacheManager"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/mailServices.js");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource:///modules/gloda/log4moz.js");

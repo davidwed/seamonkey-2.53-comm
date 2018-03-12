@@ -4,10 +4,6 @@
 
 "use strict";
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-
 Cu.import("resource:///modules/OAuth2.jsm");
 Cu.import("resource:///modules/OAuth2Providers.jsm");
 Cu.import("resource://gre/modules/Preferences.jsm");

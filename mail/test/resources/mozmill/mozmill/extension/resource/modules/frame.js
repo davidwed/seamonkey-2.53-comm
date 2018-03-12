@@ -337,7 +337,7 @@ function Collector () {
   this.testing = [];
   this.httpd_started = false;
   this.http_port = 43336;
-  // var logging = {}; Components.utils.import('resource://mozmill/stdlib/logging.js', logging);
+  // var logging = {}; Cu.import('resource://mozmill/stdlib/logging.js', logging);
   // this.logger = new logging.Logger('Collector');
 }
 
