@@ -41,21 +41,19 @@ var EXPORTED_SYMBOLS = ["Server", "server", "AsyncRead", "Session", "sessions", 
 var events = {}; Cu.import("resource://jsbridge/modules/events.js", events);
 var DEBUG_ON = false;
 var BUFFER_SIZE = 1024;
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var loader = Cc['@mozilla.org/moz/jssubscript-loader;1']
-    .getService(Ci.mozIJSSubScriptLoader);
+               .getService(Ci.mozIJSSubScriptLoader);
 
 var hwindow = Cc["@mozilla.org/appshell/appShellService;1"]
-    .getService(Ci.nsIAppShellService)
-    .hiddenDOMWindow;
+                .getService(Ci.nsIAppShellService)
+                .hiddenDOMWindow;
 
 var json2 = Cu.import("resource://jsbridge/modules/json2.js");
 
 var jsonEncode = json2.JSON.stringify;
 
 var uuidgen = Cc["@mozilla.org/uuid-generator;1"]
-    .getService(Ci.nsIUUIDGenerator);
+                .getService(Ci.nsIUUIDGenerator);
 
 function AsyncRead (session) {
   this.session = session;
@@ -211,13 +209,14 @@ function Session (transport) {
   try {
       this.outputstream = transport.openOutputStream(Ci.nsITransport.OPEN_BLOCKING, 0, 0);
       this.outstream = Cc['@mozilla.org/intl/converter-output-stream;1']
-                    .createInstance(Ci.nsIConverterOutputStream);
+                         .createInstance(Ci.nsIConverterOutputStream);
       this.outstream.init(this.outputstream, 'UTF-8');
       this.stream = transport.openInputStream(0, 0, 0);
       this.instream = Cc['@mozilla.org/intl/converter-input-stream;1']
-          .createInstance(Ci.nsIConverterInputStream);
-      this.instream.init(this.stream, 'UTF-8', BUFFER_SIZE,
-                    Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+                        .createInstance(Ci.nsIConverterInputStream);
+      this.instream
+          .init(this.stream, 'UTF-8', BUFFER_SIZE,
+                Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
   } catch(e) {
       log('jsbridge: Error: ' + e);
   }
@@ -339,5 +338,3 @@ function startServer(port) {
   var server = new Server(port)
   server.start()
 }
-
-

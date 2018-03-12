@@ -114,10 +114,8 @@ function getFolderProperties(aFolder, aOpen) {
  * @param aUri  the rdf uri of the folder to return
  */
 function getFolderFromUri(aUri) {
-  const Cc = Components.classes;
-  const Ci = Components.interfaces;
-  return Cc["@mozilla.org/mail/folder-lookup;1"].
-         getService(Ci.nsIFolderLookupService).getFolderById(aUri);
+  return Cc["@mozilla.org/mail/folder-lookup;1"]
+           .getService(Ci.nsIFolderLookupService).getFolderById(aUri);
 }
 
 /**
