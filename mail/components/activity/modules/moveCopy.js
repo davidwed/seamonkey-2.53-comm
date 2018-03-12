@@ -5,16 +5,12 @@
 
 this.EXPORTED_SYMBOLS = ['moveCopyModule'];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-
 var nsActProcess = Components.Constructor("@mozilla.org/activity-process;1",
-                                            "nsIActivityProcess", "init");
+                                          "nsIActivityProcess", "init");
 var nsActEvent = Components.Constructor("@mozilla.org/activity-event;1",
-                                          "nsIActivityEvent", "init");
+                                        "nsIActivityEvent", "init");
 var nsActWarning = Components.Constructor("@mozilla.org/activity-warning;1",
-                                            "nsIActivityWarning", "init");
+                                          "nsIActivityWarning", "init");
 var nsMsgFolderFlags = Ci.nsMsgFolderFlags;
 
 Cu.import("resource://gre/modules/Services.jsm");

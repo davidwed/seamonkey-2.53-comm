@@ -39,7 +39,7 @@
             item = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "richlistitem");
 
             var glodaCompleter =  Cc["@mozilla.org/autocomplete/search;1?name=gloda"]
-                                    .getService() // Ci.nsIAutoCompleteSearch)
+                                    .getService(Ci.nsIAutoCompleteSearch)
                                     .wrappedJSObject;
             var result = glodaCompleter.curResult;
 
@@ -62,7 +62,7 @@
 
           // yield after each batch of items so that typing the url bar is responsive
           setTimeout(() => this._appendCurrentResult(), 0);
-        ]]>
+          ]]>
         </body>
       </method>
       <method name="_invalidate">

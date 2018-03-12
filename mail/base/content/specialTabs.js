@@ -1333,7 +1333,6 @@ var specialTabs = {
 
   xpInstallObserver: {
     observe: function (aSubject, aTopic, aData) {
-      const Ci = Components.interfaces;
       let brandBundle = document.getElementById("bundle_brand");
       let messengerBundle = document.getElementById("bundle_messenger");
 
