@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 # Global Variables
 var helpExternal;
@@ -34,8 +34,8 @@ const platform = "unix";
 #endif
 
 # Resources
-const RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"]
-    .getService(Components.interfaces.nsIRDFService);
+const RDF = Cc["@mozilla.org/rdf/rdf-service;1"]
+              .getService(Ci.nsIRDFService);
 const RDF_ROOT = RDF.GetResource("urn:root");
 const NC_PANELLIST = RDF.GetResource(NC + "panellist");
 const NC_PANELID = RDF.GetResource(NC + "panelid");
@@ -51,11 +51,10 @@ const NC_TITLE = RDF.GetResource(NC + "title");
 const NC_BASE = RDF.GetResource(NC + "base");
 const NC_DEFAULTTOPIC = RDF.GetResource(NC + "defaulttopic");
 
-var RDFContainer =
-   Components.classes["@mozilla.org/rdf/container;1"]
-             .createInstance(Components.interfaces.nsIRDFContainer);
-const CONSOLE_SERVICE = Components.classes['@mozilla.org/consoleservice;1']
-    .getService(Components.interfaces.nsIConsoleService);
+var RDFContainer = Cc["@mozilla.org/rdf/container;1"]
+                     .createInstance(Ci.nsIRDFContainer);
+const CONSOLE_SERVICE = Cc['@mozilla.org/consoleservice;1']
+                          .getService(Ci.nsIConsoleService);
 
 var RE;
 
@@ -113,7 +112,7 @@ function init() {
   // Get the content pack, base URL, and help topic
   var helpTopic = defaultTopic;
   if ("arguments" in window && 
-       window.arguments[0] instanceof Components.interfaces.nsIDialogParamBlock) {
+       window.arguments[0] instanceof Ci.nsIDialogParamBlock) {
     helpFileURI = window.arguments[0].GetString(0);
     // trailing "/" included.
     helpBaseURI = helpFileURI.substring(0, helpFileURI.lastIndexOf("/")+1);
@@ -129,19 +128,18 @@ function init() {
   window.moveTo((screen.availWidth - width) / 2, (screen.availHeight - height) / 2);
 
   // Initialize history.
-  getWebNavigation().sessionHistory = 
-    Components.classes["@mozilla.org/browser/shistory;1"]
-              .createInstance(Components.interfaces.nsISHistory);
+  getWebNavigation().sessionHistory = Cc["@mozilla.org/browser/shistory;1"]
+                                        .createInstance(Ci.nsISHistory);
   window.XULBrowserWindow = new nsHelpStatusHandler();
 
   //Start the status handler.
   window.XULBrowserWindow.init();
 
   // Hook up UI through Progress Listener
-  const interfaceRequestor = helpBrowser.docShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor);
-  const webProgress = interfaceRequestor.getInterface(Components.interfaces.nsIWebProgress);
+  const interfaceRequestor = helpBrowser.docShell.QueryInterface(Ci.nsIInterfaceRequestor);
+  const webProgress = interfaceRequestor.getInterface(Ci.nsIWebProgress);
 
-  webProgress.addProgressListener(window.XULBrowserWindow, Components.interfaces.nsIWebProgress.NOTIFY_ALL);
+  webProgress.addProgressListener(window.XULBrowserWindow, Ci.nsIWebProgress.NOTIFY_ALL);
 
   var searchBox = document.getElementById("findText");
   searchBox.clickSelectsAll = getBoolPref("browser.urlbar.clickSelectsAll", true);
@@ -150,12 +148,11 @@ function init() {
 
   helpExternal = document.getElementById("help-external");
   helpExternal.docShell.useErrorPages = false;
-  helpExternal
-    .docShell
-    .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-    .getInterface(Components.interfaces.nsIURIContentListener)
-    .parentContentListener = helpContentListener;
-  helpExternal.addProgressListener(window.XULBrowserWindow, Components.interfaces.nsIWebProgress.NOTIFY_ALL);
+  helpExternal.docShell
+              .QueryInterface(Ci.nsIInterfaceRequestor)
+              .getInterface(Ci.nsIURIContentListener)
+              .parentContentListener = helpContentListener;
+  helpExternal.addProgressListener(window.XULBrowserWindow, Ci.nsIWebProgress.NOTIFY_ALL);
 
 }
 function contentClick(event) {
@@ -180,7 +177,7 @@ function contentClick(event) {
   try {
     helpExternal.webNavigation
                 .loadURI(uri,
-                         Components.interfaces.nsIWebNavigation.LOAD_FLAGS_IS_LINK,
+                         Ci.nsIWebNavigation.LOAD_FLAGS_IS_LINK,
                          null, null, null,
                          Services.scriptSecurityManager.getSystemPrincipal());
   } catch (e) {}
@@ -329,7 +326,7 @@ function filterNodeByPlatform(aDatasource, aCurrentResource, aCurrentLevel) {
   var nodes = aDatasource.GetTargets(aCurrentResource, NC_SUBHEADINGS, true);
   while (nodes.hasMoreElements()) {
     var node = nodes.getNext();
-    node = node.QueryInterface(Components.interfaces.nsIRDFResource);
+    node = node.QueryInterface(Ci.nsIRDFResource);
     // should we test for rdf:Seq here?  see also doFindOnDatasource
     filterSeqByPlatform(aDatasource, node, aCurrentLevel+1);
   }
@@ -340,8 +337,8 @@ function filterNodeByPlatform(aDatasource, aCurrentResource, aCurrentLevel) {
 # only on other platforms.
 function filterSeqByPlatform(aDatasource, aNode, aCurrentLevel) {
   // get nc:subheading children into an enumerator
-  var RDFC = Components.classes["@mozilla.org/rdf/container;1"]
-                       .createInstance(Components.interfaces.nsIRDFContainer);
+  var RDFC = Cc["@mozilla.org/rdf/container;1"]
+               .createInstance(Ci.nsIRDFContainer);
   RDFC.Init(aDatasource, aNode);
   var targets = RDFC.GetElements();
 
@@ -351,12 +348,12 @@ function filterSeqByPlatform(aDatasource, aNode, aCurrentLevel) {
 
     // find out on which platforms this node is meaningful
     var nodePlatforms = getAttribute(aDatasource,
-                                     currentTarget.QueryInterface(Components.interfaces.nsIRDFResource),
+                                     currentTarget.QueryInterface(Ci.nsIRDFResource),
                                      NC_PLATFORM,
                                      platform);
 
     if (nodePlatforms.split(/\s+/).indexOf(platform) == -1) { // node is for another platform
-      var currentNode = currentTarget.QueryInterface(Components.interfaces.nsIRDFNode);
+      var currentNode = currentTarget.QueryInterface(Ci.nsIRDFNode);
       // "false" because we don't want to renumber elements in the container
       RDFC.RemoveElement(currentNode, false);
 
@@ -408,7 +405,7 @@ function getLink(ID) {
       var link = tocDS.GetTarget(resource, NC_LINK, true);
       if (!link)  // no such rdf:ID found
         continue;
-      return link.QueryInterface(Components.interfaces.nsIRDFLiteral).Value;
+      return link.QueryInterface(Ci.nsIRDFLiteral).Value;
     }
     return null;
 }
@@ -437,7 +434,7 @@ function loadURI(uri) {
         uri = helpBaseURI + uri;
     }
     getWebNavigation().loadURI(uri,
-        Components.interfaces.nsIWebNavigation.LOAD_FLAGS_NONE,
+        Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
         null, null, null,
         Services.scriptSecurityManager.getSystemPrincipal());
 }
@@ -566,13 +563,13 @@ nsHelpStatusHandler.prototype = {
         UpdateBackForwardButtons();
     },
     QueryInterface : function(aIID) {
-        if (aIID.equals(Components.interfaces.nsIWebProgressListener) ||
-                aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-                aIID.equals(Components.interfaces.nsIXULBrowserWindow) ||
-                aIID.equals(Components.interfaces.nsISupports)) {
+        if (aIID.equals(Ci.nsIWebProgressListener) ||
+                aIID.equals(Ci.nsISupportsWeakReference) ||
+                aIID.equals(Ci.nsIXULBrowserWindow) ||
+                aIID.equals(Ci.nsISupports)) {
             return this;
         }
-        throw Components.results.NS_NOINTERFACE;
+        throw Cr.NS_NOINTERFACE;
     },
 
     init : function() {},
@@ -617,7 +614,7 @@ function onselect_loadURI(tree) {
         var resource = tree.view.getResourceAtIndex(tree.currentIndex);
         var link = tree.database.GetTarget(resource, NC_LINK, true);
         if (link) {
-            link = link.QueryInterface(Components.interfaces.nsIRDFLiteral);
+            link = link.QueryInterface(Ci.nsIRDFLiteral);
             loadURI(link.Value);
         }
     } catch (e) {
@@ -656,8 +653,8 @@ function doFind() {
     emptySearch = true;
 
     // search TOC
-    var resultsDS = Components.classes["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"]
-        .createInstance(Components.interfaces.nsIRDFDataSource);
+    var resultsDS = Cc["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"]
+                      .createInstance(Ci.nsIRDFDataSource);
     var sourceDS = helpTocPanel.database;
     doFindOnDatasource(resultsDS, sourceDS, RDF_ROOT, 0);
 
@@ -701,7 +698,7 @@ function doFindOnDatasource(resultsDS, sourceDS, resource, level) {
     var targets = sourceDS.GetTargets(resource, NC_SUBHEADINGS, true);
     while (targets.hasMoreElements()) {
         var target = targets.getNext();
-        target = target.QueryInterface(Components.interfaces.nsIRDFResource);
+        target = target.QueryInterface(Ci.nsIRDFResource);
         // The first child of a rdf:subheading should (must) be a rdf:seq.
         // Should we test for a SEQ here?
         doFindOnSeq(resultsDS, sourceDS, target, level+1);
@@ -719,7 +716,7 @@ function doFindOnSeq(resultsDS, sourceDS, resource, level) {
         var name = sourceDS.GetTarget(target, NC_NAME, true);
 
         if (link &&
-            name instanceof Components.interfaces.nsIRDFLiteral &&
+            name instanceof Ci.nsIRDFLiteral &&
             isMatch(name.Value)) {
             // we have found a search entry - add it to the results datasource.
             var urn = RDF.GetAnonymousResource();
@@ -770,7 +767,7 @@ function getAttribute(datasource, resource, attributeResourceName,
 
 function getLiteralValue(literal, defaultValue) {
     if (literal) {
-        literal = literal.QueryInterface(Components.interfaces.nsIRDFLiteral);
+        literal = literal.QueryInterface(Ci.nsIRDFLiteral);
         if (literal) {
             return literal.Value;
         }
@@ -789,8 +786,8 @@ function log(aText) {
 function getBoolPref (aPrefname, aDefault)
 {
   try { 
-    var pref = Components.classes["@mozilla.org/preferences-service;1"]
-                         .getService(Components.interfaces.nsIPrefBranch);
+    var pref = Cc["@mozilla.org/preferences-service;1"]
+                 .getService(Ci.nsIPrefBranch);
     return pref.getBoolPref(aPrefname);
   }
   catch(e) {
@@ -801,13 +798,13 @@ function getBoolPref (aPrefname, aDefault)
 # getXulWin - Returns the current Help window as a nsIXULWindow.
 function getXulWin()
 {
-  window.QueryInterface(Components.interfaces.nsIInterfaceRequestor);
-  var webnav = window.getInterface(Components.interfaces.nsIWebNavigation);
-  var dsti = webnav.QueryInterface(Components.interfaces.nsIDocShellTreeItem);
+  window.QueryInterface(Ci.nsIInterfaceRequestor);
+  var webnav = window.getInterface(Ci.nsIWebNavigation);
+  var dsti = webnav.QueryInterface(Ci.nsIDocShellTreeItem);
   var treeowner = dsti.treeOwner;
-  var ifreq = treeowner.QueryInterface(Components.interfaces.nsIInterfaceRequestor);
+  var ifreq = treeowner.QueryInterface(Ci.nsIInterfaceRequestor);
 
-  return ifreq.getInterface(Components.interfaces.nsIXULWindow);
+  return ifreq.getInterface(Ci.nsIXULWindow);
 }
 
 # toggleZLevel - Toggles whether or not the window will always appear on top. Because
@@ -839,7 +836,7 @@ var helpContentListener = {
     return false;
   },
   doContent: function(aContentType, aIsContentPreferred, aRequest, aContentHandler) {
-    throw Components.results.NS_ERROR_UNEXPECTED;
+    throw Cr.NS_ERROR_UNEXPECTED;
   },
   isPreferred: function(aContentType, aDesiredContentType) {
     return false;
@@ -850,11 +847,11 @@ var helpContentListener = {
   loadCookie: null,
   parentContentListener: null,
   QueryInterface: function (aIID) {
-    if (aIID.equals(Components.interfaces.nsIURIContentListener) ||
-        aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-        aIID.equals(Components.interfaces.nsISupports))
+    if (aIID.equals(Ci.nsIURIContentListener) ||
+        aIID.equals(Ci.nsISupportsWeakReference) ||
+        aIID.equals(Ci.nsISupports))
       return this;
 
-    throw Components.results.NS_ERROR_NO_INTERFACE;
+    throw Cr.NS_ERROR_NO_INTERFACE;
   }
 };
