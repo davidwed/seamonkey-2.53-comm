@@ -89,10 +89,10 @@
       </property>
 
       <field name="usePrivateBrowsing" readonly="true">
-        window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-              .getInterface(Components.interfaces.nsIWebNavigation)
-              .QueryInterface(Components.interfaces.nsILoadContext)
-              .usePrivateBrowsing
+        window.QueryInterface(Ci.nsIInterfaceRequestor)
+              .getInterface(Ci.nsIWebNavigation)
+              .QueryInterface(Ci.nsILoadContext)
+              .usePrivateBrowsing;
       </field>
 
       <method name="onDocumentChange">
