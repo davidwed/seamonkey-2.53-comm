@@ -5,8 +5,6 @@
 Cu.import("resource:///modules/iteratorUtils.jsm");
 Cu.import("resource:///modules/imServices.jsm");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var autoJoinPref = "autoJoin";
 
 var joinChat = {

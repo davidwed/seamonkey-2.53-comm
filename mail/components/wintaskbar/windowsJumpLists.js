@@ -5,10 +5,6 @@
 
 var EXPORTED_SYMBOLS = ["WinTaskbarJumpList"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource:///modules/iteratorUtils.jsm");

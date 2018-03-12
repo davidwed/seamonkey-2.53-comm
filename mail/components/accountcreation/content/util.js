@@ -6,14 +6,6 @@
  * Some common, generic functions
  */
 
-try {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-} catch (e) { ddump(e); } // if already declared, as in xpcshell-tests
-try {
-  var Cu = Components.utils;
-} catch (e) { ddump(e); }
-
 Cu.import("resource:///modules/errUtils.js");
 Cu.import("resource://gre/modules/Services.jsm");
 

@@ -9,11 +9,7 @@
 
 this.EXPORTED_SYMBOLS = ['NetworkTestUtils'];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
 var CC = Components.Constructor;
-var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://gre/modules/Promise.jsm");

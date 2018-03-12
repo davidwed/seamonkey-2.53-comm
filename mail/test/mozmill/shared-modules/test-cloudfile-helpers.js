@@ -12,8 +12,6 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 var os = {};
 Cu.import('resource://mozmill/stdlib/os.js', os);
 
-var Cr = Components.results;
-
 var kMockContractIDPrefix = "@mozilla.org/mail/mockCloudFile;1?id=";
 
 var kDefaults = {

@@ -4,10 +4,6 @@
 
 this.EXPORTED_SYMBOLS = ["QuickFilterState", "QuickFilterManager",
                           "MessageTextFilter", "QuickFilterSearchListener"];
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/PluralForm.jsm");
 Cu.import("resource://gre/modules/Services.jsm");

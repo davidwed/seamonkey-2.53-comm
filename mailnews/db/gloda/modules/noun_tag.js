@@ -5,12 +5,6 @@
 this.EXPORTED_SYMBOLS = ['TagNoun'];
 
 Cu.import("resource:///modules/mailServices.js");
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/gloda/gloda.js");
 
 /**
