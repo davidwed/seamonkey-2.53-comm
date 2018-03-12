@@ -18,10 +18,6 @@ var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers",
 
 Cu.import("resource://gre/modules/Services.jsm");
 
-// We can't initialize them h because the global scope is read far too
-// early.
-var Cc, Ci;
-
 var gFontEnumerator;
 
 // We'll test with Western. Unicode has issues on Windows (bug 550443).
@@ -40,9 +36,6 @@ function setupModule(module) {
   wh.installInto(module);
   let pwh = collector.getModule("pref-window-helpers");
   pwh.installInto(module);
-
-  Cc = Components.classes;
-  Ci = Components.interfaces;
 
   gFontEnumerator = Cc["@mozilla.org/gfx/fontenumerator;1"]
                       .createInstance(Ci.nsIFontEnumerator);
