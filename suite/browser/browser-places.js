@@ -5,11 +5,6 @@
 // This file is loaded into the browser window scope.
 /* eslint-env mozilla/browser-window */
 
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-var Cc = Components.classes;
-var Cr = Components.results;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 XPCOMUtils.defineLazyScriptGetter(this, ["PlacesToolbar", "PlacesMenu",
