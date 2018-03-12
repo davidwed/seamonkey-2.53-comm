@@ -4,9 +4,6 @@
 
 var EXPORTED_SYMBOLS = ["MailUtils"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 Cu.import("resource:///modules/iteratorUtils.jsm");
 Cu.import("resource:///modules/MailConsts.js");
 Cu.import("resource:///modules/mailServices.js");
