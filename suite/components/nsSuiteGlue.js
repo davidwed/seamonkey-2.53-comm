@@ -2,11 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const Ci = Components.interfaces;
-const Cc = Components.classes;
-const Cr = Components.results;
-const Cu = Components.utils;
-
 const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -583,7 +578,7 @@ SuiteGlue.prototype = {
     if (this._shouldShowRights())
       this._showRightsNotification(notifyBox);
 
-    if ("@mozilla.org/windows-taskbar;1" in Components.classes &&
+    if ("@mozilla.org/windows-taskbar;1" in Cc &&
         Cc["@mozilla.org/windows-taskbar;1"]
           .getService(Ci.nsIWinTaskbar).available) {
       let temp = {};
