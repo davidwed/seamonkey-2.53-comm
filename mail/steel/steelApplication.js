@@ -2,12 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
 XPCOMUtils.defineLazyModuleGetter(this, "Deprecated",
                                   "resource://gre/modules/Deprecated.jsm");
+
 var APPLICATION_CID = Components.ID("f265021a-7f1d-4b4b-bdc6-9aedca4d8f13");
 var APPLICATION_CONTRACTID = "@mozilla.org/steel/application;1";
 

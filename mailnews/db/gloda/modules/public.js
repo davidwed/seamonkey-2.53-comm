@@ -4,14 +4,10 @@
 
 this.EXPORTED_SYMBOLS = ["Gloda"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/gloda/gloda.js");
 Cu.import("resource:///modules/gloda/everybody.js");
 Cu.import("resource:///modules/gloda/indexer.js");
+
 // initialize the indexer! (who was actually imported as a nested dep by the
 //  things everybody.js imported.)  We waited until now so it could know about
 //  its indexers.

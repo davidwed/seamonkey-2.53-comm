@@ -3,9 +3,6 @@ Cu.import("resource:///modules/mailServices.js");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://testing-common/mailnews/localAccountUtils.js");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
 var CC = Components.Constructor;
 
 // WebApps.jsm called by ProxyAutoConfig (PAC) requires a valid nsIXULAppInfo.
