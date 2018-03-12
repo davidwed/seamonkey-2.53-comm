@@ -8,11 +8,6 @@
  * one of our account providers.
  */
 
-var Cu = Components.utils;
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/NetUtil.jsm");
@@ -45,8 +40,8 @@ httpRequestObserver.prototype = {
       return;
 
     if (!(aSubject instanceof Ci.nsIHttpChannel)) {
-      Component.utils.reportError("Failed to get a nsIHttpChannel when "
-                                  + "observing http-on-examine-response");
+      Cu.reportError("Failed to get a nsIHttpChannel when "
+                     + "observing http-on-examine-response");
       return;
     }
 
