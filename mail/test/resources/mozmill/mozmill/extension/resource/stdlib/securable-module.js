@@ -35,21 +35,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 (function(global) {
-   const Cc = Components.classes;
-   const Ci = Components.interfaces;
-   const Cu = Components.utils;
-   const Cr = Components.results;
-
    var exports = {};
 
    var ios = Cc['@mozilla.org/network/io-service;1']
-             .getService(Ci.nsIIOService);
+               .getService(Ci.nsIIOService);
 
    var scriptSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
-                               .getService(Ci.nsIScriptSecurityManager);
+                                 .getService(Ci.nsIScriptSecurityManager);
 
    var systemPrincipal = Cc["@mozilla.org/systemprincipal;1"]
-                         .createInstance(Ci.nsIPrincipal);
+                           .createInstance(Ci.nsIPrincipal);
 
    function resolvePrincipal(principal, defaultPrincipal) {
      if (principal === undefined)

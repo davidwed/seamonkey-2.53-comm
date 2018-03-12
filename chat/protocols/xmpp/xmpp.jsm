@@ -9,8 +9,6 @@ this.EXPORTED_SYMBOLS = [
   "XMPPAccountPrototype"
 ];
 
-var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-
 Cu.import("resource:///modules/imServices.jsm");
 Cu.import("resource:///modules/imStatusUtils.jsm");
 Cu.import("resource:///modules/imXPCOMUtils.jsm");

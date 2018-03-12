@@ -4,11 +4,6 @@
 
 this.EXPORTED_SYMBOLS = ['DebugTraceHelper'];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var SPACES = "                                                   ";
@@ -36,7 +31,7 @@ var STOP_COLORS = "\x1b[0m";
 /**
  * Example usages:
  *
- * Components.utils.import("resource:///modules/traceHelper.js");
+ * Cu.import("resource:///modules/traceHelper.js");
  * var debugContext = {color: "cyan"};
  * DebugTraceHelper.tracify(FolderDisplayWidget.prototype,
  *                          "FolderDisplayWidget", /.+/, debugContext);
