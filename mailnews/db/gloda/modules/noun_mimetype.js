@@ -4,11 +4,6 @@
 
 this.EXPORTED_SYMBOLS = ['MimeType', 'MimeTypeNoun'];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/gloda/log4moz.js");
 Cu.import("resource:///modules/StringBundle.js");
 
