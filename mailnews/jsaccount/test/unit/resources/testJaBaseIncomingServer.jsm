@@ -11,11 +11,6 @@
 
 const EXPORTED_SYMBOLS = ["JaBaseIncomingServerProperties", "JaBaseIncomingServer"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource:///modules/jsaccount/JSAccountUtils.jsm");
 

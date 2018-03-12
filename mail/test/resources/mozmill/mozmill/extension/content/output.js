@@ -161,7 +161,7 @@ var createCell = function (t, obj, message) {
 }
 
 var frame = {}; Cu.import('resource://mozmill/modules/frame.js', frame);
-// var utils = {}; Components.utils.import('resouce://mozmill/modules/utils.js', utils);
+// var utils = {}; Cu.import('resouce://mozmill/modules/utils.js', utils);
 
 // Set UI Listeners in frame
 
