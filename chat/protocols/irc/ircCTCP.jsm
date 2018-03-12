@@ -10,8 +10,6 @@
 
 this.EXPORTED_SYMBOLS = ["ircCTCP", "ctcpBase"];
 
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/imServices.jsm");
 Cu.import("resource:///modules/imXPCOMUtils.jsm");
 Cu.import("resource:///modules/ircHandlers.jsm");

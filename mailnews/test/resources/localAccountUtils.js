@@ -8,9 +8,6 @@ this.EXPORTED_SYMBOLS = ['localAccountUtils'];
 Cu.import("resource:///modules/mailServices.js");
 Cu.import("resource://gre/modules/Services.jsm");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
 var CC = Components.Constructor;
 
 // Local Mail Folders. Requires prior setup of profile directory

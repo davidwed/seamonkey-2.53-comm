@@ -17,9 +17,6 @@ Cu.import("resource:///modules/IOUtils.js");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://testing-common/mailnews/auth.js");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 // Since we don't really need to worry about peristence, we can just
 // use a UIDL counter.
 var gUIDLCount = 1;

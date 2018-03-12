@@ -9,11 +9,6 @@
 
 this.EXPORTED_SYMBOLS = ["GlodaDatastore"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/IOUtils.js");
 Cu.import("resource://gre/modules/Services.jsm");
 

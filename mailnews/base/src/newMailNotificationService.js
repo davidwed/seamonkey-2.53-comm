@@ -12,10 +12,6 @@
  * "mail.notification.logging.dump" (for stderr) to the string indicating the level you want.
  */
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/gloda/log4moz.js");
 Cu.import("resource:///modules/iteratorUtils.jsm");
 Cu.import("resource:///modules/mailServices.js");

@@ -18,8 +18,6 @@
 
 this.EXPORTED_SYMBOLS = ["ircServices", "servicesBase"];
 
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/imXPCOMUtils.jsm");
 Cu.import("resource:///modules/ircHandlers.jsm");
 Cu.import("resource:///modules/ircUtils.jsm");

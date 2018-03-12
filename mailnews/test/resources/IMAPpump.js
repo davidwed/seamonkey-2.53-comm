@@ -34,9 +34,6 @@ var IMAPPump = {
   inbox: null,          // nsIMsgFolder/nsIMsgImapMailFolder for imap inbox
   mailbox: null         // imap fake server mailbox
 };
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-
 function setupIMAPPump(extensions)
 {
   // Create Application info if we need it.

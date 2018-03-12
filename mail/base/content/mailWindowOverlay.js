@@ -1800,7 +1800,6 @@ BatchMessageMover.prototype = {
 
   // continue processing of default archive operations
   continueBatch: function () {
-      const Ci = Components.interfaces;
       let batch = this._currentBatch;
       let srcFolder = batch.srcFolder;
       let archiveFolderURI = batch.archiveFolderURI;
