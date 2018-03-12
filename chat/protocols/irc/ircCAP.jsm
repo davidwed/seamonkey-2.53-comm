@@ -19,8 +19,6 @@
 
 this.EXPORTED_SYMBOLS = ["ircCAP"];
 
-var Cu = Components.utils;
-
 Cu.import("resource:///modules/ircHandlers.jsm");
 Cu.import("resource:///modules/ircUtils.jsm");
 

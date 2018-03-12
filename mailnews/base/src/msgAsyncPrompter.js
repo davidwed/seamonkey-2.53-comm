@@ -7,9 +7,6 @@ Cu.import("resource://gre/modules/Task.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource:///modules/gloda/log4moz.js");
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-
 function runnablePrompter(asyncPrompter, hashKey) {
   this._asyncPrompter = asyncPrompter;
   this._hashKey = hashKey;

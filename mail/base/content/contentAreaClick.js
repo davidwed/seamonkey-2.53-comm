@@ -119,8 +119,6 @@ function contentAreaClick(aEvent)
 
   if (!href && !aEvent.button) {
     // Is this an image that we might want to scale?
-    const Ci = Components.interfaces;
-
     if (target instanceof Ci.nsIImageLoadingContent) {
       // Make sure it loaded successfully. No action if not or a broken link.
       var req = target.getRequest(Ci.nsIImageLoadingContent.CURRENT_REQUEST);

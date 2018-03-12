@@ -67,9 +67,6 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource:///modules/mimeParser.jsm");
 Cu.import("resource://testing-common/mailnews/auth.js");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 function imapDaemon(flags, syncFunc) {
   this._flags = flags;
 

@@ -15,9 +15,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //// Globals
 
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "DownloadIntegration",
                                   "resource://gre/modules/DownloadIntegration.jsm");

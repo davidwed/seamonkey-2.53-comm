@@ -6,13 +6,6 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource:///modules/gloda/log4moz.js");
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cr = Components.results;
-
-////////////////////////////////////////////////////////////////////////////////
 //// Base class for nsActivityProcess and nsActivityEvent objects
 
 function nsActivity()

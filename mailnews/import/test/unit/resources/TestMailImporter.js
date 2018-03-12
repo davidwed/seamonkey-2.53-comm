@@ -1,8 +1,5 @@
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 function TestMailImpoter() {
 };
 
@@ -32,11 +29,11 @@ TestMailImpoter.prototype = {
     if (type != "mail")
       return null;
     let importService = Cc["@mozilla.org/import/import-service;1"]
-                        .createInstance(Ci.nsIImportService);
+                          .createInstance(Ci.nsIImportService);
     let genericInterface = importService.CreateNewGenericMail();
     genericInterface.SetData("mailInterface", this);
     let name = Cc["@mozilla.org/supports-string;1"]
-               .createInstance(Ci.nsISupportsString);
+                 .createInstance(Ci.nsISupportsString);
     name.data = "TestMailImporter";
     genericInterface.SetData("name", name);
     return genericInterface;
@@ -49,7 +46,7 @@ TestMailImpoter.prototype = {
 
   _createMailboxDescriptor: function(path, name, depth) {
     let importService = Cc["@mozilla.org/import/import-service;1"]
-                        .createInstance(Ci.nsIImportService);
+                          .createInstance(Ci.nsIImportService);
     let descriptor = importService.CreateNewMailboxDescriptor();
     descriptor.size = 100;
     descriptor.depth = depth;
@@ -101,7 +98,7 @@ TestMailImpoter.prototype = {
                                                         reusable);
 
       let inputStream = Cc["@mozilla.org/network/file-input-stream;1"]
-                         .createInstance(Ci.nsIFileInputStream);
+                          .createInstance(Ci.nsIFileInputStream);
       inputStream.init(entry, -1, -1, 0);
       let count = inputStream.available();
       while (count > 0) {
