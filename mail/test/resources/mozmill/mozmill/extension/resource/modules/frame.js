@@ -148,9 +148,9 @@ function registerFunction (name, func) {
   registeredFunctions[name] = func;
 }
 
-function stateChangeBase (possibilties, restrictions, target, cmeta, v) {
-  if (possibilties) {
-    if (!arrays.inArray(possibilties, v)) {
+function stateChangeBase (possibilities, restrictions, target, cmeta, v) {
+  if (possibilities) {
+    if (!arrays.inArray(possibilities, v)) {
       // TODO Error value not in this.poss
       return;
     }
