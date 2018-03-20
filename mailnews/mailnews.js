@@ -96,7 +96,7 @@ pref("mailnews.allowMboxOver4GB", true);
 
 // For IMAP caching lift the limits since they are designed for HTML pages.
 // Note that the maximum size of a cache entry is limited by
-// max_entry_size and (capacity >> 3), so devided by 8.
+// max_entry_size and (capacity >> 3), so divided by 8.
 // Larger messages or attachments won't be cached.
 pref("browser.cache.memory.max_entry_size", 25000); //  25 MB
 pref("browser.cache.memory.capacity",      200000); // 200 MB = 8*25 MB
