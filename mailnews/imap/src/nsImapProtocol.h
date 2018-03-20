@@ -327,10 +327,10 @@ public:
 private:
   virtual ~nsImapProtocol();
   // the following flag is used to determine when a url is currently being run. It is cleared when we
-  // finish processng a url and it is set whenever we call Load on a url
+  // finish processing a url and it is set whenever we call Load on a url
   bool m_urlInProgress;
   nsCOMPtr<nsIImapUrl> m_runningUrl; // the nsIImapURL that is currently running
-  nsImapAction m_imapAction;  // current imap action associated with this connnection...
+  nsImapAction m_imapAction;  // current imap action associated with this connection...
 
   nsCString             m_hostName;
   nsCString             m_userName;
@@ -343,7 +343,7 @@ private:
   uint32_t        m_curReadIndex;  // current read index
   nsCString       m_trashFolderName;
 
-  // Ouput stream for writing commands to the socket
+  // Output stream for writing commands to the socket
   nsCOMPtr<nsISocketTransport>  m_transport;
 
   nsCOMPtr<nsIAsyncInputStream>   m_channelInputStream;
@@ -447,7 +447,7 @@ private:
   // SendData not only writes the NULL terminated data in dataBuffer to our output stream
   // but it also informs the consumer that the data has been written to the stream.
   // aSuppressLogging --> set to true if you wish to suppress logging for this particular command.
-  // this is useful for making sure we don't log authenication information like the user's password (which was
+  // this is useful for making sure we don't log authentication information like the user's password (which was
   // encoded anyway), but still we shouldn't add that information to the log.
   nsresult SendData(const char * dataBuffer, bool aSuppressLogging = false) override;
 
@@ -461,7 +461,7 @@ private:
 
   // use to prevent re-entering TellThreadToDie.
   bool m_inThreadShouldDie;
-  // if the UI thread has signalled the IMAP thread to die, and the
+  // if the UI thread has signaled the IMAP thread to die, and the
   // connection has timed out, this will be set to FALSE.
   bool m_safeToCloseConnection;
 

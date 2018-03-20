@@ -393,7 +393,7 @@ protected:
   // and we want to batch notifications.
   bool m_deletingRows;
   // for certain special folders
-  // and decendents of those folders
+  // and descendants of those folders
   // (like the "Sent" folder, "Sent/Old Sent")
   // the Sender column really shows recipients.
 

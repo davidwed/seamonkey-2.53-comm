@@ -1731,7 +1731,7 @@ nsMsgComposeAndSend::ProcessMultipartRelated(int32_t *aMailboxCount, int32_t *aN
     j++;
     domSaveArray[j].node = node;
 
-    // check if we have alreay attached this object, don't need to attach it twice
+    // check if we have already attached this object, don't need to attach it twice
     duplicateOf = -1;
     for (k = mPreloadedAttachmentCount; k < i; k++)
     {
@@ -2799,7 +2799,7 @@ nsMsgComposeAndSend::InitCompositionFields(nsMsgCompFields *fields,
 
 // Add default headers to outgoing messages see Bug #61520
 // mail.identity.<id#>.headers pref is a comma separated value of pref names
-// containging headers to add headers are stored in
+// containing headers to add headers are stored in
 // mail.identity.<id#>.header.<header name> grab all the headers, mime encode
 // them and add them to the other custom headers.
 nsresult
@@ -2954,7 +2954,7 @@ nsMsgComposeAndSend::AddMailReplyToHeader() {
                              recipients_without_mailing_lists);
 
     // ... If the result is equal to the input, none of the recipients
-    // occure in the MRT addresses and therefore we stop here.
+    // occur in the MRT addresses and therefore we stop here.
     if (recipients_no_dups == recipients_without_mailing_lists)
       return NS_OK;
   }
@@ -3026,7 +3026,7 @@ nsMsgComposeAndSend::Init(
 {
   nsresult      rv = NS_OK;
 
-  //Let make sure we retreive the correct number of related parts. It may have changed since last time
+  //Let make sure we retrieve the correct number of related parts. It may have changed since last time
   GetMultipartRelatedCount(true);
 
   nsString msg;
@@ -3166,7 +3166,7 @@ NS_IMETHODIMP nsMsgComposeAndSend::SendDeliveryCallback(nsIURI *aUrl, bool inIsN
     if (NS_FAILED(aExitCode))
     {
 #ifdef __GNUC__
-// Temporary workaroung until bug 783526 is fixed.
+// Temporary workaround until bug 783526 is fixed.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
 #endif
@@ -4291,7 +4291,7 @@ nsMsgGetEnvelopeLine(void)
   // Use PR_FormatTimeUSEnglish() to format the date in US English format,
   // then figure out what our local GMT offset is, and append it (since
   // PR_FormatTimeUSEnglish() can't do that.) Generate four digit years as
-  // per RFC 1123 (superceding RFC 822.)
+  // per RFC 1123 (superseding RFC 822.)
   //
   PR_ExplodeTime(PR_Now(), PR_LocalTimeParameters, &now);
   PR_FormatTimeUSEnglish(buffer, sizeof(buffer),
