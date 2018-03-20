@@ -2978,7 +2978,7 @@ NS_IMETHODIMP nsMsgLocalMailFolder::DeleteDownloadMsg(nsIMsgDBHdr *aMsgHdr, bool
   uint32_t numMsgs;
   char *newMsgId;
 
-  // This method is only invoked thru DownloadMessagesForOffline()
+  // This method is only invoked through DownloadMessagesForOffline()
   if (mDownloadState != DOWNLOAD_STATE_NONE)
   {
     // We only remember the first key, no matter how many

@@ -153,7 +153,7 @@ add_content_type_attribs(const char *content_type,
 }
 
 /*
- * This routine will find all content type handler for a specifc content
+ * This routine will find all content type handler for a specific content
  * type (if it exists)
  */
 bool
@@ -166,7 +166,7 @@ force_inline_display(const char *content_type)
 }
 
 /*
- * This routine will find all content type handler for a specifc content
+ * This routine will find all content type handler for a specific content
  * type (if it exists) and is defined to the nsRegistry
  */
 MimeObjectClass *
@@ -489,7 +489,7 @@ mime_find_class (const char *content_type, MimeHeaders *hdrs,
        )
       /* Use a little hack to prevent some dangerous plugins, which ship
          with Mozilla, to run.
-         For the truely user-installed plugins, we rely on the judgement
+         For the truly user-installed plugins, we rely on the judgement
          of the user. */
     {
       if (!exact_match_p)
@@ -881,7 +881,7 @@ mime_create (const char *content_type, MimeHeaders *hdrs,
         override_content_type = nullptr;
       PR_FREEIF(name);
 
-      // Workaroung for saving '.eml" file encoded with base64.
+      // Workaround for saving '.eml" file encoded with base64.
       // Do not override with message/rfc822 whenever Transfer-Encoding is
       // base64 since base64 encoding of message/rfc822 is invalid.
       // Our MimeMessageClass has no capability to decode it.
@@ -1773,7 +1773,7 @@ MimeObject_write(MimeObject *obj, const char *output, int32_t length,
 {
   if (!obj->output_p) return 0;
 
-  // if we're stripping attachments, check if any parent is not being ouput
+  // if we're stripping attachments, check if any parent is not being output
   if (obj->options->format_out == nsMimeOutput::nsMimeMessageAttach)
   {
     // if true, mime generates a separator in html - we don't want that.

@@ -99,10 +99,10 @@ function doChecks(server)
   // check that the change was propagated to spamSettings
   do_check_false(spamSettings.useWhiteList);
 
-  // and affects whitelisting calculationss
+  // and affects whitelisting calculations
   do_check_false(spamSettings.checkWhiteList(hdrs[kDomainTest]));
 
-  // reenable whitelisting
+  // re-enable whitelisting
   server.setBoolValue("useWhiteList", true);
   spamSettings.initialize(server);
   do_check_true(spamSettings.checkWhiteList(hdrs[kDomainTest]));
