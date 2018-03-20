@@ -340,7 +340,7 @@ static void GetCachedName(const nsCString& unparsedString,
 {
   nsresult err;
 
-  //get verion #
+  //get version #
   int32_t cachedVersion = unparsedString.ToInteger(&err);
   if (cachedVersion != displayVersion)
     return;
@@ -1009,7 +1009,7 @@ NS_IMETHODIMP nsMsgDBView::IsEditable(int32_t row, nsITreeColumn* col, bool* _re
 {
   NS_ENSURE_ARG_POINTER(col);
   NS_ENSURE_ARG_POINTER(_retval);
-  //attempt to retreive a custom column handler. If it exists call it and return
+  //attempt to retrieve a custom column handler. If it exists call it and return
   const char16_t* colID;
   col->GetIdConst(&colID);
 
@@ -1709,7 +1709,7 @@ nsresult nsMsgDBView::GetDBForViewIndex(nsMsgViewIndex index, nsIMsgDatabase **d
 NS_IMETHODIMP nsMsgDBView::GetImageSrc(int32_t aRow, nsITreeColumn* aCol, nsAString& aValue)
 {
   NS_ENSURE_ARG_POINTER(aCol);
-  //attempt to retreive a custom column handler. If it exists call it and return
+  //attempt to retrieve a custom column handler. If it exists call it and return
   const char16_t* colID;
   aCol->GetIdConst(&colID);
 
@@ -1996,7 +1996,7 @@ NS_IMETHODIMP nsMsgDBView::GetCellText(int32_t aRow, nsITreeColumn* aCol, nsAStr
 
   aValue.Truncate();
 
-  //attempt to retreive a custom column handler. If it exists call it and return
+  //attempt to retrieve a custom column handler. If it exists call it and return
   nsIMsgCustomColumnHandler* colHandler = GetColumnHandler(colID);
 
   if (colHandler)
@@ -2156,7 +2156,7 @@ NS_IMETHODIMP nsMsgDBView::CycleCell(int32_t row, nsITreeColumn* col)
   const char16_t* colID;
   col->GetIdConst(&colID);
 
-  //attempt to retreive a custom column handler. If it exists call it and return
+  //attempt to retrieve a custom column handler. If it exists call it and return
   nsIMsgCustomColumnHandler* colHandler = GetColumnHandler(colID);
 
   if (colHandler)
@@ -3996,7 +3996,7 @@ nsresult nsMsgDBView::GetFieldTypeAndLenForSort(nsMsgViewSortTypeValue sortType,
           if (isString)
           {
             *pFieldType = kCollationKey;
-            *pMaxLen = kMaxRecipientKey; //80 - do we need a seperate k?
+            *pMaxLen = kMaxRecipientKey; //80 - do we need a separate k?
           }
           else
           {
@@ -5916,7 +5916,7 @@ int32_t nsMsgDBView::FindLevelInThread(nsIMsgDBHdr *msgHdr, nsMsgViewIndex start
     // against that corruption.
     if (msgKey == parentKey || NS_FAILED(m_db->GetMsgHdrForKey(parentKey, getter_AddRefs(curMsgHdr))))
     {
-      NS_ERROR("msgKey == parentKey, or GetMsgHdrForKey failed, this used to be an infinte loop condition");
+      NS_ERROR("msgKey == parentKey, or GetMsgHdrForKey failed, this used to be an infinite loop condition");
       curMsgHdr = nullptr;
     }
     else
@@ -6688,7 +6688,7 @@ nsresult nsMsgDBView::NavigateFromPos(nsMsgNavigationTypeValue motion, nsMsgView
                 *pResultKey = m_keys[*pResultIndex];
             break;
         case nsMsgNavigationType::firstUnreadMessage:
-            startIndex = nsMsgViewIndex_None;        // note fall thru - is this motion ever used?
+            startIndex = nsMsgViewIndex_None;        // note fall through - is this motion ever used?
             MOZ_FALLTHROUGH;
         case nsMsgNavigationType::nextUnreadMessage:
             for (curIndex = (startIndex == nsMsgViewIndex_None) ? 0 : startIndex; curIndex <= lastIndex && lastIndex != nsMsgViewIndex_None; curIndex++) {
@@ -7858,14 +7858,14 @@ nsresult nsMsgDBView::CopyDBView(nsMsgDBView *aNewMsgDBView, nsIMessenger *aMess
 NS_IMETHODIMP
 nsMsgDBView::GetSearchSession(nsIMsgSearchSession* *aSession)
 {
-  NS_ASSERTION(false, "should be overriden by child class");
+  NS_ASSERTION(false, "should be overridden by child class");
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
 nsMsgDBView::SetSearchSession(nsIMsgSearchSession *aSession)
 {
-  NS_ASSERTION(false, "should be overriden by child class");
+  NS_ASSERTION(false, "should be overridden by child class");
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
