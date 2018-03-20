@@ -146,7 +146,7 @@ protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
-// THIS IS THE CLASS THAT IS THE STREAM Listener OF THE HTML OUPUT
+// THIS IS THE CLASS THAT IS THE STREAM Listener OF THE HTML OUTPUT
 // FROM LIBMIME. THIS IS FOR QUOTING
 ////////////////////////////////////////////////////////////////////////////////////
 class QuotingOutputStreamListener : public nsIMsgQuotingOutputStreamListener

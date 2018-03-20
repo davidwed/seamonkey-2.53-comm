@@ -102,7 +102,7 @@ ProcessBodyAsAttachment(MimeObject *obj, nsMsgAttachmentData **data)
 
   // Ok, this is the special case when somebody sends an "attachment" as the
   // body of an RFC822 message...I really don't think this is the way this
-  // should be done.  I belive this should really be a multipart/mixed message
+  // should be done.  I believe this should really be a multipart/mixed message
   // with an empty body part, but what can ya do...our friends to the North seem
   // to do this.
   MimeObject    *child = obj;
@@ -1253,7 +1253,7 @@ bool MimeObjectIsMessageBody(MimeObject *looking_for)
 // New Stream Converter Interface
 //
 
-// Get the connnection to prefs service manager
+// Get the connection to prefs service manager
 nsIPrefBranch *
 GetPrefBranch(MimeDisplayOptions *opt)
 {
