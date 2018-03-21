@@ -59,8 +59,8 @@ locales = [
     path = "suite/extensions/irc/locales/l10n.toml"
 
 [[paths]]
-    reference = "{mozilla}/devtools/shim/locales/en-US/**"
-    l10n = "{l}devtools/shim/**"
+    reference = "{mozilla}/devtools/startup/locales/en-US/**"
+    l10n = "{l}devtools/startup/**"
 
 # ignore MOZ_LANGPACK_CONTRIBUTORS
 [[filters]]
