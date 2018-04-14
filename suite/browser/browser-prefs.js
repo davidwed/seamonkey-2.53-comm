@@ -176,6 +176,14 @@ pref("browser.history.last_page_visited", "about:blank");
 pref("browser.history.grouping", "day");
 pref("browser.sessionhistory.max_entries", 50);
 
+// Whether useAsyncTransactions is enabled or not.
+// Currently we only enable them for nightly.
+#ifdef NIGHTLY_BUILD
+pref("browser.places.useAsyncTransactions", true);
+#else
+pref("browser.places.useAsyncTransactions", false);
+#endif
+
 // Whether history is enabled or not.
 pref("places.history.enabled", true);
 
@@ -244,6 +252,9 @@ pref("browser.tabs.maxOpenBeforeWarn", 15);
 pref("browser.tabs.insertRelatedAfterCurrent", true);
 // 0 = append, 1 = replace
 pref("browser.tabs.loadGroup", 1);
+
+// For future use
+pref("browser.tabs.loadBookmarksInBackground", false);
 
 // how many browsers can be saved in the DOM (by the tabbed browser)
 pref("browser.tabs.max_tabs_undo", 3);
