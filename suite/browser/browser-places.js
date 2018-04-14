@@ -2,6 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// This file is loaded into the browser window scope.
+/* eslint-env mozilla/browser-window */
+
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+var Cc = Components.classes;
+var Cr = Components.results;
+
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyScriptGetter(this, ["PlacesToolbar", "PlacesMenu",
+                                         "PlacesPanelview", "PlacesPanelMenuView"],
+                                  "chrome://communicator/content/places/browserPlacesViews.js");
+
 var StarUI = {
   _itemGuids: -1,
   uri: null,
@@ -18,8 +32,15 @@ var StarUI = {
     // initially the panel is hidden
     // to avoid impacting startup / new window performance
     element.hidden = false;
-    element.addEventListener("popuphidden", this, false);
-    element.addEventListener("keypress", this, false);
+    element.addEventListener("keypress", this);
+    element.addEventListener("mousedown", this);
+    element.addEventListener("mouseout", this);
+    element.addEventListener("mousemove", this);
+    element.addEventListener("compositionstart", this);
+    element.addEventListener("compositionend", this);
+    element.addEventListener("input", this);
+    element.addEventListener("popuphidden", this);
+    element.addEventListener("popupshown", this);
     return this.panel = element;
   },
 
@@ -116,22 +137,38 @@ var StarUI = {
 
   _overlayLoaded: false,
   _overlayLoading: false,
-  showEditBookmarkPopup:
-  function SU_showEditBookmarkPopup(aItemId, aAnchorElement, aPosition) {
+  async showEditBookmarkPopup(aNode, aAnchorElement, aPosition, aIsNewBookmark) {
+    // Slow double-clicks (not true double-clicks) shouldn't
+    // cause the panel to flicker.
+    if (this.panel.state == "showing" ||
+        this.panel.state == "open") {
+      return;
+    }
+
+    this._isNewBookmark = aIsNewBookmark;
+    this._uriForRemoval = "";
+    // TODO (bug 1131491): Deprecate this once async transactions are enabled
+    // and the legacy transactions code is gone.
+    if (typeof(aNode) == "number") {
+      let itemId = aNode;
+      let guid = await PlacesUtils.promiseItemGuid(itemId);
+      aNode = await PlacesUIUtils.fetchNodeLike(guid);
+    }
+
     // Performance: load the overlay the first time the panel is opened
     // (see bug 392443).
     if (this._overlayLoading)
       return;
 
     if (this._overlayLoaded) {
-      this._doShowEditBookmarkPanel(aItemId, aAnchorElement, aPosition);
+      this._doShowEditBookmarkPanel(aNode, aAnchorElement, aPosition);
       return;
     }
 
     this._overlayLoading = true;
     document.loadOverlay(
-      "chrome://communicator/content/bookmarks/editBookmarkOverlay.xul",
-      (function (aSubject, aTopic, aData) {
+      "chrome://communicator/content/places/editBookmarkOverlay.xul",
+      (aSubject, aTopic, aData) => {
         // Move the header (star, title, button) into the grid,
         // so that it aligns nicely with the other items (bug 484022).
         let header = this._element("editBookmarkPanelHeader");
@@ -141,13 +178,13 @@ var StarUI = {
 
         this._overlayLoading = false;
         this._overlayLoaded = true;
-        this._doShowEditBookmarkPanel(aItemId, aAnchorElement, aPosition);
-      }).bind(this)
+        this._doShowEditBookmarkPanel(aNode, aAnchorElement, aPosition);
+      }
     );
   },
 
   _doShowEditBookmarkPanel:
-  function SU__doShowEditBookmarkPanel(aItemId, aAnchorElement, aPosition) {
+  function SU__doShowEditBookmarkPanel(aNode, aAnchorElement, aPosition) {
     if (this.panel.state != "closed")
       return;
 
@@ -158,35 +195,42 @@ var StarUI = {
     // then show Page Bookmarked, else if the bookmark did already exist,
     // we are about editing it, then use Edit This Bookmark.
     this._element("editBookmarkPanelTitle").value =
-      this._batching ?
+      this._isNewBookmark ?
         gNavigatorBundle.getString("editBookmarkPanel.pageBookmarkedTitle") :
         gNavigatorBundle.getString("editBookmarkPanel.editBookmarkTitle");
 
     this._element("editBookmarkPanelBottomButtons").hidden = false;
     this._element("editBookmarkPanelContent").hidden = false;
 
-    // The remove button is shown only if we're not already batching, i.e.
-    // if the cancel button/ESC does not remove the bookmark.
-    this._element("editBookmarkPanelRemoveButton").hidden = this._batching;
-
     // The label of the remove button differs if the URI is bookmarked
     // multiple times.
-    var bookmarks = PlacesUtils.getBookmarksForURI(gBrowser.currentURI);
-    var forms = gNavigatorBundle.getString("editBookmark.removeBookmarks.label");
-    var label = PluralForm.get(bookmarks.length, forms).replace("#1", bookmarks.length);
+    let bookmarks = PlacesUtils.getBookmarksForURI(gBrowser.currentURI);
+    let forms = gNavigatorBundle.getString("editBookmark.removeBookmarks.label");
+    let label = PluralForm.get(bookmarks.length, forms).replace("#1", bookmarks.length);
     this._element("editBookmarkPanelRemoveButton").label = label;
 
-    this._itemId = aItemId !== undefined ? aItemId : this._itemId;
+    this._itemId = aNode.itemId;
     this.beginBatch();
 
-    // Consume dismiss clicks, see bug 400924
-    this.panel.popupBoxObject
-        .setConsumeRollupEvent(PopupBoxObject.ROLLUP_CONSUME);
-    this.panel.openPopup(aAnchorElement, aPosition);
+    let onPanelReady = fn => {
+      let target = this.panel;
+      if (target.parentNode) {
+        // By targeting the panel's parent and using a capturing listener, we
+        // can have our listener called before others waiting for the panel to
+        // be shown (which probably expect the panel to be fully initialized)
+        target = target.parentNode;
+      }
+      target.addEventListener("popupshown", function(event) {
+        fn();
+      }, {"capture": true, "once": true});
+    };
+    gEditItemOverlay.initPanel({ node: aNode,
+                                 onPanelReady,
+                                 hiddenRows: ["description", "location",
+                                              "loadInSidebar", "keyword"],
+                                 focusedElement: "preferred"});
 
-    gEditItemOverlay.initPanel(this._itemId,
-                               { hiddenRows: ["description", "location",
-                                              "keyword"] });
+    this.panel.openPopup(aAnchorElement, aPosition);
   },
 
   panelShown:
@@ -237,6 +281,7 @@ var StarUI = {
 }
 
 var PlacesCommandHook = {
+
   /**
    * Adds a bookmark to the page loaded in the given browser.
    *
@@ -248,97 +293,155 @@ var PlacesCommandHook = {
    * @param [optional] aShowEditUI
    *        whether or not to show the edit-bookmark UI for the bookmark item
    */
-  bookmarkPage: function PCH_bookmarkPage(aBrowser, aParent, aShowEditUI) {
+  async bookmarkPage(aBrowser, aParent, aShowEditUI) {
+    if (PlacesUIUtils.useAsyncTransactions) {
+      await this._bookmarkPagePT(aBrowser, aParent, aShowEditUI);
+      return;
+    }
+
     var uri = aBrowser.currentURI;
     var itemId = PlacesUtils.getMostRecentBookmarkForURI(uri);
-    if (itemId == -1) {
-      // Copied over from addBookmarkForBrowser:
-      // Bug 52536: We obtain the URL and title from the nsIWebNavigation
-      // associated with a <browser/> rather than from a DOMWindow.
-      // This is because when a full page plugin is loaded, there is
-      // no DOMWindow (?) but information about the loaded document
-      // may still be obtained from the webNavigation.
-      var webNav = aBrowser.webNavigation;
-      var url = webNav.currentURI;
+    let isNewBookmark = itemId == -1;
+    if (isNewBookmark) {
+      // Bug 1148838 - Make this code work for full page plugins.
       var title;
       var description;
       var charset;
+
+      let docInfo = await this._getPageDetails(aBrowser);
+
       try {
-        title = webNav.document.title || url.spec;
-        description = PlacesUIUtils.getDescriptionFromDocument(webNav.document);
-        charset = webNav.document.characterSet;
-      }
-      catch (e) { }
+        title = docInfo.isErrorPage ? PlacesUtils.history.getPageTitle(uri)
+                                    : aBrowser.contentTitle;
+        title = title || uri.spec;
+        description = docInfo.description;
+        charset = aBrowser.characterSet;
+      } catch (e) { }
 
       if (aShowEditUI) {
-        // If we bookmark the page here (i.e. page was not "starred" already)
-        // but open right into the "edit" state, start batching here, so
-        // "Cancel" in that state removes the bookmark.
+        // If we bookmark the page here but open right into a cancelable
+        // state (i.e. new bookmark in Library), start batching here so
+        // all of the actions can be undone in a single undo step.
         StarUI.beginBatch();
       }
 
-      var parent = aParent || PlacesUtils.unfiledBookmarksFolderId;
+      var parent = aParent !== undefined ?
+                   aParent : PlacesUtils.unfiledBookmarksFolderId;
       var descAnno = { name: PlacesUIUtils.DESCRIPTION_ANNO, value: description };
       var txn = new PlacesCreateBookmarkTransaction(uri, parent,
                                                     PlacesUtils.bookmarks.DEFAULT_INDEX,
                                                     title, null, [descAnno]);
       PlacesUtils.transactionManager.doTransaction(txn);
-      // Set the character-set
-      if (charset)
+      itemId = txn.item.id;
+      // Set the character-set.
+      if (charset && !PrivateBrowsingUtils.isBrowserPrivate(aBrowser))
         PlacesUtils.setCharsetForURI(uri, charset);
-      itemId = PlacesUtils.getMostRecentBookmarkForURI(uri);
     }
 
-    // dock the panel to the star icon when possible, otherwise dock
-    // it to the content area
+    // If it was not requested to open directly in "edit" mode, we are done.
+    if (!aShowEditUI)
+      return;
+
+    // Dock the panel to the star icon when possible, otherwise dock
+    // it to the content area.
     if (aBrowser.contentWindow == window.content) {
       let ubIcons = aBrowser.ownerDocument.getElementById("urlbar-icons");
       if (ubIcons) {
-        if (aShowEditUI)
-          StarUI.showEditBookmarkPopup(itemId, ubIcons, "bottomcenter topright");
+        await StarUI.showEditBookmarkPopup(itemId, ubIcons,
+                                           "bottomcenter topright",
+                                           isNewBookmark);
         return;
       }
     }
 
-    StarUI.showEditBookmarkPopup(itemId, aBrowser, "overlap");
+    await StarUI.showEditBookmarkPopup(itemId, aBrowser, "overlap",
+                                       isNewBookmark);
   },
 
-  /**
-   * Adds a bookmark to the page loaded in the given browser using the
-   * properties dialog.
-   *
-   * @param aBrowser
-   *        a <browser> element.
-   * @param [optional] aParent
-   *        The folder in which to create a new bookmark if the page loaded in
-   *        aBrowser isn't bookmarked yet, defaults to the unfiled root.
-   */
-  bookmarkPageAs: function PCH_bookmarkPageAs(aBrowser, aParent) {
-    var uri = aBrowser.currentURI;
-    var webNav = aBrowser.webNavigation;
-    var url = webNav.currentURI;
-    var title;
-    var description;
-    try {
-      title = webNav.document.title || url.spec;
-      description = PlacesUIUtils.getDescriptionFromDocument(webNav.document);
+  // TODO: Replace bookmarkPage code with this function once legacy
+  // transactions are removed.
+  async _bookmarkPagePT(aBrowser, aParentId, aShowEditUI) {
+    let url = new URL(aBrowser.currentURI.spec);
+    let info = await PlacesUtils.bookmarks.fetch({ url });
+    let isNewBookmark = !info;
+    if (!info) {
+      let parentGuid = aParentId !== undefined ?
+                         await PlacesUtils.promiseItemGuid(aParentId) :
+                         PlacesUtils.bookmarks.unfiledGuid;
+      info = { url, parentGuid };
+      // Bug 1148838 - Make this code work for full page plugins.
+      let description = null;
+      let charset = null;
+
+      let docInfo = await this._getPageDetails(aBrowser);
+
+      try {
+        if (docInfo.isErrorPage) {
+          let entry = await PlacesUtils.history.fetch(aBrowser.currentURI);
+          if (entry) {
+            info.title = entry.title;
+          }
+        } else {
+          info.title = aBrowser.contentTitle;
+        }
+        info.title = info.title || url.href;
+        description = docInfo.description;
+        charset = aBrowser.characterSet;
+      } catch (e) {
+        Components.utils.reportError(e);
+      }
+
+      if (aShowEditUI && isNewBookmark) {
+        // If we bookmark the page here but open right into a cancelable
+        // state (i.e. new bookmark in Library), start batching here so
+        // all of the actions can be undone in a single undo step.
+        StarUI.beginBatch();
+      }
+
+      if (description) {
+        info.annotations = [{ name: PlacesUIUtils.DESCRIPTION_ANNO,
+                              value: description }];
+      }
+
+      info.guid = await PlacesTransactions.NewBookmark(info).transact();
+
+      // Set the character-set
+      if (charset && !PrivateBrowsingUtils.isBrowserPrivate(aBrowser))
+         PlacesUtils.setCharsetForURI(makeURI(url.href), charset);
     }
-    catch (e) { }
 
-    var parent = aParent || PlacesUtils.bookmarksMenuFolderId;
+    // If it was not requested to open directly in "edit" mode, we are done.
+    if (!aShowEditUI)
+      return;
 
-    var insertPoint = new InsertionPoint(parent,
-                                         PlacesUtils.bookmarks.DEFAULT_INDEX);
-    var hiddenRows = [];
-    PlacesUIUtils.showAddBookmarkUI(uri, title, description, insertPoint, true,
-                                    null, null, null, null, hiddenRows);
+    let node = await PlacesUIUtils.promiseNodeLikeFromFetchInfo(info);
+
+    // Dock the panel to the star icon when possible, otherwise dock
+    // it to the content area.
+    if (aBrowser.contentWindow == window.content) {
+      let ubIcons = aBrowser.ownerDocument.getElementById("urlbar-icons");
+      if (ubIcons) {
+        await StarUI.showEditBookmarkPopup(node, ubIcons,
+                                           "bottomcenter topright",
+                                           isNewBookmark);
+        return;
+      }
+    }
+
+    await StarUI.showEditBookmarkPopup(node, aBrowser, "overlap",
+                                       isNewBookmark);
   },
 
-  /**
-   * Adds a bookmark to the page loaded in the current tab.
-   */
-  bookmarkCurrentPage: function PCH_bookmarkCurrentPage(aShowEditUI, aParent) {
-    this.bookmarkPage(gBrowser.selectedBrowser, aParent, aShowEditUI);
+  _getPageDetails(browser) {
+    return new Promise(resolve => {
+      let mm = browser.messageManager;
+      mm.addMessageListener("Bookmarks:GetPageDetails:Result", function listener(msg) {
+        mm.removeMessageListener("Bookmarks:GetPageDetails:Result", listener);
+        resolve(msg.data);
+      });
+
+      mm.sendAsyncMessage("Bookmarks:GetPageDetails", { })
+    });
   },
 
   /**
@@ -350,45 +453,57 @@ var PlacesCommandHook = {
    *        the address of the link target
    * @param aTitle
    *        The link text
+   * @param [optional] aDescription
+   *        The linked page description, if available
    */
-  bookmarkLink: function PCH_bookmarkLink(aParent, aURL, aTitle) {
-    var linkURI = makeURI(aURL);
-    var itemId = PlacesUtils.getMostRecentBookmarkForURI(linkURI);
-    if (itemId == -1)
-      PlacesUIUtils.showMinimalAddBookmarkUI(linkURI, aTitle);
-    else {
-      PlacesUIUtils.showItemProperties(itemId,
-                                       PlacesUtils.bookmarks.TYPE_BOOKMARK);
+  async bookmarkLink(aParentId, aURL, aTitle, aDescription = "") {
+    let node = await PlacesUIUtils.fetchNodeLike({ url: aURL });
+    if (node) {
+      PlacesUIUtils.showBookmarkDialog({ action: "edit",
+                                         node
+                                       }, window.top);
+      return;
     }
+
+    let ip = new InsertionPoint(aParentId,
+                                PlacesUtils.bookmarks.DEFAULT_INDEX,
+                                Components.interfaces.nsITreeView.DROP_ON);
+    PlacesUIUtils.showBookmarkDialog({ action: "add",
+                                       type: "bookmark",
+                                       uri: makeURI(aURL),
+                                       title: aTitle,
+                                       description: aDescription,
+                                       defaultInsertionPoint: ip,
+                                       hiddenRows: [ "description",
+                                                     "location",
+                                                     "loadInSidebar",
+                                                     "keyword" ]
+                                     }, window.top);
   },
 
   /**
-   * This function returns a list of nsIURI objects characterizing the
-   * tabs currently open in the browser.  The URIs will appear in the
-   * list in the order in which their corresponding tabs appeared.  However,
-   * only the first instance of each URI will be returned.
-   *
-   * @returns a list of nsIURI objects representing unique locations open
+   * List of nsIURI objects characterizing the tabs currently open in the
+   * browser. The URIs will be in the order in which their
+   * corresponding tabs appeared and duplicates are discarded.
    */
-  _getUniqueTabInfo: function BATC__getUniqueTabInfo(aTitles) {
-    var tabList = [];
-    var seenURIs = {};
+  get uniqueCurrentPages() {
+    let seenURIs = {};
+    let URIs = [];
 
-    var browsers = gBrowser.browsers;
-    for (var i = 0; i < browsers.length; ++i) {
-      let uri = browsers[i].currentURI;
+    gBrowser.tabs.forEach(tab => {
+      let browser = tab.linkedBrowser;
+      let uri = browser.currentURI;
+      // contentTitle is usually empty.
+      let title = browser.contentTitle || tab.label;
+      let spec = uri.spec;
+      if (!(spec in seenURIs)) {
+        // add to the set of seen URIs
+        seenURIs[uri.spec] = null;
+        URIs.push({ uri, title });
+      }
+    });
 
-      // skip redundant entries
-      if (uri.spec in seenURIs)
-        continue;
-
-      // add to the set of seen URIs
-      seenURIs[uri.spec] = null;
-      tabList.push(uri);
-      if (aTitles)
-        aTitles.push(browsers[i].contentTitle);
-    }
-    return tabList;
+    return URIs;
   },
 
   /**
@@ -396,11 +511,30 @@ var PlacesCommandHook = {
    * window.
    */
   bookmarkCurrentPages: function PCH_bookmarkCurrentPages() {
-    var titles = [];
-    var tabURIs = this._getUniqueTabInfo(titles);
-    PlacesUIUtils.showMinimalAddMultiBookmarkUI(tabURIs, titles);
+    let pages = this.uniqueCurrentPages;
+    if (pages.length > 1) {
+      PlacesUIUtils.showBookmarkDialog({ action: "add",
+                                         type: "folder",
+                                         URIList: pages,
+                                         hiddenRows: [ "description" ]
+                                       }, window);
+    }
   },
 
+  /**
+   * Updates disabled state for the "Bookmark All Tabs" command.
+   */
+  updateBookmarkAllTabsCommand:
+  function PCH_updateBookmarkAllTabsCommand() {
+    // There's nothing to do in non-browser windows.
+    if (window.location.href != getBrowserURL())
+      return;
+
+    // Disable "Bookmark All Tabs" if there are less than two
+    // "unique current pages".
+    goSetCommandEnabled("Browser:BookmarkAllTabs",
+                        this.uniqueCurrentPages.length >= 2);
+  },
 
   /**
    * Adds a Live Bookmark to a feed associated with the current page.
@@ -411,44 +545,50 @@ var PlacesCommandHook = {
    * @subtitle  subtitle
    *            A short description of the feed. Optional.
    */
-  addLiveBookmark: function PCH_addLiveBookmark(url, feedTitle, feedSubtitle) {
-    var feedURI = makeURI(url);
+  async addLiveBookmark(url, feedTitle, feedSubtitle) {
+    let toolbarIP = new InsertionPoint(PlacesUtils.toolbarFolderId,
+                                       PlacesUtils.bookmarks.DEFAULT_INDEX,
+                                       Components.interfaces.nsITreeView.DROP_ON);
 
-    var doc = gBrowser.contentDocument;
-    var title = (arguments.length > 1) ? feedTitle : doc.title;
+    let feedURI = makeURI(url);
+    let title = feedTitle || gBrowser.contentTitle;
+    let description = feedSubtitle;
+    if (!description) {
+      description = (await this._getPageDetails(gBrowser.selectedBrowser)).description;
+    }
 
-    var description;
-    if (arguments.length > 2)
-      description = feedSubtitle;
-    else
-      description = PlacesUIUtils.getDescriptionFromDocument(doc);
-
-    var toolbarIP =
-      new InsertionPoint(PlacesUtils.bookmarks.toolbarFolder, -1);
-    PlacesUIUtils.showMinimalAddLivemarkUI(feedURI, gBrowser.currentURI,
-                                           title, description, toolbarIP, true);
+    PlacesUIUtils.showBookmarkDialog({ action: "add",
+                                       type: "livemark",
+                                       feedURI,
+                                       siteURI: gBrowser.currentURI,
+                                       title,
+                                       description,
+                                       defaultInsertionPoint: toolbarIP,
+                                       hiddenRows: [ "feedLocation",
+                                                     "siteLocation",
+                                                     "description" ]
+                                     }, window);
   },
 
   /**
-   * Opens the bookmarks manager.
+   * Opens the Places Organizer.
    * @param   aLeftPaneRoot
    *          The query to select in the organizer window - options
-   *          are: AllBookmarks, BookmarksMenu, BookmarksToolbar,
+   *          are: History, AllBookmarks, BookmarksMenu, BookmarksToolbar,
    *          UnfiledBookmarks and Tags.
    */
-  showBookmarksManager: function PCH_showBookmarksManager(aLeftPaneRoot) {
-    var manager = Services.wm.getMostRecentWindow("bookmarks:manager");
+  showPlacesOrganizer: function PCH_showPlacesOrganizer(aLeftPaneRoot) {
+    var organizer = Services.wm.getMostRecentWindow("Places:Organizer");
     // Due to bug 528706, getMostRecentWindow can return closed windows.
-    if (!manager || manager.closed) {
+    if (!organizer || organizer.closed) {
       // No currently open places window, so open one with the specified mode.
-      openDialog("chrome://communicator/content/bookmarks/bookmarksManager.xul",
-                 "", "all,dialog=no", aLeftPaneRoot);
+      openDialog("chrome://communicator/content/places/places.xul",
+                 "", "chrome,toolbar=yes,dialog=no,resizable", aLeftPaneRoot);
+    } else {
+      organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(aLeftPaneRoot);
+      organizer.focus();
     }
-    else {
-      manager.PlacesOrganizer.selectLeftPaneQuery(aLeftPaneRoot);
-      manager.focus();
-    }
-  }
+  },
 };
 
 /**
@@ -678,8 +818,9 @@ var PlacesMenuDNDHandler = {
 };
 
 
-var PlacesStarButton = {
+var BookmarkingUI = {
   _hasBookmarksObserver: false,
+  _itemGuids: new Set(),
 
   uninit: function BUI_uninit()
   {
@@ -766,7 +907,8 @@ var PlacesStarButton = {
   {
     // Ignore clicks on the star while we update its state.
     if (aEvent.button == 0 && !this._pendingUpdate)
-      PlacesCommandHook.bookmarkCurrentPage(this._itemGuids.length > 0);
+      PlacesCommandHook.bookmarkPage(gBrowser.selectedBrowser, undefined,
+                                     this._itemGuids.length > 0);
   },
 
   // nsINavBookmarkObserver
