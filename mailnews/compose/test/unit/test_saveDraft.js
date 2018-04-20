@@ -3,8 +3,8 @@
  * Test suite for checking correctly saved as draft with unread.
  */
 
-add_task(function* checkDraft() {
-  yield createMessage();
+add_task(async function checkDraft() {
+  await createMessage();
   do_check_eq(gDraftFolder.getTotalMessages(false), 1);
   do_check_eq(gDraftFolder.getNumUnread(false), 1);
 });
