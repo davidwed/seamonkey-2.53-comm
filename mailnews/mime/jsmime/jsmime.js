@@ -2210,7 +2210,7 @@ MimeParser.prototype._applyDataConversion = function (buf, type) {
     buf = this._savedBuffer + buf;
     [buf, this._savedBuffer] = this._convertData(buf, true);
   }
-  return this._coerceData(buf, type, true);
+  return this._coerceData(buf, type, false);
 };
 
 /**
