@@ -97,9 +97,9 @@ extern nsresult NS_NewGenericMail(nsIImportGeneric** aImportGeneric);
 
 NS_IMETHODIMP nsImportService::CreateNewGenericMail(nsIImportGeneric **_retval)
 {
-    NS_PRECONDITION(_retval != nullptr, "null ptr");
-    if (! _retval)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(_retval != nullptr, "null ptr");
+  if (!_retval)
+    return NS_ERROR_NULL_POINTER;
 
   return NS_NewGenericMail(_retval);
 }
@@ -108,9 +108,9 @@ extern nsresult NS_NewGenericAddressBooks(nsIImportGeneric** aImportGeneric);
 
 NS_IMETHODIMP nsImportService::CreateNewGenericAddressBooks(nsIImportGeneric **_retval)
 {
-    NS_PRECONDITION(_retval != nullptr, "null ptr");
-    if (! _retval)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(_retval != nullptr, "null ptr");
+  if (!_retval)
+    return NS_ERROR_NULL_POINTER;
 
   return NS_NewGenericAddressBooks(_retval);
 }
@@ -118,9 +118,9 @@ NS_IMETHODIMP nsImportService::CreateNewGenericAddressBooks(nsIImportGeneric **_
 
 NS_IMETHODIMP nsImportService::GetModuleCount(const char *filter, int32_t *_retval)
 {
-    NS_PRECONDITION(_retval != nullptr, "null ptr");
-    if (! _retval)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(_retval != nullptr, "null ptr");
+  if (!_retval)
+    return NS_ERROR_NULL_POINTER;
 
   DoDiscover();
 
@@ -142,7 +142,7 @@ NS_IMETHODIMP nsImportService::GetModuleCount(const char *filter, int32_t *_retv
 
 NS_IMETHODIMP nsImportService::GetModuleWithCID(const nsCID& cid, nsIImportModule **ppModule)
 {
-  NS_PRECONDITION(ppModule != nullptr, "null ptr");
+  NS_ASSERTION(ppModule != nullptr, "null ptr");
   if (!ppModule)
     return NS_ERROR_NULL_POINTER;
 
@@ -176,16 +176,16 @@ NS_IMETHODIMP nsImportService::GetModuleWithCID(const nsCID& cid, nsIImportModul
 
 NS_IMETHODIMP nsImportService::GetModuleInfo(const char *filter, int32_t index, char16_t **name, char16_t **moduleDescription)
 {
-    NS_PRECONDITION(name != nullptr, "null ptr");
-    NS_PRECONDITION(moduleDescription != nullptr, "null ptr");
-    if (!name || !moduleDescription)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(name != nullptr, "null ptr");
+  NS_ASSERTION(moduleDescription != nullptr, "null ptr");
+  if (!name || !moduleDescription)
+    return NS_ERROR_NULL_POINTER;
 
   *name = nullptr;
   *moduleDescription = nullptr;
 
-    DoDiscover();
-    if (!m_pModules)
+  DoDiscover();
+  if (!m_pModules)
     return NS_ERROR_FAILURE;
 
   if ((index < 0) || (index >= m_pModules->GetCount()))
@@ -211,14 +211,14 @@ NS_IMETHODIMP nsImportService::GetModuleInfo(const char *filter, int32_t index, 
 
 NS_IMETHODIMP nsImportService::GetModuleName(const char *filter, int32_t index, char16_t **_retval)
 {
-    NS_PRECONDITION(_retval != nullptr, "null ptr");
-    if (!_retval)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(_retval != nullptr, "null ptr");
+  if (!_retval)
+    return NS_ERROR_NULL_POINTER;
 
   *_retval = nullptr;
 
-    DoDiscover();
-    if (!m_pModules)
+  DoDiscover();
+  if (!m_pModules)
     return NS_ERROR_FAILURE;
 
   if ((index < 0) || (index >= m_pModules->GetCount()))
@@ -244,14 +244,14 @@ NS_IMETHODIMP nsImportService::GetModuleName(const char *filter, int32_t index, 
 
 NS_IMETHODIMP nsImportService::GetModuleDescription(const char *filter, int32_t index, char16_t **_retval)
 {
-    NS_PRECONDITION(_retval != nullptr, "null ptr");
-    if (!_retval)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(_retval != nullptr, "null ptr");
+  if (!_retval)
+    return NS_ERROR_NULL_POINTER;
 
   *_retval = nullptr;
 
-    DoDiscover();
-    if (!m_pModules)
+  DoDiscover();
+  if (!m_pModules)
     return NS_ERROR_FAILURE;
 
   if ((index < 0) || (index >= m_pModules->GetCount()))
@@ -354,13 +354,13 @@ nsImportService::CreateRFC822Message(nsIMsgIdentity *aIdentity,
 
 NS_IMETHODIMP nsImportService::GetModule(const char *filter, int32_t index, nsIImportModule **_retval)
 {
-    NS_PRECONDITION(_retval != nullptr, "null ptr");
-    if (!_retval)
-        return NS_ERROR_NULL_POINTER;
+  NS_ASSERTION(_retval != nullptr, "null ptr");
+  if (!_retval)
+    return NS_ERROR_NULL_POINTER;
   *_retval = nullptr;
 
-    DoDiscover();
-    if (!m_pModules)
+  DoDiscover();
+  if (!m_pModules)
     return NS_ERROR_FAILURE;
 
   if ((index < 0) || (index >= m_pModules->GetCount()))
@@ -379,7 +379,7 @@ NS_IMETHODIMP nsImportService::GetModule(const char *filter, int32_t index, nsII
         count++;
     }
   }
-  if (! (*_retval))
+  if (!(*_retval))
     return NS_ERROR_FAILURE;
 
   return NS_OK;
