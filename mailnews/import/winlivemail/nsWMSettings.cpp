@@ -101,8 +101,8 @@ NS_IMPL_ISUPPORTS(nsWMSettings, nsIImportSettings)
 NS_IMETHODIMP nsWMSettings::AutoLocate(char16_t **description,
                                        nsIFile **location, bool *_retval)
 {
-  NS_PRECONDITION(description != nullptr, "null ptr");
-  NS_PRECONDITION(_retval != nullptr, "null ptr");
+  NS_ASSERTION(description != nullptr, "null ptr");
+  NS_ASSERTION(_retval != nullptr, "null ptr");
   if (!description || !_retval)
     return NS_ERROR_NULL_POINTER;
 
@@ -126,7 +126,7 @@ NS_IMETHODIMP nsWMSettings::SetLocation(nsIFile *location)
 NS_IMETHODIMP nsWMSettings::Import(nsIMsgAccount **localMailAccount,
                                    bool *_retval)
 {
-  NS_PRECONDITION(_retval != nullptr, "null ptr");
+  NS_ASSERTION(_retval != nullptr, "null ptr");
 
   if (WMSettings::DoImport(localMailAccount)) {
     *_retval = true;
