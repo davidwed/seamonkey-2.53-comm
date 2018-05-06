@@ -136,7 +136,8 @@ nsresult nsMsgThreadedDBView::InitThreadedView(int32_t *pCount)
 
 nsresult nsMsgThreadedDBView::SortThreads(nsMsgViewSortTypeValue sortType, nsMsgViewSortOrderValue sortOrder)
 {
-  NS_PRECONDITION(m_viewFlags & nsMsgViewFlagsType::kThreadedDisplay, "trying to sort unthreaded threads");
+  NS_ASSERTION(m_viewFlags & nsMsgViewFlagsType::kThreadedDisplay,
+               "trying to sort unthreaded threads");
 
   uint32_t numThreads = 0;
   // the idea here is that copy the current view,  then build up an m_keys and m_flags array of just the top level
