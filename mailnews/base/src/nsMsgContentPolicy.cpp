@@ -637,8 +637,8 @@ nsMsgContentPolicy::ShouldAcceptContentForPotentialMsg(nsIURI *aOriginatorLocati
                                                        nsIURI *aContentLocation,
                                                        int16_t *aDecision)
 {
-  NS_PRECONDITION(*aDecision == nsIContentPolicy::REJECT_REQUEST,
-                  "AllowContentForPotentialMessage expects default decision to be reject!");
+  NS_ASSERTION(*aDecision == nsIContentPolicy::REJECT_REQUEST,
+               "AllowContentForPotentialMessage expects default decision to be reject!");
 
   // Is it a mailnews url?
   nsresult rv;
@@ -708,8 +708,8 @@ void nsMsgContentPolicy::ComposeShouldLoad(nsIMsgCompose *aMsgCompose,
                                            nsIURI *aContentLocation,
                                            int16_t *aDecision)
 {
-  NS_PRECONDITION(*aDecision == nsIContentPolicy::REJECT_REQUEST,
-                  "ComposeShouldLoad expects default decision to be reject!");
+  NS_ASSERTION(*aDecision == nsIContentPolicy::REJECT_REQUEST,
+               "ComposeShouldLoad expects default decision to be reject!");
 
   nsCString originalMsgURI;
   nsresult rv = aMsgCompose->GetOriginalMsgURI(getter_Copies(originalMsgURI));
