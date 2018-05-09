@@ -28,14 +28,11 @@ function restoreDefaultBookmarks() {
 }
 
 function deleteLocalstore() {
-  // Delete the old localstore otherwise it will get imported.
-  var localstoreFile = Services.dirsvc.get("LStoreS", Ci.nsIFile);
-  if (localstoreFile.exists())
-    localstoreFile.remove(false);
-  // Delete the new xulstore file.
-  localstoreFile.leafName = "xulstore.json";
-  if (localstoreFile.exists())
-    localstoreFile.remove(false);
+  // Delete the xulstore file.
+  let xulstoreFile = Services.dirsvc.get("ProfD", Ci.nsIFile);
+  xulstoreFile.append("xulstore.json");
+  if (xulstoreFile.exists())
+    xulstoreFile.remove(false);
 }
 
 function disableAddons() {
