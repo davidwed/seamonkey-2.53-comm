@@ -10,8 +10,9 @@ MOZ_APP_DISPLAYNAME=SeaMonkey
 MOZ_LDAP_XPCOM=1
 MOZ_COMPOSER=1
 MOZ_SUITE=1
-MOZ_BRANDING_DIRECTORY=suite/branding/nightly
-MOZ_OFFICIAL_BRANDING_DIRECTORY=suite/branding/nightly
+MOZ_BRANDING_DIRECTORY=suite/branding/seamonkey
+MOZ_OFFICIAL_BRANDING_DIRECTORY=suite/branding/seamonkey
+
 MOZ_UPDATER=1
 # This should usually be the same as the value MAR_CHANNEL_ID.
 # If more than one ID is needed, then you should use a comma separated list
