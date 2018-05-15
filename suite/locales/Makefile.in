@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+LOCALE_TOPDIR=$(commtopsrcdir)
+LOCALE_RELATIVEDIR=suite/locales
+
 include $(moztopsrcdir)/config/config.mk
 
 _ABS_SRCDIR := $(abspath $(commtopsrcdir))
@@ -64,6 +67,10 @@ libs:: searchplugins
 DIST_SUBDIRS = $(DIST_SUBDIR)
 
 include $(moztopsrcdir)/config/rules.mk
+
+ifeq ($(commreltopsrcdir),comm)
+COMPARE_LOCALES_DEFINES += -Dmozilla=..
+endif
 
 include $(moztopsrcdir)/toolkit/locales/l10n.mk
 
