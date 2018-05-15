@@ -5,33 +5,24 @@
 basepath = "../.."
 
 locales = [
-    "ca",
     "cs",
-    "da",
     "de",
     "en-GB",
     "es-AR",
     "es-ES",
-    "fi",
     "fr",
     "hu",
     "it",
     "ja",
     "ja-JP-mac",
-    "ka",
-    "lt",
     "nb-NO",
     "nl",
     "pl",
     "pt-BR",
     "pt-PT",
-    "ro",
     "ru",
-    "si",
     "sk",
     "sv-SE",
-    "tr",
-    "uk",
     "zh-CN",
     "zh-TW",
 ]
@@ -64,7 +55,7 @@ locales = [
     key = "MOZ_LANGPACK_CONTRIBUTORS"
     action = "ignore"
 
-# defines.inc and all-l10n.js can be missing completely
+# defines.inc and suite-l10n.js can be missing completely
 [[filters]]
     path = [
         "{l}suite/defines.inc",
