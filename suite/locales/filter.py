@@ -7,7 +7,11 @@ def test(mod, path, entity=None):
   # ignore anything but SeaMonkey
   if mod not in ("netwerk", "dom", "toolkit", "security/manager",
                  "devtools/client", "devtools/shared",
-                 "editor/ui", "suite", "services/sync"):
+                 "suite",
+                 "editor/ui",
+                 "extensions/spellcheck",
+                 "services/sync"):
+
     return "ignore"
   # ignore temporary files, hiden files and files from rejects
   if (re.match(r".*?\/[.#].+", path) or
@@ -23,7 +27,6 @@ def test(mod, path, entity=None):
                          path == "profile/bookmarks.extra" or
                          path == "profile/panels.extra" or
                          path == "defines.inc" or
-                         path == "suite-l10n.js" or
                          re.match(r"chrome\/common\/help\/images\/[A-Za-z-_]+\.[a-z]+", path))
             else "error")
   if path == "defines.inc":
