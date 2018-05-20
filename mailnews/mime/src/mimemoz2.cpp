@@ -2076,7 +2076,6 @@ HTML2Plaintext(const nsString& inString, nsString& outString,
 /**
  * This function synchronously sanitizes an HTML document (string->string)
  * using the Gecko nsTreeSanitizer.
- * Compare HTMLSanitizeQuote() in nsMsgCompose.cpp.
  */
 nsresult
 HTMLSanitize(const nsString& inString, nsString& outString)
