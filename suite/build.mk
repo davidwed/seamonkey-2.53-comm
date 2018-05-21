@@ -3,9 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ifndef COMM_BUILD
-installer:
-	@$(MAKE) -C suite/installer installer
-
 package:
 	@$(MAKE) -C suite/installer
 
