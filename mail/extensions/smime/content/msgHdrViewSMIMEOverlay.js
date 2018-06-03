@@ -21,8 +21,8 @@ var nsICMSMessageErrors = Ci.nsICMSMessageErrors;
 function neckoURLForMessageURI(aMessageURI)
 {
   let msgSvc = Cc["@mozilla.org/messenger;1"]
-    .createInstance(Ci.nsIMessenger)
-    .messageServiceFromURI(aMessageURI);
+                 .createInstance(Ci.nsIMessenger)
+                 .messageServiceFromURI(aMessageURI);
   let neckoURI = {};
   msgSvc.GetUrlForUri(aMessageURI, neckoURI, null);
   return neckoURI.value.spec;
