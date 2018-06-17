@@ -68,10 +68,13 @@
 #include "nsMimeTypes.h"
 #include "nsMsgUtils.h"
 #include "nsIPrefBranch.h"
+#include "mozilla/Preferences.h"
 #include "imgLoader.h"
 
 #include "nsIMsgMailNewsUrl.h"
 #include "nsIMsgHdr.h"
+
+using namespace mozilla;
 
 // forward declaration
 void getMsgHdrForCurrentURL(MimeDisplayOptions *opts, nsIMsgDBHdr ** aMsgHdr);
@@ -713,7 +716,18 @@ mime_find_class (const char *content_type, MimeHeaders *hdrs,
 #ifdef ENABLE_SMIME
     else if (!PL_strcasecmp(content_type, APPLICATION_XPKCS7_MIME)
              || !PL_strcasecmp(content_type, APPLICATION_PKCS7_MIME)) {
-        char *ct = (hdrs ? MimeHeaders_get(hdrs, HEADER_CONTENT_TYPE,
+
+        if (!Preferences::GetBool("mail.decrypt_children", false) &&
+            opts->is_child) {
+          // We do not allow encrypted parts except as top level.
+          // Allowing them would leak the plain text in case the part is
+          // cleverly hidden and the decrypted content gets included in
+          // replies and forwards.
+          clazz = (MimeObjectClass *)&mimeExternalObjectClass;
+          return clazz;
+        }
+
+         char *ct = (hdrs ? MimeHeaders_get(hdrs, HEADER_CONTENT_TYPE,
                                            false, false)
                            : nullptr);
         char *st = (ct ? MimeHeaders_get_parameter(ct, "smime-type", NULL, NULL)
@@ -1168,7 +1182,7 @@ mime_external_attachment_url(MimeObject *obj)
    to decide if the headers need to be presented differently.)
  */
 bool
-mime_crypto_object_p(MimeHeaders *hdrs, bool clearsigned_counts)
+mime_crypto_object_p(MimeHeaders *hdrs, bool clearsigned_counts, MimeDisplayOptions *opts)
 {
   char *ct;
   MimeObjectClass *clazz;
@@ -1187,7 +1201,7 @@ mime_crypto_object_p(MimeHeaders *hdrs, bool clearsigned_counts)
   }
 
   /* It's a candidate for being a crypto object.  Let's find out for sure... */
-  clazz = mime_find_class (ct, hdrs, 0, true);
+  clazz = mime_find_class(ct, hdrs, opts, true);
   PR_Free(ct);
 
   if (clazz == ((MimeObjectClass *)&mimeEncryptedCMSClass))
