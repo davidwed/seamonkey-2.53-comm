@@ -581,12 +581,6 @@ mail-emailaddress[selected="true"] .emailDisplayButton:-moz-system-metric(mac-gr
   list-style-image: url("chrome://messenger/skin/icons/arrow-dn-7.png");
 }
 
-/* ::::: view expand and collapse twisties  ::::: */
-
-.expandHeaderViewButton {
-  list-style-image:url("chrome://messenger/skin/icons/twisty-open.gif");
-}
-
 /* ::::: collapsed view styles ::::: */
 
 window[inlinetoolbox] #newtoolbar {
