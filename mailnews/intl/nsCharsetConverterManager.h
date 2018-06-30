@@ -8,9 +8,6 @@
 #include "nsISupports.h"
 #include "nsICharsetConverterManager.h"
 
-#define NS_DATA_BUNDLE_CATEGORY     "uconv-charset-data"
-#define NS_TITLE_BUNDLE_CATEGORY    "uconv-charset-titles"
-
 class nsCharsetAlias;
 
 class nsCharsetConverterManager : public nsICharsetConverterManager
