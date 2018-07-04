@@ -78,8 +78,8 @@ calItipEmailTransport.prototype = {
                 if (usePrefixes) {
                     let seq = item.getProperty("SEQUENCE");
                     let subjectKey = seq && seq > 0
-                        ? "itipRequestUpdatedSubject"
-                        : "itipRequestSubject";
+                        ? "itipRequestUpdatedSubject2"
+                        : "itipRequestSubject2";
                     subject = cal.l10n.getLtnString(subjectKey, [summary]);
                 } else {
                     subject = summary;
@@ -91,7 +91,7 @@ calItipEmailTransport.prototype = {
                 break;
             }
             case "CANCEL": {
-                subject = cal.l10n.getLtnString("itipCancelSubject", [summary]);
+                subject = cal.l10n.getLtnString("itipCancelSubject2", [summary]);
                 body = cal.l10n.getLtnString(
                     "itipCancelBody",
                     [item.organizer ? item.organizer.toString() : "", summary]
@@ -125,19 +125,19 @@ calItipEmailTransport.prototype = {
                 let subjectKey, bodyKey;
                 switch (myPartStat) {
                     case "ACCEPTED":
-                        subjectKey = "itipReplySubjectAccept";
+                        subjectKey = "itipReplySubjectAccept2";
                         bodyKey = "itipReplyBodyAccept";
                         break;
                     case "TENTATIVE":
-                        subjectKey = "itipReplySubjectTentative";
+                        subjectKey = "itipReplySubjectTentative2";
                         bodyKey = "itipReplyBodyAccept";
                         break;
                     case "DECLINED":
-                        subjectKey = "itipReplySubjectDecline";
+                        subjectKey = "itipReplySubjectDecline2";
                         bodyKey = "itipReplyBodyDecline";
                         break;
                     default:
-                        subjectKey = "itipReplySubject";
+                        subjectKey = "itipReplySubject2";
                         bodyKey = "itipReplyBodyAccept";
                         break;
                 }
