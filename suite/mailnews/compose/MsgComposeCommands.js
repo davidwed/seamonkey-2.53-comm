@@ -1362,11 +1362,12 @@ function ComposeStartup(aParams)
               addCommandObserver(gMsgEditorCreationObserver, "obs_documentCreated");
 
         // Load empty page to create the editor
-        editorElement.webNavigation.loadURI("about:blank", // uri string
-                             0,                            // load flags
-                             null,                         // referrer
-                             null,                         // post-data stream
-                             null);
+        editorElement.webNavigation.loadURI("about:blank",
+                         Components.interfaces.nsIWebNavigation.LOAD_FLAGS_NONE,
+                         null,                             // referrer
+                         null,                             // post-data stream
+                         null,                             // HTTP headers
+                         Services.scriptSecurityManager.getSystemPrincipal());
       } catch (e) {
         dump(" Failed to startup editor: "+e+"\n");
       }
