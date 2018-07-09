@@ -420,7 +420,8 @@ nsBrowserAccess.prototype = {
           try {
             aOpener.QueryInterface(nsIInterfaceRequestor)
                    .getInterface(nsIWebNavigation)
-                   .loadURI(uri, loadflags, referrer, null, null);
+                   .loadURI(uri, loadflags, referrer, null, null,
+                            aTriggeringPrincipal);
           } catch (e) {}
         }
         return aOpener;
