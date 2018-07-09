@@ -177,9 +177,12 @@ function contentClick(event) {
   if (/^x-moz-url-link:/.test(uri))
     uri = Services.urlFormatter.formatURLPref(RegExp.rightContext);
 
-  const loadFlags = Components.interfaces.nsIWebNavigation.LOAD_FLAGS_IS_LINK;
   try {
-    helpExternal.webNavigation.loadURI(uri, loadFlags, null, null, null);
+    helpExternal.webNavigation
+                .loadURI(uri,
+                         Components.interfaces.nsIWebNavigation.LOAD_FLAGS_IS_LINK,
+                         null, null, null,
+                         Services.scriptSecurityManager.getSystemPrincipal());
   } catch (e) {}
   return false;
 }
@@ -433,8 +436,10 @@ function loadURI(uri) {
     if (uri.substr(0,7) != "chrome:") {
         uri = helpBaseURI + uri;
     }
-    getWebNavigation().loadURI(uri, Components.interfaces.nsIWebNavigation.LOAD_FLAGS_NONE,
-        null, null, null);
+    getWebNavigation().loadURI(uri,
+        Components.interfaces.nsIWebNavigation.LOAD_FLAGS_NONE,
+        null, null, null,
+        Services.scriptSecurityManager.getSystemPrincipal());
 }
 
 function goBack() {
