@@ -2711,10 +2711,6 @@ SessionStoreService.prototype = {
 
     // Attach data that will be restored on "load" event, after tab is restored.
     if (activeIndex > -1) {
-      let curSHEntry = browser.webNavigation.sessionHistory
-                              .getEntryAtIndex(activeIndex, false)
-                              .QueryInterface(Components.interfaces.nsISHEntry);
-
       // restore those aspects of the currently active documents which are not
       // preserved in the plain history entries (mainly scroll state and text data)
       browser.__SS_restore_data = tabData.entries[activeIndex] || {};
@@ -2741,17 +2737,19 @@ SessionStoreService.prototype = {
     // as needed. Calling loadURI will cancel form filling in restoreDocument
     if (tabData.userTypedValue) {
       browser.userTypedValue = tabData.userTypedValue;
+
       if (tabData.userTypedClear) {
         // Make it so that we'll enter restoreDocument on page load. We will
-        // fire SSTabRestored from there. We don't have any form data to restore
-        // so we can just set the URL to null.
+        // fire SSTabRestored from there. We don't have any form data to
+        // restore so we can just set the URL to null.
         browser.__SS_restore_data = { url: null };
         browser.__SS_restore_tab = aTab;
         didStartLoad = true;
-        browser.loadURI(tabData.userTypedValue,
+        browser.webNavigation
+               .loadURI(tabData.userTypedValue,
                         Components.interfaces.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP,
-                        null, null, null);
-
+                        null, null, null,
+                       Services.scriptSecurityManager.getSystemPrincipal());
       }
     }
 
