@@ -142,7 +142,7 @@ calGoogleSession.prototype = {
           ["hl", Preferences.get("general.useragent.locale", "en-US")]
         ];
         this.oauth.requestWindowURI = "chrome://gdata-provider/content/browserRequest.xul";
-        this.oauth.requestWindowFeatures = "chrome,private,centerscreen,width=430,height=600";
+        this.oauth.requestWindowFeatures = "chrome,private,centerscreen,width=430,height=750";
         this.oauth.requestWindowTitle = authTitle;
         this.oauth.requestWindowDescription = authDescr;
 
