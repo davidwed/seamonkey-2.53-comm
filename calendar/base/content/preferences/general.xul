@@ -15,15 +15,16 @@
 <overlay id="CalendarGeneralPaneOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <vbox id="calPreferencesBoxGeneral">
-        <script src="chrome://calendar/content/preferences/general.js"/>
-        <script src="chrome://calendar/content/calendar-ui-utils.js"/>
+    <script src="chrome://calendar/content/preferences/general.js"/>
+    <script src="chrome://calendar/content/calendar-ui-utils.js"/>
 
-        <!-- Get the localized text for use in the .js -->
-        <script>
-            var labelLong  = "&pref.dateformat.long;";
-            var labelShort = "&pref.dateformat.short;";
-        </script>
+    <!-- Get the localized text for use in the .js -->
+    <script>
+        var labelLong  = "&pref.dateformat.long;";
+        var labelShort = "&pref.dateformat.short;";
+    </script>
+
+    <vbox id="calPreferencesBoxGeneral">
 
         <preferences>
             <preference id="calendar.date.format"
@@ -266,8 +267,7 @@
                        accesskey="&pref.soondays2.accesskey;"
                        control="soondays-menulist"/>
                 <menulist id="soondays-menulist"
-                          preference="calendar.agendaListbox.soondays"
-                          oncommand="gCalendarGeneralPane.updateTodaypaneMenu()">
+                          preference="calendar.agendaListbox.soondays">
                     <menupopup id="soondaysdurationpopup">
                         <menuitem value="1"/>
                         <menuitem value="2"/>

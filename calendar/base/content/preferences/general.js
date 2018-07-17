@@ -98,26 +98,19 @@ var gCalendarGeneralPane = {
             }
         }
 
-        let prefName = "calendar.agendaListbox.soondays";
-        let soonpref = Services.prefs.getIntPref(prefName, 5)
+        let pref = document.getElementById("calendar.agendaListbox.soondays");
+        let soonpref = pref.value || 5;
 
         // Check if soonDays preference has been edited with a wrong value.
         if (soonpref > 0 && soonpref <= 28) {
             if (soonpref % 7 != 0) {
                 let intSoonpref = Math.floor(soonpref / 7) * 7;
                 soonpref = (intSoonpref == 0 ? soonpref : intSoonpref);
-                Services.prefs.setIntPref(prefName, soonpref);
+                pref.value = soonpref;
             }
         } else {
             soonpref = soonpref > 28 ? 28 : 1;
-            Services.prefs.setIntPref(prefName, soonpref);
+            pref.value = soonpref;
         }
-
-        document.getElementById("soondays-menulist").value = soonpref;
-    },
-
-    updateTodaypaneMenu: function() {
-        let soonpref = Number(document.getElementById("soondays-menulist").value);
-        Services.prefs.setIntPref("calendar.agendaListbox.soondays", soonpref);
     }
 };
