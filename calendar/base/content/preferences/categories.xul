@@ -8,19 +8,19 @@
 <overlay id="CategoriesPaneOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
+    <script src="chrome://calendar/content/preferences/categories.js"/>
+
+    <!-- Get the localized text for use in the .js -->
+    <script>
+        var noneLabel  = "&pref.categories.none.label;";
+        var newTitle   = "&pref.categories.new.title;";
+        var editTitle  = "&pref.categories.edit.title;";
+        var overwrite  = "&pref.categories.overwrite;";
+        var overwriteTitle = "&pref.categories.overwrite.title;";
+        var noBlankCategories = "&pref.categories.noBlankCategories;";
+    </script>
+
     <vbox id="calPreferencesBoxCategories">
-        <script src="chrome://calendar/content/preferences/categories.js"/>
-
-        <!-- Get the localized text for use in the .js -->
-        <script>
-            var noneLabel  = "&pref.categories.none.label;";
-            var newTitle   = "&pref.categories.new.title;";
-            var editTitle  = "&pref.categories.edit.title;";
-            var overwrite  = "&pref.categories.overwrite;";
-            var overwriteTitle = "&pref.categories.overwrite.title;";
-            var noBlankCategories = "&pref.categories.noBlankCategories;";
-        </script>
-
         <preferences>
             <preference id="calendar.categories.names"
                         name="calendar.categories.names"
