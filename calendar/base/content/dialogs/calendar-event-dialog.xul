@@ -49,6 +49,8 @@
           src="chrome://global/content/globalOverlay.js"/>
   <script type="application/javascript"
           src="chrome://messenger/content/toolbarIconColor.js"/>
+  <script type="application/javascript"
+          src="chrome://global/content/printUtils.js"/>
 
   <stringbundleset id="stringbundleset">
     <stringbundle id="languageBundle"
