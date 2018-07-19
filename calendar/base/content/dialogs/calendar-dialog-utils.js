@@ -82,8 +82,7 @@ function resetDialogId(aDialog) {
  * @param aDialog               The Dialog to apply the property values for
  */
 function applyPersitedProperties(aDialog) {
-    let xulStore = Cc["@mozilla.org/xul/xulstore;1"]
-                     .getService(Ci.nsIXULStore);
+    let xulStore = Services.xulStore;
     // first we need to detect which properties are persisted
     let persistedProps = aDialog.getAttribute("persist") || "";
     if (persistedProps == "") {
