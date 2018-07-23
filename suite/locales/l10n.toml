@@ -49,6 +49,9 @@ locales = [
 [[includes]]
     path = "{mozilla}/toolkit/locales/l10n.toml"
 
+[[includes]]
+    path = "calendar/locales/l10n.toml"
+
 # ignore MOZ_LANGPACK_CONTRIBUTORS
 [[filters]]
     path = "{l}suite/defines.inc"
