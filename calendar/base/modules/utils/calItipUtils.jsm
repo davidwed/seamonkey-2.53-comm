@@ -1914,6 +1914,7 @@ ItipItemFinder.prototype = {
                             } else {
                                 cal.ASSERT(itipItemItem.getAttendees({}).length == 0,
                                            "invalid number of attendees in PUBLISH!");
+                                cal.alarms.setDefaultValues(newItem);
                             }
                             return newItem.calendar.addItem(newItem,
                                                             method == "REQUEST"
