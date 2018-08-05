@@ -2523,7 +2523,13 @@ SessionStoreService.prototype = {
       let browser = tabbrowser.getBrowserForTab(tab);
       let tabData = aTabData[t];
 
-      tab.hidden = tabData.hidden;
+      if (tabData.hidden) {
+        tab.setAttribute("hidden", true);
+      } else {
+        if (tab.hidden) {
+          tab.removeAttribute("hidden");
+        }
+      }
 
       for (let name in tabData.attributes)
         this.xulAttributes[name] = true;
