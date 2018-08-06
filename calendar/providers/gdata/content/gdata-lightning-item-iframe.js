@@ -174,7 +174,7 @@ ChromeUtils.import("resource://gdata-provider/modules/calUtilsShim.jsm");
             // remember the selected index
             gLastAlarmSelection = reminderList.selectedIndex;
         } else {
-            rv = protofunc.apply(this, args);
+            rv = protofunc.call(this, reminders, ...args);
         }
         return rv;
     });
