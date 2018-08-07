@@ -267,7 +267,7 @@ NS_IMETHODIMP nsMsgSearchDBView::OnHdrFlagsChanged(nsIMsgDBHdr *aHdrChanged, uin
 {
   // defer to base class if we're grouped or not threaded at all
   if (m_viewFlags & nsMsgViewFlagsType::kGroupBySort ||
-      !(m_viewFlags && nsMsgViewFlagsType::kThreadedDisplay))
+      !(m_viewFlags & nsMsgViewFlagsType::kThreadedDisplay))
     return nsMsgGroupView::OnHdrFlagsChanged(aHdrChanged, aOldFlags, 
                                              aNewFlags, aInstigator);
 
