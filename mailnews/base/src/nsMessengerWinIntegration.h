@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -62,7 +62,6 @@ private:
   nsresult GetStringBundle(nsIStringBundle **aBundle);
   nsCOMPtr<nsIMutableArray> mFoldersWithNewMail;  // keep track of all the root folders with pending new mail
   nsCOMPtr<nsIAtom> mBiffStateAtom;
-  uint32_t mCurrentBiffState;
 
   bool mBiffIconVisible;
   bool mBiffIconInitialized;
