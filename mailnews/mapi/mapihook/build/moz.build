@@ -17,3 +17,13 @@ for var in ('REGISTER_PROXY_DLL', 'UNICODE', '_UNICODE'):
 
 DEFFILE = SRCDIR + '/MapiProxy.def'
 
+# The Windows MIDL code generator creates things like:
+#
+#   #endif !_MIDL_USE_GUIDDEF_
+#
+# which clang-cl complains about.  MSVC doesn't, so turn this warning off.
+if CONFIG['CC_TYPE'] == 'clang-cl':
+    CFLAGS += ['-Wno-extra-tokens']
+
+if CONFIG['CC_TYPE'] == 'clang-cl':
+    ALLOW_COMPILER_WARNINGS = True  # workaround for bug 1090497 / bug 1481326
