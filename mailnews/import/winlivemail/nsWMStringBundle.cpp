@@ -21,13 +21,12 @@ nsIStringBundle *nsWMStringBundle::GetStringBundle(void)
   if (m_pBundle)
     return m_pBundle;
 
-  char*        propertyURL = WM_MSGS_URL;
   nsIStringBundle*  sBundle = nullptr;
 
   nsCOMPtr<nsIStringBundleService> sBundleService =
     mozilla::services::GetStringBundleService();
   if (sBundleService) {
-    sBundleService->CreateBundle(propertyURL, &sBundle);
+    sBundleService->CreateBundle(WM_MSGS_URL, &sBundle);
   }
 
   m_pBundle = sBundle;
