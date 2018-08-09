@@ -666,7 +666,6 @@ nsresult nsMessenger::SaveAttachment(nsIFile *aFile,
   nsSaveAllAttachmentsState *saveState= (nsSaveAllAttachmentsState*) closure;
   nsCOMPtr<nsIMsgMessageFetchPartService> fetchService;
   nsAutoCString urlString;
-  nsCOMPtr<nsIURI> URL;
   nsAutoCString fullMessageUri(aMessageUri);
 
   // This instance will be held onto by the listeners, and will be released once
@@ -705,7 +704,8 @@ nsresult nsMessenger::SaveAttachment(nsIFile *aFile,
   }
 
   MsgReplaceSubstring(urlString, "/;section", "?section");
-  nsresult rv = CreateStartupUrl(urlString.get(), getter_AddRefs(URL));
+  nsCOMPtr<nsIURI> URL;
+  nsresult rv = NS_NewURI(getter_AddRefs(URL), urlString);
 
   if (NS_SUCCEEDED(rv))
   {
@@ -1043,7 +1043,6 @@ nsMessenger::SaveAs(const nsACString& aURI, bool aAsFile,
   nsCOMPtr<nsIMsgMessageService> messageService;
   nsCOMPtr<nsIUrlListener> urlListener;
   nsSaveMsgListener *saveListener = nullptr;
-  nsCOMPtr<nsIURI> url;
   nsCOMPtr<nsIStreamListener> convertedListener;
   int32_t saveAsFileType = EML_FILE_TYPE;
 
@@ -1130,8 +1129,9 @@ nsMessenger::SaveAs(const nsACString& aURI, bool aAsFile,
         urlString.AppendLiteral("?header=saveas");
       }
 
-      rv = CreateStartupUrl(urlString.get(), getter_AddRefs(url));
-      NS_ASSERTION(NS_SUCCEEDED(rv), "CreateStartupUrl failed");
+      nsCOMPtr<nsIURI> url;
+      rv = NS_NewURI(getter_AddRefs(url), urlString);
+      NS_ASSERTION(NS_SUCCEEDED(rv), "NS_NewURI failed");
       if (NS_FAILED(rv))
         goto done;
 
