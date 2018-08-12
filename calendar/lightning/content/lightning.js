@@ -162,6 +162,3 @@ pref("calendar.icaljs", true);
 #else
 pref("calendar.icaljs", false);
 #endif
-
-// Calendar integration notification
-pref("calendar.integration.notify", true);
