@@ -369,9 +369,6 @@ pref("mail.folderpane.sizeUnits", "");
 // Allowed values: true/false
 pref("mail.folderpane.sumSubfolders", true);
 
-// default calendar integration
-pref("mail.calendar-integration.opt-out", false);
-
 pref("mailnews.reuse_thread_window2", true);
 
 pref("mailnews.ui.deleteMarksRead", true);
