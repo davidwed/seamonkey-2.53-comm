@@ -4,7 +4,7 @@
 
 STANDALONE_MAKEFILE := 1
 
-include $(moztopsrcdir)/config/rules.mk
+include $(topsrcdir)/config/rules.mk
 
 MOZ_PKG_REMOVALS = $(srcdir)/removed-files.in
 
@@ -17,7 +17,7 @@ endif
 MOZ_PKG_DUPEFLAGS = \
 	-w \
 	-f $(srcdir)/allowed-dupes.mn \
-	-f $(moztopsrcdir)/browser/installer/allowed-dupes.mn \
+	-f $(topsrcdir)/browser/installer/allowed-dupes.mn \
 	$(NULL)
 
 MOZ_NONLOCALIZED_PKG_LIST = \
@@ -143,7 +143,7 @@ NON_OMNIJAR_FILES = \
 	defaults/profile/chrome/userContent-example.css \
 	$(NULL)
 
-include $(moztopsrcdir)/toolkit/mozapps/installer/packager.mk
+include $(topsrcdir)/toolkit/mozapps/installer/packager.mk
 
 ifeq (Darwin, $(OS_ARCH))
 BINPATH = $(_BINPATH)
@@ -183,7 +183,7 @@ DEFINES += -DMOZ_CLANG_RT_ASAN_LIB=$(notdir $(MOZ_CLANG_RT_ASAN_LIB_PATH))
 endif
 
 libs::
-	$(MAKE) -C $(commtopobjdir)/suite/locales langpack
+	$(MAKE) -C $(topobjdir)/comm/suite/locales langpack
 
 ifeq (WINNT,$(OS_ARCH))
 PKGCOMP_FIND_OPTS =
