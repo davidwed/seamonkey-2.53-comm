@@ -4890,16 +4890,25 @@ NS_IMETHODIMP nsMsgDBFolder::CopyDataDone()
   return NS_OK;
 }
 
+#define NOTIFY_LISTENERS(propertyfunc_, params_) \
+  PR_BEGIN_MACRO \
+  nsTObserverArray<nsCOMPtr<nsIFolderListener>>::ForwardIterator iter(mListeners); \
+  nsCOMPtr<nsIFolderListener> listener; \
+  while (iter.HasMore()) { \
+    listener = iter.GetNext(); \
+    listener->propertyfunc_ params_; \
+  } \
+  PR_END_MACRO
+
 NS_IMETHODIMP
 nsMsgDBFolder::NotifyPropertyChanged(nsIAtom *aProperty,
                                      const nsACString& aOldValue,
                                      const nsACString& aNewValue)
 {
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemPropertyChanged,
-                                     (this, aProperty,
-                                      nsCString(aOldValue).get(),
-                                      nsCString(aNewValue).get()));
+  NOTIFY_LISTENERS(OnItemPropertyChanged,
+                   (this, aProperty,
+                    nsCString(aOldValue).get(),
+                    nsCString(aNewValue).get()));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -4916,11 +4925,10 @@ nsMsgDBFolder::NotifyUnicharPropertyChanged(nsIAtom *aProperty,
                                           const nsAString& aOldValue,
                                           const nsAString& aNewValue)
 {
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemUnicharPropertyChanged,
-                                     (this, aProperty,
-                                      nsString(aOldValue).get(),
-                                      nsString(aNewValue).get()));
+  NOTIFY_LISTENERS(OnItemUnicharPropertyChanged,
+                   (this, aProperty,
+                    nsString(aOldValue).get(),
+                    nsString(aNewValue).get()));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -4943,9 +4951,8 @@ nsMsgDBFolder::NotifyIntPropertyChanged(nsIAtom *aProperty, int64_t aOldValue,
        (aProperty == kTotalUnreadMessagesAtom)))
     return NS_OK;
 
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemIntPropertyChanged,
-                                     (this, aProperty, aOldValue, aNewValue));
+  NOTIFY_LISTENERS(OnItemIntPropertyChanged,
+                   (this, aProperty, aOldValue, aNewValue));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -4960,9 +4967,8 @@ NS_IMETHODIMP
 nsMsgDBFolder::NotifyBoolPropertyChanged(nsIAtom* aProperty,
                                          bool aOldValue, bool aNewValue)
 {
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemBoolPropertyChanged,
-                                     (this, aProperty, aOldValue, aNewValue));
+  NOTIFY_LISTENERS(OnItemBoolPropertyChanged,
+                   (this, aProperty, aOldValue, aNewValue));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -4977,9 +4983,8 @@ NS_IMETHODIMP
 nsMsgDBFolder::NotifyPropertyFlagChanged(nsIMsgDBHdr *aItem, nsIAtom *aProperty,
                                          uint32_t aOldValue, uint32_t aNewValue)
 {
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemPropertyFlagChanged,
-                                     (aItem, aProperty, aOldValue, aNewValue));
+  NOTIFY_LISTENERS(OnItemPropertyFlagChanged,
+                   (aItem, aProperty, aOldValue, aNewValue));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -4997,9 +5002,8 @@ NS_IMETHODIMP nsMsgDBFolder::NotifyItemAdded(nsISupports *aItem)
   if (!notify)
     return NS_OK;
 
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemAdded,
-                                     (this, aItem));
+  NOTIFY_LISTENERS(OnItemAdded,
+                   (this, aItem));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -5011,9 +5015,8 @@ NS_IMETHODIMP nsMsgDBFolder::NotifyItemAdded(nsISupports *aItem)
 
 nsresult nsMsgDBFolder::NotifyItemRemoved(nsISupports *aItem)
 {
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemRemoved,
-                                     (this, aItem));
+  NOTIFY_LISTENERS(OnItemRemoved,
+                   (this, aItem));
 
   // Notify listeners who listen to every folder
   nsresult rv;
@@ -5025,9 +5028,8 @@ nsresult nsMsgDBFolder::NotifyItemRemoved(nsISupports *aItem)
 
 nsresult nsMsgDBFolder::NotifyFolderEvent(nsIAtom* aEvent)
 {
-  NS_OBSERVER_ARRAY_NOTIFY_OBSERVERS(mListeners, nsIFolderListener,
-                                     OnItemEvent,
-                                     (this, aEvent));
+  NOTIFY_LISTENERS(OnItemEvent,
+                   (this, aEvent));
 
   //Notify listeners who listen to every folder
   nsresult rv;
