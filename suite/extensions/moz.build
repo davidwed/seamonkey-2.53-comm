@@ -8,6 +8,8 @@ if CONFIG['MOZ_DEBUGQA']:
         'debugQA',
     ]
 
+DIRS += ['smime']
+
 # for later
 # if CONFIG['MOZ_IRC']:
 #     DIRS += [
