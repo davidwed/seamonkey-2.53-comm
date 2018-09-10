@@ -33,6 +33,8 @@ public:
     void         SetPartialUIDFetch(bool isPartial) {fPartialUIDFetch = isPartial;}
     uint32_t     GetHighestNonDeletedUID();
     uint16_t     GetSupportedUserFlags() { return fSupportedUserFlags; }
+    void         StartCapture() { fStartCapture = true; }
+    uint32_t     GetNumAdded() { return fNumAdded; }
 
 private:
   virtual ~nsImapFlagAndUidState();
@@ -46,6 +48,8 @@ private:
     uint16_t                fSupportedUserFlags;
     int32_t                 fNumberDeleted;
     bool                    fPartialUIDFetch;
+    uint32_t                fNumAdded;
+    bool                    fStartCapture;
     mozilla::Mutex mLock;
 };
 
