@@ -67,6 +67,7 @@ public:
   int32_t    FolderUID();
   uint32_t   CurrentResponseUID();
   uint32_t   HighestRecordedUID();
+  void       ResetHighestRecordedUID();
   void       SetCurrentResponseUID(uint32_t uid);
   bool       IsNumericString(const char *string);
   uint32_t   SizeOfMostRecentMessage();
