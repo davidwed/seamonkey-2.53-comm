@@ -14,7 +14,7 @@ function calHtmlExporter() {
 }
 
 var calHtmlExporterClassID = Components.ID("{72d9ab35-9b1b-442a-8cd0-ae49f00b159b}");
-var calHtmlExporterInterfaces = [Components.interfaces.calIExporter];
+var calHtmlExporterInterfaces = [Ci.calIExporter];
 calHtmlExporter.prototype = {
     classID: calHtmlExporterClassID,
     QueryInterface: XPCOMUtils.generateQI(calHtmlExporterInterfaces),
@@ -31,7 +31,7 @@ calHtmlExporter.prototype = {
         let wildmat = "*.html; *.htm";
         let label = cal.l10n.getCalString("filterHtml", [wildmat]);
         return [{
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIFileType]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIFileType]),
             defaultExtension: "html",
             extensionFilter: wildmat,
             description: label
@@ -67,7 +67,7 @@ calHtmlExporter.prototype = {
                     itemNode.querySelector("." + classKey).textContent = propValue;
                 } else {
                     let row = itemNode.querySelector("." + classKey + "row");
-                    if (row.nextSibling instanceof Components.interfaces.nsIDOMText) {
+                    if (row.nextSibling instanceof Ci.nsIDOMText) {
                         row.nextSibling.remove();
                     }
                     row.remove();
@@ -89,7 +89,7 @@ calHtmlExporter.prototype = {
                 let row = itemNode.querySelector(".intervalrow");
                 row.remove();
                 if (row.nextSibling &&
-                    row.nextSibling instanceof Components.interfaces.nsIDOMText) {
+                    row.nextSibling instanceof Ci.nsIDOMText) {
                     row.nextSibling.remove();
                 }
             }
@@ -107,8 +107,8 @@ calHtmlExporter.prototype = {
         templates.remove();
 
         // Convert the javascript string to an array of bytes, using the utf8 encoder
-        let convStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-                                   .createInstance(Components.interfaces.nsIConverterOutputStream);
+        let convStream = Cc["@mozilla.org/intl/converter-output-stream;1"]
+                           .createInstance(Ci.nsIConverterOutputStream);
         convStream.init(aStream, "UTF-8");
         convStream.writeString(cal.xml.serializeDOM(document));
     }

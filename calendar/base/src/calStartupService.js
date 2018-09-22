@@ -30,7 +30,7 @@ function calStartupService() {
     this.setupObservers();
 }
 
-var calStartupServiceInterfaces = [Components.interfaces.nsIObserver];
+var calStartupServiceInterfaces = [Ci.nsIObserver];
 var calStartupServiceClassID = Components.ID("{2547331f-34c0-4a4b-b93c-b503538ba6d6}");
 calStartupService.prototype = {
     QueryInterface: XPCOMUtils.generateQI(calStartupServiceInterfaces),
@@ -40,7 +40,7 @@ calStartupService.prototype = {
         classDescription: "Calendar Startup Service",
         classID: calStartupServiceClassID,
         interfaces: calStartupServiceInterfaces,
-        flags: Components.interfaces.nsIClassInfo.SINGLETON
+        flags: Ci.nsIClassInfo.SINGLETON
     }),
 
     // Startup Service Methods
@@ -64,17 +64,17 @@ calStartupService.prototype = {
      */
     getStartupOrder: function() {
         let self = this;
-        let tzService = Components.classes["@mozilla.org/calendar/timezone-service;1"]
-                                  .getService(Components.interfaces.calITimezoneService);
-        let calMgr = Components.classes["@mozilla.org/calendar/manager;1"]
-                               .getService(Components.interfaces.calICalendarManager);
+        let tzService = Cc["@mozilla.org/calendar/timezone-service;1"]
+                          .getService(Ci.calITimezoneService);
+        let calMgr = Cc["@mozilla.org/calendar/manager;1"]
+                       .getService(Ci.calICalendarManager);
 
         // Notification object
         let notify = {
             startup: function(aCompleteListener) {
                 self.started = true;
                 Services.obs.notifyObservers(null, "calendar-startup-done");
-                aCompleteListener.onResult(null, Components.results.NS_OK);
+                aCompleteListener.onResult(null, Cr.NS_OK);
             },
             shutdown: function(aCompleteListener) {
                 // Argh, it would have all been so pretty! Since we just reverse
@@ -82,7 +82,7 @@ calStartupService.prototype = {
                 // other shutdown calls. For lack of pretty code, I'm
                 // leaving this out! Users can still listen to xpcom-shutdown.
                 self.started = false;
-                aCompleteListener.onResult(null, Components.results.NS_OK);
+                aCompleteListener.onResult(null, Cr.NS_OK);
             }
         };
 

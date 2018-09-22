@@ -10,7 +10,7 @@ function calWeekInfoService() {
     this.wrappedJSObject = this;
 }
 var calWeekInfoServiceClassID = Components.ID("{6877bbdd-f336-46f5-98ce-fe86d0285cc1}");
-var calWeekInfoServiceInterfaces = [Components.interfaces.calIWeekInfoService];
+var calWeekInfoServiceInterfaces = [Ci.calIWeekInfoService];
 calWeekInfoService.prototype = {
     classID: calWeekInfoServiceClassID,
     QueryInterface: XPCOMUtils.generateQI(calWeekInfoServiceInterfaces),
@@ -19,7 +19,7 @@ calWeekInfoService.prototype = {
         contractID: "@mozilla.org/calendar/weekinfo-service;1",
         classDescription: "Calendar WeekInfo Service",
         interfaces: calWeekInfoServiceInterfaces,
-        flags: Components.interfaces.nsIClassInfo.SINGLETON
+        flags: Ci.nsIClassInfo.SINGLETON
     }),
 
     // calIWeekInfoService:

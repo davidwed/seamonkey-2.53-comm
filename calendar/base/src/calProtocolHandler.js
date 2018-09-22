@@ -31,9 +31,9 @@ calProtocolHandler.prototype = {
     get protocolFlags() { return this.mHttpProtocol.protocolFlags; },
 
     newURI: function(aSpec, anOriginalCharset, aBaseURI) {
-        let uri = Components.classes["@mozilla.org/network/standard-url;1"]
-                            .createInstance(Components.interfaces.nsIStandardURL);
-        uri.init(Components.interfaces.nsIStandardURL.URLTYPE_STANDARD,
+        let uri = Cc["@mozilla.org/network/standard-url;1"]
+                    .createInstance(Ci.nsIStandardURL);
+        uri.init(Ci.nsIStandardURL.URLTYPE_STANDARD,
                  this.mHttpProtocol.defaultPort, aSpec, anOriginalCharset, aBaseURI);
         return uri;
     },
@@ -56,8 +56,8 @@ calProtocolHandler.prototype = {
                                                      null,
                                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                                      null,
-                                                     Components.interfaces.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
-                                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER);
+                                                     Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
+                                                     Ci.nsIContentPolicy.TYPE_OTHER);
         }
         channel.originalURI = aUri;
         return channel;
@@ -68,7 +68,7 @@ calProtocolHandler.prototype = {
 };
 
 var calProtocolHandlerWebcalClassID = Components.ID("{1153c73a-39be-46aa-9ba9-656d188865ca}");
-var calProtocolHandlerWebcalInterfaces = [Components.interfaces.nsIProtocolHandler];
+var calProtocolHandlerWebcalInterfaces = [Ci.nsIProtocolHandler];
 calProtocolHandlerWebcal.prototype = {
     __proto__: calProtocolHandler.prototype,
     classID: calProtocolHandlerWebcalClassID,
@@ -82,7 +82,7 @@ calProtocolHandlerWebcal.prototype = {
 };
 
 var calProtocolHandlerWebcalsClassID = Components.ID("{bdf71224-365d-4493-856a-a7e74026f766}");
-var calProtocolHandlerWebcalsInterfaces = [Components.interfaces.nsIProtocolHandler];
+var calProtocolHandlerWebcalsInterfaces = [Ci.nsIProtocolHandler];
 calProtocolHandlerWebcals.prototype = {
     __proto__: calProtocolHandler.prototype,
     classID: calProtocolHandlerWebcalsClassID,

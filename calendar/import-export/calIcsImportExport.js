@@ -13,7 +13,7 @@ ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 function getIcsFileTypes(aCount) {
     aCount.value = 1;
     return [{
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIFileType]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calIFileType]),
         defaultExtension: "ics",
         extensionFilter: "*.ics",
         description: cal.l10n.getCalString("filterIcs", ["*.ics"])
@@ -26,7 +26,7 @@ function calIcsImporter() {
 }
 
 var calIcsImporterClassID = Components.ID("{1e3e33dc-445a-49de-b2b6-15b2a050bb9d}");
-var calIcsImporterInterfaces = [Components.interfaces.calIImporter];
+var calIcsImporterInterfaces = [Ci.calIImporter];
 calIcsImporter.prototype = {
     classID: calIcsImporterClassID,
     QueryInterface: XPCOMUtils.generateQI(calIcsImporterInterfaces),
@@ -40,8 +40,8 @@ calIcsImporter.prototype = {
     getFileTypes: getIcsFileTypes,
 
     importFromStream: function(aStream, aCount) {
-        let parser = Components.classes["@mozilla.org/calendar/ics-parser;1"]
-                               .createInstance(Components.interfaces.calIIcsParser);
+        let parser = Cc["@mozilla.org/calendar/ics-parser;1"]
+                       .createInstance(Ci.calIIcsParser);
         parser.parseFromStream(aStream, null);
         return parser.getItems(aCount);
     }
@@ -53,7 +53,7 @@ function calIcsExporter() {
 }
 
 var calIcsExporterClassID = Components.ID("{a6a524ce-adff-4a0f-bb7d-d1aaad4adc60}");
-var calIcsExporterInterfaces = [Components.interfaces.calIExporter];
+var calIcsExporterInterfaces = [Ci.calIExporter];
 calIcsExporter.prototype = {
     classID: calIcsExporterClassID,
     QueryInterface: XPCOMUtils.generateQI(calIcsExporterInterfaces),
@@ -68,8 +68,8 @@ calIcsExporter.prototype = {
     getFileTypes: getIcsFileTypes,
 
     exportToStream: function(aStream, aCount, aItems) {
-        let serializer = Components.classes["@mozilla.org/calendar/ics-serializer;1"]
-                                   .createInstance(Components.interfaces.calIIcsSerializer);
+        let serializer = Cc["@mozilla.org/calendar/ics-serializer;1"]
+                           .createInstance(Ci.calIIcsSerializer);
         serializer.addItems(aItems, aItems.length);
         serializer.serializeToStream(aStream);
     }

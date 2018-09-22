@@ -91,7 +91,7 @@ function calOutlookCSVImporter() {
     this.wrappedJSObject = this;
 }
 var calOutlookCSVImporterClassID = Components.ID("{64a5d17a-0497-48c5-b54f-72b15c9e9a14}");
-var calOutlookCSVImporterInterfaces = [Components.interfaces.calIImporter];
+var calOutlookCSVImporterInterfaces = [Ci.calIImporter];
 calOutlookCSVImporter.prototype = {
     classID: calOutlookCSVImporterClassID,
     QueryInterface: XPCOMUtils.generateQI(calOutlookCSVImporterInterfaces),
@@ -124,8 +124,8 @@ calOutlookCSVImporter.prototype = {
      *   If the parse is cancelled, a zero length array is returned.
      */
     importFromStream: function(aStream, aCount) {
-        let scriptableInputStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-                                              .createInstance(Components.interfaces.nsIScriptableInputStream);
+        let scriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"]
+                                      .createInstance(Ci.nsIScriptableInputStream);
         scriptableInputStream.init(aStream);
         let str = scriptableInputStream.read(-1);
 
@@ -412,7 +412,7 @@ calOutlookCSVImporter.prototype = {
 function calOutlookCSVExporter() {
 }
 var calOutlookCSVExporterClassID = Components.ID("{48e6d3a6-b41b-4052-9ed2-40b27800bd4b}");
-var calOutlookCSVExporterInterfaces = [Components.interfaces.calIExporter];
+var calOutlookCSVExporterInterfaces = [Ci.calIExporter];
 calOutlookCSVExporter.prototype = {
     classID: calOutlookCSVExporterClassID,
     QueryInterface: XPCOMUtils.generateQI(calOutlookCSVExporterInterfaces),
@@ -485,8 +485,8 @@ calOutlookCSVExporter.prototype = {
             line = line.map(value => `"${String(value).replace(/"/g, '""')}"`);
             str = line.join(",") + exportLineEnding;
 
-            let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                                      .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+            let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                              .createInstance(Ci.nsIScriptableUnicodeConverter);
             converter.charset = "UTF-8";
             str = converter.ConvertFromUnicode(str);
 

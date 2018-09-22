@@ -4,9 +4,8 @@
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-var HINT_EXACT_MATCH = Components.interfaces.calICalendarSearchProvider.HINT_EXACT_MATCH;
-var search = Components.classes["@mozilla.org/calendar/calendarsearch-service;1"]
-                       .getService(Components.interfaces.calICalendarSearchService);
+var HINT_EXACT_MATCH = Ci.calICalendarSearchProvider.HINT_EXACT_MATCH;
+var search = Cc["@mozilla.org/calendar/calendarsearch-service;1"].getService(Ci.calICalendarSearchService);
 
 function run_test() {
     test_found();
@@ -94,14 +93,14 @@ function test_cancel() {
     search.getProviders({}).forEach(search.removeProvider, search);
 
     let provider = {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendarSearchProvider, Components.interfaces.calIOperation]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calICalendarSearchProvider, Ci.calIOperation]),
         searchForCalendars: function(aStr, aHint, aMax, aListener) {
             Services.tm.currentThread.dispatch({
                 run: function() {
                     dump("Cancelling search...");
                     operation.cancel();
                 }
-            }, Components.interfaces.nsIEventTarget.DISPATCH_NORMAL);
+            }, Ci.nsIEventTarget.DISPATCH_NORMAL);
 
             // No listener call, we emulate a long running search
             // Do return the operation though
@@ -110,7 +109,7 @@ function test_cancel() {
 
         isPending: true,
         cancelCalled: false,
-        status: Components.results.NS_OK,
+        status: Cr.NS_OK,
         cancel: function() {
             this.cancelCalled = true;
         },

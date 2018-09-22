@@ -13,7 +13,7 @@ function calDefaultACLManager() {
 }
 
 var calDefaultACLManagerClassID = Components.ID("{7463258c-6ef3-40a2-89a9-bb349596e927}");
-var calDefaultACLManagerInterfaces = [Components.interfaces.calICalendarACLManager];
+var calDefaultACLManagerInterfaces = [Ci.calICalendarACLManager];
 calDefaultACLManager.prototype = {
     mCalendarEntries: null,
 
@@ -25,7 +25,7 @@ calDefaultACLManager.prototype = {
         contractID: "@mozilla.org/calendar/acl-manager;1?type=default",
         classDescription: "Default Calendar ACL Provider",
         interfaces: calDefaultACLManagerInterfaces,
-        flags: Components.interfaces.nsIClassInfo.SINGLETON
+        flags: Ci.nsIClassInfo.SINGLETON
     }),
 
     /* calICalendarACLManager */
@@ -39,8 +39,8 @@ calDefaultACLManager.prototype = {
     },
     getCalendarEntry: function(aCalendar, aListener) {
         let entry = this._getCalendarEntryCached(aCalendar);
-        aListener.onOperationComplete(aCalendar, Components.results.NS_OK,
-                                      Components.interfaces.calIOperationListener.GET,
+        aListener.onOperationComplete(aCalendar, Cr.NS_OK,
+                                      Ci.calIOperationListener.GET,
                                       null,
                                       entry);
     },
@@ -60,7 +60,7 @@ calDefaultCalendarACLEntry.prototype = {
     mACLManager: null,
 
     /* nsISupports */
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendarACLEntry]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.calICalendarACLEntry]),
 
     /* calICalendarACLCalendarEntry */
     get aclManager() {
@@ -108,7 +108,7 @@ function calDefaultItemACLEntry(aCalendarEntry) {
 
 calDefaultItemACLEntry.prototype = {
     /* nsISupports */
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIItemACLEntry]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.calIItemACLEntry]),
 
     /* calIItemACLEntry */
     calendarEntry: null,

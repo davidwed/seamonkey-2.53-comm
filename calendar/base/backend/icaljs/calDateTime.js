@@ -13,7 +13,7 @@ function calDateTime(innerObject) {
     this.innerObject = innerObject || ICAL.Time.epochTime.clone();
 }
 
-var calDateTimeInterfaces = [Components.interfaces.calIDateTime];
+var calDateTimeInterfaces = [Ci.calIDateTime];
 var calDateTimeClassID = Components.ID("{36783242-ec94-4d8a-9248-d2679edd55b9}");
 calDateTime.prototype = {
     QueryInterface: XPCOMUtils.generateQI(calDateTimeInterfaces),

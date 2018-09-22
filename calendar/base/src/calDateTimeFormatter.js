@@ -12,7 +12,7 @@ function calDateTimeFormatter() {
     this.mDateStringBundle = Services.strings.createBundle("chrome://calendar/locale/dateFormat.properties");
 }
 var calDateTimeFormatterClassID = Components.ID("{4123da9a-f047-42da-a7d0-cc4175b9f36a}");
-var calDateTimeFormatterInterfaces = [Components.interfaces.calIDateTimeFormatter];
+var calDateTimeFormatterInterfaces = [Ci.calIDateTimeFormatter];
 calDateTimeFormatter.prototype = {
     classID: calDateTimeFormatterClassID,
     QueryInterface: XPCOMUtils.generateQI(calDateTimeFormatterInterfaces),

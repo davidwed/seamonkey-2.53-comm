@@ -108,7 +108,7 @@ OAuth2.prototype = {
                 }
 
                 this.account.finishAuthorizationRequest();
-                this.account.onAuthorizationFailed(Components.results.NS_ERROR_ABORT, '{ "error": "cancelled"}');
+                this.account.onAuthorizationFailed(Cr.NS_ERROR_ABORT, '{ "error": "cancelled"}');
             },
 
             loaded: function(aWindow, aWebProgress) {
@@ -122,8 +122,8 @@ OAuth2.prototype = {
                     _parent: this.account,
 
                     QueryInterface: XPCOMUtils.generateQI([
-                        Components.interfaces.nsIWebProgressListener,
-                        Components.interfaces.nsISupportsWeakReference
+                        Ci.nsIWebProgressListener,
+                        Ci.nsISupportsWeakReference
                     ]),
 
                     _cleanUp: function() {
@@ -142,10 +142,10 @@ OAuth2.prototype = {
                     },
 
                     onStateChange: function(aChangedWebProgress, aRequest, aStateFlags, aStatus) {
-                        const wpl = Components.interfaces.nsIWebProgressListener;
+                        const wpl = Ci.nsIWebProgressListener;
                         if (aStateFlags & (wpl.STATE_STOP)) {
                             try {
-                                let httpchannel = aRequest.QueryInterface(Components.interfaces.nsIHttpChannel);
+                                let httpchannel = aRequest.QueryInterface(Ci.nsIHttpChannel);
 
                                 let responseCategory = Math.floor(httpchannel.responseStatus / 100);
 
@@ -155,7 +155,7 @@ OAuth2.prototype = {
                                 }
                             } catch (e) {
                                 // Throw the case where it's a http channel.
-                                if (e.result != Components.results.NS_ERROR_NO_INTERFACE) {
+                                if (e.result != Cr.NS_ERROR_NO_INTERFACE) {
                                     throw e;
                                 }
                             }
@@ -172,8 +172,7 @@ OAuth2.prototype = {
                     onStatusChange: function() {},
                     onSecurityChange: function() {},
                 };
-                aWebProgress.addProgressListener(this._listener,
-                                                 Components.interfaces.nsIWebProgress.NOTIFY_ALL);
+                aWebProgress.addProgressListener(this._listener, Ci.nsIWebProgress.NOTIFY_ALL);
                 aWindow.document.title = this.account.requestWindowTitle;
             }
         };

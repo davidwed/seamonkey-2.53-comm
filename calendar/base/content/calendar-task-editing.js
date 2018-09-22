@@ -128,7 +128,7 @@ var taskEdit = {
      * @param aEvent    The DOM keypress event
      */
     onKeyPress: function(aEvent) {
-        if (aEvent.keyCode == Components.interfaces.nsIDOMKeyEvent.DOM_VK_RETURN) {
+        if (aEvent.keyCode == Ci.nsIDOMKeyEvent.DOM_VK_RETURN) {
             let edit = aEvent.target;
             if (edit.value && edit.value.length > 0) {
                 let item = cal.createTodo();
@@ -171,7 +171,7 @@ var taskEdit = {
      * @see calIObserver
      */
     calendarObserver: {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIObserver]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calIObserver]),
 
         // calIObserver:
         onStartBatch: function() {},
@@ -217,8 +217,8 @@ var taskEdit = {
      */
     compositeObserver: {
         QueryInterface: XPCOMUtils.generateQI([
-            Components.interfaces.calIObserver,
-            Components.interfaces.calICompositeObserver
+            Ci.calIObserver,
+            Ci.calICompositeObserver
         ]),
 
         // calIObserver:

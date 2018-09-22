@@ -23,7 +23,7 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
             try {
                 return func.apply(this, arguments);
             } catch (e) {
-                Components.utils.reportError(e);
+                Cu.reportError(e);
                 throw e;
             }
         };
@@ -206,7 +206,7 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
 
             calendarListWidget.calendars = calendars;
         }, (e) => {
-            Components.utils.reportError(e);
+            Cu.reportError(e);
         });
     });
 

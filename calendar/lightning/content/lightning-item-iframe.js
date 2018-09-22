@@ -65,8 +65,7 @@ var eventDialogQuitObserver = {
         // Check whether or not we want to veto the quit request (unless another
         // observer already did.
         if (aTopic == "quit-application-requested" &&
-            (aSubject instanceof Components.interfaces.nsISupportsPRBool) &&
-            !aSubject.data) {
+            (aSubject instanceof Ci.nsISupportsPRBool) && !aSubject.data) {
             aSubject.data = !onCancel();
         }
     }
@@ -84,7 +83,7 @@ var eventDialogCalendarObserver = {
             // The item has been modified outside the dialog. We only need to
             // prompt if there have been local changes also.
             if (isItemChanged()) {
-                let promptService = Components.interfaces.nsIPromptService;
+                let promptService = Ci.nsIPromptService;
                 let promptTitle = cal.l10n.getCalString("modifyConflictPromptTitle");
                 let promptMessage = cal.l10n.getCalString("modifyConflictPromptMessage");
                 let promptButton1 = cal.l10n.getCalString("modifyConflictPromptButton1");
@@ -156,7 +155,7 @@ var eventDialogCalendarObserver = {
  */
 function canNotifyAttendees(aCalendar, aItem) {
     try {
-        let calendar = aCalendar.QueryInterface(Components.interfaces.calISchedulingSupport);
+        let calendar = aCalendar.QueryInterface(Ci.calISchedulingSupport);
         return (calendar.canNotify("REQUEST", aItem) && calendar.canNotify("CANCEL", aItem));
     } catch (exc) {
         return false;
@@ -457,7 +456,7 @@ function onCommandCancel() {
         gTabmail.switchToTab(gTabInfoObject);
     }
 
-    let promptService = Components.interfaces.nsIPromptService;
+    let promptService = Ci.nsIPromptService;
 
     let promptTitle = cal.l10n.getCalString(
         cal.item.isEvent(window.calendarItem) ? "askSaveTitleEvent" : "askSaveTitleTask"
@@ -1258,7 +1257,7 @@ function getRepeatTypeAndUntilDate(aItem) {
             }
         }
         if (rules.length == 1) {
-            let rule = cal.wrapInstance(rules[0], Components.interfaces.calIRecurrenceRule);
+            let rule = cal.wrapInstance(rules[0], Ci.calIRecurrenceRule);
             if (rule) {
                 switch (rule.type) {
                     case "DAILY": {
@@ -1541,7 +1540,7 @@ function updateTitle() {
     } else if (cal.item.isToDo(window.calendarItem)) {
         strName = (window.mode == "new" ? "newTaskDialog" : "editTaskDialog");
     } else {
-        throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
+        throw Cr.NS_ERROR_NOT_IMPLEMENTED;
     }
     let newTitle = cal.l10n.getCalString(strName) + ": " + getElementValue("item-title");
     sendMessage({ command: "updateTitle", argument: newTitle });
@@ -1991,12 +1990,10 @@ function attachFile(cloudProvider) {
         cal.ERROR("[calendar-event-dialog] Could not attach file without cloud provider" + cal.STACK(10));
     }
 
-    const nsIFilePicker = Components.interfaces.nsIFilePicker;
-    let filePicker = Components.classes["@mozilla.org/filepicker;1"]
-                               .createInstance(nsIFilePicker);
+    let filePicker = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
     filePicker.init(window,
                     cal.l10n.getString("calendar-event-dialog", "selectAFile"),
-                    nsIFilePicker.modeOpenMultiple);
+                    Ci.nsIFilePicker.modeOpenMultiple);
 
     // Check for the last directory
     let lastDir = lastDirectory();
@@ -2005,17 +2002,17 @@ function attachFile(cloudProvider) {
     }
 
     filePicker.open(rv => {
-        if (rv != nsIFilePicker.returnOK || !filePicker.files) {
+        if (rv != Ci.nsIFilePicker.returnOK || !filePicker.files) {
             return;
         }
         let files = filePicker.files;
 
         // Create the attachment
         while (files.hasMoreElements()) {
-            let file = files.getNext().QueryInterface(Components.interfaces.nsIFile);
+            let file = files.getNext().QueryInterface(Ci.nsIFile);
 
             let fileHandler = Services.io.getProtocolHandler("file")
-                                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+                                         .QueryInterface(Ci.nsIFileProtocolHandler);
             let uriSpec = fileHandler.getURLSpecFromFile(file);
 
             if (!(uriSpec in gAttachMap)) {
@@ -2048,8 +2045,8 @@ function lastDirectory(aFileUri) {
     if (aFileUri) {
         // Act similar to a setter, save the passed uri.
         let uri = Services.io.newURI(aFileUri);
-        let file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-        lastDirectory.mValue = file.parent.QueryInterface(Components.interfaces.nsIFile);
+        let file = uri.QueryInterface(Ci.nsIFileURL).file;
+        lastDirectory.mValue = file.parent.QueryInterface(Ci.nsIFile);
     }
 
     // In any case, return the value
@@ -2084,7 +2081,7 @@ function makePrettyName(aUri) {
  * @param listItem          The listitem in attachment-link listbox to update.
  */
 function uploadCloudAttachment(attachment, cloudProvider, listItem) {
-    let file = attachment.uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+    let file = attachment.uri.QueryInterface(Ci.nsIFileURL).file;
     listItem.attachLocalFile = file;
     listItem.attachCloudProvider = cloudProvider;
     cloudProvider.uploadFile(file, {
@@ -2261,8 +2258,8 @@ function openAttachment() {
     let documentLink = document.getElementById("attachment-link");
     if (documentLink.selectedItems.length == 1) {
         let attURI = documentLink.getSelectedItem(0).attachment.uri;
-        let externalLoader = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"]
-                                       .getService(Components.interfaces.nsIExternalProtocolService);
+        let externalLoader = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+                               .getService(Ci.nsIExternalProtocolService);
         // TODO There should be a nicer dialog
         externalLoader.loadURI(attURI);
     }
@@ -2274,8 +2271,8 @@ function openAttachment() {
 function copyAttachment() {
     let documentLink = document.getElementById("attachment-link");
     let attURI = documentLink.getSelectedItem(0).attachment.uri.spec;
-    let clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                              .getService(Components.interfaces.nsIClipboardHelper);
+    let clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                      .getService(Ci.nsIClipboardHelper);
     clipboard.copyString(attURI);
 }
 
@@ -2285,7 +2282,7 @@ function copyAttachment() {
  * @param aEvent     The DOM event caused by the key press.
  */
 function attachmentLinkKeyPress(aEvent) {
-    const kKE = Components.interfaces.nsIDOMKeyEvent;
+    const kKE = Ci.nsIDOMKeyEvent;
     switch (aEvent.keyCode) {
         case kKE.DOM_VK_BACK_SPACE:
         case kKE.DOM_VK_DELETE:
@@ -2979,7 +2976,7 @@ function onCommandSave(aIsClosing) {
     // before the call is complete. In that case, we do need a progress bar and
     // the ability to cancel the operation though.
     let listener = {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
         onOperationComplete: function(aCalendar, aStatus, aOpType, aId, aItem) {
             // Check if the current window has a calendarItem first, because in case of undo
             // window refers to the main window and we would get a 'calendarItem is undefined' warning.
@@ -3015,8 +3012,8 @@ function onCommandSave(aIsClosing) {
         onGetResult: function() {}
     };
     let resp = document.getElementById("notify-attendees-checkbox").checked
-             ? Components.interfaces.calIItipItem.AUTO
-             : Components.interfaces.calIItipItem.NONE;
+             ? Ci.calIItipItem.AUTO
+             : Ci.calIItipItem.NONE;
     let extResponse = { responseMode: resp };
     window.onAcceptCallback(item, calendar, originalItem, listener, extResponse);
 }
@@ -3494,7 +3491,7 @@ function showOrHideItemURL(aShow, aUrl) {
         }
         // Only show if its either an internal protcol handler, or its external
         // and there is an external app for the scheme
-        handler = cal.wrapInstance(handler, Components.interfaces.nsIExternalProtocolHandler);
+        handler = cal.wrapInstance(handler, Ci.nsIExternalProtocolHandler);
         return !handler || handler.externalAppExistsForScheme(uri.scheme);
     } else {
         // Hide if there is no url, or the menuitem was chosen so that the url

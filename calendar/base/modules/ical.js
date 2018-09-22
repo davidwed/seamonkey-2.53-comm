@@ -32,7 +32,7 @@ function unwrapSingle(type, val) {
         return val.wrappedJSObject.innerObject;
     } else {
         ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
-        Components.utils.reportError("Unknown " + (type.icalclass || type) + " passed at " + cal.STACK(10));
+        Cu.reportError("Unknown " + (type.icalclass || type) + " passed at " + cal.STACK(10));
         return null;
     }
 }

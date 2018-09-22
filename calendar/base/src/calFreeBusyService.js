@@ -18,7 +18,7 @@ calFreeBusyListener.prototype = {
     mNumOperations: 0,
     opGroup: null,
 
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIGenericOperationListener]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.calIGenericOperationListener]),
 
     notifyResult: function(result) {
         let listener = this.mFinalListener;
@@ -39,7 +39,7 @@ calFreeBusyListener.prototype = {
                     this.opGroup.notifyCompleted();
                 }
             }
-            let opStatus = aOperation ? aOperation.status : Components.results.NS_OK;
+            let opStatus = aOperation ? aOperation.status : Cr.NS_OK;
             if (Components.isSuccessCode(opStatus) &&
                 aResult && Array.isArray(aResult)) {
                 this.notifyResult(aResult);
@@ -56,8 +56,8 @@ function calFreeBusyService() {
 }
 var calFreeBusyServiceClassID = Components.ID("{29c56cd5-d36e-453a-acde-0083bd4fe6d3}");
 var calFreeBusyServiceInterfaces = [
-    Components.interfaces.calIFreeBusyProvider,
-    Components.interfaces.calIFreeBusyService
+    Ci.calIFreeBusyProvider,
+    Ci.calIFreeBusyService
 ];
 calFreeBusyService.prototype = {
     mProviders: null,
@@ -69,7 +69,7 @@ calFreeBusyService.prototype = {
         contractID: "@mozilla.org/calendar/freebusy-service;1",
         classDescription: "Calendar FreeBusy Service",
         interfaces: calFreeBusyServiceInterfaces,
-        flags: Components.interfaces.nsIClassInfo.SINGLETON
+        flags: Ci.nsIClassInfo.SINGLETON
     }),
 
     // calIFreeBusyProvider:
@@ -87,9 +87,9 @@ calFreeBusyService.prototype = {
 
     // calIFreeBusyService:
     addProvider: function(aProvider) {
-        this.mProviders.add(aProvider.QueryInterface(Components.interfaces.calIFreeBusyProvider));
+        this.mProviders.add(aProvider.QueryInterface(Ci.calIFreeBusyProvider));
     },
     removeProvider: function(aProvider) {
-        this.mProviders.delete(aProvider.QueryInterface(Components.interfaces.calIFreeBusyProvider));
+        this.mProviders.delete(aProvider.QueryInterface(Ci.calIFreeBusyProvider));
     }
 };

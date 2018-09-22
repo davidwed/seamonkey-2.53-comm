@@ -436,8 +436,8 @@ function openNewMessage() {
         null,
         null,
         null,
-        Components.interfaces.nsIMsgCompType.New,
-        Components.interfaces.nsIMsgCompFormat.Default,
+        Ci.nsIMsgCompType.New,
+        Ci.nsIMsgCompFormat.Default,
         null,
         null
     );

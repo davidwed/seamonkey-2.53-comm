@@ -15,7 +15,7 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataRequest.jsm");
 ChromeUtils.import("resource://gdata-provider/modules/gdataSession.jsm");
 ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
 
-var cIOL = Components.interfaces.calIOperationListener;
+var cIOL = Ci.calIOperationListener;
 
 var MIN_REFRESH_INTERVAL = 30;
 
@@ -34,9 +34,9 @@ function calGoogleCalendar() {
 
 var calGoogleCalendarClassID = Components.ID("{d1a6e988-4b4d-45a5-ba46-43e501ea96e3}");
 var calGoogleCalendarInterfaces = [
-    Components.interfaces.calICalendar,
-    Components.interfaces.calISchedulingSupport,
-    Components.interfaces.calIChangeLog
+    Ci.calICalendar,
+    Ci.calISchedulingSupport,
+    Ci.calIChangeLog
 ];
 calGoogleCalendar.prototype = {
     __proto__: cal.provider.BaseClass.prototype,
@@ -88,8 +88,7 @@ calGoogleCalendar.prototype = {
     ensureWritable: function() {
         // Check if calendar is readonly
         if (this.readOnly) {
-            const cIE = Components.interfaces.calIErrors;
-            throw new Components.Exception("", cIE.CAL_IS_READONLY);
+            throw new Components.Exception("", Ci.calIErrors.CAL_IS_READONLY);
         }
     },
 
@@ -379,7 +378,7 @@ calGoogleCalendar.prototype = {
 
             if (!request.uri) {
                 throw Components.Exception("Item type not supported",
-                                           Components.results.NS_ERROR_NOT_IMPLEMENTED);
+                                           Cr.NS_ERROR_NOT_IMPLEMENTED);
             }
 
             request.setUploadData("application/json; charset=UTF-8",
@@ -409,10 +408,10 @@ calGoogleCalendar.prototype = {
         })().then((item) => {
             cal.LOG("[calGoogleCalendar] Adding " + item.title + " succeeded");
             this.observers.notify("onAddItem", [item]);
-            this.notifyOperationComplete(aListener, Components.results.NS_OK,
+            this.notifyOperationComplete(aListener, Cr.NS_OK,
                                          cIOL.ADD, item.id, item);
         }, (e) => {
-            let code = e.result || Components.results.NS_ERROR_FAILURE;
+            let code = e.result || Cr.NS_ERROR_FAILURE;
             cal.ERROR("[calGoogleCalendar] Adding Item " + aItem.title +
                       " failed:" + code + ": " + e.message);
             this.notifyPureOperationComplete(aListener, code, cIOL.ADD, aItem.id, e.message);
@@ -450,7 +449,7 @@ calGoogleCalendar.prototype = {
 
             if (!request.uri) {
                 throw Components.Exception("Item type not supported",
-                                           Components.results.NS_ERROR_NOT_IMPLEMENTED);
+                                           Cr.NS_ERROR_NOT_IMPLEMENTED);
             }
 
             request.setUploadData("application/json; charset=UTF-8",
@@ -509,11 +508,11 @@ calGoogleCalendar.prototype = {
         })().then((item) => {
             cal.LOG("[calGoogleCalendar] Modifying " + aNewItem.title + " succeeded");
             this.observers.notify("onModifyItem", [item, aOldItem]);
-            this.notifyOperationComplete(aListener, Components.results.NS_OK,
+            this.notifyOperationComplete(aListener, Cr.NS_OK,
                                          cIOL.MODIFY, item.id, item);
         }, (e) => {
-            let code = e.result || Components.results.NS_ERROR_FAILURE;
-            if (code != Components.interfaces.calIErrors.OPERATION_CANCELLED) {
+            let code = e.result || Cr.NS_ERROR_FAILURE;
+            if (code != Ci.calIErrors.OPERATION_CANCELLED) {
                 cal.ERROR("[calGoogleCalendar] Modifying item " + aNewItem.title +
                           " failed:" + code + ": " + e.message);
             }
@@ -540,7 +539,7 @@ calGoogleCalendar.prototype = {
 
             if (!request.uri) {
                 throw Components.Exception("Item type not supported",
-                                           Components.results.NS_ERROR_NOT_IMPLEMENTED);
+                                           Cr.NS_ERROR_NOT_IMPLEMENTED);
             }
 
             // Set up etag from storage so we don't overwrite any foreign changes
@@ -569,11 +568,11 @@ calGoogleCalendar.prototype = {
         })().then((item) => {
             cal.LOG("[calGoogleCalendar] Deleting " + aItem.title + " succeeded");
             this.observers.notify("onDeleteItem", [item]);
-            this.notifyOperationComplete(aListener, Components.results.NS_OK,
+            this.notifyOperationComplete(aListener, Cr.NS_OK,
                                          cIOL.DELETE, item.id, item);
         }, (e) => {
-            let code = e.result || Components.results.NS_ERROR_FAILURE;
-            if (code != Components.interfaces.calIErrors.OPERATION_CANCELLED) {
+            let code = e.result || Cr.NS_ERROR_FAILURE;
+            if (code != Ci.calIErrors.OPERATION_CANCELLED) {
                 cal.ERROR("[calGoogleCalendar] Deleting item " + aItem.title +
                           " failed:" + code + ": " + e.message);
             }
@@ -664,21 +663,19 @@ calGoogleCalendar.prototype = {
                     }
                 }
             };
-            this.mOfflineStorage.QueryInterface(Components.interfaces.calICalendarProvider)
+            this.mOfflineStorage.QueryInterface(Ci.calICalendarProvider)
                                 .deleteCalendar(this.mOfflineStorage, listener);
         });
     },
 
     replayChangesOn: function(aListener) {
         // Figure out if the user is idle, no need to synchronize if so.
-        let idleTime = Components.classes["@mozilla.org/widget/idleservice;1"]
-                                 .getService(Components.interfaces.nsIIdleService)
-                                 .idleTime;
+        let idleTime = Cc["@mozilla.org/widget/idleservice;1"].getService(Ci.nsIIdleService).idleTime;
         let maxIdleTime = Preferences.get("calendar.google.idleTime", 300) * 1000;
 
         if (maxIdleTime != 0 && idleTime > maxIdleTime) {
             cal.LOG("[calGoogleCalendar] Skipping refresh since user is idle");
-            aListener.onResult({ status: Components.results.NS_OK }, null);
+            aListener.onResult({ status: Cr.NS_OK }, null);
             return Promise.resolve();
         }
 
@@ -778,10 +775,10 @@ calGoogleCalendar.prototype = {
 
         return Promise.all([calendarPromise, eventsPromise, tasksPromise]).then(() => {
             this.mOfflineStorage.endBatch();
-            aListener.onResult({ status: Components.results.NS_OK }, null);
+            aListener.onResult({ status: Cr.NS_OK }, null);
         }, (e) => {
             this.mOfflineStorage.endBatch();
-            let code = e.result || Components.results.NS_ERROR_FAILURE;
+            let code = e.result || Cr.NS_ERROR_FAILURE;
             if (code == calGoogleRequest.RESOURCE_GONE) {
                 cal.LOG("[calGoogleCalendar] Server did not accept " +
                         "incremental update, resetting calendar and " +

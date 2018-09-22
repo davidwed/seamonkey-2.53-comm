@@ -56,9 +56,9 @@ function getCurrentUnifinderFilter() {
  */
 var unifinderObserver = {
     QueryInterface: XPCOMUtils.generateQI([
-        Components.interfaces.calICompositeObserver,
-        Components.interfaces.nsIObserver,
-        Components.interfaces.calIObserver
+        Ci.calICompositeObserver,
+        Ci.nsIObserver,
+        Ci.calIObserver
     ]),
 
     // calIObserver:
@@ -359,7 +359,7 @@ function unifinderSelect(event) {
  * @param aEvent        The DOM Key event.
  */
 function unifinderKeyPress(aEvent) {
-    const kKE = Components.interfaces.nsIDOMKeyEvent;
+    const kKE = Ci.nsIDOMKeyEvent;
     switch (aEvent.keyCode) {
         case 13:
             // Enter, edit the event
@@ -380,7 +380,7 @@ function unifinderKeyPress(aEvent) {
  * Tree controller for unifinder search results
  */
 var unifinderTreeView = {
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsITreeView]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsITreeView]),
 
     // Provide a default tree that holds all the functions used here to avoid
     // cludgy if (this.tree) { this.tree.rowCountChanged(...); } constructs.
@@ -868,7 +868,7 @@ function addItemsFromCalendar(aCalendar, aAddItemsInternalFunc) {
         return;
     }
     let refreshListener = {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
         mEventArray: [],
 
         onOperationComplete: function(aOpCalendar, aStatus, aOperationType, aId, aDateTime) {

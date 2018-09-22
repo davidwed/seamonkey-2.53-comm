@@ -338,7 +338,7 @@
 
       <field name="mTreeView"><![CDATA[
         ({
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsITreeView]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.nsITreeView]),
 
             /**
              * Attributes
@@ -550,7 +550,7 @@
                 if (aCol != null) {
                     let content = aCol.element.getAttribute("itemproperty");
                     if (content == "completed") {
-                        let newTask = task.clone().QueryInterface(Components.interfaces.calITodo);
+                        let newTask = task.clone().QueryInterface(Ci.calITodo);
                         newTask.isCompleted = !task.completedDate;
                         doTransaction("modify", newTask, newTask.calendar, task, null);
                     }
@@ -716,13 +716,13 @@
                             task.percentComplete > 0) {
                             // XXX Would be nice if we could use relative widths,
                             // i.e "15ex", but there is no scriptable interface.
-                            return Components.interfaces.nsITreeView.PROGRESS_NORMAL;
+                            return Ci.nsITreeView.PROGRESS_NORMAL;
                         }
                         break;
                     }
                 }
 
-                return Components.interfaces.nsITreeView.PROGRESS_NONE;
+                return Ci.nsITreeView.PROGRESS_NONE;
             },
 
             /**
@@ -806,8 +806,8 @@
 
             // Helper function to display datetimes
             _formatDateTime: function(aDateTime) {
-                let dateFormatter = Components.classes["@mozilla.org/calendar/datetime-formatter;1"]
-                                              .getService(Components.interfaces.calIDateTimeFormatter);
+                let dateFormatter = Cc["@mozilla.org/calendar/datetime-formatter;1"]
+                                      .getService(Ci.calIDateTimeFormatter);
 
                 // datetime is from todo object, it is not a javascript date
                 if (aDateTime && aDateTime.isValid) {
@@ -828,8 +828,8 @@
             binding: this,
 
             QueryInterface: XPCOMUtils.generateQI([
-                Components.interfaces.calICompositeObserver,
-                Components.interfaces.calIObserver
+                Ci.calICompositeObserver,
+                Ci.calIObserver
             ]),
 
             /**
@@ -922,7 +922,7 @@
         <parameter name="aCalendar"/>
         <body><![CDATA[
             let refreshJob = {
-                QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+                QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
                 binding: this,
                 calendar: null,
                 items: null,
@@ -1140,7 +1140,7 @@
           // let's build the drag region
           let region = null;
           try {
-              region = Components.classes["@mozilla.org/gfx/region;1"].createInstance(Components.interfaces.nsIScriptableRegion);
+              region = Cc["@mozilla.org/gfx/region;1"].createInstance(Ci.nsIScriptableRegion);
               region.init();
               let treeBox = tree.treeBox;
               let bodyBox = treeBox.treeBody.boxObject;

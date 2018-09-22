@@ -21,7 +21,7 @@ function really_run_test() {
 
 function test_aclmanager() {
     let mockCalendar = {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendar]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calICalendar]),
 
         get superCalendar() { return this; },
         get aclManager() { return this; },
@@ -35,7 +35,7 @@ function test_aclmanager() {
     };
 
     let itemEntry = {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIItemACLEntry]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calIItemACLEntry]),
         userCanModify: true,
         userCanRespond: false,
         userCanViewAll: true,
@@ -72,7 +72,7 @@ function test_calendar() {
     let parentEntry = cal.createEvent();
 
     let mockCalendar = {
-        QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendar]),
+        QueryInterface: XPCOMUtils.generateQI([Ci.calICalendar]),
         id: "one"
     };
 
@@ -164,7 +164,7 @@ function test_alarm() {
     let alarm = cal.createAlarm();
 
     alarm.action = "DISPLAY";
-    alarm.related = Components.interfaces.calIAlarm.ALARM_RELATED_ABSOLUTE;
+    alarm.related = Ci.calIAlarm.ALARM_RELATED_ABSOLUTE;
     alarm.alarmDate = cal.createDateTime();
 
     e.addAlarm(alarm);

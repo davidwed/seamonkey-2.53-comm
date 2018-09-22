@@ -194,10 +194,10 @@ function calWcapNetworkRequest(url, respFunc, bLogging) {
 }
 var calWcapNetworkRequestClassID = Components.ID("{e3c62b37-83cf-41ec-9872-0af9f952430a}");
 var calWcapNetworkRequestInterfaces = [
-    Components.interfaces.nsIUnicharStreamLoaderObserver,
-    Components.interfaces.nsIInterfaceRequestor,
-    Components.interfaces.nsIChannelEventSink,
-    Components.interfaces.calIOperation,
+    Ci.nsIUnicharStreamLoaderObserver,
+    Ci.nsIInterfaceRequestor,
+    Ci.nsIChannelEventSink,
+    Ci.calIOperation,
 ];
 calWcapNetworkRequest.prototype = {
     m_id: 0,
@@ -229,8 +229,8 @@ calWcapNetworkRequest.prototype = {
      */
     prepareChannel: function(aChannel) {
         // No caching
-        aChannel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
-        aChannel = aChannel.QueryInterface(Components.interfaces.nsIHttpChannel);
+        aChannel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
+        aChannel = aChannel.QueryInterface(Ci.nsIHttpChannel);
         aChannel.requestMethod = "GET";
     },
 
@@ -240,7 +240,7 @@ calWcapNetworkRequest.prototype = {
     asyncOnChannelRedirect: function(aOldChannel, aNewChannel, aFlags, aCallback) {
         // all we need to do to the new channel is the basic preparation
         this.prepareChannel(aNewChannel);
-        aCallback.onRedirectVerifyCallback(Components.results.NS_OK);
+        aCallback.onRedirectVerifyCallback(Cr.NS_OK);
     },
 
     /**
@@ -270,7 +270,7 @@ calWcapNetworkRequest.prototype = {
         if (LOG_LEVEL > 0 && this.m_bLogging) {
             log("status: " + errorToString(aStatus), this);
         }
-        if (aStatus != Components.results.NS_OK) {
+        if (aStatus != Cr.NS_OK) {
             this.execRespFunc(aStatus);
             return;
         }
@@ -279,7 +279,7 @@ calWcapNetworkRequest.prototype = {
             log("contentCharset = " + aLoader.charset + "\nrequest result:\n" + unicharData, this);
         }
 
-        let httpChannel = aLoader.channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+        let httpChannel = aLoader.channel.QueryInterface(Ci.nsIHttpChannel);
         switch (httpChannel.responseStatus / 100) {
             case 2: /* 2xx codes */
                 // Everything worked out, we are done
@@ -402,19 +402,18 @@ function issueNetworkRequest(parentRequest, respFunc, url, bLogging) {
                                                      null,
                                                      Services.scriptSecurityManager.getSystemPrincipal(),
                                                      null,
-                                                     Components.interfaces.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
-                                                     Components.interfaces.nsIContentPolicy.TYPE_OTHER);
+                                                     Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
+                                                     Ci.nsIContentPolicy.TYPE_OTHER);
         netRequest.prepareChannel(channel);
-        channel = channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+        channel = channel.QueryInterface(Ci.nsIHttpChannel);
         channel.redirectionLimit = 3;
         channel.notificationCallbacks = netRequest;
-        let loader = Components.classes["@mozilla.org/network/unichar-stream-loader;1"]
-                               .createInstance(Components.interfaces.nsIUnicharStreamLoader);
+        let loader = Cc["@mozilla.org/network/unichar-stream-loader;1"]
+                       .createInstance(Ci.nsIUnicharStreamLoader);
         netRequest.m_loader = loader;
 
         log("opening channel.", netRequest);
-        loader.init(netRequest,
-                    Components.interfaces.nsIUnicharStreamLoader.DEFAULT_SEGMENT_SIZE);
+        loader.init(netRequest, Ci.nsIUnicharStreamLoader.DEFAULT_SEGMENT_SIZE);
         channel.asyncOpen(loader, null);
     } catch (exc) {
         netRequest.execRespFunc(exc);

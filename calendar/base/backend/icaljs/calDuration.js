@@ -10,7 +10,7 @@ function calDuration(innerObject) {
     this.wrappedJSObject = this;
 }
 
-var calDurationInterfaces = [Components.interfaces.calIDuration];
+var calDurationInterfaces = [Ci.calIDuration];
 var calDurationClassID = Components.ID("{7436f480-c6fc-4085-9655-330b1ee22288}");
 calDuration.prototype = {
     QueryInterface: XPCOMUtils.generateQI(calDurationInterfaces),

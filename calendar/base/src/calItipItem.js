@@ -15,7 +15,7 @@ function calItipItem() {
     this.mCurrentItemIndex = 0;
 }
 var calItipItemClassID = Components.ID("{f41392ab-dcad-4bad-818f-b3d1631c4d93}");
-var calItipItemInterfaces = [Components.interfaces.calIItipItem];
+var calItipItemInterfaces = [Ci.calIItipItem];
 calItipItem.prototype = {
     mIsInitialized: false,
 
@@ -55,7 +55,7 @@ calItipItem.prototype = {
     mResponseMethod: "REPLY",
     get responseMethod() {
         if (!this.mIsInitialized) {
-            throw Components.results.NS_ERROR_NOT_INITIALIZED;
+            throw Cr.NS_ERROR_NOT_INITIALIZED;
         }
         return this.mResponseMethod;
     },
@@ -98,8 +98,7 @@ calItipItem.prototype = {
     mItemList: {},
 
     init: function(aIcalString) {
-        let parser = Components.classes["@mozilla.org/calendar/ics-parser;1"]
-                               .createInstance(Components.interfaces.calIIcsParser);
+        let parser = Cc["@mozilla.org/calendar/ics-parser;1"].createInstance(Ci.calIIcsParser);
         parser.parseString(aIcalString, null);
 
         // - User specific alarms as well as X-MOZ- properties are irrelevant w.r.t. iTIP messages,
@@ -117,7 +116,7 @@ calItipItem.prototype = {
             item.deleteProperty("RECEIVED-DTSTAMP");
             let propEnum = item.propertyEnumerator;
             while (propEnum.hasMoreElements()) {
-                let prop = propEnum.getNext().QueryInterface(Components.interfaces.nsIProperty);
+                let prop = propEnum.getNext().QueryInterface(Ci.nsIProperty);
                 let pname = prop.name;
                 if (pname != "X-MOZ-FAKED-MASTER" && pname.substr(0, "X-MOZ-".length) == "X-MOZ-") {
                     item.deleteProperty(prop.name);
@@ -198,7 +197,7 @@ calItipItem.prototype = {
      */
     getItemList: function(itemCountRef) {
         if (!this.mIsInitialized) {
-            throw Components.results.NS_ERROR_NOT_INITIALIZED;
+            throw Cr.NS_ERROR_NOT_INITIALIZED;
         }
         itemCountRef.value = this.mItemList.length;
         return this.mItemList;

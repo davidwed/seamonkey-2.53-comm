@@ -62,9 +62,9 @@ var calxml = {
             case XPR.ORDERED_NODE_ITERATOR_TYPE:
                 returnResult = [];
                 while ((next = result.iterateNext())) {
-                    if (next instanceof Components.interfaces.nsIDOMText) {
+                    if (next instanceof Ci.nsIDOMText) {
                         returnResult.push(next.wholeText);
-                    } else if (next instanceof Components.interfaces.nsIDOMAttr) {
+                    } else if (next instanceof Ci.nsIDOMAttr) {
                         returnResult.push(next.value);
                     } else {
                         returnResult.push(next);
@@ -76,9 +76,9 @@ var calxml = {
                 returnResult = [];
                 for (let i = 0; i < result.snapshotLength; i++) {
                     next = result.snapshotItem(i);
-                    if (next instanceof Components.interfaces.nsIDOMText) {
+                    if (next instanceof Ci.nsIDOMText) {
                         returnResult.push(next.wholeText);
-                    } else if (next instanceof Components.interfaces.nsIDOMAttr) {
+                    } else if (next instanceof Ci.nsIDOMAttr) {
                         returnResult.push(next.value);
                     } else {
                         returnResult.push(next);
@@ -133,8 +133,8 @@ var calxml = {
      * @return          The parsed DOM Document
      */
     parseString: function(str, docUri, baseUri) {
-        let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-                               .createInstance(Components.interfaces.nsIDOMParser);
+        let parser = Cc["@mozilla.org/xmlextras/domparser;1"]
+                       .createInstance(Ci.nsIDOMParser);
 
         parser.init(null, docUri, baseUri);
         return parser.parseFromString(str, "application/xml");
@@ -162,8 +162,8 @@ var calxml = {
      * @return          The DOM document as a string.
      */
     serializeDOM: function(doc) {
-        let serializer = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
-                                   .createInstance(Components.interfaces.nsIDOMSerializer);
+        let serializer = Cc["@mozilla.org/xmlextras/xmlserializer;1"]
+                           .createInstance(Ci.nsIDOMSerializer);
         return serializer.serializeToString(doc);
     },
 

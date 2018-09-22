@@ -10,8 +10,8 @@ ChromeUtils.import("resource://calendar/modules/calStorageUpgrade.jsm");
 ChromeUtils.import("resource://calendar/modules/calStorageHelpers.jsm");
 
 var USECS_PER_SECOND = 1000000;
-var kCalICalendar = Components.interfaces.calICalendar;
-var cICL = Components.interfaces.calIChangeLog;
+var kCalICalendar = Ci.calICalendar;
+var cICL = Ci.calIChangeLog;
 
 //
 // calStorageCalendar
@@ -25,11 +25,11 @@ function calStorageCalendar() {
 }
 var calStorageCalendarClassID = Components.ID("{b3eaa1c4-5dfe-4c0a-b62a-b3a514218461}");
 var calStorageCalendarInterfaces = [
-    Components.interfaces.calICalendar,
-    Components.interfaces.calICalendarProvider,
-    Components.interfaces.calIOfflineStorage,
-    Components.interfaces.calISchedulingSupport,
-    Components.interfaces.calISyncWriteCalendar,
+    Ci.calICalendar,
+    Ci.calICalendarProvider,
+    Ci.calIOfflineStorage,
+    Ci.calISchedulingSupport,
+    Ci.calISyncWriteCalendar,
 ];
 calStorageCalendar.prototype = {
     __proto__: cal.provider.BaseClass.prototype,
@@ -115,7 +115,7 @@ calStorageCalendar.prototype = {
 
         try {
             if (listener) {
-                listener.onDeleteCalendar(aCalendar, Components.results.NS_OK, null);
+                listener.onDeleteCalendar(aCalendar, Cr.NS_OK, null);
             }
         } catch (ex) {
             this.logError("error calling listener.onDeleteCalendar", ex);
@@ -170,7 +170,7 @@ calStorageCalendar.prototype = {
     set uri(aUri) {
         // We can only load once
         if (this.uri) {
-            throw Components.results.NS_ERROR_FAILURE;
+            throw Cr.NS_ERROR_FAILURE;
         }
 
         let uri = this.__proto__.__proto__.__lookupSetter__("uri").call(this, aUri);
@@ -189,9 +189,9 @@ calStorageCalendar.prototype = {
      */
     prepareInitDB: function() {
         if (this.uri.schemeIs("file")) {
-            let fileURL = this.uri.QueryInterface(Components.interfaces.nsIFileURL);
+            let fileURL = this.uri.QueryInterface(Ci.nsIFileURL);
             if (!fileURL) {
-                throw new Components.Exception("Invalid file", Components.results.NS_ERROR_NOT_IMPLEMENTED);
+                throw new Components.Exception("Invalid file", Cr.NS_ERROR_NOT_IMPLEMENTED);
             }
             // open the database
             this.mDB = Services.storage.openDatabase(fileURL.file);
@@ -207,7 +207,7 @@ calStorageCalendar.prototype = {
 
             // First, we need to check if this is from 0.9, i.e we need to
             // migrate from storage.sdb to local.sqlite.
-            let storageSdb = Services.dirsvc.get("ProfD", Components.interfaces.nsIFile);
+            let storageSdb = Services.dirsvc.get("ProfD", Ci.nsIFile);
             storageSdb.append("storage.sdb");
             this.mDB = Services.storage.openDatabase(storageSdb);
             if (this.mDB.tableExists("cal_events")) {
@@ -229,7 +229,7 @@ calStorageCalendar.prototype = {
                 }
                 try {
                     // hold lock on storage.sdb until we've migrated data from storage.sdb:
-                    this.mDB.beginTransactionAs(Components.interfaces.mozIStorageConnection.TRANSACTION_EXCLUSIVE);
+                    this.mDB.beginTransactionAs(Ci.mozIStorageConnection.TRANSACTION_EXCLUSIVE);
                     try {
                         if (this.mDB.tableExists("cal_events")) { // check again (with lock)
                             // take over data and drop from storage.sdb tables:
@@ -270,7 +270,7 @@ calStorageCalendar.prototype = {
             // WARNING: This is a somewhat fragile process. Great care should be
             // taken during future schema upgrades to make sure this still
             // works.
-            this.mDB.beginTransactionAs(Components.interfaces.mozIStorageConnection.TRANSACTION_EXCLUSIVE);
+            this.mDB.beginTransactionAs(Ci.mozIStorageConnection.TRANSACTION_EXCLUSIVE);
             try {
                 /**
                  * Helper function to migrate all tables from one id to the next
@@ -414,8 +414,8 @@ calStorageCalendar.prototype = {
     adoptItem: function(aItem, aListener) {
         if (this.readOnly) {
             this.notifyOperationComplete(aListener,
-                                         Components.interfaces.calIErrors.CAL_IS_READONLY,
-                                         Components.interfaces.calIOperationListener.ADD,
+                                         Ci.calIErrors.CAL_IS_READONLY,
+                                         Ci.calIOperationListener.ADD,
                                          null,
                                          "Calendar is readonly");
             return;
@@ -432,8 +432,8 @@ calStorageCalendar.prototype = {
                     this.deleteItemById(aItem.id, true);
                 } else {
                     this.notifyOperationComplete(aListener,
-                                                 Components.interfaces.calIErrors.DUPLICATE_ID,
-                                                 Components.interfaces.calIOperationListener.ADD,
+                                                 Ci.calIErrors.DUPLICATE_ID,
+                                                 Ci.calIOperationListener.ADD,
                                                  aItem.id,
                                                  "ID already exists for addItem");
                     return;
@@ -453,8 +453,8 @@ calStorageCalendar.prototype = {
 
         // notify the listener
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.ADD,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.ADD,
                                      aItem.id,
                                      aItem);
 
@@ -483,21 +483,21 @@ calStorageCalendar.prototype = {
         let oldOfflineFlag = offlineFlag;
         if (this.readOnly) {
             this.notifyOperationComplete(aListener,
-                                         Components.interfaces.calIErrors.CAL_IS_READONLY,
-                                         Components.interfaces.calIOperationListener.MODIFY,
+                                         Ci.calIErrors.CAL_IS_READONLY,
+                                         Ci.calIOperationListener.MODIFY,
                                          null,
                                          "Calendar is readonly");
             return null;
         }
         if (!aNewItem) {
-            throw Components.results.NS_ERROR_INVALID_ARG;
+            throw Cr.NS_ERROR_INVALID_ARG;
         }
 
         let self = this;
         function reportError(errStr, errId) {
             self.notifyOperationComplete(aListener,
-                                         errId ? errId : Components.results.NS_ERROR_FAILURE,
-                                         Components.interfaces.calIOperationListener.MODIFY,
+                                         errId ? errId : Cr.NS_ERROR_FAILURE,
+                                         Ci.calIOperationListener.MODIFY,
                                          aNewItem.id,
                                          errStr);
             return null;
@@ -564,8 +564,8 @@ calStorageCalendar.prototype = {
         this.setOfflineJournalFlag(aNewItem, oldOfflineFlag);
 
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.MODIFY,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.MODIFY,
                                      modifiedItem.id,
                                      modifiedItem);
 
@@ -578,8 +578,8 @@ calStorageCalendar.prototype = {
     deleteItem: function(aItem, aListener) {
         if (this.readOnly) {
             this.notifyOperationComplete(aListener,
-                                         Components.interfaces.calIErrors.CAL_IS_READONLY,
-                                         Components.interfaces.calIOperationListener.DELETE,
+                                         Ci.calIErrors.CAL_IS_READONLY,
+                                         Ci.calIOperationListener.DELETE,
                                          null,
                                          "Calendar is readonly");
             return;
@@ -593,8 +593,8 @@ calStorageCalendar.prototype = {
 
         if (aItem.id == null) {
             this.notifyOperationComplete(aListener,
-                                         Components.results.NS_ERROR_FAILURE,
-                                         Components.interfaces.calIOperationListener.DELETE,
+                                         Cr.NS_ERROR_FAILURE,
+                                         Ci.calIOperationListener.DELETE,
                                          null,
                                          "ID is null for deleteItem");
             return;
@@ -603,8 +603,8 @@ calStorageCalendar.prototype = {
         this.deleteItemById(aItem.id);
 
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.DELETE,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.DELETE,
                                      aItem.id,
                                      aItem);
 
@@ -622,8 +622,8 @@ calStorageCalendar.prototype = {
         if (!item) {
             // querying by id is a valid use case, even if no item is returned:
             this.notifyOperationComplete(aListener,
-                                         Components.results.NS_OK,
-                                         Components.interfaces.calIOperationListener.GET,
+                                         Cr.NS_OK,
+                                         Ci.calIOperationListener.GET,
                                          aId,
                                          null);
             return;
@@ -631,26 +631,26 @@ calStorageCalendar.prototype = {
 
         let item_iid = null;
         if (cal.item.isEvent(item)) {
-            item_iid = Components.interfaces.calIEvent;
+            item_iid = Ci.calIEvent;
         } else if (cal.item.isToDo(item)) {
-            item_iid = Components.interfaces.calITodo;
+            item_iid = Ci.calITodo;
         } else {
             this.notifyOperationComplete(aListener,
-                                         Components.results.NS_ERROR_FAILURE,
-                                         Components.interfaces.calIOperationListener.GET,
+                                         Cr.NS_ERROR_FAILURE,
+                                         Ci.calIOperationListener.GET,
                                          aId,
                                          "Can't deduce item type based on QI");
             return;
         }
 
         aListener.onGetResult(this.superCalendar,
-                              Components.results.NS_OK,
+                              Cr.NS_OK,
                               item_iid, null,
                               1, [item]);
 
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.GET,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.GET,
                                      aId,
                                      null);
     },
@@ -684,7 +684,7 @@ calStorageCalendar.prototype = {
         let wantUnrespondedInvitations = ((aItemFilter & kCalICalendar.ITEM_FILTER_REQUEST_NEEDS_ACTION) != 0);
         let superCal;
         try {
-            superCal = this.superCalendar.QueryInterface(Components.interfaces.calISchedulingSupport);
+            superCal = this.superCalendar.QueryInterface(Ci.calISchedulingSupport);
         } catch (exc) {
             wantUnrespondedInvitations = false;
         }
@@ -703,8 +703,8 @@ calStorageCalendar.prototype = {
         if (!wantEvents && !wantTodos) {
             // nothing to do
             this.notifyOperationComplete(aListener,
-                                         Components.results.NS_OK,
-                                         Components.interfaces.calIOperationListener.GET,
+                                         Cr.NS_OK,
+                                         Ci.calIOperationListener.GET,
                                          null,
                                          null);
             return;
@@ -750,7 +750,7 @@ calStorageCalendar.prototype = {
 
             if (queuedItems.length != 0 && (!theItems || queuedItems.length > maxQueueSize)) {
                 aListener.onGetResult(self.superCalendar,
-                                      Components.results.NS_OK,
+                                      Cr.NS_OK,
                                       queuedItemsIID, null,
                                       queuedItems.length, queuedItems);
                 queuedItems = [];
@@ -792,8 +792,8 @@ calStorageCalendar.prototype = {
 
                 // send operation complete
                 self.notifyOperationComplete(aListener,
-                                             Components.results.NS_OK,
-                                             Components.interfaces.calIOperationListener.GET,
+                                             Cr.NS_OK,
+                                             Ci.calIOperationListener.GET,
                                              null,
                                              null);
 
@@ -841,7 +841,7 @@ calStorageCalendar.prototype = {
 
             // Process the non-recurring events:
             for (let evitem of resultItems) {
-                count += handleResultItem(evitem, Components.interfaces.calIEvent);
+                count += handleResultItem(evitem, Ci.calIEvent);
                 if (checkCount()) {
                     return;
                 }
@@ -855,7 +855,7 @@ calStorageCalendar.prototype = {
                 // Return created and modified offline records if requestedOfflineJournal is null alongwith events that have no flag
                 if ((requestedOfflineJournal == null && cachedJournalFlag != cICL.OFFLINE_FLAG_DELETED_RECORD) ||
                     (requestedOfflineJournal != null && cachedJournalFlag == requestedOfflineJournal)) {
-                    count += handleResultItem(evitem, Components.interfaces.calIEvent);
+                    count += handleResultItem(evitem, Ci.calIEvent);
                     if (checkCount()) {
                         return;
                     }
@@ -899,7 +899,7 @@ calStorageCalendar.prototype = {
 
             // process the non-recurring todos:
             for (let todoitem of resultItems) {
-                count += handleResultItem(todoitem, Components.interfaces.calITodo, checkCompleted);
+                count += handleResultItem(todoitem, Ci.calITodo, checkCompleted);
                 if (checkCount()) {
                     return;
                 }
@@ -920,7 +920,7 @@ calStorageCalendar.prototype = {
                     (requestedOfflineJournal != null &&
                      (cachedJournalFlag == requestedOfflineJournal))) {
                     count += handleResultItem(todoitem,
-                                              Components.interfaces.calITodo,
+                                              Ci.calITodo,
                                               checkCompleted);
                     if (checkCount()) {
                         return;
@@ -934,8 +934,8 @@ calStorageCalendar.prototype = {
 
         // and finish
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.GET,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.GET,
                                      null,
                                      null);
     },
@@ -952,12 +952,12 @@ calStorageCalendar.prototype = {
                 },
                 handleError: function(aError) {
                     self.logError("Error getting offline flag", aError);
-                    aListener.onOperationComplete(self, Components.results.NS_ERROR_FAILURE,
-                                                  Components.interfaces.calIOperationListener.GET, aItem.id, aItem);
+                    aListener.onOperationComplete(self, Cr.NS_ERROR_FAILURE,
+                                                  Ci.calIOperationListener.GET, aItem.id, aItem);
                 },
                 handleCompletion: function(aReason) {
-                    aListener.onOperationComplete(self, Components.results.NS_OK,
-                                                  Components.interfaces.calIOperationListener.GET, aItem.id, flag);
+                    aListener.onOperationComplete(self, Cr.NS_OK,
+                                                  Ci.calIOperationListener.GET, aItem.id, flag);
                 }
             };
             if (cal.item.isEvent(aItem)) {
@@ -971,8 +971,8 @@ calStorageCalendar.prototype = {
             }
         } else {
             // It is possible that aItem can be null, flag provided should be null in this case
-            aListener.onOperationComplete(this, Components.results.NS_OK,
-                                               Components.interfaces.calIOperationListener.GET, null, flag);
+            aListener.onOperationComplete(this, Cr.NS_OK,
+                                          Ci.calIOperationListener.GET, null, flag);
         }
     },
 
@@ -1010,8 +1010,8 @@ calStorageCalendar.prototype = {
         let newOfflineJournalFlag = cICL.OFFLINE_FLAG_CREATED_RECORD;
         this.setOfflineJournalFlag(aItem, newOfflineJournalFlag);
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.ADD,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.ADD,
                                      aItem.id,
                                      aItem);
     },
@@ -1019,7 +1019,7 @@ calStorageCalendar.prototype = {
     modifyOfflineItem: function(aItem, aListener) {
         let self = this;
         let opListener = {
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
             onGetResult: function(calendar, status, itemType, detail, count, items) {
             },
             onOperationComplete: function(calendar, status, opType, id, oldOfflineJournalFlag) {
@@ -1030,8 +1030,8 @@ calStorageCalendar.prototype = {
                     self.setOfflineJournalFlag(aItem, newOfflineJournalFlag);
                 }
                 self.notifyOperationComplete(aListener,
-                                             Components.results.NS_OK,
-                                             Components.interfaces.calIOperationListener.MODIFY,
+                                             Cr.NS_OK,
+                                             Ci.calIOperationListener.MODIFY,
                                              aItem.id,
                                              aItem);
             }
@@ -1042,7 +1042,7 @@ calStorageCalendar.prototype = {
     deleteOfflineItem: function(aItem, aListener) {
         let self = this;
         let opListener = {
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
             onGetResult: function(calendar, status, itemType, detail, count, items) {
 
             },
@@ -1059,8 +1059,8 @@ calStorageCalendar.prototype = {
                 }
 
                 self.notifyOperationComplete(aListener,
-                                             Components.results.NS_OK,
-                                             Components.interfaces.calIOperationListener.DELETE,
+                                             Cr.NS_OK,
+                                             Ci.calIOperationListener.DELETE,
                                              aItem.id,
                                              aItem);
                 // notify observers
@@ -1073,8 +1073,8 @@ calStorageCalendar.prototype = {
     resetItemOfflineFlag: function(aItem, aListener) {
         this.setOfflineJournalFlag(aItem, null);
         this.notifyOperationComplete(aListener,
-                                     Components.results.NS_OK,
-                                     Components.interfaces.calIOperationListener.MODIFY,
+                                     Cr.NS_OK,
+                                     Ci.calIOperationListener.MODIFY,
                                      aItem.id,
                                      aItem);
     },
@@ -1747,7 +1747,7 @@ calStorageCalendar.prototype = {
 
         if (flags & CAL_ITEM_FLAG.HAS_RECURRENCE) {
             if (item.recurrenceId) {
-                throw Components.results.NS_ERROR_UNEXPECTED;
+                throw Cr.NS_ERROR_UNEXPECTED;
             }
 
             let recInfo = cal.createRecurrenceInfo(item);
@@ -1774,7 +1774,7 @@ calStorageCalendar.prototype = {
             // (getAdditionalDataForItem->get[Event|Todo]FromRow->getAdditionalDataForItem):
             // every excepton has a recurrenceId and isn't flagged as CAL_ITEM_FLAG.HAS_EXCEPTIONS
             if (item.recurrenceId) {
-                throw Components.results.NS_ERROR_UNEXPECTED;
+                throw Cr.NS_ERROR_UNEXPECTED;
             }
 
             let rec = item.recurrenceInfo;
@@ -1810,7 +1810,7 @@ calStorageCalendar.prototype = {
                     this.mSelectTodoExceptions.reset();
                 }
             } else {
-                throw Components.results.NS_ERROR_UNEXPECTED;
+                throw Cr.NS_ERROR_UNEXPECTED;
             }
         }
 
@@ -1887,8 +1887,7 @@ calStorageCalendar.prototype = {
         switch (prop.propertyName) {
             case "RDATE":
             case "EXDATE":
-                ritem = Components.classes["@mozilla.org/calendar/recurrence-date;1"]
-                                  .createInstance(Components.interfaces.calIRecurrenceDate);
+                ritem = Cc["@mozilla.org/calendar/recurrence-date;1"].createInstance(Ci.calIRecurrenceDate);
                 break;
             case "RRULE":
             case "EXRULE":
@@ -2008,7 +2007,7 @@ calStorageCalendar.prototype = {
         } else if (cal.item.isToDo(item)) {
             this.writeTodo(item, olditem, flags);
         } else {
-            throw Components.results.NS_ERROR_UNEXPECTED;
+            throw Cr.NS_ERROR_UNEXPECTED;
         }
     },
 
@@ -2124,7 +2123,7 @@ calStorageCalendar.prototype = {
             this.prepareStatement(this.mInsertProperty);
             let params = this.mInsertProperty.params;
             params.key = propName;
-            let wPropValue = cal.wrapInstance(propValue, Components.interfaces.calIDateTime);
+            let wPropValue = cal.wrapInstance(propValue, Ci.calIDateTime);
             if (wPropValue) {
                 params.value = wPropValue.nativeTime;
             } else {
@@ -2134,7 +2133,7 @@ calStorageCalendar.prototype = {
                     // The storage service throws an NS_ERROR_ILLEGAL_VALUE in
                     // case pval is something complex (i.e not a string or
                     // number). Swallow this error, leaving the value empty.
-                    if (e.result != Components.results.NS_ERROR_ILLEGAL_VALUE) {
+                    if (e.result != Cr.NS_ERROR_ILLEGAL_VALUE) {
                         throw e;
                     }
                 }
@@ -2152,7 +2151,7 @@ calStorageCalendar.prototype = {
         let propEnumerator = item.propertyEnumerator;
         while (propEnumerator.hasMoreElements()) {
             ret = CAL_ITEM_FLAG.HAS_PROPERTIES;
-            let prop = propEnumerator.getNext().QueryInterface(Components.interfaces.nsIProperty);
+            let prop = propEnumerator.getNext().QueryInterface(Ci.nsIProperty);
             if (item.isPropertyPromoted(prop.name)) {
                 continue;
             }
@@ -2197,7 +2196,7 @@ calStorageCalendar.prototype = {
                 for (let exid of exceptions) {
                     let ex = rec.getExceptionFor(exid);
                     if (!ex) {
-                        throw Components.results.NS_ERROR_UNEXPECTED;
+                        throw Cr.NS_ERROR_UNEXPECTED;
                     }
                     this.writeItem(ex, null);
                 }
@@ -2341,7 +2340,7 @@ calStorageCalendar.prototype = {
             params.value = value;
             this.mInsertMetaData.executeStep();
         } catch (e) {
-            if (e.result == Components.results.NS_ERROR_ILLEGAL_VALUE) {
+            if (e.result == Cr.NS_ERROR_ILLEGAL_VALUE) {
                 this.logError("Unknown error!", e);
             } else {
                 // The storage service throws an NS_ERROR_ILLEGAL_VALUE in

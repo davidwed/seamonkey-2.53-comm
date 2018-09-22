@@ -115,7 +115,7 @@ function LOGalarm(aAlarm) {
 }
 
 function LOGinterval(aInterval) {
-    const fbtypes = Components.interfaces.calIFreeBusyInterval;
+    const fbtypes = Ci.calIFreeBusyInterval;
     let type;
     if (aInterval.freeBusyType == fbtypes.FREE) {
         type = "FREE";

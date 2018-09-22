@@ -129,7 +129,7 @@ InvitationsManager.prototype = {
         let cals = cal.getCalendarManager().getCalendars({});
 
         let opListener = {
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
             mCount: cals.length,
             mRequestManager: gInvitationsRequestManager,
             mInvitationsManager: this,
@@ -150,15 +150,15 @@ InvitationsManager.prototype = {
                             if (this.mInvitationsManager.mItemList.length) {
                                 // Only call if there are actually items
                                 listener.onGetResult(null,
-                                                     Components.results.NS_OK,
-                                                     Components.interfaces.calIItemBase,
+                                                     Cr.NS_OK,
+                                                     Ci.calIItemBase,
                                                      null,
                                                      this.mInvitationsManager.mItemList.length,
                                                      this.mInvitationsManager.mItemList);
                             }
                             listener.onOperationComplete(null,
-                                                         Components.results.NS_OK,
-                                                         Components.interfaces.calIOperationListener.GET,
+                                                         Cr.NS_OK,
+                                                         Ci.calIOperationListener.GET,
                                                          null,
                                                          null);
                         } catch (exc) {
@@ -203,14 +203,14 @@ InvitationsManager.prototype = {
             }
 
             try {
-                calendar = calendar.QueryInterface(Components.interfaces.calICalendar);
+                calendar = calendar.QueryInterface(Ci.calICalendar);
                 let endDate = this.mStartDate.clone();
                 endDate.year += 1;
-                let operation = calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_REQUEST_NEEDS_ACTION |
-                                                  Components.interfaces.calICalendar.ITEM_FILTER_TYPE_ALL |
+                let operation = calendar.getItems(Ci.calICalendar.ITEM_FILTER_REQUEST_NEEDS_ACTION |
+                                                  Ci.calICalendar.ITEM_FILTER_TYPE_ALL |
                                                   // we need to retrieve by occurrence to properly filter exceptions,
                                                   // should be fixed with bug 416975
-                                                  Components.interfaces.calICalendar.ITEM_FILTER_CLASS_OCCURRENCES,
+                                                  Ci.calICalendar.ITEM_FILTER_CLASS_OCCURRENCES,
                                                   0, this.mStartDate,
                                                   endDate /* we currently cannot pass null here, because of bug 416975 */,
                                                   opListener);
@@ -268,14 +268,14 @@ InvitationsManager.prototype = {
             this.mOldItem = oldItem_;
         }
         operationListener.prototype = {
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
             onOperationComplete: function(aCalendar,
                                           aStatus,
                                           aOperationType,
                                           aId,
                                           aDetail) {
                 if (Components.isSuccessCode(aStatus) &&
-                    aOperationType == Components.interfaces.calIOperationListener.MODIFY) {
+                    aOperationType == Ci.calIOperationListener.MODIFY) {
                     cal.itip.checkAndSend(aOperationType, aDetail, this.mOldItem);
                     this.mInvitationsManager.deleteItem(aDetail);
                     this.mInvitationsManager.addItem(aDetail);
@@ -410,7 +410,7 @@ InvitationsManager.prototype = {
      * @return          A boolean indicating if the item is a valid invitation.
      */
     validateItem: function(item) {
-        if (item.calendar instanceof Components.interfaces.calISchedulingSupport &&
+        if (item.calendar instanceof Ci.calISchedulingSupport &&
             !item.calendar.isInvitation(item)) {
             return false; // exclude if organizer has invited himself
         }

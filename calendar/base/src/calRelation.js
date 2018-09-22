@@ -17,7 +17,7 @@ function calRelation() {
     this.mProperties = new cal.data.PropertyMap();
 }
 var calRelationClassID = Components.ID("{76810fae-abad-4019-917a-08e95d5bbd68}");
-var calRelationInterfaces = [Components.interfaces.calIRelation];
+var calRelationInterfaces = [Ci.calIRelation];
 calRelation.prototype = {
     mType: null,
     mId: null,
@@ -64,7 +64,7 @@ calRelation.prototype = {
             try {
                 icalatt.setParameter(key, value);
             } catch (e) {
-                if (e.result == Components.results.NS_ERROR_ILLEGAL_VALUE) {
+                if (e.result == Cr.NS_ERROR_ILLEGAL_VALUE) {
                     // Illegal values should be ignored, but we could log them if
                     // the user has enabled logging.
                     cal.LOG("Warning: Invalid relation property value " + key + "=" + value);
@@ -101,7 +101,7 @@ calRelation.prototype = {
     set icalString(val) {
         let prop = cal.getIcsService().createIcalPropertyFromString(val);
         if (prop.propertyName != "RELATED-TO") {
-            throw Components.results.NS_ERROR_ILLEGAL_VALUE;
+            throw Cr.NS_ERROR_ILLEGAL_VALUE;
         }
         this.icalProperty = prop;
         return val;

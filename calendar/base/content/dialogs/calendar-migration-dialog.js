@@ -268,7 +268,7 @@ var gDataMigrator = {
                 if (getRDFAttr(node, "remote") == "false") {
                     migLOG("not remote");
                     let localFile = Cc["@mozilla.org/file/local;1"]
-                                    .createInstance(Ci.nsIFile);
+                                      .createInstance(Ci.nsIFile);
                     localFile.initWithPath(getRDFAttr(node, "path"));
                     calendar = gDataMigrator.importICSToStorage(localFile);
                 } else {
@@ -290,7 +290,7 @@ var gDataMigrator = {
 
         // Look in our current profile directory, in case we're upgrading in
         // place
-        let profileDir = this.dirService.get("ProfD", Components.interfaces.nsIFile);
+        let profileDir = this.dirService.get("ProfD", Ci.nsIFile);
         profileDir.append("Calendar");
         if (profileDir.exists()) {
             migLOG("Found old extension directory in current app");
@@ -354,11 +354,11 @@ var gDataMigrator = {
 
                 let chars = [];
                 let fileStream = Cc["@mozilla.org/network/file-input-stream;1"]
-                                 .createInstance(Ci.nsIFileInputStream);
+                                   .createInstance(Ci.nsIFileInputStream);
 
                 fileStream.init(dataStore, 0x01, parseInt("0444", 8), {});
                 let convIStream = Cc["@mozilla.org/intl/converter-input-stream;1"]
-                                  .getService(Ci.nsIConverterInputStream);
+                                    .getService(Ci.nsIConverterInputStream);
                 convIStream.init(fileStream, 'UTF-8', 0, 0x0000);
                 let tmpStr = {};
                 let str = "";
@@ -386,10 +386,10 @@ var gDataMigrator = {
                 let tempUri = Services.io.newFileURI(tempFile);
 
                 let stream = Cc["@mozilla.org/network/file-output-stream;1"]
-                             .createInstance(Ci.nsIFileOutputStream);
+                               .createInstance(Ci.nsIFileOutputStream);
                 stream.init(tempFile, 0x2A, parseInt("0600", 8), 0);
                 let convOStream = Cc["@mozilla.org/intl/converter-output-stream;1"]
-                                 .createInstance(Ci.nsIConverterOutputStream);
+                                    .createInstance(Ci.nsIConverterOutputStream);
                 convOStream.init(stream, 'UTF-8');
                 convOStream.writeString(str);
 
@@ -540,10 +540,10 @@ var gDataMigrator = {
             Services.io.newURI(uri)
         );
         let icsImporter = Cc["@mozilla.org/calendar/import;1?type=ics"]
-                          .getService(Ci.calIImporter);
+                            .getService(Ci.calIImporter);
 
         let inputStream = Cc["@mozilla.org/network/file-input-stream;1"]
-                          .createInstance(Ci.nsIFileInputStream);
+                            .createInstance(Ci.nsIFileInputStream);
         let items = [];
 
         calendar.id = cal.getUUID();
