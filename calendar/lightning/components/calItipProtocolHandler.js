@@ -11,7 +11,7 @@ var NS_ERROR_WONT_HANDLE_CONTENT = 0x805d0001;
 
 
 function NYI() {
-    throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
+    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
 }
 
 function ItipChannel(URI) {
@@ -19,8 +19,8 @@ function ItipChannel(URI) {
 }
 var ItipChannelClassID = Components.ID("{643e0328-36f6-411d-a107-16238dff9cd7}");
 var ItipChannelInterfaces = [
-    Components.interfaces.nsIChannel,
-    Components.interfaces.nsIRequest
+    Ci.nsIChannel,
+    Ci.nsIRequest
 ];
 ItipChannel.prototype = {
     classID: ItipChannelClassID,
@@ -49,7 +49,7 @@ ItipChannel.prototype = {
     },
 
     isPending: function() { return true; },
-    status: Components.results.NS_OK,
+    status: Cr.NS_OK,
     cancel: function(status) { this.status = status; },
     suspend: NYI,
     resume: NYI,
@@ -59,7 +59,7 @@ function ItipProtocolHandler() {
     this.wrappedJSObject = this;
 }
 var ItipProtocolHandlerClassID = Components.ID("{6e957006-b4ce-11d9-b053-001124736B74}");
-var ItipProtocolHandlerInterfaces = [Components.interfaces.nsIProtocolHandler];
+var ItipProtocolHandlerInterfaces = [Ci.nsIProtocolHandler];
 ItipProtocolHandler.prototype = {
     classID: ItipProtocolHandlerClassID,
     QueryInterface: XPCOMUtils.generateQI(ItipProtocolHandlerInterfaces),
@@ -74,7 +74,7 @@ ItipProtocolHandler.prototype = {
     allowPort: () => false,
     isSecure: false,
     newURI: function(spec, charSet, baseURI) {
-        let cls = Components.classes["@mozilla.org/network/standard-url;1"];
+        let cls = Cc["@mozilla.org/network/standard-url;1"];
         let url = cls.createInstance(Ci.nsIStandardURL);
         url.init(Ci.nsIStandardURL.URLTYPE_STANDARD, 0, spec, charSet, baseURI);
         dump("Creating new URI for " + spec + "\n");
@@ -95,7 +95,7 @@ function ItipContentHandler() {
     this.wrappedJSObject = this;
 }
 var ItipContentHandlerClassID = Components.ID("{47c31f2b-b4de-11d9-bfe6-001124736B74}");
-var ItipContentHandlerInterfaces = [Components.interfaces.nsIContentHandler];
+var ItipContentHandlerInterfaces = [Ci.nsIContentHandler];
 ItipContentHandler.prototype = {
     classID: ItipContentHandlerClassID,
     QueryInterface: XPCOMUtils.generateQI(ItipContentHandlerInterfaces),

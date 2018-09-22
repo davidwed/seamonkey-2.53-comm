@@ -32,9 +32,9 @@ var itemConversion = {
         cal.alarms.setDefaultValues(aItem);
 
         let messenger = Cc["@mozilla.org/messenger;1"]
-                        .createInstance(Ci.nsIMessenger);
+                          .createInstance(Ci.nsIMessenger);
         let streamListener = Cc["@mozilla.org/network/sync-stream-listener;1"]
-                             .createInstance(Ci.nsISyncStreamListener);
+                               .createInstance(Ci.nsISyncStreamListener);
         messenger.messageServiceFromURI(msgUri).streamMessage(msgUri,
                                                               streamListener,
                                                               null,
@@ -216,7 +216,7 @@ calDNDBaseObserver.prototype = {
 
     onDrop: function(aEvent, aTransferData, aDragSession) {
         let transferable = Cc["@mozilla.org/widget/transferable;1"]
-                           .createInstance(Ci.nsITransferable);
+                             .createInstance(Ci.nsITransferable);
         transferable.init(null);
         transferable.addDataFlavor("text/calendar");
         transferable.addDataFlavor("text/x-moz-url");
@@ -251,7 +251,7 @@ calDNDBaseObserver.prototype = {
                     data = data.data.replace(/\n\n/g, "\r\n");
                 }
                 let parser = Cc["@mozilla.org/calendar/ics-parser;1"]
-                             .createInstance(Components.interfaces.calIIcsParser);
+                               .createInstance(Ci.calIIcsParser);
                 parser.parseString(data);
                 this.onDropItems(
                     parser.getItems({}).concat(parser.getParentlessItems({}))
@@ -267,11 +267,11 @@ calDNDBaseObserver.prototype = {
                 let url = Services.io.newURI(droppedUrl);
 
                 let localFileInstance = Cc["@mozilla.org/file/local;1"]
-                                        .createInstance(Ci.nsIFile);
+                                          .createInstance(Ci.nsIFile);
                 localFileInstance.initWithPath(url.path);
 
                 let inputStream = Cc["@mozilla.org/network/file-input-stream;1"]
-                                  .createInstance(Ci.nsIFileInputStream);
+                                    .createInstance(Ci.nsIFileInputStream);
                 inputStream.init(localFileInstance,
                                  MODE_RDONLY,
                                  parseInt("0444", 8),
@@ -280,7 +280,7 @@ calDNDBaseObserver.prototype = {
                 try {
                     // XXX support csv
                     let importer = Cc["@mozilla.org/calendar/import;1?type=ics"]
-                                   .getService(Ci.calIImporter);
+                                     .getService(Ci.calIImporter);
                     let items = importer.importFromStream(inputStream, {});
                     this.onDropItems(items);
                 }
@@ -294,7 +294,7 @@ calDNDBaseObserver.prototype = {
             case "text/x-moz-url": {
                 let uri = Services.io.newURI(data.toString());
                 let loader = Cc["@mozilla.org/network/unichar-stream-loader;1"]
-                             .createInstance(Ci.nsIUnicharStreamLoader);
+                               .createInstance(Ci.nsIUnicharStreamLoader);
                 let channel = Services.io.newChannelFromURI2(uri,
                                                              null,
                                                              Services.scriptSecurityManager.getSystemPrincipal(),
@@ -320,7 +320,7 @@ calDNDBaseObserver.prototype = {
 
                     onStreamComplete: function(loader, context, status, unicharString) {
                         let parser = Cc["@mozilla.org/calendar/ics-parser;1"]
-                                     .createInstance(Ci.calIIcsParser);
+                                       .createInstance(Ci.calIIcsParser);
                         parser.parseString(unicharString);
                         self.onDropItems(parser.getItems({}).concat(parser.getParentlessItems({})));
                     }
@@ -554,7 +554,7 @@ calTaskButtonDNDObserver.prototype = {
  */
 function invokeEventDragSession(aItem, aXULBox) {
     let transfer = Cc["@mozilla.org/widget/transferable;1"]
-                   .createInstance(Ci.nsITransferable);
+                     .createInstance(Ci.nsITransferable);
     transfer.init(null);
     transfer.addDataFlavor("text/calendar");
 
@@ -583,18 +583,18 @@ function invokeEventDragSession(aItem, aXULBox) {
 
     // Also set some normal data-types, in case we drag into another app
     let serializer = Cc["@mozilla.org/calendar/ics-serializer;1"]
-                     .createInstance(Ci.calIIcsSerializer);
+                       .createInstance(Ci.calIIcsSerializer);
     serializer.addItems([aItem], 1);
 
     let supportsString = Cc["@mozilla.org/supports-string;1"]
-                         .createInstance(Ci.nsISupportsString);
+                           .createInstance(Ci.nsISupportsString);
     supportsString.data = serializer.serializeToString();
     transfer.setTransferData("text/calendar", supportsString, supportsString.data.length * 2);
     transfer.setTransferData("text/unicode", supportsString, supportsString.data.length * 2);
 
     let action = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
     let mutArray = Cc["@mozilla.org/array;1"]
-                   .createInstance(Ci.nsIMutableArray);
+                     .createInstance(Ci.nsIMutableArray);
     mutArray.appendElement(transfer);
     aXULBox.sourceObject = aItem;
     try {

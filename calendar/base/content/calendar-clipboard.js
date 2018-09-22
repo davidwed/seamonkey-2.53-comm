@@ -145,7 +145,7 @@ function pasteFromClipboard() {
         case "text/calendar":
         case "text/unicode": {
             let icsParser = Cc["@mozilla.org/calendar/ics-parser;1"]
-                           .createInstance(Ci.calIIcsParser);
+                              .createInstance(Ci.calIIcsParser);
             try {
                 icsParser.parseString(data);
             } catch (e) {

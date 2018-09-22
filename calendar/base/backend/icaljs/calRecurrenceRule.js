@@ -11,7 +11,7 @@ function calRecurrenceRule(innerObject) {
     this.wrappedJSObject = this;
 }
 
-var calRecurrenceRuleInterfaces = [Components.interfaces.calIRecurrenceRule];
+var calRecurrenceRuleInterfaces = [Ci.calIRecurrenceRule];
 var calRecurrenceRuleClassID = Components.ID("{df19281a-5389-4146-b941-798cb93a7f0d}");
 calRecurrenceRule.prototype = {
     QueryInterface: XPCOMUtils.generateQI(calRecurrenceRuleInterfaces),
@@ -44,7 +44,7 @@ calRecurrenceRule.prototype = {
         aRangeEnd = unwrapSingle(ICAL.Time, aRangeEnd);
 
         if (!aMaxCount && !aRangeEnd && this.count == 0 && this.until == null) {
-            throw Components.results.NS_ERROR_INVALID_ARG;
+            throw Cr.NS_ERROR_INVALID_ARG;
         }
 
         let occurrences = [];
@@ -117,7 +117,7 @@ calRecurrenceRule.prototype = {
 
     get count() {
         if (!this.isByCount) {
-            throw Components.results.NS_ERROR_FAILURE;
+            throw Cr.NS_ERROR_FAILURE;
         }
         return this.innerObject.count || -1;
     },

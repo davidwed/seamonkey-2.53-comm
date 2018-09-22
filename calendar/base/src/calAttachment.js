@@ -16,7 +16,7 @@ function calAttachment() {
 }
 
 var calAttachmentClassID = Components.ID("{5f76b352-ab75-4c2b-82c9-9206dbbf8571}");
-var calAttachmentInterfaces = [Components.interfaces.calIAttachment];
+var calAttachmentInterfaces = [Ci.calIAttachment];
 calAttachment.prototype = {
     mData: null,
     mHashId: null,
@@ -32,11 +32,11 @@ calAttachment.prototype = {
 
     get hashId() {
         if (!this.mHashId) {
-            let cryptoHash = Components.classes["@mozilla.org/security/hash;1"]
-                                       .createInstance(Components.interfaces.nsICryptoHash);
+            let cryptoHash = Cc["@mozilla.org/security/hash;1"]
+                               .createInstance(Ci.nsICryptoHash);
 
-            let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                                      .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+            let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                              .createInstance(Ci.nsIScriptableUnicodeConverter);
             converter.charset = "UTF-8";
             let data = converter.convertToByteArray(this.rawData, {});
 
@@ -105,7 +105,7 @@ calAttachment.prototype = {
             try {
                 icalatt.setParameter(key, value);
             } catch (e) {
-                if (e.result == Components.results.NS_ERROR_ILLEGAL_VALUE) {
+                if (e.result == Cr.NS_ERROR_ILLEGAL_VALUE) {
                     // Illegal values should be ignored, but we could log them if
                     // the user has enabled logging.
                     cal.LOG("Warning: Invalid attachment parameter value " + key + "=" + value);
@@ -139,7 +139,7 @@ calAttachment.prototype = {
     set icalString(val) {
         let prop = cal.getIcsService().createIcalPropertyFromString(val);
         if (prop.propertyName != "ATTACH") {
-            throw Components.results.NS_ERROR_ILLEGAL_VALUE;
+            throw Cr.NS_ERROR_ILLEGAL_VALUE;
         }
         this.icalProperty = prop;
         return val;

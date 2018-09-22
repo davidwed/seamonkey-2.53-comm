@@ -10,7 +10,7 @@ ChromeUtils.import("resource://gdata-provider/modules/calUtilsShim.jsm");
 
 /* exported cancelRequest, loadRequestedUrl, reportUserClosed */
 
-var wpl = Components.interfaces.nsIWebProgressListener;
+var wpl = Ci.nsIWebProgressListener;
 
 var reporterListener = {
     _isBusy: false,
@@ -20,8 +20,8 @@ var reporterListener = {
     },
 
     QueryInterface: XPCOMUtils.generateQI([
-        Components.interfaces.nsIWebProgressListener,
-        Components.interfaces.nsISupportsWeakReference,
+        Ci.nsIWebProgressListener,
+        Ci.nsISupportsWeakReference,
     ]),
 
     onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus) {
@@ -82,8 +82,7 @@ function loadRequestedUrl() {
     }
 
     let browser = document.getElementById("requestFrame");
-    browser.addProgressListener(reporterListener,
-                                Components.interfaces.nsIWebProgress.NOTIFY_ALL);
+    browser.addProgressListener(reporterListener, Ci.nsIWebProgress.NOTIFY_ALL);
     let url = request.url;
     if (url != "") {
         browser.setAttribute("src", url);

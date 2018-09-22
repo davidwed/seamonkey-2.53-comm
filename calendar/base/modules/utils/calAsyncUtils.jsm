@@ -14,8 +14,8 @@ ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 this.EXPORTED_SYMBOLS = ["calasync"]; /* exported calasync */
 
-var cIOL = Components.interfaces.calIOperationListener;
-var cIC = Components.interfaces.calICalendar;
+var cIOL = Ci.calIOperationListener;
+var cIC = Ci.calICalendar;
 
 var promisifyProxyHandler = {
     promiseOperation: function(target, name, args) {
@@ -41,7 +41,7 @@ var promisifyProxyHandler = {
             case "deleteOfflineItem":
             case "getOfflineItemFlag":
             case "resetItemOfflineFlag": {
-                let offline = target.QueryInterface(Components.interfaces.calIOfflineStorage);
+                let offline = target.QueryInterface(Ci.calIOfflineStorage);
                 return (...args) => this.promiseOperation(offline, name, args);
             }
 
@@ -107,9 +107,9 @@ var calasync = {
      */
     promiseOperationListener: function(deferred) {
         return {
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
             items: [],
-            itemStatus: Components.results.NS_OK,
+            itemStatus: Cr.NS_OK,
             onGetResult: function(aCalendar, aStatus, aItemType, aDetail,
                                   aCount, aItems) {
                 this.itemStatus = aStatus;

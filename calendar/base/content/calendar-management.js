@@ -31,8 +31,8 @@ function getSelectedCalendar() {
  * @param aCalendar     The calendar to delete.
  */
 function promptDeleteCalendar(aCalendar) {
-    const nIPS = Components.interfaces.nsIPromptService;
-    const cICM = Components.interfaces.calICalendarManager;
+    const nIPS = Ci.nsIPromptService;
+    const cICM = Ci.calICalendarManager;
 
     let calMgr = cal.getCalendarManager();
     let calendars = calMgr.getCalendars({});
@@ -128,7 +128,7 @@ function initHomeCalendar() {
         try {
             gDataMigrator.checkAndMigrate();
         } catch (e) {
-            Components.utils.reportError("Migrator error: " + e);
+            Cu.reportError("Migrator error: " + e);
         }
     }
 
@@ -351,8 +351,8 @@ function showOnlyCalendar(aCalendar) {
 
 var compositeObserver = {
     QueryInterface: XPCOMUtils.generateQI([
-        Components.interfaces.calIObserver,
-        Components.interfaces.calICompositeObserver
+        Ci.calIObserver,
+        Ci.calICompositeObserver
     ]),
 
     onStartBatch: function() {},
@@ -406,11 +406,11 @@ function openCalendarSubscriptionsDialog() {
  * Calendar Offline Manager
  */
 var calendarOfflineManager = {
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIObserver]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
 
     init: function() {
         if (this.initialized) {
-            throw Components.results.NS_ERROR_ALREADY_INITIALIZED;
+            throw Cr.NS_ERROR_ALREADY_INITIALIZED;
         }
         Services.obs.addObserver(this, "network:offline-status-changed");
 
@@ -420,7 +420,7 @@ var calendarOfflineManager = {
 
     uninit: function() {
         if (!this.initialized) {
-            throw Components.results.NS_ERROR_NOT_INITIALIZED;
+            throw Cr.NS_ERROR_NOT_INITIALIZED;
         }
         Services.obs.removeObserver(this, "network:offline-status-changed");
         this.initialized = false;

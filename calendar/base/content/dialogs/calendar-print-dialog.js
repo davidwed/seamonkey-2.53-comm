@@ -39,18 +39,17 @@ function loadCalendarPrintDialog() {
             .setAttribute("selected", true);
 
     // Get a list of formatters
-    let catman = Components.classes["@mozilla.org/categorymanager;1"]
-                           .getService(Components.interfaces.nsICategoryManager);
+    let catman = Cc["@mozilla.org/categorymanager;1"]
+                   .getService(Ci.nsICategoryManager);
     let catenum = catman.enumerateCategory("cal-print-formatters");
 
     // Walk the list, adding items to the layout menupopup
     let layoutList = document.getElementById("layout-field");
     while (catenum.hasMoreElements()) {
         let entry = catenum.getNext();
-        entry = entry.QueryInterface(Components.interfaces.nsISupportsCString);
+        entry = entry.QueryInterface(Ci.nsISupportsCString);
         let contractid = catman.getCategoryEntry("cal-print-formatters", entry);
-        let formatter = Components.classes[contractid]
-                                  .getService(Components.interfaces.calIPrintFormatter);
+        let formatter = Cc[contractid].getService(Ci.calIPrintFormatter);
         // Use the contractid as value
         layoutList.appendItem(formatter.name, contractid);
     }
@@ -144,7 +143,7 @@ function getPrintSettings(receiverFunc) {
     // then fetch the items here.
     if (requiresFetch) {
         let listener = {
-            QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIOperationListener]),
+            QueryInterface: XPCOMUtils.generateQI([Ci.calIOperationListener]),
             onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDateTime) {
                 receiverFunc(settings);
             },
@@ -182,17 +181,17 @@ function getPrintSettings(receiverFunc) {
 function getFilter(settings) {
     let filter = 0;
     if (settings.printTasks) {
-        filter |= Components.interfaces.calICalendar.ITEM_FILTER_TYPE_TODO;
+        filter |= Ci.calICalendar.ITEM_FILTER_TYPE_TODO;
         if (settings.printCompletedTasks) {
-            filter |= Components.interfaces.calICalendar.ITEM_FILTER_COMPLETED_ALL;
+            filter |= Ci.calICalendar.ITEM_FILTER_COMPLETED_ALL;
         } else {
-            filter |= Components.interfaces.calICalendar.ITEM_FILTER_COMPLETED_NO;
+            filter |= Ci.calICalendar.ITEM_FILTER_COMPLETED_NO;
         }
     }
 
     if (settings.printEvents) {
-        filter |= Components.interfaces.calICalendar.ITEM_FILTER_TYPE_EVENT |
-                  Components.interfaces.calICalendar.ITEM_FILTER_CLASS_OCCURRENCES;
+        filter |= Ci.calICalendar.ITEM_FILTER_TYPE_EVENT |
+                  Ci.calICalendar.ITEM_FILTER_CLASS_OCCURRENCES;
     }
     return filter;
 }
@@ -221,7 +220,7 @@ function refreshHtml(finishFunc) {
             pipe.outputStream.close();
             // convert byte-array to UTF-8 string:
             let convStream = Cc["@mozilla.org/intl/converter-input-stream;1"]
-                                 .createInstance(Ci.nsIConverterInputStream);
+                               .createInstance(Ci.nsIConverterInputStream);
             convStream.init(pipe.inputStream, "UTF-8", 0,
                             Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
             try {
@@ -233,7 +232,7 @@ function refreshHtml(finishFunc) {
                 convStream.close();
             }
         } catch (e) {
-            Components.utils.reportError("Calendar print dialog:refreshHtml: " + e);
+            Cu.reportError("Calendar print dialog:refreshHtml: " + e);
         }
 
         // Temporary Fix for showing print preview in SeaMonkey 2.53 after

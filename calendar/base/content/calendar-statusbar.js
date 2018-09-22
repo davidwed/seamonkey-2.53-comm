@@ -19,12 +19,12 @@ var gCalendarStatusFeedback = {
     mStatusBar: null,
     mStatusProgressPanel: null,
     mThrobber: null,
-    mProgressMode: Components.interfaces.calIStatusObserver.NO_PROGRESS,
+    mProgressMode: Ci.calIStatusObserver.NO_PROGRESS,
     mCurIndex: 0,
     mInitialized: false,
     mCalendars: {},
 
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIStatusObserver]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.calIStatusObserver]),
 
     initialize: function(aWindow) {
         if (!this.mInitialized) {
@@ -46,9 +46,9 @@ var gCalendarStatusFeedback = {
     },
 
     startMeteors: function(aProgressMode, aCalendarCount) {
-        if (aProgressMode != Components.interfaces.calIStatusObserver.NO_PROGRESS) {
+        if (aProgressMode != Ci.calIStatusObserver.NO_PROGRESS) {
             if (!this.mInitialized) {
-                Components.utils.reportError("StatusObserver has not been initialized!");
+                Cu.reportError("StatusObserver has not been initialized!");
                 return;
             }
             this.mCalendars = {};
@@ -59,7 +59,7 @@ var gCalendarStatusFeedback = {
             }
             this.mProgressMode = aProgressMode;
             this.mStatusProgressPanel.removeAttribute("collapsed");
-            if (this.mProgressMode == Components.interfaces.calIStatusObserver.DETERMINED_PROGRESS) {
+            if (this.mProgressMode == Ci.calIStatusObserver.DETERMINED_PROGRESS) {
                 this.mStatusBar.removeAttribute("collapsed");
                 this.mStatusBar.setAttribute("mode", "determined");
                 this.mStatusBar.value = 0;
@@ -76,8 +76,8 @@ var gCalendarStatusFeedback = {
         if (!this.mInitialized) {
             return;
         }
-        if (this.spinning != Components.interfaces.calIStatusObserver.NO_PROGRESS) {
-            this.mProgressMode = Components.interfaces.calIStatusObserver.NO_PROGRESS;
+        if (this.spinning != Ci.calIStatusObserver.NO_PROGRESS) {
+            this.mProgressMode = Ci.calIStatusObserver.NO_PROGRESS;
             this.mStatusProgressPanel.collapsed = true;
             this.mStatusBar.setAttribute("mode", "normal");
             this.mStatusBar.value = 0;
@@ -93,8 +93,8 @@ var gCalendarStatusFeedback = {
         if (!this.mInitialized) {
             return;
         }
-        if (this.spinning != Components.interfaces.calIStatusObserver.NO_PROGRESS) {
-            if (this.spinning == Components.interfaces.calIStatusObserver.DETERMINED_PROGRESS) {
+        if (this.spinning != Ci.calIStatusObserver.NO_PROGRESS) {
+            if (this.spinning == Ci.calIStatusObserver.DETERMINED_PROGRESS) {
                 if (!this.mCalendars[aCalendar.id] || this.mCalendars[aCalendar.id] === undefined) {
                     this.mCalendars[aCalendar.id] = true;
                     this.mStatusBar.value = parseInt(this.mStatusBar.value, 10) + this.mCalendarStep;

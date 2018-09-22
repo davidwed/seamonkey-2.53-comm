@@ -13,8 +13,6 @@ ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
 ChromeUtils.import("resource://gdata-provider/modules/calUtilsShim.jsm");
 
-var cIE = Components.interfaces.calIErrors;
-
 var API_BASE = {
     EVENTS: "https://www.googleapis.com/calendar/v3/",
     TASKS: "https://www.googleapis.com/tasks/v1/"
@@ -54,7 +52,7 @@ calGoogleRequest.DELETE = "DELETE";
 calGoogleRequest.GET = "GET";
 calGoogleRequest.PATCH = "PATCH";
 
-var GDATA_ERROR_BASE = Components.interfaces.calIErrors.ERROR_BASE + 0x400;
+var GDATA_ERROR_BASE = Ci.calIErrors.ERROR_BASE + 0x400;
 calGoogleRequest.LOGIN_FAILED = GDATA_ERROR_BASE + 1;
 calGoogleRequest.CONFLICT_DELETED = GDATA_ERROR_BASE + 2;
 calGoogleRequest.CONFLICT_MODIFY = GDATA_ERROR_BASE + 3;
@@ -73,7 +71,7 @@ calGoogleRequest.prototype = {
     mType: null,
     mLoader: null,
     mDeferred: null,
-    mStatus: Components.results.NS_OK,
+    mStatus: Cr.NS_OK,
 
     /* Constants */
     ADD: calGoogleRequest.ADD,
@@ -91,10 +89,10 @@ calGoogleRequest.prototype = {
     requestDate: null,
 
     QueryInterface: XPCOMUtils.generateQI([
-        Components.interfaces.calIOperation,
-        Components.interfaces.nsIStreamLoaderObserver,
-        Components.interfaces.nsIInterfaceRequestor,
-        Components.interfaces.nsIChannelEventSink
+        Ci.calIOperation,
+        Ci.nsIStreamLoaderObserver,
+        Ci.nsIInterfaceRequestor,
+        Ci.nsIChannelEventSink
     ]),
 
     /**
@@ -132,7 +130,7 @@ calGoogleRequest.prototype = {
         let valid = [this.GET, this.ADD, this.MODIFY, this.PATCH, this.DELETE];
         if (!valid.includes(val)) {
             throw new Components.Exception("Invalid request type: " + val,
-                                            Components.results.NS_ERROR_ILLEGAL_VALUE);
+                                            Cr.NS_ERROR_ILLEGAL_VALUE);
         }
         return (this.method = val);
     },
@@ -204,8 +202,8 @@ calGoogleRequest.prototype = {
                                                          null,
                                                          Services.scriptSecurityManager.getSystemPrincipal(),
                                                          null,
-                                                         Components.interfaces.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
-                                                         Components.interfaces.nsIContentPolicy.TYPE_OTHER);
+                                                         Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_DATA_IS_NULL,
+                                                         Ci.nsIContentPolicy.TYPE_OTHER);
             } else {
                 // Lightning 4.2 and older
                 channel = Services.io.newChannelFromURI(uri);
@@ -216,7 +214,7 @@ calGoogleRequest.prototype = {
 
             this.prepareChannel(channel);
 
-            channel = channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+            channel = channel.QueryInterface(Ci.nsIHttpChannel);
             channel.redirectionLimit = 3;
 
             this.mLoader = cal.provider.createStreamLoader();
@@ -253,7 +251,7 @@ calGoogleRequest.prototype = {
      */
     succeed: function(aResult) {
         this.mLoader = null;
-        this.mStatus = Components.results.NS_OK;
+        this.mStatus = Cr.NS_OK;
         this.mDeferred.resolve(aResult);
         this.mDeferred = null;
     },
@@ -266,23 +264,23 @@ calGoogleRequest.prototype = {
      */
     prepareChannel: function(aChannel) {
         // No caching
-        aChannel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+        aChannel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
 
         // Set upload Data
         if (this.mUploadData) {
-            let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                                      .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+            let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                              .createInstance(Ci.nsIScriptableUnicodeConverter);
             converter.charset = "UTF-8";
 
             let stream = converter.convertToInputStream(this.mUploadData);
-            aChannel = aChannel.QueryInterface(Components.interfaces.nsIUploadChannel);
+            aChannel = aChannel.QueryInterface(Ci.nsIUploadChannel);
             aChannel.setUploadStream(stream, this.mUploadContent, -1);
 
             cal.LOG("[calGoogleCalendar] Setting Upload Data (" +
                     this.mUploadContent + "):\n" + this.mUploadData);
         }
 
-        aChannel = aChannel.QueryInterface(Components.interfaces.nsIHttpChannel);
+        aChannel = aChannel.QueryInterface(Ci.nsIHttpChannel);
 
         // Depending on the preference, we will use X-HTTP-Method-Override to
         // get around some proxies. This will default to true.
@@ -337,7 +335,7 @@ calGoogleRequest.prototype = {
     asyncOnChannelRedirect: function(aOldChannel, aNewChannel, aFlags, aCallback) {
         // all we need to do to the new channel is the basic preparation
         this.prepareChannel(aNewChannel);
-        aCallback.onRedirectVerifyCallback(Components.results.NS_OK);
+        aCallback.onRedirectVerifyCallback(Cr.NS_OK);
     },
 
     /**
@@ -349,12 +347,12 @@ calGoogleRequest.prototype = {
             return;
         }
 
-        let httpChannel = aLoader.request.QueryInterface(Components.interfaces.nsIHttpChannel);
+        let httpChannel = aLoader.request.QueryInterface(Ci.nsIHttpChannel);
 
         // Convert the stream, falling back to utf-8 in case its not given.
         let result = new TextDecoder(httpChannel.contentCharset || "utf-8").decode(Uint8Array.from(aResult));
         if (result === null) {
-            this.fail(Components.results.NS_ERROR_FAILURE,
+            this.fail(Cr.NS_ERROR_FAILURE,
                       "Could not convert bytestream to Unicode: " + e);
             return;
         }
@@ -369,7 +367,7 @@ calGoogleRequest.prototype = {
         } catch (e) {
             cal.ERROR("[calGoogleCalendar] Could not parse API response as " +
                       "JSON: " + result);
-            this.fail(Components.results.NS_ERROR_FAILURE, result);
+            this.fail(Cr.NS_ERROR_FAILURE, result);
         }
 
         // Calculate Google Clock Skew
@@ -458,9 +456,9 @@ calGoogleRequest.prototype = {
                         break;
                     case "insufficientPermissions":
                         if (this.type == this.MODIFY || this.type == this.DELETE || this.type == this.ADD) {
-                            this.fail(cIE.MODIFICATION_FAILED, objData);
+                            this.fail(Ci.calIErrors.MODIFICATION_FAILED, objData);
                         } else {
-                            this.fail(cIE.READ_FAILED, objData);
+                            this.fail(Ci.calIErrors.READ_FAILED, objData);
                         }
                         break;
                     case "authError":
@@ -475,9 +473,9 @@ calGoogleRequest.prototype = {
                         break;
                     default:
                         if (this.calendar) {
-                            this.calendar.setProperty("currentStatus", Components.results.NS_ERROR_FAILURE);
+                            this.calendar.setProperty("currentStatus", Cr.NS_ERROR_FAILURE);
                         }
-                        this.fail(Components.results.NS_ERROR_FAILURE, result);
+                        this.fail(Cr.NS_ERROR_FAILURE, result);
                         break;
                 }
 
@@ -523,7 +521,7 @@ calGoogleRequest.prototype = {
                           result;
                 cal.LOG("[calGoogleCalendar] " + msg);
 
-                this.fail(Components.results.NS_ERROR_NOT_AVAILABLE, msg);
+                this.fail(Cr.NS_ERROR_NOT_AVAILABLE, msg);
                 break;
             }
         }

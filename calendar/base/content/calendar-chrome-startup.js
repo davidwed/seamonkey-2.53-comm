@@ -39,9 +39,7 @@ function commonInitCalendar() {
     getViewDeck().addEventListener("itemselect", calendarController.onSelectionChanged, true);
 
     // Start alarm service
-    Components.classes["@mozilla.org/calendar/alarm-service;1"]
-              .getService(Components.interfaces.calIAlarmService)
-              .startup();
+    Cc["@mozilla.org/calendar/alarm-service;1"].getService(Ci.calIAlarmService).startup();
     document.getElementById("calsidebar_splitter").addEventListener("command", onCalendarViewResize);
     window.addEventListener("resize", onCalendarViewResize, true);
 
@@ -115,7 +113,7 @@ function onCalendarViewResize(aEvent) {
 var calendarWindowPrefs = {
 
     /** nsISupports QueryInterface */
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIObserver]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
 
     /** Initialize the preference observers */
     init: function() {
@@ -149,7 +147,7 @@ var calendarWindowPrefs = {
                 }
             }
         } else if (aTopic == "domwindowopened") {
-            let win = aSubject.QueryInterface(Components.interfaces.nsIDOMWindow);
+            let win = aSubject.QueryInterface(Ci.nsIDOMWindow);
             win.addEventListener("load", () => {
                 let attributeValue = Preferences.get("calendar.view.useSystemColors", false) && "true";
                 setElementValue(win.document.documentElement, attributeValue, "systemcolors");
@@ -180,8 +178,8 @@ function migrateCalendarUI() {
             // If the user has customized the event/task window dialog toolbar,
             // we copy that custom set of toolbar items to the event/task tab
             // toolbar and add the app menu button and a spring for alignment.
-            let xulStore = Components.classes["@mozilla.org/xul/xulstore;1"]
-                                     .getService(Components.interfaces.nsIXULStore);
+            let xulStore = Cc["@mozilla.org/xul/xulstore;1"]
+                             .getService(Ci.nsIXULStore);
             let uri = "chrome://calendar/content/calendar-event-dialog.xul";
 
             if (xulStore.hasValue(uri, "event-toolbar", "currentset")) {
@@ -205,8 +203,8 @@ function migrateCalendarUI() {
         if (currentUIVersion < 3) {
             // Rename toolbar button id "button-save" to
             // "button-saveandclose" in customized toolbars
-            let xulStore = Components.classes["@mozilla.org/xul/xulstore;1"]
-                                     .getService(Components.interfaces.nsIXULStore);
+            let xulStore = Cc["@mozilla.org/xul/xulstore;1"]
+                             .getService(Ci.nsIXULStore);
             let windowUri = "chrome://calendar/content/calendar-event-dialog.xul";
             let tabUri = "chrome://messenger/content/messenger.xul";
 

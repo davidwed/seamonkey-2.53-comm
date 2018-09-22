@@ -11,7 +11,7 @@ function calICALJSTimezone(innerObject) {
     this.wrappedJSObject = this;
 }
 
-var calTimezoneInterfaces = [Components.interfaces.calITimezone];
+var calTimezoneInterfaces = [Ci.calITimezone];
 var calTimezoneClassID = Components.ID("{6702eb17-a968-4b43-b562-0d0c5f8e9eb5}");
 calICALJSTimezone.prototype = {
     QueryInterface: XPCOMUtils.generateQI(calTimezoneInterfaces),

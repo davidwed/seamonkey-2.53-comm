@@ -13,7 +13,7 @@ function ltnMimeConverter() {
 }
 
 var ltnMimeConverterClassID = Components.ID("{c70acb08-464e-4e55-899d-b2c84c5409fa}");
-var ltnMimeConverterInterfaces = [Components.interfaces.nsISimpleMimeConverter];
+var ltnMimeConverterInterfaces = [Ci.nsISimpleMimeConverter];
 ltnMimeConverter.prototype = {
     classID: ltnMimeConverterClassID,
     QueryInterface: XPCOMUtils.generateQI(ltnMimeConverterInterfaces),
@@ -28,8 +28,8 @@ ltnMimeConverter.prototype = {
     uri: null,
 
     convertToHTML: function(contentType, data) {
-        let parser = Components.classes["@mozilla.org/calendar/ics-parser;1"]
-                               .createInstance(Components.interfaces.calIIcsParser);
+        let parser = Cc["@mozilla.org/calendar/ics-parser;1"]
+                       .createInstance(Ci.calIIcsParser);
         parser.parseString(data);
         let event = null;
         for (let item of parser.getItems({})) {
@@ -54,15 +54,14 @@ ltnMimeConverter.prototype = {
         let msgOverlay = "";
         let msgWindow = null;
 
-        itipItem = Components.classes["@mozilla.org/calendar/itip-item;1"]
-                             .createInstance(Components.interfaces.calIItipItem);
+        itipItem = Cc["@mozilla.org/calendar/itip-item;1"].createInstance(Ci.calIItipItem);
         itipItem.init(data);
 
         // this.uri is the message URL that we are processing.
         // We use it to get the nsMsgHeaderSink to store the calItipItem.
         if (this.uri) {
             try {
-                let msgUrl = this.uri.QueryInterface(Components.interfaces.nsIMsgMailNewsUrl);
+                let msgUrl = this.uri.QueryInterface(Ci.nsIMsgMailNewsUrl);
                 msgWindow = msgUrl.msgWindow;
                 itipItem.sender = msgUrl.mimeHeaders.extractHeader("From", false);
             } catch (exc) {

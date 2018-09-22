@@ -9,13 +9,13 @@ function calTransactionManager() {
     this.wrappedJSObject = this;
     if (!this.transactionManager) {
         this.transactionManager =
-            Components.classes["@mozilla.org/transactionmanager;1"]
-                      .createInstance(Components.interfaces.nsITransactionManager);
+            Cc["@mozilla.org/transactionmanager;1"]
+              .createInstance(Ci.nsITransactionManager);
     }
 }
 
 var calTransactionManagerClassID = Components.ID("{1d529847-d292-4222-b066-b8b17a794d62}");
-var calTransactionManagerInterfaces = [Components.interfaces.calITransactionManager];
+var calTransactionManagerInterfaces = [Ci.calITransactionManager];
 calTransactionManager.prototype = {
 
     classID: calTransactionManagerClassID,
@@ -25,7 +25,7 @@ calTransactionManager.prototype = {
         classDescription: "Calendar Transaction Manager",
         contractID: "mozilla.org/calendar/transactionmanager;1",
         interfaces: calTransactionManagerInterfaces,
-        flags: Components.interfaces.nsIClassInfo.SINGLETON
+        flags: Ci.nsIClassInfo.SINGLETON
     }),
 
     transactionManager: null,
@@ -89,8 +89,8 @@ function calTransaction(aAction, aItem, aCalendar, aOldItem, aListener, aExtResp
 
 var calTransactionClassID = Components.ID("{fcb54c82-2fb9-42cb-bf44-1e197a55e520}");
 var calTransactionInterfaces = [
-    Components.interfaces.nsITransaction,
-    Components.interfaces.calIOperationListener
+    Ci.nsITransaction,
+    Ci.calIOperationListener
 ];
 calTransaction.prototype = {
     classID: calTransactionClassID,
@@ -118,8 +118,8 @@ calTransaction.prototype = {
                                   this.mIsDoTransaction ? this.mOldItem : this.mItem,
                                   this.mExtResponse);
 
-            if (aOperationType == Components.interfaces.calIOperationListener.ADD ||
-                aOperationType == Components.interfaces.calIOperationListener.MODIFY) {
+            if (aOperationType == Ci.calIOperationListener.ADD ||
+                aOperationType == Ci.calIOperationListener.MODIFY) {
                 if (this.mIsDoTransaction) {
                     this.mItem = aDetail;
                 } else {
@@ -177,8 +177,7 @@ calTransaction.prototype = {
                 this.mCalendar.deleteItem(this.mItem, this);
                 break;
             default:
-                throw new Components.Exception("Invalid action specified",
-                                               Components.results.NS_ERROR_ILLEGAL_VALUE);
+                throw new Components.Exception("Invalid action specified", Cr.NS_ERROR_ILLEGAL_VALUE);
         }
     },
 
@@ -201,8 +200,7 @@ calTransaction.prototype = {
                 this.mCalendar.addItem(this.mItem, this);
                 break;
             default:
-                throw new Components.Exception("Invalid action specified",
-                                               Components.results.NS_ERROR_ILLEGAL_VALUE);
+                throw new Components.Exception("Invalid action specified", Cr.NS_ERROR_ILLEGAL_VALUE);
         }
     },
 

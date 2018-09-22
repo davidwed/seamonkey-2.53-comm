@@ -16,7 +16,7 @@ function calBackendLoader() {
 }
 
 var calBackendLoaderClassID = Components.ID("{0314c271-7168-40fa-802e-83c8c46a557e}");
-var calBackendLoaderInterfaces = [Components.interfaces.nsIObserver];
+var calBackendLoaderInterfaces = [Ci.nsIObserver];
 calBackendLoader.prototype = {
     classID: calBackendLoaderClassID,
     QueryInterface: XPCOMUtils.generateQI(calBackendLoaderInterfaces),
@@ -25,7 +25,7 @@ calBackendLoader.prototype = {
         contractID: "@mozilla.org/calendar/backend-loader;1",
         classDescription: "Calendar Backend Loader",
         interfaces: calBackendLoaderInterfaces,
-        flags: Components.interfaces.nsIClassInfo.SINGLETON
+        flags: Ci.nsIClassInfo.SINGLETON
     }),
 
     loaded: false,
@@ -54,7 +54,7 @@ calBackendLoader.prototype = {
 
             // Register the icaljs components. We used to unregisterFactory, but this caused all
             // sorts of problems. Just registering over it seems to work quite fine.
-            let registrar = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar);
+            let registrar = Components.manager.QueryInterface(Ci.nsIComponentRegistrar);
             for (let [contractID, classID] of Object.entries(contracts)) {
                 let newClassID = Components.ID(classID);
                 let newFactory = lazyFactoryFor(scope, newClassID);

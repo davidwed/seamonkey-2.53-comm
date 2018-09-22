@@ -12,7 +12,7 @@ var EXPECT_TIMER = 2;
 function do_check_xor(a, b, aMessage) { return ok((a && !b) || (!a && b), aMessage); }
 
 var alarmObserver = {
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calIAlarmServiceObserver]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.calIAlarmServiceObserver]),
 
     service: null,
     firedMap: {},
@@ -139,9 +139,7 @@ function run_test() {
 }
 
 function initializeAlarmService() {
-    alarmObserver.service = Components.classes["@mozilla.org/calendar/alarm-service;1"]
-                                       .getService(Components.interfaces.calIAlarmService)
-                                       .wrappedJSObject;
+    alarmObserver.service = Cc["@mozilla.org/calendar/alarm-service;1"].getService(Ci.calIAlarmService).wrappedJSObject;
     ok(!alarmObserver.service.mStarted);
     alarmObserver.service.startup(null);
     ok(alarmObserver.service.mStarted);

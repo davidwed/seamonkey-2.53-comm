@@ -14,8 +14,6 @@ ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
 ChromeUtils.import("resource://gdata-provider/modules/calUtilsShim.jsm");
 
-var cIE = Components.interfaces.calIErrors;
-
 var FOUR_WEEKS_IN_MINUTES = 40320;
 
 var EXPORTED_SYMBOLS = [
@@ -327,7 +325,7 @@ function EventToJSON(aItem, aOfflineStorage, aIsImport) {
         // user didn't choose to delete the event, we will protect him and not
         // allow this status to be set
         throw new Components.Exception("The status CANCELLED is reserved, delete the event instead!",
-                                       Components.results.NS_ERROR_LOSS_OF_SIGNIFICANT_DATA);
+                                       Cr.NS_ERROR_LOSS_OF_SIGNIFICANT_DATA);
     } else if (status == "none") {
         status = null;
     }
@@ -456,7 +454,7 @@ function EventToJSON(aItem, aOfflineStorage, aIsImport) {
         let snoozeObj = {};
         let enumerator = aItem.propertyEnumerator;
         while (enumerator.hasMoreElements()) {
-            let prop = enumerator.getNext().QueryInterface(Components.interfaces.nsIProperty);
+            let prop = enumerator.getNext().QueryInterface(Ci.nsIProperty);
             if (prop.name.substr(0, 18) == "X-MOZ-SNOOZE-TIME-") {
                 // We have a snooze time for a recurring event, add it to our object
                 snoozeObj[prop.name.substr(18)] = prop.value;
@@ -476,7 +474,7 @@ function EventToJSON(aItem, aOfflineStorage, aIsImport) {
         let recurrenceItems = aItem.recurrenceInfo.getRecurrenceItems({});
         for (let ritem of recurrenceItems) {
             let prop = ritem.icalProperty;
-            if (ritem instanceof Components.interfaces.calIRecurrenceDate) {
+            if (ritem instanceof Ci.calIRecurrenceDate) {
                 // EXDATES require special casing, since they might contain
                 // a TZID. To avoid the need for conversion of TZID strings,
                 // convert to UTC before serialization.
@@ -594,8 +592,8 @@ function setupRecurrence(aItem, aRecurrence, aTimezone) {
         switch (prop.propertyName) {
             case "RDATE":
             case "EXDATE": {
-                let recItem = Components.classes["@mozilla.org/calendar/recurrence-date;1"]
-                                        .createInstance(Components.interfaces.calIRecurrenceDate);
+                let recItem = Cc["@mozilla.org/calendar/recurrence-date;1"]
+                                .createInstance(Ci.calIRecurrenceDate);
                 try {
                     recItem.icalProperty = prop;
                     aItem.recurrenceInfo.appendRecurrenceItem(recItem);
@@ -645,7 +643,7 @@ function JSONToAlarm(aEntry, aDefault) {
     let alarm = cal.createAlarm();
     let alarmOffset = cal.createDuration();
     alarm.action = alarmActionMap[aEntry.method] || "DISPLAY";
-    alarm.related = Components.interfaces.calIAlarm.ALARM_RELATED_START;
+    alarm.related = Ci.calIAlarm.ALARM_RELATED_START;
     alarmOffset.inSeconds = -aEntry.minutes * 60;
     alarmOffset.normalize();
     alarm.offset = alarmOffset;
@@ -977,7 +975,7 @@ ItemSaver.prototype = {
             return this.parseTaskStream(aData);
         } else {
             let message = "Invalid Stream type: " + (aData ? aData.kind || aData.toSource() : null);
-            throw new Components.Exception(message, Components.results.NS_ERROR_FAILURE);
+            throw new Components.Exception(message, Cr.NS_ERROR_FAILURE);
         }
     },
 
@@ -1197,8 +1195,8 @@ ItemSaver.prototype = {
                     parent.id = meta.path + "@google.com";
                 }
                 parent.recurrenceInfo = cal.createRecurrenceInfo(parent);
-                let rdate = Components.classes["@mozilla.org/calendar/recurrence-date;1"]
-                    .createInstance(Components.interfaces.calIRecurrenceDate);
+                let rdate = Cc["@mozilla.org/calendar/recurrence-date;1"]
+                              .createInstance(Ci.calIRecurrenceDate);
                 rdate.date = exc.recurrenceId;
                 parent.recurrenceInfo.appendRecurrenceItem(rdate);
                 await this.commitItem(parent);
@@ -1215,7 +1213,7 @@ ItemSaver.prototype = {
 function ActivityShell(aCalendar) {
     this.calendar = aCalendar;
 
-    if ("@mozilla.org/activity-process;1" in Components.classes) {
+    if ("@mozilla.org/activity-process;1" in Cc) {
         this.init();
     }
 }
@@ -1227,16 +1225,14 @@ ActivityShell.prototype = {
     type: null,
 
     init: function() {
-        this.actMgr = Components.classes["@mozilla.org/activity-manager;1"]
-                                .getService(Components.interfaces.nsIActivityManager);
-        this.act = Components.classes["@mozilla.org/activity-process;1"]
-                             .createInstance(Components.interfaces.nsIActivityProcess);
+        this.actMgr = Cc["@mozilla.org/activity-manager;1"].getService(Ci.nsIActivityManager);
+        this.act = Cc["@mozilla.org/activity-process;1"].createInstance(Ci.nsIActivityProcess);
         this.act.init(getProviderString("syncStatus", this.calendar.name), this);
         this.act.iconClass = "syncMail";
         this.act.contextType = "gdata-calendar";
         this.act.contextObj = this.calendar;
         this.act.contextDisplayText = this.calendar.name;
-        this.act.state = Components.interfaces.nsIActivityProcess.STATE_INPROGRESS;
+        this.act.state = Ci.nsIActivityProcess.STATE_INPROGRESS;
 
         this.actMgr.addActivity(this.act);
     },
@@ -1269,7 +1265,7 @@ ActivityShell.prototype = {
         }
         let total = this.act.totalWorkUnits;
         this.act.setProgress("", total, total);
-        this.act.state = Components.interfaces.nsIActivityProcess.STATE_COMPLETED;
+        this.act.state = Ci.nsIActivityProcess.STATE_COMPLETED;
         this.actMgr.removeActivity(this.act.id);
     }
 };
@@ -1311,7 +1307,7 @@ async function checkResolveConflict(aOperation, aCalendar, aItem) {
         // means to update the item locally.
         cal.LOG("[calGoogleCalendar] Reload requested, cancelling change of " + aItem.title);
         aCalendar.superCalendar.refresh();
-        throw Components.Exception(null, cIE.OPERATION_CANCELLED);
+        throw Components.Exception(null, Ci.calIErrors.OPERATION_CANCELLED);
     }
 }
 
@@ -1344,7 +1340,7 @@ function monkeyPatch(obj, x, func) {
         try {
             return func.apply(obj, args);
         } catch (e) {
-            Components.utils.reportError(e);
+            Cu.reportError(e);
             throw e;
         }
     };

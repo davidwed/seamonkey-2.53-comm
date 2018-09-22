@@ -14,7 +14,7 @@ ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 var gCurrentSearchOperation = null;
 function cancelPendingSearchOperation() {
     if (gCurrentSearchOperation && gCurrentSearchOperation.isPending) {
-        gCurrentSearchOperation.cancel(Components.interfaces.calIErrors.OPERATION_CANCELLED);
+        gCurrentSearchOperation.cancel(Ci.calIErrors.OPERATION_CANCELLED);
     }
     gCurrentSearchOperation = null;
 }

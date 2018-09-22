@@ -15,7 +15,7 @@ function calWeekPrinter() {
 }
 
 var calWeekPrinterClassID = Components.ID("{2d6ec97b-9109-4b92-89c5-d4b4806619ce}");
-var calWeekPrinterInterfaces = [Components.interfaces.calIPrintFormatter];
+var calWeekPrinterInterfaces = [Ci.calIPrintFormatter];
 calWeekPrinter.prototype = {
     classID: calWeekPrinterClassID,
     QueryInterface: XPCOMUtils.generateQI(calWeekPrinterInterfaces),
@@ -86,8 +86,8 @@ calWeekPrinter.prototype = {
 
         // Stream out the resulting HTML
         let html = cal.xml.serializeDOM(document);
-        let convStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-                                   .createInstance(Components.interfaces.nsIConverterOutputStream);
+        let convStream = Cc["@mozilla.org/intl/converter-output-stream;1"]
+                           .createInstance(Ci.nsIConverterOutputStream);
         convStream.init(aStream, "UTF-8");
         convStream.writeString(html);
     },
