@@ -24,6 +24,7 @@ var modeList_menu;
 var modeList_appmenu;
 var view_menu;
 var view_appmenu;
+var menu_state;
 
 function setupModule(module) {
   for (let lib of MODULE_REQUIRES) {
@@ -56,6 +57,8 @@ function setupModule(module) {
   tree = mc.folderTreeView;
 
   select_no_folders();
+  // Main menu is needed for this whole test file.
+  menu_state = toggle_main_menu(true);
 }
 
 /**
@@ -275,4 +278,5 @@ function teardownModule() {
   tree.mode = "all";
   inboxFolder.propagateDelete(unreadFolder, true, null);
   inboxFolder.propagateDelete(favoriteFolder, true, null);
+  toggle_main_menu(menu_state);
 }
