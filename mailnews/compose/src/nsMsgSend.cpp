@@ -463,14 +463,11 @@ nsMsgComposeAndSend::GatherMimeAttachments()
 
   uint32_t multipartRelatedCount = GetMultipartRelatedCount(); // The number of related part we will have to generate
 
-  nsCOMPtr<nsIPrompt> promptObject; // only used if we have to show an alert here....
-  GetDefaultPrompt(getter_AddRefs(promptObject));
-
   char *hdrs = 0;
   bool maincontainerISrelatedpart = false;
   const char * toppart_type = nullptr;
-
   status = m_status;
+
   if (NS_FAILED(status))
     goto FAIL;
 
@@ -3256,7 +3253,8 @@ nsMsgComposeAndSend::DeliverMessage()
     if (!msg.IsEmpty())
     {
       nsCOMPtr<nsIPrompt> prompt;
-      GetDefaultPrompt(getter_AddRefs(prompt));
+      rv = GetDefaultPrompt(getter_AddRefs(prompt));
+      NS_ENSURE_SUCCESS(rv, rv);
       nsMsgAskBooleanQuestionByString(prompt, msg.get(), &abortTheSend);
       if (!abortTheSend)
       {
@@ -3293,9 +3291,6 @@ nsMsgComposeAndSend::DeliverFileAsMail()
 
   if (mSendReport)
     mSendReport->SetCurrentProcess(nsIMsgSendReport::process_SMTP);
-
-  nsCOMPtr<nsIPrompt> promptObject;
-  GetDefaultPrompt(getter_AddRefs(promptObject));
 
   if (!buf)
   {
@@ -3445,9 +3440,6 @@ nsMsgComposeAndSend::DeliverFileAsNews()
   if (mSendReport)
     mSendReport->SetCurrentProcess(nsIMsgSendReport::process_NNTP);
 
-  nsCOMPtr<nsIPrompt> promptObject;
-  GetDefaultPrompt(getter_AddRefs(promptObject));
-
   nsCOMPtr<nsINntpService> nntpService(do_GetService(NS_NNTPSERVICE_CONTRACTID, &rv));
 
   if (NS_SUCCEEDED(rv) && nntpService)
@@ -3490,7 +3482,8 @@ nsMsgComposeAndSend::Fail(nsresult aFailureCode, const char16_t *aErrorMsg,
   if (NS_FAILED(aFailureCode))
   {
     nsCOMPtr<nsIPrompt> prompt;
-    GetDefaultPrompt(getter_AddRefs(prompt));
+    nsresult rv = GetDefaultPrompt(getter_AddRefs(prompt));
+    NS_ENSURE_SUCCESS(rv, rv);
 
     if (mSendReport)
     {
@@ -3840,11 +3833,11 @@ nsMsgComposeAndSend::NotifyListenerOnStopCopy(nsresult aStatus)
 
   SetStatusMessage(msg);
   nsCOMPtr<nsIPrompt> prompt;
-  GetDefaultPrompt(getter_AddRefs(prompt));
+  nsresult rv = GetDefaultPrompt(getter_AddRefs(prompt));
+  NS_ENSURE_SUCCESS(rv, rv);
 
   if (NS_FAILED(aStatus))
   {
-    nsresult rv;
     nsCOMPtr<nsIStringBundleService> bundleService =
       mozilla::services::GetStringBundleService();
     NS_ENSURE_TRUE(bundleService, NS_ERROR_UNEXPECTED);
@@ -3950,7 +3943,8 @@ nsMsgComposeAndSend::NotifyListenerOnStopCopy(nsresult aStatus)
       {
         // Save to Local Folders failed. Inform the user.
         nsCOMPtr<nsIPrompt> prompt;
-        GetDefaultPrompt(getter_AddRefs(prompt));
+        rv = GetDefaultPrompt(getter_AddRefs(prompt));
+        NS_ENSURE_SUCCESS(rv, rv);
         nsMsgDisplayMessageByName(prompt, "saveToLocalFoldersFailed");
       }
     }
@@ -3966,7 +3960,7 @@ nsMsgComposeAndSend::NotifyListenerOnStopCopy(nsresult aStatus)
       !mPerformingSecondFCC && m_messageKey != nsMsgKey_None &&
       (m_deliver_mode == nsMsgDeliverNow || m_deliver_mode == nsMsgSendUnsent))
   {
-    nsresult rv = FilterSentMessage();
+    rv = FilterSentMessage();
     if (NS_FAILED(rv))
       OnStopOperation(rv);
     return rv;
@@ -4028,7 +4022,8 @@ nsMsgComposeAndSend::OnStopOperation(nsresult aStatus)
     if (NS_SUCCEEDED(rv))
     {
       nsCOMPtr<nsIPrompt> prompt;
-      GetDefaultPrompt(getter_AddRefs(prompt));
+      rv = GetDefaultPrompt(getter_AddRefs(prompt));
+      NS_ENSURE_SUCCESS(rv, rv);
       nsMsgDisplayMessageByString(prompt, msg.get(), nullptr);
     }
 
