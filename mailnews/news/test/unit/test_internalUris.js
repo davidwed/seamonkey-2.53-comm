@@ -140,12 +140,9 @@ function* test_grouplist() {
   subserver.subscribeListener = subscribeListener;
 
   function enumGroups(rootUri) {
-    let hierarchy = subserver.getChildren(rootUri);
+    let hierarchy = subserver.getChildURIs(rootUri);
     let groups = [];
-    while (hierarchy.hasMoreElements()) {
-      let element = hierarchy.getNext().QueryInterface(Ci.nsIRDFResource);
-      let name = element.ValueUTF8;
-      name = name.slice(name.lastIndexOf("/") + 1);
+    for (let name of hierarchy) {
       if (subserver.isSubscribable(name))
         groups.push(name);
       if (subserver.hasChildren(name))
@@ -158,8 +155,14 @@ function* test_grouplist() {
   yield false;
 
   let groups = enumGroups("");
-  for (let group in daemon._groups)
-    do_check_true(groups.indexOf(group) >= 0);
+  Assert.equal(groups.length, Object.keys(daemon._groups).length);
+  for (let group in daemon._groups) {
+    Assert.ok(groups.includes(group));
+  }
+
+  // First node in the group list, even though it is not subscribable,
+  // parent of "test.empty" group.
+  Assert.equal(subserver.getFirstChildURI(""), "test");
 
   // Release reference, somehow impedes GC of 'subserver'.
   subserver.subscribeListener = null;
