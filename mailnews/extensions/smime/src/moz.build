@@ -19,5 +19,4 @@ FINAL_LIBRARY = 'mail'
 
 LOCAL_INCLUDES += [
     '/mozilla/security/manager/pki',
-    '/mozilla/security/pkix/include'
 ]
