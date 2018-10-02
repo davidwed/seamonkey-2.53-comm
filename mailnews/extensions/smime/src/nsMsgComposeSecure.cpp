@@ -29,7 +29,7 @@
 #include "nsNSSComponent.h"
 #include "nsServiceManagerUtils.h"
 #include "nspr.h"
-#include "pkix/Result.h"
+#include "mozpkix/Result.h"
 
 using namespace mozilla::mailnews;
 using namespace mozilla;
