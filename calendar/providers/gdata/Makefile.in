@@ -7,6 +7,9 @@ XPI_VERSION = $(GDATA_VERSION)
 XPI_EM_ID = {a62ef8ec-5fdc-40c2-873c-223b8a6925cc}
 XPI_INSTALL_EXTENSION = $(XPI_EM_ID)
 
+THUNDERBIRD_VERSION := $(shell cat $(commtopsrcdir)/mail/config/version.txt)
+SEAMONKEY_VERSION := $(shell cat $(commtopsrcdir)/suite/config/version.txt)
+
 DEFINES += -DLIGHTNING_VERSION=$(LIGHTNING_VERSION) \
            -DSEAMONKEY_VERSION=$(SEAMONKEY_VERSION) \
            -DTHUNDERBIRD_VERSION=$(THUNDERBIRD_VERSION) \
