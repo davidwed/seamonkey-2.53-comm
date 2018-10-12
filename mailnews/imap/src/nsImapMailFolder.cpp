@@ -3146,7 +3146,7 @@ nsresult nsImapMailFolder::NormalEndHeaderParseStream(nsIImapProtocol *aProtocol
         {
           GetMoveCoalescer();  // not sure why we're doing this here.
           m_filterList->ApplyFiltersToHdr(nsMsgFilterType::InboxRule, newMsgHdr,
-                                          this, mDatabase, headers, headersSize,
+                                          this, mDatabase, nsDependentCString(headers, headersSize),
                                           this, msgWindow);
           NotifyFolderEvent(mFiltersAppliedAtom);
         }
@@ -4676,7 +4676,7 @@ nsImapMailFolder::NormalEndMsgWriteStream(nsMsgKey uidOfMessage,
           msgUrl->GetMsgWindow(getter_AddRefs(msgWindow));
       }
       m_filterList->ApplyFiltersToHdr(nsMsgFilterType::InboxRule, newMsgHdr,
-                                      this, mDatabase, nullptr, 0, this,
+                                      this, mDatabase, EmptyCString(), this,
                                       msgWindow);
       NotifyFolderEvent(mFiltersAppliedAtom);
     }

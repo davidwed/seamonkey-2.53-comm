@@ -748,8 +748,7 @@ nsresult nsMsgSearchTerm::MatchArbitraryHeader (nsIMsgSearchScopeTerm *scope,
                                                 bool charsetOverride,
                                                 nsIMsgDBHdr *msg,
                                                 nsIMsgDatabase* db,
-                                                const char * headers,
-                                                uint32_t headersSize,
+                                                const nsACString& headers,
                                                 bool ForFiltering,
                                                 bool *pResult)
 {
@@ -770,9 +769,10 @@ nsresult nsMsgSearchTerm::MatchArbitraryHeader (nsIMsgSearchScopeTerm *scope,
     // match value with the other info.
     return MatchRfc2047String(dbHdrValue, charset, charsetOverride, pResult);
 
-  nsMsgBodyHandler * bodyHandler =
-    new nsMsgBodyHandler (scope, length, msg, db, headers, headersSize,
-                          ForFiltering);
+  nsMsgBodyHandler * bodyHandler = new nsMsgBodyHandler(scope, length, msg, db,
+                                                        headers.BeginReading(),
+                                                        headers.Length(),
+                                                        ForFiltering);
   NS_ENSURE_TRUE(bodyHandler, NS_ERROR_OUT_OF_MEMORY);
 
   bodyHandler->SetStripHeaders (false);
