@@ -8,7 +8,7 @@
 
 var MODULE_NAME = "testAlarmDefaultValue";
 var RELATIVE_ROOT = "./shared-modules";
-var MODULE_REQUIRES = ["calendar-utils", "keyboard-helpers"];
+var MODULE_REQUIRES = ["calendar-utils", "content-tab-helpers"];
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
@@ -27,7 +27,7 @@ function setupModule(module) {
         openLightningPrefs,
         menulistSelect
     } = collector.getModule("calendar-utils"));
-    collector.getModule("calendar-utils").setupModule();
+    collector.getModule("calendar-utils").setupModule(controller);
     Object.assign(module, helpersForController(controller));
 
     ({ plan_for_modal_dialog, wait_for_modal_dialog } =
@@ -43,50 +43,48 @@ function testDefaultAlarms() {
     let expectedEventReminder = alarmString("reminderCustomTitle", [unitString, originStringEvent]);
     let expectedTaskReminder = alarmString("reminderCustomTitle", [unitString, originStringTask]);
 
-    // Configure the lightning preferences
+    let detailPath = `
+        //*[@id="reminder-details"]/*[local-name()="label" and (not(@hidden) or @hidden="false")]
+    `;
+
+    // Configure the lightning preferences.
     openLightningPrefs(handlePrefDialog, controller);
 
-    // Create New Event
+    // Create New Event.
     controller.click(eid("newMsgButton-calendar-menuitem"));
 
-    // Set up the event dialog controller
+    // Set up the event dialog controller.
     invokeEventDialog(controller, null, (event, iframe) => {
         let { xpath: eventpath, eid: eventid } = helpersForController(event);
 
-        // Check if the "custom" item was selected
+        // Check if the "custom" item was selected.
         event.assertDOMProperty(eventid("item-alarm"), "value", "custom");
-        let reminderDetailsVisible = eventpath(`
-            //*[@id="reminder-details"]/
-            *[local-name()="label" and (not(@hidden) or @hidden="false")]
-        `);
+        let reminderDetailsVisible = eventpath(detailPath);
         event.assertDOMProperty(reminderDetailsVisible, "value", expectedEventReminder);
 
         plan_for_modal_dialog("Calendar:EventDialog:Reminder", handleReminderDialog);
         event.click(reminderDetailsVisible);
         wait_for_modal_dialog("Calendar:EventDialog:Reminder");
 
-        // Close the event dialog
+        // Close the event dialog.
         event.window.close();
     });
 
-    // Create New Task
+    // Create New Task.
     controller.click(eid("newMsgButton-task-menuitem"));
     invokeEventDialog(controller, null, (task, iframe) => {
         let { xpath: taskpath, eid: taskid } = helpersForController(task);
 
-        // Check if the "custom" item was selected
+        // Check if the "custom" item was selected.
         task.assertDOMProperty(taskid("item-alarm"), "value", "custom");
-        let reminderDetailsVisible = taskpath(`
-            //*[@id="reminder-details"]/
-            *[local-name()="label" and (not(@hidden) or @hidden="false")]
-        `);
+        let reminderDetailsVisible = taskpath(detailPath);
         task.assertDOMProperty(reminderDetailsVisible, "value", expectedTaskReminder);
 
         plan_for_modal_dialog("Calendar:EventDialog:Reminder", handleReminderDialog);
         task.click(reminderDetailsVisible);
         wait_for_modal_dialog("Calendar:EventDialog:Reminder");
 
-        // Close the task dialog
+        // Close the task dialog.
         task.window.close();
     });
 }
@@ -94,19 +92,19 @@ function testDefaultAlarms() {
 function handlePrefDialog(prefs) {
     let { eid: prefsid } = helpersForController(prefs);
 
-    // Click on the alarms tab
+    // Click on the alarms tab.
     prefs.click(prefsid("calPreferencesTabAlarms"));
 
-    // Turn on alarms for events and tasks
+    // Turn on alarms for events and tasks.
     prefs.waitForElement(prefsid("eventdefalarm"));
     menulistSelect(prefsid("eventdefalarm"), "1", prefs);
     menulistSelect(prefsid("tododefalarm"), "1", prefs);
 
-    // Selects "days" as a unit
+    // Selects "days" as a unit.
     menulistSelect(prefsid("tododefalarmunit"), "days", prefs);
     menulistSelect(prefsid("eventdefalarmunit"), "days", prefs);
 
-    // Sets default alarm length for events to DEFVALUE
+    // Sets default alarm length for events to DEFVALUE.
     let eventdefalarmlen = prefsid("eventdefalarmlen");
     prefs.click(eventdefalarmlen);
     prefs.keypress(eventdefalarmlen, "a", { accelKey: true });
