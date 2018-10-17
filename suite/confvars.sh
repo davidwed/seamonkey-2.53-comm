@@ -38,20 +38,5 @@ fi
 # Include the DevTools client, not just the server (which is the default)
 MOZ_DEVTOOLS=all
 
-# Bundled extensions Lightning Chatzilla DOM Inspector and debugQA
-MOZ_CALENDAR=1
-MOZ_IRC=1
-MOZ_DOMINSPECTOR=1
-
-# frg private patch always build debugQA extension
-MOZ_DEBUGQA=1
-
-if [[ $MOZ_IRC == 1 ]]; then
-  MOZ_EXTENSIONS_DEFAULT='irc'
-fi
-
-if [[ $MOZ_DOMINSPECTOR == 1 ]]; then
-  MOZ_EXTENSIONS_DEFAULT+=' inspector'
-fi
-# Include Lightning
+# Bundled extensions Lightning
 MOZ_CALENDAR=1
