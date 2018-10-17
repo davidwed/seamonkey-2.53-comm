@@ -8,4 +8,43 @@ imply_option('MOZ_PLACES', True)
 imply_option('MOZ_SERVICES_SYNC', False)
 imply_option('MOZ_SOCIAL', False)
 
+# Building extensions is enabled by default.
+# Bug 1231349 needs to be fixed for successful l10n builds.
+
+# =========================================================
+# = ChatZilla extension
+# =========================================================
+option('--enable-irc', default=False,
+       help='Enable building of the ChatZilla IRC extension')
+
+@depends_if('--enable-irc')
+def irc(arg):
+    return True
+
+set_config('MOZ_IRC', irc)
+
+# =========================================================
+# = DOM Inspector extension
+# =========================================================
+option('--enable-dominspector', default=False,
+       help='Enable building of the DOM Inspector extension')
+
+@depends_if('--enable-dominspector')
+def dominspector(arg):
+    return True
+
+set_config('MOZ_DOMINSPECTOR', dominspector)
+
+# =========================================================
+# = DebugQA extension
+# =========================================================
+option('--enable-debugqa', default=False,
+       help='Enable building of the DebugQA extension')
+
+@depends_if('--enable-debugqa')
+def debugqa(arg):
+    return True
+
+set_config('MOZ_DEBUGQA', debugqa)
+
 include('../mozilla/toolkit/moz.configure')
