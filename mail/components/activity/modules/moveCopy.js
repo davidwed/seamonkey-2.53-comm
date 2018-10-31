@@ -11,7 +11,6 @@ var nsActEvent = Components.Constructor("@mozilla.org/activity-event;1",
                                         "nsIActivityEvent", "init");
 var nsActWarning = Components.Constructor("@mozilla.org/activity-warning;1",
                                           "nsIActivityWarning", "init");
-var nsMsgFolderFlags = Ci.nsMsgFolderFlags;
 
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
@@ -197,7 +196,7 @@ var moveCopyModule =
 
     // Display a different message depending on whether we emptied the trash
     // or actually deleted a folder
-    if (aFolder.isSpecialFolder(nsMsgFolderFlags.Trash, false))
+    if (aFolder.isSpecialFolder(Ci.nsMsgFolderFlags.Trash, false))
       displayText = this.getString("emptiedTrash");
     else
       displayText = this.getString("deletedFolder").replace("#1", aFolder.prettyName);
@@ -265,7 +264,7 @@ var moveCopyModule =
 
     // Display a different message depending on whether we moved the folder
     // to the trash or actually renamed the folder.
-    if (aNewFolder.isSpecialFolder(nsMsgFolderFlags.Trash, true))
+    if (aNewFolder.isSpecialFolder(Ci.nsMsgFolderFlags.Trash, true))
     {
       displayText = this.getString("movedFolderToTrash");
       displayText = displayText.replace("#1", aOrigFolder.prettyName);
