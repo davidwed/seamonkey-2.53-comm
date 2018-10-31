@@ -22,8 +22,6 @@ var smartInboxFolder;
 
 var inboxSet;
 
-var nsMsgFolderFlags = Ci.nsMsgFolderFlags;
-
 function setupModule(module) {
   let fdh = collector.getModule("folder-display-helpers");
   fdh.installInto(module);
@@ -35,7 +33,7 @@ function setupModule(module) {
   inboxSubfolder = inboxFolder.getChildNamed("SmartFoldersA");
 
   trashFolder = inboxFolder.server.rootFolder.getFolderWithFlags(
-    nsMsgFolderFlags.Trash);
+    Ci.nsMsgFolderFlags.Trash);
   trashFolder.createSubfolder("SmartFoldersB", null);
   trashSubfolder = trashFolder.getChildNamed("SmartFoldersB");
 
@@ -176,7 +174,7 @@ function test_folder_flag_changes() {
 
   // Remove the archive flag, and make sure the archive folder and
   // its children are no longer in the search scope.
-  archiveFolder.clearFlag(nsMsgFolderFlags.Archive);
+  archiveFolder.clearFlag(Ci.nsMsgFolderFlags.Archive);
 
   // Refresh the archive scope because clearing the flag should have
   // changed it.
