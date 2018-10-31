@@ -76,10 +76,9 @@ function menu_new_init()
   if (Services.prefs.prefIsLocked("mail.disable_new_account_addition"))
     document.getElementById("newAccountMenuItem").setAttribute("disabled", "true");
 
-  const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
-  var isInbox = folder.isSpecialFolder(nsMsgFolderFlags.Inbox);
+  var isInbox = folder.isSpecialFolder(Ci.nsMsgFolderFlags.Inbox);
   var showNew = (folder.canCreateSubfolders ||
-                 (isInbox && !(folder.flags & nsMsgFolderFlags.Virtual))) &&
+                 (isInbox && !(folder.getFlag(Ci.nsMsgFolderFlags.Virtual)))) &&
                 (document.getElementById("cmd_newFolder").getAttribute("disabled") != "true");
   ShowMenuItem("menu_newFolder", showNew);
   ShowMenuItem("menu_newVirtualFolder", showNew);
@@ -137,9 +136,9 @@ function InitEditMessagesMenu()
   if (!favoriteFolderMenu.hasAttribute("disabled")) {
     let folders = gFolderTreeView.getSelectedFolders();
     if (folders.length == 1 && !folders[0].isServer) {
-      const kFavoriteFlag = Ci.nsMsgFolderFlags.Favorite;
       // Adjust the checked state on the menu item.
-      favoriteFolderMenu.setAttribute("checked", folders[0].getFlag(kFavoriteFlag));
+      favoriteFolderMenu.setAttribute("checked",
+        folders[0].getFlag(Ci.nsMsgFolderFlags.Favorite));
       favoriteFolderMenu.hidden = false;
     } else {
       favoriteFolderMenu.hidden = true;
@@ -158,9 +157,9 @@ function InitAppFolderViewsMenu()
   if (!favoriteAppFolderMenu.hasAttribute("disabled")) {
     let folders = gFolderTreeView.getSelectedFolders();
     if (folders.length == 1 && !folders[0].isServer) {
-      const kFavoriteFlag = Ci.nsMsgFolderFlags.Favorite;
       // Adjust the checked state on the menu item.
-      favoriteAppFolderMenu.setAttribute("checked", folders[0].getFlag(kFavoriteFlag));
+      favoriteAppFolderMenu.setAttribute("checked",
+        folders[0].getFlag(Ci.nsMsgFolderFlags.Favorite));
       favoriteAppFolderMenu.hidden = false;
     } else {
       favoriteAppFolderMenu.hidden = true;
@@ -1426,8 +1425,7 @@ function GetInboxFolder(server)
     var rootMsgFolder = server.rootMsgFolder;
 
     // Now find the Inbox.
-    const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
-    return rootMsgFolder.getFolderWithFlags(nsMsgFolderFlags.Inbox);
+    return rootMsgFolder.getFolderWithFlags(Ci.nsMsgFolderFlags.Inbox);
   }
   catch (ex) {
     dump(ex + "\n");
@@ -2844,8 +2842,7 @@ function CoalesceGetMsgsForPop3ServersByDestFolder(currentServer,
                                                    localFoldersToDownloadTo)
 {
   var outNumFolders = new Object();
-  const kInboxFlag = Ci.nsMsgFolderFlags.Inbox;
-  var inboxFolder = currentServer.rootMsgFolder.getFolderWithFlags(kInboxFlag);
+  var inboxFolder = currentServer.rootMsgFolder.getFolderWithFlags(Ci.nsMsgFolderFlags.Inbox);
   // coalesce the servers that download into the same folder...
   var index = localFoldersToDownloadTo.indexOf(inboxFolder);
   if (index == -1)
@@ -3002,10 +2999,9 @@ function HandleJunkStatusChanged(folder)
       //    (see nsMsgDBView::DetermineActionsForJunkChange)
       // 2) When marking as junk, the msg will move or delete, if manualMark is set.
       // 3) Marking as junk in the junk folder just changes the junk status.
-      const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
-      if ((!isJunk && !folder.isSpecialFolder(nsMsgFolderFlags.Junk)) ||
+      if ((!isJunk && !folder.isSpecialFolder(Ci.nsMsgFolderFlags.Junk)) ||
           (isJunk && !folder.server.spamSettings.manualMark) ||
-          (isJunk && folder.isSpecialFolder(nsMsgFolderFlags.Junk)))
+          (isJunk && folder.isSpecialFolder(Ci.nsMsgFolderFlags.Junk)))
         ReloadMessage();
     }
   }
@@ -3208,8 +3204,7 @@ var gMessageNotificationBar =
    if (!msgHdr || !msgHdr.folder)
      return;
 
-   const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
-   if (msgHdr.folder.isSpecialFolder(nsMsgFolderFlags.Drafts, true))
+   if (msgHdr.folder.isSpecialFolder(Ci.nsMsgFolderFlags.Drafts, true))
    {
     let draftMsgNote = this.stringBundle.getString("draftMessageMsg");
 
