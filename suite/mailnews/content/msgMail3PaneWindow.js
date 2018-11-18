@@ -591,10 +591,17 @@ function SelectServer(server)
 var gThreePaneIncomingServerListener = {
     onServerLoaded: function(server) {},
     onServerUnloaded: function(server) {
+      let defaultAccount = accountManager.defaultAccount;
+      if (!defaultAccount) {
+        // If there is no default server we have nothing to do.
+        return;
+      }
+
+      let defaultServer = defaultAccount.incomingServer;
       var selectedFolders = GetSelectedMsgFolders();
       for (var i = 0; i < selectedFolders.length; i++) {
         if (ServerContainsFolder(server, selectedFolders[i])) {
-          SelectServer(accountManager.defaultAccount.incomingServer);
+          SelectServer(defaultServer);
           // we've made a new selection, we're done
           return;
         }
@@ -604,7 +611,7 @@ var gThreePaneIncomingServerListener = {
       // this could happen if nothing was selected when the server was removed
       selectedFolders = GetSelectedMsgFolders();
       if (selectedFolders.length == 0) {
-        SelectServer(accountManager.defaultAccount.incomingServer);
+        SelectServer(defaultServer);
       }
     },
     onServerChanged: function(server) {
@@ -856,12 +863,10 @@ function loadStartFolder(initialUri)
     var isLoginAtStartUpEnabled = false;
 
     //First get default account
-    try
-    {
-        if (!initialUri)
-        {
-            // Startup time.
-            defaultServer = accountManager.defaultAccount.incomingServer;
+    if (!initialUri) {
+        var defaultAccount = accountManager.defaultAccount;
+        if (defaultAccount) {
+            defaultServer = defaultAccount.incomingServer;
 
             // set the initialUri to the server, so we select it
             // so we'll get account central
@@ -889,8 +894,14 @@ function loadStartFolder(initialUri)
                 if (inboxFolder)
                   initialUri = inboxFolder.URI;
             }
+        } else {
+            // If no default account then show account central page.
+            ShowAccountCentral();
         }
 
+   }
+
+   if (initialUri) {
         SelectFolder(initialUri);
 
         // Perform biff on the server to check for new mail, if:
@@ -902,11 +913,6 @@ function loadStartFolder(initialUri)
             !defaultServer.isDeferredTo &&
             defaultServer.rootFolder == defaultServer.rootMsgFolder)
           defaultServer.performBiff(msgWindow);
-    }
-    catch(ex)
-    {
-      // If no default account then show account central page.
-      ShowAccountCentral();
     }
 
     MsgGetMessagesForAllServers(defaultServer);
@@ -1429,13 +1435,8 @@ function MigrateJunkMailSettings()
   {
     // Get the default account, check to see if we have values for our
     // globally migrated prefs.
-    var defaultAccount;
-    try {
-      defaultAccount = accountManager.defaultAccount;
-    } catch (ex) {
-      defaultAccount = null;
-    }
-    if (defaultAccount && defaultAccount.incomingServer)
+    var defaultAccount = accountManager.defaultAccount;
+    if (defaultAccount)
     {
       // we only care about
       var prefix = "mail.server." + defaultAccount.incomingServer.key + ".";
