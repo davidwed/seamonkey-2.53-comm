@@ -54,7 +54,9 @@ var gPrefsBundle, gMessengerBundle;
 // the current nsIMsgAccount
 var gCurrentAccount;
 
-// default account
+// The default account before we create a new account.
+// We need to store this as just asking for the default account may switch
+// it to the newly created one if there was none before.
 var gDefaultAccount;
 
 // the current associative array that
@@ -86,14 +88,9 @@ function onAccountWizardLoad() {
 
   checkForInvalidAccounts();
 
-  try {
-    gDefaultAccount = MailServices.accounts.defaultAccount;
-  }
-  catch (ex) {
-    // no default account, this is expected the first time you launch mail
-    // on a new profile
-    gDefaultAccount = null;
-  }
+  // It is fine if there is no default account, this is expected the first
+  // time you launch mail on a new profile.
+  gDefaultAccount = MailServices.accounts.defaultAccount;
 
   // Set default value for global inbox checkbox
   var checkGlobalInbox = document.getElementById("deferStorage");
@@ -807,8 +804,7 @@ function getPreConfigDataForAccount(account)
 
 function AccountToAccountData(account, defaultAccountData)
 {
-  dump("AccountToAccountData(" + account + ", " +
-       defaultAccountData + ")\n");
+  dump("AccountToAccountData(" + account + ", " + defaultAccountData + ")\n");
   var accountData = defaultAccountData;
   if (!accountData)
     accountData = new Object;
@@ -974,10 +970,10 @@ function onFlush() {
   */
 function EnableCheckMailAtStartUpIfNeeded(newAccount)
 {
-  // Check if default account exists and if that account is alllowed to be
-  // a default account. If no such account, make this one as the default account
+  // Check if default account existed.
+  // If no such account, make this one the default account
   // and turn on the new mail check at startup for the current account
-  if (!(gDefaultAccount && gDefaultAccount.incomingServer.canBeDefaultServer)) {
+  if (!gDefaultAccount) {
     MailServices.accounts.defaultAccount = newAccount;
     newAccount.incomingServer.loginAtStartUp = true;
     newAccount.incomingServer.downloadOnBiff = true;
@@ -989,7 +985,7 @@ function SetSmtpRequiresUsernameAttribute(accountData)
   // If this is the default server, time to set the smtp user name
   // Set the generic attribute for requiring user name for smtp to true.
   // ISPs can override the pref via rdf files.
-  if (!(gDefaultAccount && gDefaultAccount.incomingServer.canBeDefaultServer)) {
+  if (!gDefaultAccount) {
     accountData.smtpRequiresUsername = true;
   }
 }
