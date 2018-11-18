@@ -528,8 +528,12 @@ function InitNewMsgMenu(aPopup)
   var folder = GetFirstSelectedMsgFolder();
   if (folder)
     identity = getIdentityForServer(folder.server);
-  if (!identity)
-    identity = MailServices.accounts.defaultAccount.defaultIdentity;
+  if (!identity) {
+    let defaultAccount = MailServices.accounts.defaultAccount;
+    if (defaultAccount)
+      identity = defaultAccount.defaultIdentity;
+  }
+
   // If the identity is not found, use the mail.html_compose pref to
   // determine the message compose type (HTML or PlainText).
   var composeHTML = identity ? identity.composeHtml
@@ -2222,13 +2226,9 @@ function PromptMessagesOffline(aPrefix)
 
 function GetDefaultAccountRootFolder()
 {
-  try {
-    var account = accountManager.defaultAccount;
-    var defaultServer = account.incomingServer;
-    var defaultFolder = defaultServer.rootMsgFolder;
-    return defaultFolder;
-  }
-  catch (ex) {
+  var account = accountManager.defaultAccount;
+  if (account) {
+    return account.incomingServer.rootMsgFolder;
   }
   return null;
 }
@@ -2241,8 +2241,8 @@ function GetFolderMessages() {
   var selectedFolders = GetSelectedMsgFolders();
   var defaultAccountRootFolder = GetDefaultAccountRootFolder();
 
-  // if no default account, get msg isn't going do anything anyways
-  // so bail out
+  // If no default account, GetNewMsgs isn't going to do anything anyways
+  // so bail out.
   if (!defaultAccountRootFolder)
     return;
 
