@@ -150,10 +150,14 @@ STDMETHODIMP CMapiImp::Login(unsigned long aUIArg, LPSTR aLogin, LPSTR aPassWord
       nsCOMPtr <nsIMsgAccountManager> accountManager =
         do_GetService(NS_MSGACCOUNTMANAGER_CONTRACTID, &rv);
       NS_ENSURE_SUCCESS(rv,MAPI_E_LOGIN_FAILURE);
-      nsCOMPtr <nsIMsgAccount> account;
-      nsCOMPtr <nsIMsgIdentity> identity;
+
+      nsCOMPtr<nsIMsgAccount> account;
       rv = accountManager->GetDefaultAccount(getter_AddRefs(account));
       NS_ENSURE_SUCCESS(rv,MAPI_E_LOGIN_FAILURE);
+      if (!account)
+        return MAPI_E_LOGIN_FAILURE;
+
+      nsCOMPtr<nsIMsgIdentity> identity;
       rv = account->GetDefaultIdentity(getter_AddRefs(identity));
       NS_ENSURE_SUCCESS(rv,MAPI_E_LOGIN_FAILURE);
       if (!identity)
@@ -309,6 +313,8 @@ nsresult CMapiImp::GetDefaultInbox(nsIMsgFolder **inboxFolder)
   nsCOMPtr <nsIMsgAccount> account;
   rv = accountManager->GetDefaultAccount(getter_AddRefs(account));
   NS_ENSURE_SUCCESS(rv,rv);
+  if (!account)
+    return NS_ERROR_FAILURE;
 
   // get incoming server
   nsCOMPtr <nsIMsgIncomingServer> server;
