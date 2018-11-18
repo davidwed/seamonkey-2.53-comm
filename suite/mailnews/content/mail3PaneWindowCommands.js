@@ -842,8 +842,14 @@ function IsSendUnsentMsgsEnabled(folderResource)
   if (folders.length > 0)
     identity = getIdentityForServer(folders[0].server);
 
-  if (!identity)
-    identity = MailServices.accounts.defaultAccount.defaultIdentity;
+  if (!identity) {
+    let defaultAccount = MailServices.accounts.defaultAccount;
+    if (defaultAccount)
+      identity = defaultAccount.defaultIdentity;
+
+    if (!identity)
+      return false;
+  }
 
   return msgSendLater.hasUnsentMessages(identity);
 }
@@ -856,8 +862,7 @@ function IsSubscribeEnabled()
   // If there are any IMAP or News servers, we can show the dialog any time and
   // it will properly show those.
   let servers = accountManager.allServers;
-  for (let server of fixIterator(servers,
-                                 Ci.nsIMsgIncomingServer)) {
+  for (let server of fixIterator(servers, Ci.nsIMsgIncomingServer)) {
     if (server.type == "imap" || server.type == "nntp")
       return true;
   }
