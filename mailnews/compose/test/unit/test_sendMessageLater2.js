@@ -238,6 +238,7 @@ function run_test() {
   account.addIdentity(identity);
   account.defaultIdentity = identity;
   account.incomingServer = incomingServer;
+  MailServices.accounts.defaultAccount = account;
 
   localAccountUtils.rootFolder.createLocalSubfolder("Sent");
 
