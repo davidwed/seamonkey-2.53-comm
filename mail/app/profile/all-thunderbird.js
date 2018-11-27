@@ -270,9 +270,6 @@ pref("browser.preferences.animateFadeIn", false);
 // load the Preferences in a tab
 pref("mail.preferences.inContent", false);
 
-pref("browser.download.show_plugins_in_list", false);
-pref("browser.download.hide_plugins_without_extensions", true);
-
 pref("accessibility.typeaheadfind", false);
 pref("accessibility.typeaheadfind.timeout", 5000);
 pref("accessibility.typeaheadfind.linksonly", false);
@@ -723,63 +720,6 @@ pref("places.frecency.unvisitedBookmarkBonus", 140);
 pref("places.frecency.unvisitedTypedBonus", 200);
 
 pref("browser.urlbar.restrict.openpage", "%");
-
-// The default for this pref reflects whether the build is capable of IPC.
-// (Turning it on in a no-IPC build will have no effect.)
-#ifdef XP_MACOSX
-// i386 ipc preferences
-pref("dom.ipc.plugins.enabled.i386", false);
-pref("dom.ipc.plugins.enabled.i386.flash player.plugin", true);
-pref("dom.ipc.plugins.enabled.i386.javaplugin2_npapi.plugin", true);
-pref("dom.ipc.plugins.enabled.i386.javaappletplugin.plugin", true);
-// x86_64 ipc preferences
-pref("dom.ipc.plugins.enabled.x86_64", true);
-#else
-pref("dom.ipc.plugins.enabled", true);
-#endif
-
-// This pref governs whether we attempt to work around problems caused by
-// plugins using OS calls to manipulate the cursor while running out-of-
-// process.  These workarounds all involve intercepting (hooking) certain
-// OS calls in the plugin process, then arranging to make certain OS calls
-// in the browser process.  Eventually plugins will be required to use the
-// NPAPI to manipulate the cursor, and these workarounds will be removed.
-// See bug 621117.
-#ifdef XP_MACOSX
-pref("dom.ipc.plugins.nativeCursorSupport", true);
-#endif
-
-// plugin finder service url
-pref("pfs.datasource.url", "https://pfs.mozilla.org/plugins/PluginFinderService.
-php?mimetype=%PLUGIN_MIMETYPE%&appID=%APP_ID%&appVersion=%APP_VERSION%&clientOS=
-%CLIENT_OS%&chromeLocale=%CHROME_LOCALE%&appRelease=%APP_RELEASE%");
-
-// By default we show an infobar message when pages require plugins that are
-// outdated.
-pref("plugins.hide_infobar_for_outdated_plugin", false);
-
-#ifdef XP_MACOSX
-pref("plugins.use_layers", false);
-pref("plugins.hide_infobar_for_carbon_failure_plugin", false);
-#endif
-
-pref("plugins.update.url", "https://www.mozilla.org/%LOCALE%/plugincheck/");
-pref("plugins.update.notifyUser", false);
-pref("plugins.crash.supportUrl", "https://live.mozillamessaging.com/%APP%/plugin-crashed?locale=%LOCALE%&version=%VERSION%&os=%OS%&buildid=%APPBUILDID%");
-
-// Click-to-play has not been ported for TB yet, see bug 814168.
-// The default plugin state should be changed to "ask to activate" when this
-// has been done.
-pref("plugins.click_to_play", false);
-// Disable by default.
-pref("plugin.default.state", 0);
-
-// Plugins bundled in XPIs are enabled by default.
-pref("plugin.defaultXpi.state", 2);
-
-// Flash is enabled and Java is disabled by default.
-pref("plugin.state.flash", 2);
-pref("plugin.state.java", 0);
 
 // Windows taskbar support
 #ifdef XP_WIN
