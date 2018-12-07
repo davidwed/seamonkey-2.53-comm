@@ -20,8 +20,6 @@ class nsCharsetConverterManager : public nsICharsetConverterManager
 public:
   nsCharsetConverterManager();
 
-  static void Shutdown();
-
 private:
   virtual ~nsCharsetConverterManager();
 
