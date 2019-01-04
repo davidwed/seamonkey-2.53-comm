@@ -248,6 +248,10 @@ function deepCopy(org)
 if (typeof gEmailWizardLogger == "undefined") {
   ChromeUtils.import("resource:///modules/gloda/log4moz.js");
   var gEmailWizardLogger = Log4Moz.getConfiguredLogger("mail.wizard");
+  // Bug 1516229
+  // -  gEmailWizardLogger.addAppender(new Log4Moz.DumpAppender(new Log4Moz.BasicFormatter())); // stdout
+  // +  //gEmailWizardLogger.addAppender(new Log4Moz.DumpAppender(new Log4Moz.BasicFormatter())); // stdout
+
 }
 function ddump(text)
 {
