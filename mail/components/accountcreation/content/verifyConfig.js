@@ -39,7 +39,7 @@ if (typeof gEmailWizardLogger == "undefined") {
 
 function verifyConfig(config, alter, msgWindow, successCallback, errorCallback)
 {
-  ddump(debugObject(config, "config", 3));
+  ddump("verify config:\n" + config);
   assert(config instanceof AccountConfig,
          "BUG: Arg 'config' needs to be an AccountConfig object");
   assert(typeof(alter) == "boolean");
