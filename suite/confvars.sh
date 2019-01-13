@@ -3,22 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-export moztopsrcdir=${srcdir}
-export commtopsrcdir=${srcdir}/comm
-export mozreltopsrcdir=.
-export commreltopsrcdir=comm
-export commtopobjdir=${_objdir}/comm
-tmpscript=`$PYTHON -c 'import os, tempfile; print tempfile.mktemp(prefix="subscript.").replace(os.sep, "/")'` || exit 1
-m4 "${srcdir}/build/autoconf/subconfigure.m4" \
-    "${srcdir}/build/autoconf/altoptions.m4" \
-    "${srcdir}/${MOZ_BUILD_APP}/configure.in" > $tmpscript
-. $tmpscript
-rm -f $tmpscript
-
 MOZ_APP_BASENAME=SeaMonkey
 MOZ_APP_VENDOR=Mozilla
 MOZ_APP_NAME=seamonkey
 MOZ_APP_DISPLAYNAME=SeaMonkey
+
 MOZ_BRANDING_DIRECTORY=comm/suite/branding/seamonkey
 MOZ_OFFICIAL_BRANDING_DIRECTORY=comm/suite/branding/seamonkey
 
@@ -30,22 +19,8 @@ ACCEPTED_MAR_CHANNEL_IDS=seamonkey-comm-central
 # The MAR_CHANNEL_ID must not contain the following 3 characters: ",\t "
 MAR_CHANNEL_ID=seamonkey-comm-central
 
-MOZ_APP_VERSION_TXT=${_topsrcdir}/$MOZ_BUILD_APP/config/version.txt
-MOZ_APP_VERSION=`cat $MOZ_APP_VERSION_TXT`
-MOZ_APP_VERSION_DISPLAY_TXT=${_topsrcdir}/$MOZ_BUILD_APP/config/version_display.txt
-MOZ_APP_VERSION_DISPLAY=`cat $MOZ_APP_VERSION_DISPLAY_TXT`
-MOZ_PKG_VERSION_TXT=${_topsrcdir}/$MOZ_BUILD_APP/config/version_package.txt
-MOZ_PKG_VERSION=`cat $MOZ_PKG_VERSION_TXT`
-SEAMONKEY_VERSION=$MOZ_APP_VERSION
-SEAMONKEY_VERSION_DISPLAY=$MOZ_APP_VERSION_DISPLAY
-
 MOZ_APP_ID={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 MOZ_PROFILE_MIGRATOR=1
-
-if test "$OS_ARCH" = "WINNT" -o \
-        "$OS_ARCH" = "Linux"; then
-  MOZ_BUNDLED_FONTS=1
-fi
 
 # Include the DevTools client, not just the server (which is the default)
 MOZ_DEVTOOLS=all
