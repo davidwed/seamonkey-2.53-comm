@@ -6,7 +6,6 @@
 
 #include <mapidefs.h>
 #include <mapi.h>
-#include <tchar.h>
 #include <direct.h>
 #include "nsCOMPtr.h"
 #include "nsIComponentManager.h"
@@ -179,7 +178,7 @@ bool nsMapiHook::DisplayLoginDialog(bool aLogin, char16_t **aUsername,
   return btnResult;
 }
 
-bool nsMapiHook::VerifyUserName(const nsString& aUsername, nsCString& aIdKey)
+bool nsMapiHook::VerifyUserName(const nsCString& aUsername, nsCString& aIdKey)
 {
   nsresult rv;
 
@@ -209,7 +208,7 @@ bool nsMapiHook::VerifyUserName(const nsString& aUsername, nsCString& aIdKey)
       if (index != -1)
         email.SetLength(index);
 
-      if (aUsername.Equals(NS_ConvertASCIItoUTF16(email)))
+      if (aUsername.Equals(email))
         return NS_SUCCEEDED(thisIdentity->GetKey(aIdKey));
     }
   }
@@ -782,10 +781,10 @@ nsresult nsMapiHook::PopulateCompFieldsW(lpnsMapiMessageW aMessage,
 
 // this is used to populate the docs as attachments in the Comp fields for Send Documents
 nsresult nsMapiHook::PopulateCompFieldsForSendDocs(nsIMsgCompFields * aCompFields, ULONG aFlags,
-                                                   LPTSTR aDelimChar, LPTSTR aFilePaths)
+                                                   LPSTR aDelimChar, LPSTR aFilePaths)
 {
-  nsAutoString strDelimChars ;
-  nsString strFilePaths;
+  nsAutoCString strDelimChars;
+  nsAutoCString strFilePaths;
   nsresult rv = NS_OK ;
   bool bExist ;
 
@@ -817,7 +816,7 @@ nsresult nsMapiHook::PopulateCompFieldsForSendDocs(nsIMsgCompFields * aCompField
     nsCOMPtr <nsIFile> pFile = do_CreateInstance (NS_LOCAL_FILE_CONTRACTID, &rv) ;
     if (NS_FAILED(rv) || (!pFile) ) return rv ;
 
-    char16_t * newFilePaths = (char16_t *) strFilePaths.get() ;
+    char *newFilePaths = (char *)strFilePaths.get();
     while (offset != kNotFound)
     {
       //Temp Directory
@@ -834,7 +833,7 @@ nsresult nsMapiHook::PopulateCompFieldsForSendDocs(nsIMsgCompFields * aCompField
         if (NS_FAILED(rv)) return rv ;
       }
 
-      nsString RemainingPaths ;
+      nsAutoCString RemainingPaths;
       RemainingPaths.Assign(newFilePaths) ;
       offset = RemainingPaths.Find (strDelimChars) ;
       if (offset != kNotFound)
@@ -852,14 +851,14 @@ nsresult nsMapiHook::PopulateCompFieldsForSendDocs(nsIMsgCompFields * aCompField
         char cwd[MAX_PATH];
         if (_getdcwd(_getdrive(), cwd, MAX_PATH))
         {
-          nsAutoString cwdStr;
-          CopyASCIItoUTF16(cwd, cwdStr);
+          nsAutoCString cwdStr;
+          cwdStr.Assign(cwd);
           cwdStr.Append('\\');
           RemainingPaths.Insert(cwdStr, 0);
         }
       }
 
-      pFile->InitWithPath (RemainingPaths) ;
+      pFile->InitWithNativePath(RemainingPaths) ;
 
       rv = pFile->Exists(&bExist) ;
       if (NS_FAILED(rv) || (!bExist) ) return NS_ERROR_FILE_TARGET_DOES_NOT_EXIST ;
