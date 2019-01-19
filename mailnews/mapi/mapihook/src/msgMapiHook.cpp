@@ -350,7 +350,7 @@ nsresult nsMapiHook::BlindSendMail (unsigned long aSession, nsIMsgCompFields * a
 }
 
 nsresult nsMapiHook::HandleAttachments (nsIMsgCompFields * aCompFields, int32_t aFileCount,
-                                        lpnsMapiFileDesc aFiles, bool bUTF8)
+                                        lpnsMapiFileDesc aFiles, bool aIsUTF8)
 {
     nsresult rv = NS_OK ;
     // Do nothing if there are no files to process.
@@ -399,7 +399,7 @@ nsresult nsMapiHook::HandleAttachments (nsIMsgCompFields * aCompFields, int32_t 
             if (aFiles[i].lpszFileName)
             {
                 nsAutoString wholeFileName;
-                if (!bUTF8)
+                if (!aIsUTF8)
                     NS_CopyNativeToUnicode(nsDependentCString(aFiles[i].lpszFileName),
                                            wholeFileName);
                 else
@@ -576,12 +576,12 @@ nsresult nsMapiHook::PopulateCompFieldsWithConversion(lpnsMapiMessage aMessage,
                                     nsIMsgCompFields * aCompFields)
 {
   nsresult rv = NS_OK;
-  bool bUTF8 = aMessage->ulReserved == CP_UTF8;
+  bool isUTF8 = aMessage->ulReserved == CP_UTF8;
 
   if (aMessage->lpOriginator)
   {
     nsAutoString From;
-    if (!bUTF8)
+    if (!isUTF8)
         From.Append(NS_ConvertASCIItoUTF16(aMessage->lpOriginator->lpszAddress));
     else
         From.Append(NS_ConvertUTF8toUTF16(aMessage->lpOriginator->lpszAddress));
@@ -608,7 +608,7 @@ nsresult nsMapiHook::PopulateCompFieldsWithConversion(lpnsMapiMessage aMessage,
         case MAPI_TO :
           if (!To.IsEmpty())
             To += Comma ;
-          if (!bUTF8)
+          if (!isUTF8)
               To.Append(NS_ConvertASCIItoUTF16(addressWithoutType));
           else
               To.Append(NS_ConvertUTF8toUTF16(addressWithoutType));
@@ -617,7 +617,7 @@ nsresult nsMapiHook::PopulateCompFieldsWithConversion(lpnsMapiMessage aMessage,
         case MAPI_CC :
           if (!Cc.IsEmpty())
             Cc += Comma ;
-          if (!bUTF8)
+          if (!isUTF8)
               Cc.Append(NS_ConvertASCIItoUTF16(addressWithoutType));
           else
               Cc.Append(NS_ConvertUTF8toUTF16(addressWithoutType));
@@ -626,7 +626,7 @@ nsresult nsMapiHook::PopulateCompFieldsWithConversion(lpnsMapiMessage aMessage,
         case MAPI_BCC :
           if (!Bcc.IsEmpty())
               Bcc += Comma ;
-          if (!bUTF8)
+          if (!isUTF8)
               Bcc.Append(NS_ConvertASCIItoUTF16(addressWithoutType));
           else
               Bcc.Append(NS_ConvertUTF8toUTF16(addressWithoutType));
@@ -647,7 +647,7 @@ nsresult nsMapiHook::PopulateCompFieldsWithConversion(lpnsMapiMessage aMessage,
   if (aMessage->lpszSubject)
   {
     nsAutoString Subject ;
-    if (!bUTF8)
+    if (!isUTF8)
         rv = NS_CopyNativeToUnicode(nsDependentCString(aMessage->lpszSubject),
                                     Subject);
     else
@@ -657,14 +657,14 @@ nsresult nsMapiHook::PopulateCompFieldsWithConversion(lpnsMapiMessage aMessage,
   }
 
   // handle attachments as File URL
-  rv = HandleAttachments(aCompFields, aMessage->nFileCount, aMessage->lpFiles, bUTF8);
+  rv = HandleAttachments(aCompFields, aMessage->nFileCount, aMessage->lpFiles, isUTF8);
   if (NS_FAILED(rv)) return rv ;
 
   // set body
   if (aMessage->lpszNoteText)
   {
     nsAutoString Body ;
-    if (!bUTF8)
+    if (!isUTF8)
         rv = NS_CopyNativeToUnicode(nsDependentCString(aMessage->lpszNoteText),
                                     Body);
     else
