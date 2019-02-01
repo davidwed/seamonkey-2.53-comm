@@ -1,0 +1,21 @@
+--- .eslintrc.js
++++ .eslintrc.js
+@@ -17,17 +17,17 @@ module.exports = {
+     "gMessageNotificationBar": true,
+     "getBrowser": true,
+     "onCheckItem": true,
+     "openContentTab": true,
+   },
+ 
+   "rules": {
+     // Warn about cyclomatic complexity in functions.
+-    "complexity": ["error", 70],
++    "complexity": ["error", 80],
+ 
+     // Require braces around blocks that start a new line.
+     "curly": ["error", "multi-line"],
+ 
+     // Enforce valid JSDoc comments.
+     "valid-jsdoc": ["error", {
+       prefer: { return: "returns" },
+       preferType: {
