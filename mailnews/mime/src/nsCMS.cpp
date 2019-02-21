@@ -25,6 +25,7 @@
 #include "mozpkix/Result.h"
 #include "mozpkix/pkixtypes.h"
 #include "smime.h"
+#include "mozilla/StaticMutex.h"
 
 using namespace mozilla;
 using namespace mozilla::psm;
@@ -344,6 +345,7 @@ private:
   {
     MOZ_ASSERT(!NS_IsMainThread());
 
+    mozilla::StaticMutexAutoLock lock(sMutex);
     nsresult rv;
     if (!mDigestData.IsEmpty()) {
       rv = mMessage->VerifyDetachedSignature(
@@ -366,7 +368,12 @@ private:
   nsCOMPtr<nsICMSMessage> mMessage;
   nsCOMPtr<nsISMimeVerificationListener> mListener;
   nsCString mDigestData;
+
+  static mozilla::StaticMutex sMutex;
+
 };
+
+mozilla::StaticMutex SMimeVerificationTask::sMutex;
 
 nsresult nsCMSMessage::CommonAsyncVerifySignature(nsISMimeVerificationListener *aListener,
                                                   unsigned char* aDigestData, uint32_t aDigestDataLen)
