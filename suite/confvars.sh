@@ -43,3 +43,5 @@ MOZ_DEVTOOLS=all
 
 # Bundled extensions Lightning
 MOZ_CALENDAR=1
+
+NSS_EXTRA_SYMBOLS_FILE=${_topsrcdir}/../mailnews/nss-extra.symbols
