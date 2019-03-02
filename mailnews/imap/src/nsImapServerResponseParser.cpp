@@ -59,6 +59,7 @@ nsImapServerResponseParser::nsImapServerResponseParser(nsImapProtocol &imapProto
   fStatusExistingMessages = 0;
   fReceivedHeaderOrSizeForUID = nsMsgKey_None;
   fCondStoreEnabled = false;
+  fStdJunkNotJunkUseOk = false;
 }
 
 nsImapServerResponseParser::~nsImapServerResponseParser()
@@ -1831,8 +1832,8 @@ void nsImapServerResponseParser::text()
 void nsImapServerResponseParser::parse_folder_flags(bool calledForFlags)
 {
   uint16_t labelFlags = 0;
-  bool storeUserFlags = !(fSupportsUserDefinedFlags & kImapMsgSupportUserFlag) &&
-                        calledForFlags && fFlagState;
+  uint16_t junkNotJunkFlags = 0;
+  bool storeUserFlags = calledForFlags && fFlagState;
   uint16_t numOtherKeywords = 0;
 
   do
@@ -1862,7 +1863,7 @@ void nsImapServerResponseParser::parse_folder_flags(bool calledForFlags)
     else
     {
       // Treat special and built-in $LabelX's as user defined if a
-      // save occurs below.
+      // store occurs below. Include $Junk/$NotJunk in this too.
       if (!PL_strncasecmp(fNextToken, "$MDNSent", 8))
         fSupportsUserDefinedFlags |= kImapMsgSupportMDNSentFlag;
       else if (!PL_strncasecmp(fNextToken, "$Forwarded", 10))
@@ -1877,10 +1878,17 @@ void nsImapServerResponseParser::parse_folder_flags(bool calledForFlags)
         labelFlags |= 8;
       else if (!PL_strncasecmp(fNextToken, "$Label5", 7))
         labelFlags |= 16;
+      else if (!PL_strncasecmp(fNextToken, "$Junk", 5))
+        junkNotJunkFlags |= 1;
+      else if (!PL_strncasecmp(fNextToken, "$NotJunk", 8))
+        junkNotJunkFlags |= 2;
 
-      // Save user keywords defined for mailbox, usually by other clients.
-      // But only do this for FLAGS response, not PERMANENTFLAGS response
-      // and if '\*' has not appeared in a PERMANENTFLAGS response.
+      // Store user keywords defined for mailbox, usually by other clients.
+      // But only do this for FLAGS response, not PERMANENTFLAGS response.
+      // This is only needed if '\*' does not appear in a PERMANENTFLAGS
+      // response indicating the user defined keywords are not allowed. But this
+      // is not known until this function is called for PERMANENTFLAGS which
+      // typically occurs after FLAGS, so must store them regardless.
       if (storeUserFlags && *fNextToken != '\r')
       {
         if (*(fNextToken + strlen(fNextToken) - 1) != ')')
@@ -1890,7 +1898,7 @@ void nsImapServerResponseParser::parse_folder_flags(bool calledForFlags)
         }
         else
         {
-          // Token ends in ')' so end of list. Change ')' to null and save.
+          // Token ends in ')' so end of list. Save all but ending ')'.
           fFlagState->SetOtherKeywords(numOtherKeywords++,
                                        nsDependentCSubstring(fNextToken, strlen(fNextToken) - 1));
         }
@@ -1903,6 +1911,12 @@ void nsImapServerResponseParser::parse_folder_flags(bool calledForFlags)
 
   if (fFlagState)
     fFlagState->OrSupportedUserFlags(fSupportsUserDefinedFlags);
+
+  if (storeUserFlags)
+  {
+    // Set true if both "$Junk" and "$NotJunk" appear in FLAGS.
+    fStdJunkNotJunkUseOk = (junkNotJunkFlags == 3);
+  }
 }
 /*
   resp_text_code  ::= ("ALERT" / "PARSE" /
