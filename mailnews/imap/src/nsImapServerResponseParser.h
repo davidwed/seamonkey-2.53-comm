@@ -53,6 +53,7 @@ public:
   virtual eIMAPstate GetIMAPstate();
   virtual bool WaitingForMoreClientInput() { return fWaitingForMoreClientInput; }
   const char *GetSelectedMailboxName();   // can be NULL
+  bool IsStdJunkNotJunkUseOk() { return fStdJunkNotJunkUseOk; }
 
   // if we get a PREAUTH greeting from the server, initialize the parser to begin in
   // the kAuthenticated state
@@ -200,6 +201,7 @@ private:
   bool            fDownloadingHeaders;
   bool            fCurrentCommandIsSingleMessageFetch;
   bool            fGotPermanentFlags;
+  bool            fStdJunkNotJunkUseOk;
   imapMessageFlagsType   fSavedFlagInfo;
   nsTArray<nsCString> fCustomFlags;
 
