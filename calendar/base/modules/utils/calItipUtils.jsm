@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 ChromeUtils.import("resource:///modules/mailServices.js");
@@ -281,7 +281,7 @@ var calitip = {
             imipLabel = calitip.getMethodText(itipItem.receivedMethod);
         }
         let data = { label: imipLabel, showItems: [], hideItems: [] };
-        let separateButtons = Preferences.get("calendar.itip.separateInvitationButtons", false);
+        let separateButtons = Services.prefs.getBoolPref("calendar.itip.separateInvitationButtons", false);
 
         let disallowedCounter = false;
         if (foundItems && foundItems.length) {
@@ -812,7 +812,7 @@ var calitip = {
                     let replyTo = [];
                     let delegatorIds = invitedAttendee.getProperty("DELEGATED-FROM");
                     if (delegatorIds &&
-                        Preferences.get("calendar.itip.notifyDelegatorOnReply", false)) {
+                        Services.prefs.getBoolPref("calendar.itip.notifyDelegatorOnReply", false)) {
                         let getDelegator = function(aDelegatorId) {
                             let delegator = aOriginalItem.getAttendeeById(aDelegatorId);
                             if (delegator) {
@@ -930,7 +930,7 @@ var calitip = {
                 // the event (if not prevented otherwise)
                 if (isMinorUpdate &&
                     addedAttendees.length > 0 &&
-                    Preferences.get("calendar.itip.updateInvitationForNewAttendeesOnly", false)) {
+                    Services.prefs.getBoolPref("calendar.itip.updateInvitationForNewAttendeesOnly", false)) {
                     recipients = addedAttendees;
                 }
 

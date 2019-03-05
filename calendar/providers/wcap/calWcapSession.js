@@ -4,7 +4,6 @@
 
 /* exported getWcapSessionFor */
 
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -1139,7 +1138,7 @@ function confirmInsecureLogin(uri) {
             }
             confirmedEntry = (bConfirmed ? "1" : "0");
             newConfirmedLogins += encodedHost + ":" + confirmedEntry;
-            Preferences.set("calendar.wcap.confirmed_http_logins", newConfirmedLogins);
+            Services.prefs.setStringPref("calendar.wcap.confirmed_http_logins", newConfirmedLogins);
             getPref("calendar.wcap.confirmed_http_logins"); // log written entry
             confirmInsecureLogin.m_confirmedHttpLogins[encodedHost] = confirmedEntry;
         }

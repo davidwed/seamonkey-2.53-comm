@@ -5,7 +5,6 @@
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/Console.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 
 // Usually the backend loader gets loaded via profile-after-change, but in case
 // a calendar component hooks in earlier, its very likely it will use calUtils.
@@ -16,7 +15,7 @@ Cc["@mozilla.org/calendar/backend-loader;1"].getService();
 var gCalendarConsole = new ConsoleAPI({
     prefix: "Lightning",
     consoleID: "calendar",
-    maxLogLevel: Preferences.get("calendar.debug.log", false) ? "all" : "warn"
+    maxLogLevel: Services.prefs.getBoolPref("calendar.debug.log", false) ? "all" : "warn"
 });
 
 this.EXPORTED_SYMBOLS = ["cal"];

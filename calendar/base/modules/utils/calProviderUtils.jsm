@@ -5,7 +5,6 @@
 ChromeUtils.import("resource:///modules/mailServices.js");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "cal", "resource://calendar/modules/calUtils.jsm", "cal");
@@ -595,7 +594,7 @@ var calprovider = {
                 case "itip.transport": // iTIP/iMIP default:
                     return calprovider.getImipTransport(this);
                 case "itip.notify-replies": // iTIP/iMIP default:
-                    return Preferences.get("calendar.itip.notify-replies", false);
+                    return Services.prefs.getBoolPref("calendar.itip.notify-replies", false);
                 // temporary hack to get the uncached calendar instance:
                 case "cache.uncachedCalendar":
                     return this;

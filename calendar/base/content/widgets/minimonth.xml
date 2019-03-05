@@ -440,7 +440,6 @@
 
       <constructor><![CDATA[
           ChromeUtils.import("resource://gre/modules/Services.jsm");
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
           ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
           this.mToday = false;
@@ -456,7 +455,7 @@
           if (this.hasAttribute("freebusy")) {
               this._setFreeBusy(this.getAttribute("freebusy") == "true");
           }
-          this.mShowWeekNumber = Preferences.get("calendar.view-minimonth.showWeekNumber", true);
+          this.mShowWeekNumber = Services.prefs.getBoolPref("calendar.view-minimonth.showWeekNumber", true);
 
           // Add pref observer
           let branch = Services.prefs.getBranch("");
@@ -724,8 +723,8 @@
       <method name="refreshDisplay">
         <body><![CDATA[
             // Find out which should be the first day of the week
-            this.weekStart = Preferences.get("calendar.week.start", 0);
-            this.mShowWeekNumber = Preferences.get("calendar.view-minimonth.showWeekNumber", true);
+            this.weekStart = Services.prefs.getIntPref("calendar.week.start", 0);
+            this.mShowWeekNumber = Services.prefs.getBoolPref("calendar.view-minimonth.showWeekNumber", true);
             if (!this.mValue) {
                 this.mValue = new Date();
             }

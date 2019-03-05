@@ -5,7 +5,6 @@
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 
 var calICalendar = Ci.calICalendar;
 var cICL = Ci.calIChangeLog;
@@ -185,7 +184,7 @@ calCachedCalendar.prototype = {
                     this.mUncachedCalendar.resetLog();
                 }
             } else {
-                let calType = Preferences.get("calendar.cache.type", "storage");
+                let calType = Services.prefs.getStringPref("calendar.cache.type", "storage");
                 // While technically, the above deleteCalendar should delete the
                 // whole calendar, this is nothing more than deleting all events
                 // todos and properties. Therefore the initialization can be

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
@@ -163,7 +163,7 @@ function calFilter() {
     this.wrappedJSObject = this;
     this.mFilterProperties = new calFilterProperties();
     this.initDefinedFilters();
-    this.mMaxIterations = Preferences.get("calendar.filter.maxiterations", 50);
+    this.mMaxIterations = Services.prefs.getIntPref("calendar.filter.maxiterations", 50);
 }
 
 calFilter.prototype = {

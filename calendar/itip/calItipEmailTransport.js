@@ -6,7 +6,6 @@ ChromeUtils.import("resource:///modules/mailServices.js");
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://calendar/modules/ltnInvitationUtils.jsm");
 
 /**
@@ -71,7 +70,7 @@ calItipEmailTransport.prototype = {
         let body = "";
         switch (aItipItem.responseMethod) {
             case "REQUEST": {
-                let usePrefixes = Preferences.get(
+                let usePrefixes = Services.prefs.getBoolPref(
                     "calendar.itip.useInvitationSubjectPrefixes",
                     true
                 );

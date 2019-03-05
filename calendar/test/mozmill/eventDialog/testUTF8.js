@@ -9,7 +9,7 @@ var helpersForController, invokeEventDialog, createCalendar;
 var deleteCalendars, switchToView, setData;
 var EVENT_BOX, CANVAS_BOX;
 
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var UTF8STRING = " 💣 💥  ☣  ";
 
@@ -29,7 +29,7 @@ function setupModule(module) {
     Object.assign(module, helpersForController(controller));
 
     createCalendar(controller, UTF8STRING);
-    Preferences.set("calendar.categories.names", UTF8STRING);
+    Services.prefs.setStringPref("calendar.categories.names", UTF8STRING);
 }
 
 function testUTF8() {
@@ -81,5 +81,5 @@ function testUTF8() {
 
 function teardownTest(module) {
     deleteCalendars(controller, UTF8STRING);
-    Preferences.reset("calendar.categories.names");
+    Services.prefs.clearUserPref("calendar.categories.names");
 }

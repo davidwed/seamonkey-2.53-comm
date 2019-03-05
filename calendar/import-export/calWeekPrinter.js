@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
@@ -122,7 +122,7 @@ calWeekPrinter.prototype = {
             let titleNode = currentPage.querySelector("." + weekdayName + "-title");
             titleNode.textContent = dateFormatter.formatDateLong(currentDate.getInTimezone(defaultTimezone));
 
-            if (Preferences.get(dayOffPrefName, false)) {
+            if (Services.prefs.getBoolPref(dayOffPrefName, false)) {
                 let daysOffNode = currentPage.querySelector("." + weekdayName + "-box");
                 daysOffNode.className += " day-off";
             }

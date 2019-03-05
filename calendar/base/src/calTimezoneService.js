@@ -4,7 +4,6 @@
 
 ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -147,7 +146,7 @@ calTimezoneService.prototype = {
     get UTC() {
         if (!this.mZones.has("UTC")) {
             let utc;
-            if (Preferences.get("calendar.icaljs", false)) {
+            if (Services.prefs.getBoolPref("calendar.icaljs", false)) {
                 utc = new calICALJSTimezone(ICAL.Timezone.utcTimezone);
             } else {
                 utc = new calLibicalTimezone("UTC", null, "", "");
@@ -163,7 +162,7 @@ calTimezoneService.prototype = {
     get floating() {
         if (!this.mZones.has("floating")) {
             let floating;
-            if (Preferences.get("calendar.icaljs", false)) {
+            if (Services.prefs.getBoolPref("calendar.icaljs", false)) {
                 floating = new calICALJSTimezone(ICAL.Timezone.localTimezone);
             } else {
                 floating = new calLibicalTimezone("floating", null, "", "");
@@ -198,7 +197,7 @@ calTimezoneService.prototype = {
             if (timezone.aliasTo) {
                 // This zone is an alias.
                 timezone.zone = this.getTimezone(timezone.aliasTo);
-            } else if (Preferences.get("calendar.icaljs", false)) {
+            } else if (Services.prefs.getBoolPref("calendar.icaljs", false)) {
                 let parsedComp = ICAL.parse("BEGIN:VCALENDAR\r\n" + timezone.ics + "\r\nEND:VCALENDAR");
                 let icalComp = new ICAL.Component(parsedComp);
                 let tzComp = icalComp.getFirstSubcomponent("vtimezone");
@@ -241,7 +240,7 @@ calTimezoneService.prototype = {
 
     get defaultTimezone() {
         if (!this.mDefaultTimezone) {
-            let prefTzid = Preferences.get("calendar.timezone.local", null);
+            let prefTzid = Services.prefs.getStringPref("calendar.timezone.local", null);
             let tzid = prefTzid;
             // If a user already has a profile created by an earlier version
             // with floating timezone, set the correctly guessed timezone.
@@ -257,7 +256,7 @@ calTimezoneService.prototype = {
             cal.ASSERT(this.mDefaultTimezone, "Timezone not found: " + tzid);
             // Update prefs if necessary:
             if (this.mDefaultTimezone && this.mDefaultTimezone.tzid != prefTzid) {
-                Preferences.set("calendar.timezone.local", this.mDefaultTimezone.tzid);
+                Services.prefs.setStringPref("calendar.timezone.local", this.mDefaultTimezone.tzid);
             }
 
             // We need to observe the timezone preference to update the default

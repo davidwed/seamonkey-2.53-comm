@@ -122,7 +122,7 @@
       </property>
 
       <constructor><![CDATA[
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
 
           this.initTimeRange();
       ]]></constructor>
@@ -133,8 +133,8 @@
                 this.mStartHour = 0;
                 this.mEndHour = 24;
             } else {
-                this.mStartHour = Preferences.get("calendar.view.daystarthour", 8);
-                this.mEndHour = Preferences.get("calendar.view.dayendhour", 19);
+                this.mStartHour = Services.prefs.getIntPref("calendar.view.daystarthour", 8);
+                this.mEndHour = Services.prefs.getIntPref("calendar.view.dayendhour", 19);
             }
         ]]></body>
       </method>
@@ -421,7 +421,7 @@
       </property>
 
       <constructor><![CDATA[
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
           ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
           let args = window.arguments[0];
@@ -529,8 +529,8 @@
                 this.mStartHour = 0;
                 this.mEndHour = 24;
             } else {
-                this.mStartHour = Preferences.get("calendar.view.daystarthour", 8);
-                this.mEndHour = Preferences.get("calendar.view.dayendhour", 19);
+                this.mStartHour = Services.prefs.getIntPref("calendar.view.daystarthour", 8);
+                this.mEndHour = Services.prefs.getIntPref("calendar.view.dayendhour", 19);
             }
         ]]></body>
       </method>
@@ -685,7 +685,7 @@
       </property>
 
       <constructor><![CDATA[
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
           ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
           this.initTimeRange();
@@ -959,8 +959,8 @@
                 this.mStartHour = 0;
                 this.mEndHour = 24;
             } else {
-                this.mStartHour = Preferences.get("calendar.view.daystarthour", 8);
-                this.mEndHour = Preferences.get("calendar.view.dayendhour", 19);
+                this.mStartHour = Services.prefs.getIntPref("calendar.view.daystarthour", 8);
+                this.mEndHour = Services.prefs.getIntPref("calendar.view.dayendhour", 19);
             }
         ]]></body>
       </method>
@@ -1070,7 +1070,7 @@
       </property>
 
       <constructor><![CDATA[
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
           ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
           this.initTimeRange();
@@ -1587,8 +1587,8 @@
                 this.mStartHour = 0;
                 this.mEndHour = 24;
             } else {
-                this.mStartHour = Preferences.get("calendar.view.daystarthour", 8);
-                this.mEndHour = Preferences.get("calendar.view.dayendhour", 19);
+                this.mStartHour = Services.prefs.getIntPref("calendar.view.daystarthour", 8);
+                this.mEndHour = Services.prefs.getIntPref("calendar.view.dayendhour", 19);
             }
         ]]></body>
       </method>

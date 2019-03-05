@@ -4,7 +4,7 @@
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var localeEn = {
     headTitle:       "Subject",
@@ -274,7 +274,7 @@ calOutlookCSVImporter.prototype = {
                         // end date is exclusive, so set to next day after start.
                         eDate.day += 1;
                     } else {
-                        eDate.minute += Preferences.get("calendar.event.defaultlength", 60);
+                        eDate.minute += Services.prefs.getIntPref("calendar.event.defaultlength", 60);
                     }
                 } else if (sDate.isDate) {
                     // A time part for the startDate is missing or was

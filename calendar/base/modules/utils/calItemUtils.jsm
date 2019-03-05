@@ -3,7 +3,6 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 ChromeUtils.import("resource://gre/modules/Deprecated.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -388,11 +387,11 @@ var calitem = {
     getEventDefaultTransparency: function(aIsAllDay) {
         let transp = null;
         if (aIsAllDay) {
-            transp = Preferences.get("calendar.events.defaultTransparency.allday.transparent", false)
+            transp = Services.prefs.getBoolPref("calendar.events.defaultTransparency.allday.transparent", false)
                      ? "TRANSPARENT"
                      : "OPAQUE";
         } else {
-            transp = Preferences.get("calendar.events.defaultTransparency.standard.transparent", false)
+            transp = Services.prefs.getBoolPref("calendar.events.defaultTransparency.standard.transparent", false)
                      ? "TRANSPARENT"
                      : "OPAQUE";
         }

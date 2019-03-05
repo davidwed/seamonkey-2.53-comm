@@ -264,10 +264,10 @@
     </content>
     <implementation>
       <constructor><![CDATA[
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+          ChromeUtils.import("resource://gre/modules/Services.jsm");
           ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
-          let snoozePref = Preferences.get("calendar.alarms.defaultsnoozelength", 0);
+          let snoozePref = Services.prefs.getIntPref("calendar.alarms.defaultsnoozelength", 0);
           if (snoozePref <= 0) {
               snoozePref = 5;
           }

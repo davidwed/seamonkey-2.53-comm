@@ -5,10 +5,10 @@
 var EXPORTED_SYMBOLS = ["LOGitem", "LOGverbose", "LOGinterval", "stringException"];
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 function LOGverbose(aStr) {
-    if (Preferences.get("calendar.debug.log.verbose", false)) {
+    if (Services.prefs.getBoolPref("calendar.debug.log.verbose", false)) {
         cal.LOG(aStr);
     }
 }
