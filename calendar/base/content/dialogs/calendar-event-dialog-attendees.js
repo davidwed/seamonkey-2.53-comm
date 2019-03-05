@@ -9,7 +9,6 @@
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 
 var gStartDate = null;
 var gEndDate = null;
@@ -833,8 +832,8 @@ function initTimeRange() {
         gStartHour = 0;
         gEndHour = 24;
     } else {
-        gStartHour = Preferences.get("calendar.view.daystarthour", 8);
-        gEndHour = Preferences.get("calendar.view.dayendhour", 19);
+        gStartHour = Services.prefs.getIntPref("calendar.view.daystarthour", 8);
+        gEndHour = Services.prefs.getIntPref("calendar.view.dayendhour", 19);
     }
 }
 

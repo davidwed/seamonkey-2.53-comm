@@ -6,7 +6,6 @@
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
 var gCategoryList;
@@ -64,10 +63,8 @@ var gCategoriesPane = {
             this.mWinProp += ", modal";
         }
 
-        this.mLoadInContent = Preferences.get(
-            "mail.preferences.inContent",
-            false
-        );
+        this.mLoadInContent =
+          Services.prefs.getBoolPref("mail.preferences.inContent", false);
     },
 
     /**

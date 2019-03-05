@@ -27,7 +27,7 @@
 
 ChromeUtils.import("resource://testing-common/httpd.js");
 ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 ChromeUtils.import("resource://gdata-provider/modules/gdataSession.jsm");
@@ -570,7 +570,7 @@ add_test(function test_migrate_uri() {
     checkMigrate("webcal://www.google.com/calendar/feeds/example%40example.com/public/full",
                  "example@example.com", "example@example.com", null);
 
-    Preferences.set("calendar.google.calPrefs.example@example.com.googleUser", "example@example.com");
+    Services.prefs.setStringPref("calendar.google.calPrefs.example@example.com.googleUser", "example@example.com");
     checkMigrate("http://www.google.com/calendar/feeds/example%40example.com/public/full",
                  "example@example.com", "example@example.com", "@default");
 
@@ -633,7 +633,7 @@ add_task(async function test_dateToJSON() {
     deepEqual(dateToJSON(date), { dateTime: "2015-01-30T12:00:00", timeZone: "America/Argentina/Buenos_Aires" });
 
     // ical.js and libical currently have slightly different timezone handling.
-    if (Preferences.get("calendar.icaljs", false)) {
+    if (Services.prefs.getBoolPref("calendar.icaljs", false)) {
         // unknown but formal valid Olson tz. ical.js assumes floating
         date = _createDateTime("Unknown/Olson/Timezone");
         deepEqual(dateToJSON(date), { dateTime: "2015-01-30T12:00:00-00:00" });
@@ -1220,7 +1220,7 @@ add_task(async function test_recurring_cancelled_exception() {
 });
 
 add_task(async function test_import_invitation() {
-    Preferences.set("calendar.google.enableAttendees", true);
+    Services.prefs.setBoolPref("calendar.google.enableAttendees", true);
     let client = await gServer.getClient();
     let pclient = cal.async.promisifyCalendar(client.wrappedJSObject);
     let event = cal.createEvent([
@@ -1246,11 +1246,11 @@ add_task(async function test_import_invitation() {
     equal(gServer.events.length, 1);
     equal(addedItem.icalString, event.icalString);
     gServer.resetClient(client);
-    Preferences.set("calendar.google.enableAttendees", false);
+    Services.prefs.setBoolPref("calendar.google.enableAttendees", false);
 });
 
 add_task(async function test_modify_invitation() {
-    Preferences.set("calendar.google.enableAttendees", true);
+    Services.prefs.setBoolPref("calendar.google.enableAttendees", true);
     let organizer = {
         displayName: "organizer name",
         email: "organizer@example.com",
@@ -1877,7 +1877,7 @@ add_task(async function test_paginate() {
         status: "needsAction"
     }];
 
-    Preferences.set("calendar.google.maxResultsPerRequest", 1);
+    Services.prefs.setIntPref("calendar.google.maxResultsPerRequest", 1);
 
     let client = await gServer.getClient();
     let pclient = cal.async.promisifyCalendar(client);
@@ -1893,7 +1893,7 @@ add_task(async function test_paginate() {
 
     equal(client.getProperty("syncToken.events"), "next-sync-token");
 
-    Preferences.reset("calendar.google.maxResultsPerRequest");
+    Services.prefs.clearUserPref("calendar.google.maxResultsPerRequest");
     gServer.resetClient(client);
 });
 

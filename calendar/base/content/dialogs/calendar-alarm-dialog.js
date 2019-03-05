@@ -8,7 +8,7 @@
 
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
  * Helper function to get the alarm service and cache it.
@@ -124,7 +124,7 @@ function finishWindow() {
         // all/snooze all. This can happen when the closer is clicked or escape
         // is pressed. Snooze all remaining items using the default snooze
         // property.
-        let snoozePref = Preferences.get("calendar.alarms.defaultsnoozelength", 0);
+        let snoozePref = Services.prefs.getIntPref("calendar.alarms.defaultsnoozelength", 0);
         if (snoozePref <= 0) {
             snoozePref = 5;
         }

@@ -116,9 +116,8 @@
 
       <constructor><![CDATA[
           ChromeUtils.import("resource://gre/modules/Services.jsm");
-          ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 
-          this.weekStartOffset = Preferences.get("calendar.week.start", 0);
+          this.weekStartOffset = Services.prefs.getIntPref("calendar.week.start", 0);
 
           let props =
               Services.strings.createBundle(

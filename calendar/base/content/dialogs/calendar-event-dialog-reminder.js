@@ -7,7 +7,7 @@
  */
 
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
@@ -376,8 +376,8 @@ function onNewReminder() {
     let listbox = document.getElementById("reminder-listbox");
 
     let reminder = cal.createAlarm();
-    let alarmlen = Preferences.get("calendar.alarms." + itemType + "alarmlen", 15);
-    let alarmunit = Preferences.get("calendar.alarms." + itemType + "alarmunit", 15);
+    let alarmlen = Services.prefs.getIntPref("calendar.alarms." + itemType + "alarmlen", 15);
+    let alarmunit = Services.prefs.getIntPref("calendar.alarms." + itemType + "alarmunit", 15);
 
     // Default is a relative DISPLAY alarm, |alarmlen| minutes before the event.
     // If DISPLAY is not supported by the provider, then pick the provider's

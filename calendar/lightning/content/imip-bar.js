@@ -4,7 +4,7 @@
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/ltnInvitationUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 /**
@@ -262,7 +262,7 @@ var ltnImipBar = {
         let diff = cal.itip.compare(ltnImipBar.itipItem.getItemList({})[0], ltnImipBar.foundItems[0]);
         // displaying chnages is only needed if that is enabled, an item already exists and there are
         // differences
-        if (diff != 0 && Preferences.get("calendar.itip.displayInvitationChanges", false)) {
+        if (diff != 0 && Services.prefs.getBoolPref("calendar.itip.displayInvitationChanges", false)) {
             let foundOverlay = ltn.invitation.createInvitationOverlay(ltnImipBar.foundItems[0],
                                                                       ltnImipBar.itipItem);
             let serializedOverlay = cal.xml.serializeDOM(foundOverlay);

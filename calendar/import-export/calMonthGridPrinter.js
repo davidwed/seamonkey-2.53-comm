@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
@@ -157,7 +157,7 @@ calMonthPrinter.prototype = {
         currentMonth.querySelector(".month-name").textContent = monthTitle;
 
         // Set up the weekday titles
-        let wkst = Preferences.get("calendar.week.start", 0);
+        let wkst = Services.prefs.getIntPref("calendar.week.start", 0);
         for (let i = 1; i <= 7; i++) {
             let dayNumber = ((i + wkst - 1) % 7) + 1;
             let dayTitle = currentMonth.querySelector(`.day${i}-title`);
@@ -214,7 +214,7 @@ calMonthPrinter.prototype = {
 
             let weekDay = currentDate.weekday;
             let dayOffPrefName = "calendar.week.d" + weekDay + weekdayMap[weekDay] + "soff";
-            if (Preferences.get(dayOffPrefName, false)) {
+            if (Services.prefs.getBoolPref(dayOffPrefName, false)) {
                 dayBox.className += " day-off";
             }
 

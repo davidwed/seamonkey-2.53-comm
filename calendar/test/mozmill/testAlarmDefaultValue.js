@@ -12,7 +12,7 @@ var MODULE_REQUIRES = ["calendar-utils", "keyboard-helpers"];
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 const DEFVALUE = 43;
 
@@ -145,5 +145,8 @@ function handleReminderDialog(reminders) {
 }
 
 function teardownTest(module) {
-    Preferences.resetBranch("calendar.alarms");
+    Services.prefs.clearUserPref("calendar.alarms.eventalarmlen");
+    Services.prefs.clearUserPref("calendar.alarms.eventalarmunit");
+    Services.prefs.clearUserPref("calendar.alarms.todoalarmlen");
+    Services.prefs.clearUserPref("calendar.alarms.todoalarmunit");
 }

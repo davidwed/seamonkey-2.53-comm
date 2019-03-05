@@ -5,8 +5,7 @@
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Timer.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
-
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
  * This is a handler for the etag request in calDavCalendar.js' getUpdatedItem.
@@ -684,7 +683,7 @@ multigetSyncHandler.prototype = {
             return;
         }
 
-        let batchSize = Preferences.get("calendar.caldav.multigetBatchSize", 100);
+        let batchSize = Services.prefs.getIntPref("calendar.caldav.multigetBatchSize", 100);
         let hrefString = "";
         while (this.itemsNeedFetching.length && batchSize > 0) {
             batchSize--;

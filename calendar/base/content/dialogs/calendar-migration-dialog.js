@@ -6,7 +6,6 @@ var FIREFOX_UID = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
 
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
@@ -653,7 +652,7 @@ var gDataMigrator = {
  * @param aString   The string to log
  */
 function migLOG(aString) {
-    if (!Preferences.get("calendar.migration.log", false)) {
+    if (!Services.prefs.getBoolPref("calendar.migration.log", false)) {
         return;
     }
     Services.console.logStringMessage(aString);

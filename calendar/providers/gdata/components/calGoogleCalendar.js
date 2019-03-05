@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/PromiseUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -134,7 +133,7 @@ calGoogleCalendar.prototype = {
             // Users that installed 1.0 had an issue where secondary calendars
             // were migrated to their own session. This code fixes that and
             // should be removed once 1.0.1 has been out for a while.
-            let googleUser = Preferences.get("calendar.google.calPrefs." + fullUser + ".googleUser");
+            let googleUser = Services.prefs.getStringPref("calendar.google.calPrefs." + fullUser + ".googleUser", null);
             if (googleUser && googleUser != fullUser) {
                 let newUri = "googleapi://" + googleUser + "/" + path;
                 cal.LOG("[calGoogleCalendar] Migrating url format from " + aUri.spec + " to " + newUri);
@@ -160,7 +159,7 @@ calGoogleCalendar.prototype = {
             if (matches) {
                 this.mCalendarName = decodeURIComponent(matches[2]);
 
-                let googleUser = Preferences.get("calendar.google.calPrefs." + this.mCalendarName + ".googleUser");
+                let googleUser = Services.prefs.getStringPref("calendar.google.calPrefs." + this.mCalendarName + ".googleUser", null);
                 let newUri = "googleapi://" + (googleUser || this.mCalendarName) + "/?calendar=" + matches[2];
 
                 // Use the default task list, but only if this is the primary account.
@@ -267,7 +266,7 @@ calGoogleCalendar.prototype = {
                 return 5;
             case "capabilities.alarms.actionValues": {
                 let actionValues = ["DISPLAY", "EMAIL"];
-                if (Preferences.get("calendar.google.enableSMSReminders", false)) {
+                if (Services.prefs.getBoolPref("calendar.google.enableSMSReminders", false)) {
                     actionValues.push("SMS");
                 }
                 return actionValues;
@@ -291,7 +290,7 @@ calGoogleCalendar.prototype = {
                 return "mailto:" + this.mCalendarName;
             case "itip.transport":
                 if (!this.isDefaultCalendar ||
-                    !Preferences.get("calendar.google.enableEmailInvitations", false)) {
+                    !Services.prefs.getBoolPref("calendar.google.enableEmailInvitations", false)) {
                     // If we explicitly return null here, then these calendars
                     // will not be included in the list of calendars to accept
                     // invitations to and imip will effectively be disabled.
@@ -304,7 +303,7 @@ calGoogleCalendar.prototype = {
                 // be done for all secondary calendars as they cannot accept
                 // invitations and if email invitations are generally disabled.
                 if (!this.isDefaultCalendar ||
-                    !Preferences.get("calendar.google.enableEmailInvitations", false)) {
+                    !Services.prefs.getBoolPref("calendar.google.enableEmailInvitations", false)) {
                     return true;
                 }
                 break;
@@ -366,7 +365,7 @@ calGoogleCalendar.prototype = {
                     request.uri = this.createEventsURI("events");
                 }
 
-                if (Preferences.get("calendar.google.sendEventNotifications", false)) {
+                if (Services.prefs.getBoolPref("calendar.google.sendEventNotifications", false)) {
                     request.addQueryParameter("sendNotifications", "true");
                 }
             } else if (cal.item.isToDo(aItem)) {
@@ -440,7 +439,7 @@ calGoogleCalendar.prototype = {
                     request.type = request.PATCH;
                 }
 
-                if (Preferences.get("calendar.google.sendEventNotifications", false)) {
+                if (Services.prefs.getBoolPref("calendar.google.sendEventNotifications", false)) {
                     request.addQueryParameter("sendNotifications", "true");
                 }
             } else if (cal.item.isToDo(aNewItem)) {
@@ -530,7 +529,7 @@ calGoogleCalendar.prototype = {
             request.calendar = this;
             if (cal.item.isEvent(aItem)) {
                 request.uri = this.createEventsURI("events", getGoogleId(aItem, this.offlineStorage));
-                if (Preferences.get("calendar.google.sendEventNotifications", false)) {
+                if (Services.prefs.getBoolPref("calendar.google.sendEventNotifications", false)) {
                     request.addQueryParameter("sendNotifications", "true");
                 }
             } else if (cal.item.isToDo(aItem)) {
@@ -671,7 +670,7 @@ calGoogleCalendar.prototype = {
     replayChangesOn: function(aListener) {
         // Figure out if the user is idle, no need to synchronize if so.
         let idleTime = Cc["@mozilla.org/widget/idleservice;1"].getService(Ci.nsIIdleService).idleTime;
-        let maxIdleTime = Preferences.get("calendar.google.idleTime", 300) * 1000;
+        let maxIdleTime = Services.prefs.getIntPref("calendar.google.idleTime", 300) * 1000;
 
         if (maxIdleTime != 0 && idleTime > maxIdleTime) {
             cal.LOG("[calGoogleCalendar] Skipping refresh since user is idle");
@@ -680,7 +679,7 @@ calGoogleCalendar.prototype = {
         }
 
         // Now that we've determined we are not idle we can continue with the sync.
-        let maxResults = Preferences.get("calendar.google.maxResultsPerRequest", null);
+        let maxResults = Services.prefs.getIntPref("calendar.google.maxResultsPerRequest", null);
 
         // We are going to be making potentially lots of changes to the offline
         // storage, start a batch operation.

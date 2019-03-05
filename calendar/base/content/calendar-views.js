@@ -13,7 +13,6 @@ ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/calRecurrenceUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 
 /**
  * Controller for the views
@@ -490,7 +489,7 @@ var categoryManagement = {
             }
         }
 
-        let color = Preferences.get("calendar.category.color." + aCatName) || "";
+        let color = Services.prefs.getStringPref("calendar.category.color." + aCatName, "");
         this.categoryStyleCache[aCatName].style.backgroundColor = color;
     }
 };

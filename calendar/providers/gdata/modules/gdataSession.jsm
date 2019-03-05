@@ -8,7 +8,6 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataLogging.jsm");
 ChromeUtils.import("resource://gdata-provider/modules/gdataRequest.jsm");
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/PromiseUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Timer.jsm");
@@ -58,7 +57,7 @@ var calGoogleSessionManager = {
             id = parts[0] || cal.getUUID();
         } else if (host == "www.google.com" && uri.path.startsWith("/calendar/feeds") && protocols.some(scheme => uri.schemeIs(scheme))) {
             let googleCalendarName = aCalendar.getProperty("googleCalendarName");
-            let googleUser = Preferences.get("calendar.google.calPrefs." + googleCalendarName + ".googleUser");
+            let googleUser = Services.prefs.getStringPref("calendar.google.calPrefs." + googleCalendarName + ".googleUser", null);
             id = googleUser || googleCalendarName || cal.getUUID();
         }
 
@@ -189,7 +188,7 @@ calGoogleSession.prototype = {
         // If the user has disabled cookies, we need to add an exception for
         // Google so authentication works. If the user has explicitly blocked
         // google.com then we won't overwrite the rule though.
-        if (Preferences.get("network.cookie.cookieBehavior") == 2) {
+        if (Services.prefs.getIntPref("network.cookie.cookieBehavior") == 2) {
             let found = null;
             for (let perm of fixIterator(Services.perms.enumerator, Ci.nsIPermission)) {
                 if (perm.type == "cookie" && perm.host == "google.com") {

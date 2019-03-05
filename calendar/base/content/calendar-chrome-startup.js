@@ -4,7 +4,6 @@
 
 ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/Preferences.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
 /* exported commonInitCalendar, commonFinishCalendar */
@@ -139,7 +138,7 @@ var calendarWindowPrefs = {
         if (aTopic == "nsPref:changed") {
             switch (aData) {
                 case "calendar.view.useSystemColors": {
-                    let attributeValue = Preferences.get("calendar.view.useSystemColors", false) && "true";
+                    let attributeValue = Services.prefs.getBoolPref("calendar.view.useSystemColors", false) && "true";
                     for (let win of fixIterator(Services.ww.getWindowEnumerator())) {
                         setElementValue(win.document.documentElement, attributeValue, "systemcolors");
                     }
@@ -149,7 +148,7 @@ var calendarWindowPrefs = {
         } else if (aTopic == "domwindowopened") {
             let win = aSubject.QueryInterface(Ci.nsIDOMWindow);
             win.addEventListener("load", () => {
-                let attributeValue = Preferences.get("calendar.view.useSystemColors", false) && "true";
+                let attributeValue = Services.prefs.getBoolPref("calendar.view.useSystemColors", false) && "true";
                 setElementValue(win.document.documentElement, attributeValue, "systemcolors");
             });
         }
@@ -162,7 +161,7 @@ var calendarWindowPrefs = {
  */
 function migrateCalendarUI() {
     const UI_VERSION = 3;
-    let currentUIVersion = Preferences.get("calendar.ui.version");
+    let currentUIVersion = Services.prefs.getIntPref("calendar.ui.version", 0);
     if (currentUIVersion >= UI_VERSION) {
         return;
     }
@@ -223,7 +222,7 @@ function migrateCalendarUI() {
                 tabBar.setAttribute("currentset", newSet);
             }
         }
-        Preferences.set("calendar.ui.version", UI_VERSION);
+        Services.prefs.setIntPref("calendar.ui.version", UI_VERSION);
     } catch (e) {
         cal.ERROR("Error upgrading UI from " + currentUIVersion + " to " +
                   UI_VERSION + ": " + e);
