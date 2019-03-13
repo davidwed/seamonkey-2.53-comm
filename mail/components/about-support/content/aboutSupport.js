@@ -119,8 +119,11 @@ var snapshotFormatters = {
     }
     $("stylo-box").textContent = `${data.styloResult} (${styloReason})`;
 
-    let keyGoogleFound = data.keyGoogleFound ? "found" : "missing";
-    $("key-google-box").textContent = strings.GetStringFromName(keyGoogleFound);
+    let keyLocationServiceGoogleFound = data.keyLocationServiceGoogleFound ? "found" : "missing";
+    $("key-location-service-google-box").textContent = keyLocationServiceGoogleFound;
+
+    let keySafebrowsingGoogleFound = data.keySafebrowsingGoogleFound ? "found" : "missing";
+    $("key-safebrowsing-google-box").textContent = keySafebrowsingGoogleFound;
 
     let keyMozillaFound = data.keyMozillaFound ? "found" : "missing";
     $("key-mozilla-box").textContent = strings.GetStringFromName(keyMozillaFound);
