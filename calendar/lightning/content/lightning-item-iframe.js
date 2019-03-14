@@ -1225,10 +1225,6 @@ function dateTimeControls2State(aStartDatepicker) {
             // changed the start date, it looks reasonable to restore a valid
             // until date equal to the start date.
             gUntilDate = gStartTime.clone();
-            // Update the rule.
-            let rrules = splitRecurrenceRules(window.recurrenceInfo);
-            recRule = rrules[0][0];
-            recRule.untilDate = gUntilDate.clone();
             // Update the until-date-picker. In case of "custom" rule, the
             // recurrence string is going to be changed by updateDateTime() below.
             let notCustomRule = document.getElementById("repeat-deck").selectedIndex == 0;
@@ -3671,6 +3667,7 @@ function updateAttendees() {
         attendeePanel.removeAttribute("collapsed");
 
         if (window.organizer && window.organizer.id) {
+            let organizer = window.organizer;
             document.getElementById("item-organizer-row").removeAttribute("collapsed");
             let cell = document.querySelector(".item-organizer-cell");
             let icon = cell.querySelector("img:nth-of-type(1)");
@@ -3900,7 +3897,7 @@ function removeAllAttendees() {
  * @param aAttendees    The attendees to check.
  */
 function sendMailToUndecidedAttendees(aAttendees) {
-    let targetAttendees = attendees.filter(isAttendeeUndecided);
+    let targetAttendees = aAttendees.filter(isAttendeeUndecided);
     sendMailToAttendees(targetAttendees);
 }
 
