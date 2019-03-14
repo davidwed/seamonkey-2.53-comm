@@ -14,6 +14,11 @@
  *          applyValues
  */
 
+/* import-globals-from ../../base/content/calendar-ui-utils.js */
+/* import-globals-from ../../base/content/dialogs/calendar-dialog-utils.js */
+/* import-globals-from html-item-editing/react-code.js */
+/* globals gTimezonesEnabled, gShowLink */// Set by lightning-item-panel.js.
+
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://calendar/modules/calRecurrenceUtils.jsm");
@@ -211,7 +216,7 @@ function receiveMessage(aEvent) {
             postponeTask(aEvent.data.value);
             break;
         case "toggleTimezoneLinks":
-            gTimezonesEnabled = aEvent.data.checked;
+            gTimezonesEnabled = aEvent.data.checked; // eslint-disable-line
             updateDateTime();
             /*
             // Not implemented in react-code.js yet

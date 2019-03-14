@@ -4,6 +4,10 @@
 
 /* exported loadCalendarPrintDialog, printAndClose, onDatePick */
 
+/* import-globals-from ../../../../../toolkit/components/printing/content/printUtils.js */
+/* import-globals-from ../calendar-ui-utils.js */
+
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -150,7 +154,7 @@ function getPrintSettings(receiverFunc) {
             onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItems) {
                 settings.eventList = settings.eventList.concat(aItems);
                 if (!settings.printTasksWithNoDueDate) {
-                    eventWithDueDate = [];
+                    let eventWithDueDate = [];
                     for (let item of settings.eventList) {
                         if (item.dueDate || item.endDate) {
                             eventWithDueDate.push(item);

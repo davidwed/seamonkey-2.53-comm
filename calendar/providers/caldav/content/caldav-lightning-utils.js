@@ -6,6 +6,10 @@
  *          caldavUpdateForceEmailSchedulingControl
  */
 
+/* import-globals-from ../../../base/content/calendar-ui-utils.js */
+/* import-globals-from ../../../lightning/content/lightning-utils.js */
+/* globals gCalendar */
+
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
 /**

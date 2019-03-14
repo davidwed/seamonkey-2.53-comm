@@ -16,6 +16,8 @@ var MODULE_REQUIRES = ["folder-display-helpers", "window-helpers", "notification
 var os = {};
 ChromeUtils.import("resource://mozmill/stdlib/os.js", os);
 
+/* globals open_message_from_file, close_window */
+
 function setupModule(module) {
     for (let dep of MODULE_REQUIRES) {
         collector.getModule(dep).installInto(module);

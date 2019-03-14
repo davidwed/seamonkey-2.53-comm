@@ -13,6 +13,7 @@ var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm", nul
 var SHORT_SLEEP, TIMEOUT_MODAL_DIALOG;
 var helpersForController, menulistSelect;
 var plan_for_modal_dialog, wait_for_modal_dialog;
+var mark_failure;
 
 function setupModule(module) {
     controller = mozmill.getMail3PaneController();
@@ -26,6 +27,9 @@ function setupModule(module) {
 
     ({ plan_for_modal_dialog, wait_for_modal_dialog } =
         collector.getModule("window-helpers"));
+
+    ({ mark_failure } =
+        collector.getModule("folder-display-helpers"));
 }
 // Lookup paths and path-snippets.
 // These 5 have to be used with itemEditLookup().
@@ -102,7 +106,6 @@ function installInto(module) {
     module.setReminderMenulist = setReminderMenulist;
     module.setCategories = setCategories;
     module.handleAddingAttachment = handleAddingAttachment;
-    module.acceptSendingNotificationMail = acceptSendingNotificationMail;
     module.setTimezone = setTimezone;
 }
 
@@ -232,13 +235,13 @@ function setData(dialog, iframe, data) {
 
     // title
     if (data.title != undefined) {
-        titleInput = iframeid("item-title");
+        let titleInput = iframeid("item-title");
         replaceText(titleInput, data.title);
     }
 
     // location
     if (data.location != undefined) {
-        locationInput = iframeid("item-location");
+        let locationInput = iframeid("item-location");
         replaceText(locationInput, data.location);
     }
 
@@ -467,7 +470,7 @@ function setCategories(dialog, iframe, categories) {
     let categoryList = iframeLookup(CATEGORY_LIST);
     dialog.click(categoryMenulist);
     dialog.waitFor(() => categoryMenulist.getNode().open);
-    if (categoryMenulist.itemCount > -1 && categoryMenulist.itemCount < data.categories.length) {
+    if (categoryMenulist.itemCount > -1 && categoryMenulist.itemCount < categories.length) {
         mark_failure(["more categories than supported by current calendar"]);
     } else {
         // Iterate over categories and check if needed.

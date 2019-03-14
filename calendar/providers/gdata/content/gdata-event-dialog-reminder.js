@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* import-globals-from ../../../base/content/dialogs/calendar-event-dialog-reminder.js */
+
 (function() {
     const FOUR_WEEKS_BEFORE = -2419200;
     ChromeUtils.import("resource://calendar/modules/calUtils.jsm");

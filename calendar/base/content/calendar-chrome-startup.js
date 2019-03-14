@@ -2,6 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* import-globals-from ../../lightning/content/messenger-overlay-sidebar.js */
+/* import-globals-from calendar-common-sets.js */
+/* import-globals-from calendar-management.js */
+/* import-globals-from calendar-unifinder-todo.js */
+/* import-globals-from calendar-ui-utils.js */
+/* import-globals-from calendar-views.js */
+
 ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");

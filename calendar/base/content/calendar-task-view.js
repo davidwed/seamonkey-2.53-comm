@@ -4,6 +4,10 @@
 
 /* exported taskDetailsView, sendMailToOrganizer, taskViewCopyLink */
 
+/* import-globals-from ../../../mail/base/content/mailCore.js */
+/* import-globals-from calendar-item-editing.js */
+/* import-globals-from calendar-ui-utils.js */
+
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/calRecurrenceUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");

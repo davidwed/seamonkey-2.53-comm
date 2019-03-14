@@ -6,6 +6,9 @@
  *          sendMailToOrganizer, openAttachment, reply
  */
 
+/* import-globals-from ../../src/calApplicationUtils.js */
+/* import-globals-from calendar-dialog-utils.js */
+
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/calRecurrenceUtils.jsm");
 
@@ -217,8 +220,8 @@ function onLoad() {
 
     updateToolbar();
 
-    if (typeof ToolbarIconColor !== "undefined") {
-        ToolbarIconColor.init();
+    if (typeof window.ToolbarIconColor !== "undefined") {
+        window.ToolbarIconColor.init();
     }
 
     window.focus();
@@ -226,8 +229,8 @@ function onLoad() {
 }
 
 function onUnload() {
-    if (typeof ToolbarIconColor !== "undefined") {
-        ToolbarIconColor.uninit();
+    if (typeof window.ToolbarIconColor !== "undefined") {
+        window.ToolbarIconColor.uninit();
     }
 }
 

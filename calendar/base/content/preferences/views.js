@@ -4,6 +4,8 @@
 
 /* exported gViewsPane */
 
+/* import-globals-from ../../../lightning/content/messenger-overlay-preferences.js */
+
 /**
  * Global Object to hold methods for the views pref pane
  */

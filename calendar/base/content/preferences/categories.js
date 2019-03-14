@@ -4,6 +4,10 @@
 
 /* exported gCategoriesPane */
 
+/* import-globals-from ../../../lightning/content/messenger-overlay-preferences.js */
+// From categories.xul.
+/* globals noneLabel, newTitle, editTitle, overwrite, overwriteTitle, noBlankCategories */
+
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");

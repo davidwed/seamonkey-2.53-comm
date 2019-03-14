@@ -8,6 +8,11 @@
  *          customizeMailToolbarForTabType
  */
 
+/* import-globals-from ../../base/content/calendar-common-sets.js */
+/* import-globals-from ../../base/content/calendar-invitations-manager.js */
+/* import-globals-from ../../base/content/today-pane.js */
+/* import-globals-from lightning-item-panel.js */
+
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/AddonManager.jsm");

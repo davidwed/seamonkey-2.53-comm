@@ -6,6 +6,8 @@
  *          publishEntireCalendar, publishEntireCalendarDialogResponse
  */
 
+/* import-globals-from ../../base/content/calendar-views.js */
+
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -98,7 +100,6 @@ function publishEntireCalendarDialogResponse(CalendarPublishObject, aProgressDia
         },
         onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItems) {
             if (!Components.isSuccessCode(aStatus)) {
-                aborted = true;
                 return;
             }
             if (aCount) {

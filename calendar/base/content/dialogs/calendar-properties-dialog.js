@@ -4,6 +4,8 @@
 
 /* exported onLoad, onAcceptDialog, unsubscribeCalendar */
 
+/* import-globals-from ../calendar-ui-utils.js */
+
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
 
