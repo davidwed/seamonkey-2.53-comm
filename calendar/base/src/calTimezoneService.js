@@ -478,7 +478,7 @@ function guessSystemTimezone() {
                 let match = untilRegex.exec(rrule.valueAsIcalString);
                 if (match) {
                     periodUntilCalDate.icalString = match[1];
-                    if (todayUTC.nativeTime > periodUntilDate.nativeTime) {
+                    if (todayUTC.nativeTime > periodUntilCalDate.nativeTime) {
                         continue; // period ends too early
                     }
                 } // else forever rule
