@@ -28,13 +28,13 @@ function setupModule(module) {
         menulistSelect
     } = collector.getModule("calendar-utils"));
     collector.getModule("calendar-utils").setupModule(controller);
-    Object.assign(module, helpersForController(controller));
 
-    ({ plan_for_modal_dialog, wait_for_modal_dialog } =
-        collector.getModule("window-helpers"));
+    ({ plan_for_modal_dialog, wait_for_modal_dialog } = collector.getModule("window-helpers"));
 }
 
 function testDefaultAlarms() {
+    let { eid } = helpersForController(controller);
+
     let localeUnitString = cal.l10n.getCalString("unitDays");
     let unitString = PluralForm.get(DEFVALUE, localeUnitString).replace("#1", DEFVALUE);
     let alarmString = (...args) => cal.l10n.getString("calendar-alarms", ...args);

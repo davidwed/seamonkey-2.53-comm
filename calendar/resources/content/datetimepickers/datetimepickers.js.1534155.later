@@ -1,0 +1,17 @@
+--- datetimepickers.js
++++ datetimepickers.js
+@@ -1,12 +1,14 @@
+ /* This Source Code Form is subject to the terms of the Mozilla Public
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, you can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
++/* globals BaseControlMixin, cal, MozElementMixin, MozXULElement */
++
+ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+ 
+ customElements.whenDefined("menulist-editable").then(() => {
+     class MozTimepickerMinute extends MozXULElement {
+         static get observedAttributes() {
+             return ["label", "selected"];
+         }
+ 

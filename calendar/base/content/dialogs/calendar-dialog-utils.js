@@ -8,6 +8,9 @@
  *          adaptScheduleAgent
  */
 
+/* import-globals-from ../../../lightning/content/lightning-item-iframe.js */
+/* import-globals-from ../calendar-ui-utils.js */
+
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 

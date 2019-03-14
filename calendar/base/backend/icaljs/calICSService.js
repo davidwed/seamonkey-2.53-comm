@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* import-globals-from calICALJSComponents.js */
+
 ChromeUtils.import("resource://calendar/modules/ical.js");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
@@ -486,7 +488,7 @@ calICSService.prototype = {
                     rc = event.data.rc;
                     icalComp = new calIcalComponent(new ICAL.Component(event.data.data));
                     if (!Components.isSuccessCode(rc)) {
-                        cal.ERROR("[calICSService] Error in parser worker: " + data);
+                        cal.ERROR("[calICSService] Error in parser worker: " + event.data);
                     }
                 } catch (e) {
                     cal.ERROR("[calICSService] Exception parsing item: " + e);

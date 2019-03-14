@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* globals OAUTH_BASE_URI, OAUTH_SCOPE, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET */
+
 ChromeUtils.import("resource://gdata-provider/modules/OAuth2.jsm");
 ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
 ChromeUtils.import("resource://gdata-provider/modules/gdataLogging.jsm");

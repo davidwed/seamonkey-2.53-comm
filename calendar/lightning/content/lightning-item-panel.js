@@ -12,6 +12,10 @@
  *          openNewMessage, openNewCardDialog
  */
 
+/* import-globals-from ../../../../toolkit/content/globalOverlay.js */
+/* import-globals-from ../../base/content/dialogs/calendar-dialog-utils.js */
+/* import-globals-from ../../base/content/calendar-ui-utils.js */
+
 // XXX Need to determine which of these we really need here.
 ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -261,8 +265,8 @@ function onLoadLightningItemPanel(aIframeId, aUrl) {
         cancel.parentNode.setAttribute("collapsed", "true");
 
         // set toolbar icon color for light or dark themes
-        if (typeof ToolbarIconColor !== "undefined") {
-            ToolbarIconColor.init();
+        if (typeof window.ToolbarIconColor !== "undefined") {
+            window.ToolbarIconColor.init();
         }
 
         // Enlarge the dialog window so the iframe content fits, and prevent it
@@ -333,8 +337,8 @@ function onLoadLightningItemPanel(aIframeId, aUrl) {
 function onUnloadLightningItemPanel() {
     if (!gTabmail) {
         // window dialog case
-        if (typeof ToolbarIconColor !== "undefined") {
-            ToolbarIconColor.uninit();
+        if (typeof window.ToolbarIconColor !== "undefined") {
+            window.ToolbarIconColor.uninit();
         }
     }
 }

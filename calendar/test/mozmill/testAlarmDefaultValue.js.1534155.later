@@ -1,0 +1,57 @@
+--- testAlarmDefaultValue.js
++++ testAlarmDefaultValue.js
+@@ -13,35 +13,37 @@ var MODULE_REQUIRES = ["calendar-utils",
+ var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
+ var { PluralForm } = ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+ 
+ const DEFVALUE = 43;
+ 
+ var helpersForController, invokeEventDialog, openLightningPrefs, menulistSelect;
+ var plan_for_modal_dialog, wait_for_modal_dialog;
++var content_tab_e, content_tab_eid;
+ 
+ function setupModule(module) {
+     controller = mozmill.getMail3PaneController();
+     ({
+         helpersForController,
+         invokeEventDialog,
+         openLightningPrefs,
+         menulistSelect
+     } = collector.getModule("calendar-utils"));
+     collector.getModule("calendar-utils").setupModule(controller);
+-
+-    collector.getModule("content-tab-helpers").installInto(module);
++    ({ content_tab_e, content_tab_eid } = collector.getModule("content-tab-helpers"));
++    collector.getModule("content-tab-helpers").setupModule();
+ }
+ 
+ function testDefaultAlarms() {
+     let { eid } = helpersForController(controller);
+
+     let localeUnitString = cal.l10n.getCalString("unitDays");
+     let unitString = PluralForm.get(DEFVALUE, localeUnitString).replace("#1", DEFVALUE);
+     let alarmString = (...args) => cal.l10n.getString("calendar-alarms", ...args);
+     let originStringEvent = alarmString("reminderCustomOriginBeginBeforeEvent");
+     let originStringTask = alarmString("reminderCustomOriginBeginBeforeTask");
+     let expectedEventReminder = alarmString("reminderCustomTitle", [unitString, originStringEvent]);
+     let expectedTaskReminder = alarmString("reminderCustomTitle", [unitString, originStringTask]);
+ 
+@@ -87,16 +89,17 @@ function testDefaultAlarms() {
+         wait_for_modal_dialog("Calendar:EventDialog:Reminder");
+ 
+         // Close the task dialog.
+         task.window.close();
+     });
+ }
+ 
+ function handlePrefTab(tab) {
++    let { replaceText } = helpersForController(controller);
+     // Click on the alarms tab.
+     content_tab_e(tab, "calPreferencesTabAlarms").click();
+ 
+     // Turn on alarms for events and tasks.
+     menulistSelect(content_tab_eid(tab, "eventdefalarm"), "1", controller);
+     menulistSelect(content_tab_eid(tab, "tododefalarm"), "1", controller);
+ 
+     // Selects "days" as a unit.
