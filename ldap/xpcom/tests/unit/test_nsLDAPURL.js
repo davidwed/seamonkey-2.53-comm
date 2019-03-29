@@ -198,7 +198,7 @@ function run_test() {
 
   do_check_eq(url.attributes.length, 0);
 
-  // Nothing should happend if the attribute doesn't exist
+  // Nothing should happen if the attribute doesn't exist
   url.removeAttribute("abc");
 
   do_check_eq(url.attributes.length, 0);
