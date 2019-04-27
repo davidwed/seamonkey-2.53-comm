@@ -265,7 +265,9 @@ function toggleFilter(aFilterItem)
   let filter = aFilterItem._filter;
   if (filter.unparseable && !filter.enabled)
   {
-    Services.prompt.alert(window, null, gFilterBundle.getString("cannotEnableFilter"));
+    Services.prompt.alert(window, null,
+                          gFilterBundle.getFormattedString("cannotEnableIncompatFilter",
+                          [document.getElementById("bundle_brand").getString("brandShortName")]));
     return;
   }
   filter.enabled = !filter.enabled;
