@@ -14,7 +14,7 @@
 <overlay id="PrivacyPaneOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <prefpane id="panePrivacy" onpaneload="gPrivacyPane.init();">
-    <script type="application/javascript" src="chrome://messenger/content/preferences/privacy.js"/>
+    <script src="chrome://messenger/content/preferences/privacy.js"/>
 
     <stringbundle id="bundlePreferences" src="chrome://messenger/locale/preferences/preferences.properties"/>
 

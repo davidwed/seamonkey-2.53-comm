@@ -16,7 +16,7 @@
   xmlns  = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   onload = "joinChat.onload()"
   ondialogaccept="joinChat.join()">
-  <script type="application/javascript" src="chrome://messenger/content/chat/joinchat.js"/>
+  <script src="chrome://messenger/content/chat/joinchat.js"/>
 
   <grid>
     <columns>

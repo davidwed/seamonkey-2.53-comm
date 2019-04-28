@@ -8,7 +8,7 @@
 <overlay id="mailComposeEditorOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript">
+  <script>
   <![CDATA[
     ChromeUtils.import("resource://gre/modules/Services.jsm");
 

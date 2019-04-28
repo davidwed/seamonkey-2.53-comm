@@ -10,10 +10,8 @@
 ]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/javascript"
-          src="chrome://messenger/content/mailCore.js" />
-  <script type="application/javascript"
-          src="chrome://messenger/content/macMessengerOverlay.js"/>
+  <script src="chrome://messenger/content/mailCore.js" />
+  <script src="chrome://messenger/content/macMessengerOverlay.js"/>
   <popupset>
     <menupopup id="menu_mac_dockmenu">
       <menuitem label="&writeNewMessageDock.label;" id="tasksWriteNewMessage"

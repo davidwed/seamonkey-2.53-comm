@@ -13,12 +13,12 @@
 ]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/javascript" src="chrome://calendar/content/calendar-task-tree.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-task-view.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-dialog-utils.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calApplicationUtils.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calFilter.js"/>
-  <script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
+  <script src="chrome://calendar/content/calendar-task-tree.js"/>
+  <script src="chrome://calendar/content/calendar-task-view.js"/>
+  <script src="chrome://calendar/content/calendar-dialog-utils.js"/>
+  <script src="chrome://calendar/content/calApplicationUtils.js"/>
+  <script src="chrome://calendar/content/calFilter.js"/>
+  <script src="chrome://global/content/globalOverlay.js"/>
 
   <vbox id="calendarDisplayDeck">
     <vbox id="calendar-task-box" flex="1"

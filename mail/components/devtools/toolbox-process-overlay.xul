@@ -6,5 +6,5 @@
 <overlay id="tb-toolbox-process-overlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <!-- defines openUILinkIn -->
-  <script type="application/javascript" src="chrome://communicator/content/contentAreaClick.js"/>
+  <script src="chrome://communicator/content/contentAreaClick.js"/>
 </overlay>
