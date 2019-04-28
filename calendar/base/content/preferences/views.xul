@@ -14,10 +14,8 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <vbox id="calPreferencesBoxViews">
-        <script type="application/javascript"
-                src="chrome://calendar/content/preferences/views.js"/>
-        <script type="application/javascript"
-                src="chrome://calendar/content/calendar-ui-utils.js"/>
+        <script src="chrome://calendar/content/preferences/views.js"/>
+        <script src="chrome://calendar/content/calendar-ui-utils.js"/>
 
         <preferences>
             <preference id="calendar.week.start"

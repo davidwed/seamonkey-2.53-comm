@@ -35,9 +35,9 @@
     <stringbundle id="bundle_folder"    src="chrome://messenger/locale/folderWidgets.properties"/>
   </stringbundleset>
 
-  <script type="application/javascript" src="chrome://messenger/content/mailCommands.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/commandglue.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/virtualFolderProperties.js"/>
+  <script src="chrome://messenger/content/mailCommands.js"/>
+  <script src="chrome://messenger/content/commandglue.js"/>
+  <script src="chrome://messenger/content/virtualFolderProperties.js"/>
 
   <grid>
     <columns>
