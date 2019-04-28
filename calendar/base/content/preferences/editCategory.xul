@@ -18,7 +18,7 @@
         buttons="accept,cancel"
         onload="editCategoryLoad();"
         ondialogaccept="return doOK();">
-  <script type="application/javascript" src="chrome://calendar/content/preferences/editCategory.js"/>
+  <script src="chrome://calendar/content/preferences/editCategory.js"/>
 
   <vbox id="dialog-box">
     <label value="&pref.categories.name.label;"

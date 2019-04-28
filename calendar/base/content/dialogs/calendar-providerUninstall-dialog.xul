@@ -22,8 +22,8 @@
         ondialogaccept="return onAccept()"
         ondialogcancel="return onCancel()">
 
-  <script type="application/javascript" src="chrome://calendar/content/calendar-providerUninstall-dialog.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-ui-utils.js"/>
+  <script src="chrome://calendar/content/calendar-providerUninstall-dialog.js"/>
+  <script src="chrome://calendar/content/calendar-ui-utils.js"/>
 
   <description id="pre-name-description">&providerUninstall.preName.label;</description>
   <label id="provider-name-label"/>

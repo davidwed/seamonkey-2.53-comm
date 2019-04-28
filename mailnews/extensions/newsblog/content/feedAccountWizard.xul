@@ -20,8 +20,7 @@
         onwizardfinish="return FeedAccountWizard.onFinish();"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript"
-          src="chrome://messenger-newsblog/content/feedAccountWizard.js"/>
+  <script src="chrome://messenger-newsblog/content/feedAccountWizard.js"/>
 
   <!-- Account setup page : User gets a choice to enter a name for the account -->
   <!-- Defaults : Feed account name -> default string -->
