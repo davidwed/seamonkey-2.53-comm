@@ -9,11 +9,10 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <vbox id="calPreferencesBoxCategories">
-        <script type="application/javascript"
-                src="chrome://calendar/content/preferences/categories.js"/>
+        <script src="chrome://calendar/content/preferences/categories.js"/>
 
         <!-- Get the localized text for use in the .js -->
-        <script type="application/javascript">
+        <script>
             var noneLabel  = "&pref.categories.none.label;";
             var newTitle   = "&pref.categories.new.title;";
             var editTitle  = "&pref.categories.edit.title;";

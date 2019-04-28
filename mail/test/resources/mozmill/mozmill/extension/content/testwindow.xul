@@ -7,7 +7,7 @@
 
   <!-- Test Scripts -->
   <script src="js/mozmill.js"/>
-  <script type="application/x-javascript;version=1.7" src="js/mm/testresults.js"/>
+  <script src="js/mm/testresults.js"/>
   <script src="js/tests/test_resultsFactory.js"/>
 
   <vbox id="testCollection" flex="1">

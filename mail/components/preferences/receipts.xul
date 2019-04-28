@@ -21,7 +21,7 @@
             title="&dialog.title;">
 
   <prefpane id="ReturnReceiptsDialogPane" onpaneload="enableDisableAllowedReceipts();">
-    <script type="application/javascript" src="chrome://messenger/content/preferences/receipts.js"/>
+    <script src="chrome://messenger/content/preferences/receipts.js"/>
 
     <preferences id="ReturnReceiptsPreferences">
       <preference id="mail.receipt.request_return_receipt_on" name="mail.receipt.request_return_receipt_on" type="bool"/>

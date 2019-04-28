@@ -8,7 +8,7 @@
 <overlay id="mailEdColorPropsOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript">
+  <script>
   <![CDATA[
   function onAccept() {
     // If it's a file, convert to a data URL.

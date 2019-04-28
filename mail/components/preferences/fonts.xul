@@ -37,8 +37,8 @@
     </preferences>
 
     <stringbundle id="bundlePreferences" src="chrome://messenger/locale/preferences/preferences.properties"/>
-    <script type="application/javascript" src="chrome://mozapps/content/preferences/fontbuilder.js"/>
-    <script type="application/javascript" src="chrome://messenger/content/preferences/fonts.js"/>
+    <script src="chrome://mozapps/content/preferences/fontbuilder.js"/>
+    <script src="chrome://messenger/content/preferences/fonts.js"/>
 
     <groupbox>
       <caption>

@@ -26,8 +26,8 @@
         onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { window.close(); }"
         width="600"
         height="300">
-  <script type="application/javascript" src="chrome://calendar/content/calendar-alarm-dialog.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-item-editing.js"/>
+  <script src="chrome://calendar/content/calendar-alarm-dialog.js"/>
+  <script src="chrome://calendar/content/calendar-item-editing.js"/>
 
   <notificationbox id="readonly-notification" notificationside="top"/>
   <richlistbox id="alarm-richlist" flex="1" onselect="onSelectAlarm(event)"/>

@@ -19,8 +19,7 @@
             title="&offlineDialog.title;">
 
   <prefpane id="OfflineSettingsDialogPane">
-    <script type="application/javascript"
-            src="chrome://messenger/content/preferences/offline.js"/>
+    <script src="chrome://messenger/content/preferences/offline.js"/>
 
     <preferences id="OfflineSettingsPreferences">
       <preference id="offline.autoDetect"

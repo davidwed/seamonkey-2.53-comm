@@ -28,11 +28,9 @@
 	<stringbundle id="bundleBrowser"
             src="chrome://messenger/locale/messenger.properties"/>
 
-    <script type="application/javascript"
-            src="chrome://messenger/content/sanitize.js"/>
+    <script src="chrome://messenger/content/sanitize.js"/>
 
-    <script type="application/javascript"
-            src="chrome://messenger/content/sanitizeDialog.js"/>
+    <script src="chrome://messenger/content/sanitizeDialog.js"/>
 
     <preferences id="sanitizePreferences">
       <preference id="privacy.cpd.history" name="privacy.cpd.history" type="bool"/>

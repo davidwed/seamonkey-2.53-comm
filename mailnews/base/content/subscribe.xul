@@ -26,12 +26,9 @@
   <stringbundle id="bundle_messenger" src="chrome://messenger/locale/messenger.properties"/>
   <stringbundle id="bundle_offlinePrompts" src="chrome://messenger/locale/offline.properties"/>
 
-  <script type="application/javascript"
-          src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/javascript"
-          src="chrome://messenger/content/mailWindow.js"/>
-  <script type="application/javascript"
-          src="chrome://messenger/content/subscribe.js"/>
+  <script src="chrome://global/content/globalOverlay.js"/>
+  <script src="chrome://messenger/content/mailWindow.js"/>
+  <script src="chrome://messenger/content/subscribe.js"/>
 
   <grid flex="1" style="width: 40em; height: 25em;">
     <columns>
