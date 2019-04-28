@@ -13,8 +13,7 @@
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&dockOptionsDialog.title;" dlgbuttons="accept,cancel"
             style="width: &window.macWidth;">
-  <script type="application/javascript"
-          src="chrome://communicator/content/utilityOverlay.js"/>
+  <script src="chrome://communicator/content/utilityOverlay.js"/>
   <prefpane id="DockOptionsDialogPane">
     <preferences>
       <preference id="mail.biff.animate_dock_icon"

@@ -12,8 +12,7 @@
 <overlay id="CustomizeToolbarWindowOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript"
-          src="chrome://messenger/content/mailCore.js"/>
+  <script src="chrome://messenger/content/mailCore.js"/>
 
   <menulist id="modelist"
             oncommand="overlayUpdateToolbarMode(this.value, 'mail-toolbox');"/>

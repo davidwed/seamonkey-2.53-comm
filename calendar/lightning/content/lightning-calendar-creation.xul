@@ -9,12 +9,9 @@
 <overlay id="ltnCalendarCreationOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript"
-          src="chrome://calendar/content/calendar-ui-utils.js"/>
-  <script type="application/javascript"
-          src="chrome://lightning/content/lightning-utils.js"/>
-  <script type="application/javascript"
-          src="chrome://lightning/content/lightning-calendar-creation.js"/>
+  <script src="chrome://calendar/content/calendar-ui-utils.js"/>
+  <script src="chrome://lightning/content/lightning-utils.js"/>
+  <script src="chrome://lightning/content/lightning-calendar-creation.js"/>
 
   <rows id="customize-rows">
     <notificationbox id="no-identity-notification"

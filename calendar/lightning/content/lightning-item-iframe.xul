@@ -36,20 +36,13 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <!-- Javascript includes -->
-  <script type="application/javascript"
-          src="chrome://lightning/content/lightning-item-iframe.js"/>
-  <script type="application/javascript"
-          src="chrome://calendar/content/calendar-dialog-utils.js"/>
-  <script type="application/javascript"
-          src="chrome://calendar/content/calendar-ui-utils.js"/>
-  <script type="application/javascript"
-          src="chrome://calendar/content/calApplicationUtils.js"/>
-  <script type="application/javascript"
-          src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/javascript"
-          src="chrome://global/content/printUtils.js"/>
-  <script type="application/javascript"
-          src="chrome://calendar/content/calendar-statusbar.js"/>
+  <script src="chrome://lightning/content/lightning-item-iframe.js"/>
+  <script src="chrome://calendar/content/calendar-dialog-utils.js"/>
+  <script src="chrome://calendar/content/calendar-ui-utils.js"/>
+  <script src="chrome://calendar/content/calApplicationUtils.js"/>
+  <script src="chrome://global/content/globalOverlay.js"/>
+  <script src="chrome://global/content/printUtils.js"/>
+  <script src="chrome://calendar/content/calendar-statusbar.js"/>
 
   <commandset id="">
     <command id="cmd_recurrence"

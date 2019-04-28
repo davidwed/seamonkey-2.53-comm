@@ -17,9 +17,9 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <prefpane id="paneCompose" onpaneload="gComposePane.init();">
-    <script type="application/javascript" src="chrome://messenger/content/preferences/compose.js"/>
-    <script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
-    <script type="application/javascript" src="chrome://communicator/content/utilityOverlay.js"/>
+    <script src="chrome://messenger/content/preferences/compose.js"/>
+    <script src="chrome://global/content/contentAreaUtils.js"/>
+    <script src="chrome://communicator/content/utilityOverlay.js"/>
 
     <stringbundle id="bundle_addressBook" src="chrome://messenger/locale/addressbook/addressBook.properties"/>
 

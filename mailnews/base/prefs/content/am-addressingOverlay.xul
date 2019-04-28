@@ -12,9 +12,9 @@
 <overlay xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript" src="chrome://messenger/content/am-addressing.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/amUtils.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/am-prefs.js"/>
+  <script src="chrome://messenger/content/am-addressing.js"/>
+  <script src="chrome://messenger/content/amUtils.js"/>
+  <script src="chrome://messenger/content/am-prefs.js"/>
 
   <vbox flex="1" id="compositionAndAddressing">
     <stringbundle id="bundle_addressBook" src="chrome://messenger/locale/addressbook/addressBook.properties"/>

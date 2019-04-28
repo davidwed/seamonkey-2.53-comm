@@ -30,9 +30,9 @@
 
 
    <!-- Javascript includes -->
-   <script type="application/javascript" src="chrome://calendar/content/publishDialog.js"/>
+   <script src="chrome://calendar/content/publishDialog.js"/>
 
-   <script type="application/javascript" >
+   <script >
    var publishButtonLabel = "&calendar.publish.publish.button;" ;
    var closeButtonLabel = "&calendar.publish.close.button;" ;
    </script>
