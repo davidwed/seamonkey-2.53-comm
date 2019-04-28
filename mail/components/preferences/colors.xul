@@ -22,7 +22,7 @@
             style="width: &window.width; !important;">
 #endif
 
-  <script type="application/javascript" src="chrome://communicator/content/utilityOverlay.js"/>
+  <script src="chrome://communicator/content/utilityOverlay.js"/>
   <prefpane id="ColorsDialogPane">
 
     <preferences>

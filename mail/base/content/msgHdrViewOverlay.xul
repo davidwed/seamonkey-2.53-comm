@@ -14,12 +14,9 @@
 <?xml-stylesheet href="chrome://messenger/skin/smime/msgHdrViewSMIMEOverlay.css" type="text/css"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script type="application/javascript"
-        src="chrome://messenger/content/msgHdrViewOverlay.js"/>
-<script type="application/javascript"
-        src="chrome://global/content/nsDragAndDrop.js"/>
-<script type="application/javascript"
-        src="chrome://messenger-smime/content/msgHdrViewSMIMEOverlay.js"/>
+<script src="chrome://messenger/content/msgHdrViewOverlay.js"/>
+<script src="chrome://global/content/nsDragAndDrop.js"/>
+<script src="chrome://messenger-smime/content/msgHdrViewSMIMEOverlay.js"/>
 
 <stringbundleset id="stringbundleset">
   <stringbundle id="bundle_messenger" src="chrome://messenger/locale/messenger.properties"/>
