@@ -27,10 +27,10 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <!-- Javascript includes -->
-  <script type="application/javascript" src="chrome://calendar/content/calendar-event-dialog-attendees.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-dialog-utils.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-statusbar.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-ui-utils.js"/>
+  <script src="chrome://calendar/content/calendar-event-dialog-attendees.js"/>
+  <script src="chrome://calendar/content/calendar-dialog-utils.js"/>
+  <script src="chrome://calendar/content/calendar-statusbar.js"/>
+  <script src="chrome://calendar/content/calendar-ui-utils.js"/>
 
   <hbox align="center" pack="end">
     <spacer flex="1"/>

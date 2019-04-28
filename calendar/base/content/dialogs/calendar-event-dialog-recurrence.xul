@@ -23,10 +23,10 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <!-- Javascript includes -->
-  <script type="application/javascript" src="chrome://calendar/content/calendar-event-dialog-recurrence.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-dialog-utils.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-ui-utils.js"/>
-  <script type="application/javascript" src="chrome://calendar/content/calendar-statusbar.js"/>
+  <script src="chrome://calendar/content/calendar-event-dialog-recurrence.js"/>
+  <script src="chrome://calendar/content/calendar-dialog-utils.js"/>
+  <script src="chrome://calendar/content/calendar-ui-utils.js"/>
+  <script src="chrome://calendar/content/calendar-statusbar.js"/>
 
   <!-- recurrence pattern -->
   <groupbox id="recurrence-pattern-groupbox">
