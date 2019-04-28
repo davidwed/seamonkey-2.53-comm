@@ -17,8 +17,7 @@
         buttons="cancel"
         ondialogcancel="return onCancel();">
 
-  <script type="application/javascript"
-          src="chrome://messenger/content/messengercompose/sendProgress.js"/>
+  <script src="chrome://messenger/content/messengercompose/sendProgress.js"/>
   <stringbundle id="sendProgressStringBundle"
                 src="chrome://messenger/locale/messengercompose/sendProgress.properties"/>
 
