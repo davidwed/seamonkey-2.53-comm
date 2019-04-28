@@ -41,8 +41,7 @@
         ondialogcancel="return gSystemIntegrationDialog.onDialogClose(false);"
         title="&systemIntegration.title;">
 
-  <script type="application/javascript"
-          src="chrome://messenger/content/systemIntegrationDialog.js"/>
+  <script src="chrome://messenger/content/systemIntegrationDialog.js"/>
 
   <label control="defaultClientList">&defaultClient.intro;</label>
   <listbox rows="3" seltype="single" id="defaultClientList">

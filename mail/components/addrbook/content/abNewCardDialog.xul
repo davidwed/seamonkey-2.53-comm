@@ -25,8 +25,8 @@
     <stringbundle id="bundle_addressBook" src="chrome://messenger/locale/addressbook/addressBook.properties"/>
   </stringbundleset>
 
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/abCommon.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/abCard.js"/>
+  <script src="chrome://messenger/content/addressbook/abCommon.js"/>
+  <script src="chrome://messenger/content/addressbook/abCard.js"/>
 
   <hbox align="center">
     <label id="abPopupLabel" control="abPopup" value="&chooseAddressBook.label;" accesskey="&chooseAddressBook.accesskey;"/>

@@ -42,7 +42,7 @@
       <preference id="network.proxy.backup.socks_port"   name="network.proxy.backup.socks_port"   type="int"/>
     </preferences>
 
-    <script type="application/javascript" src="chrome://messenger/content/preferences/connection.js"/>
+    <script src="chrome://messenger/content/preferences/connection.js"/>
 
     <groupbox>
       <caption label="&proxyTitle.label;"/>

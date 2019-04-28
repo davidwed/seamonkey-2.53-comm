@@ -30,9 +30,9 @@
     <stringbundle id="bundle_search" src="chrome://messenger/locale/search.properties"/>
   </stringbundleset>
 
-  <script type="application/javascript" src="chrome://messenger/content/mailWindowOverlay.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/mailCommands.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/FilterEditor.js"/>
+  <script src="chrome://messenger/content/mailWindowOverlay.js"/>
+  <script src="chrome://messenger/content/mailCommands.js"/>
+  <script src="chrome://messenger/content/FilterEditor.js"/>
 
   <commandset>
     <command id="cmd_updateFilterType" oncommand="updateFilterType();"/>

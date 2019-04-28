@@ -19,7 +19,7 @@
         onwizardfinish=""
         persist="screenX screenY">
 
-   <script type="application/javascript" src="chrome://calendar/content/calendarCreation.js"/>
+   <script src="chrome://calendar/content/calendarCreation.js"/>
 
    <wizardpage pageid="initialPage"
                next="locationPage"

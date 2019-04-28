@@ -24,13 +24,13 @@
     <stringbundle id="bundle_addressBook" src="chrome://messenger/locale/addressbook/addressBook.properties"/>
   </stringbundleset>
 
-  <script type="application/javascript" src="chrome://global/content/nsDragAndDrop.js"/>
-  <script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/addressbook.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/abDragDrop.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/abCommon.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/abResultsPane.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/addressbook/abContactsPanel.js"/>
+  <script src="chrome://global/content/nsDragAndDrop.js"/>
+  <script src="chrome://global/content/globalOverlay.js"/>
+  <script src="chrome://messenger/content/addressbook/addressbook.js"/>
+  <script src="chrome://messenger/content/addressbook/abDragDrop.js"/>
+  <script src="chrome://messenger/content/addressbook/abCommon.js"/>
+  <script src="chrome://messenger/content/addressbook/abResultsPane.js"/>
+  <script src="chrome://messenger/content/addressbook/abContactsPanel.js"/>
 
   <commandset id="CommandUpdate_AddressBook"
               commandupdater="true"
