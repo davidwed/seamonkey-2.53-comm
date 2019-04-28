@@ -17,7 +17,7 @@
             onpaneload="gApplicationsTabController.init();"
             flex="1">
 
-    <script type="application/javascript">
+    <script>
     <![CDATA[
 #ifdef MOZ_WIDGET_GTK
       var ICON_URL_APP      = "moz-icon://dummy.exe?size=16";
@@ -60,8 +60,7 @@
                   type="int"/>
     </preferences>
 
-    <script type="application/javascript"
-            src="chrome://messenger/content/preferences/applications.js"/>
+    <script src="chrome://messenger/content/preferences/applications.js"/>
 
     <commandset id="appPaneCommandSet">
       <command id="cmd_delete"
@@ -129,8 +128,7 @@
 
           <separator class="thin"/>
 
-          <script type="application/javascript"
-                  src="chrome://messenger/content/preferences/downloads.js"/>
+          <script src="chrome://messenger/content/preferences/downloads.js"/>
 
           <vbox align="start">
             <radiogroup id="saveWhere" flex="1"

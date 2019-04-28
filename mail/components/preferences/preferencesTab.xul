@@ -5,8 +5,7 @@
 
 <overlay id="preferencesTab-overlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/javascript"
-          src="chrome://messenger/content/preferences/preferencesTab.js"/>
+  <script src="chrome://messenger/content/preferences/preferencesTab.js"/>
 
   <hbox id="tabmail-container">
     <vbox id="preferencesTab" collapsed="true">

@@ -17,7 +17,7 @@
   onload = "addBuddy.onload()"
   ondialogaccept="addBuddy.create()"
   buttondisabledaccept="true">
-  <script type="application/javascript" src="chrome://messenger/content/chat/addbuddy.js"/>
+  <script src="chrome://messenger/content/chat/addbuddy.js"/>
 
   <stringbundle id="chatBundle" src="chrome://messenger/locale/chat.properties"/>
 

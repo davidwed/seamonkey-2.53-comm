@@ -15,7 +15,7 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <prefpane id="paneChat" onpaneload="gChatPane.init();">
-    <script type="application/javascript" src="chrome://messenger/content/preferences/chat.js"/>
+    <script src="chrome://messenger/content/preferences/chat.js"/>
 
     <preferences id="chatPreferences">
       <preference id="messenger.startup.action"            name="messenger.startup.action"     type="int"/>
