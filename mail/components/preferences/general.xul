@@ -15,8 +15,8 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <prefpane id="paneGeneral" onpaneload="gGeneralPane.init();">
-    <script type="application/javascript" src="chrome://communicator/content/utilityOverlay.js"/>
-    <script type="application/javascript" src="chrome://messenger/content/preferences/general.js"/>
+    <script src="chrome://communicator/content/utilityOverlay.js"/>
+    <script src="chrome://messenger/content/preferences/general.js"/>
 
     <preferences id="generalPreferences">
       <preference id="mail.pane_config.dynamic" name="mail.pane_config.dynamic" type="int"/>

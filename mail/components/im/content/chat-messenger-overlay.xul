@@ -19,14 +19,10 @@
 
 <overlay id="chat-messenger-overlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/javascript"
-          src="chrome://messenger/content/jsTreeView.js"/>
-  <script type="application/javascript"
-          src="chrome://messenger/content/chat/chat-messenger-overlay.js"/>
-  <script type="application/javascript"
-          src="chrome://messenger/content/chat/imStatusSelector.js"/>
-  <script type="application/javascript"
-          src="chrome://messenger/content/chat/imContextMenu.js"/>
+  <script src="chrome://messenger/content/jsTreeView.js"/>
+  <script src="chrome://messenger/content/chat/chat-messenger-overlay.js"/>
+  <script src="chrome://messenger/content/chat/imStatusSelector.js"/>
+  <script src="chrome://messenger/content/chat/imContextMenu.js"/>
 
   <stringbundleset id="stringbundleset">
     <stringbundle id="chatBundle" src="chrome://messenger/locale/chat.properties"/>

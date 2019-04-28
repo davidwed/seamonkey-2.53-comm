@@ -24,10 +24,10 @@
         title="&accountsWindow.title;"
         style="&accountsWindow2.style;"
         persist="width height screenX screenY">
- <script type="application/javascript" src="chrome://messenger/content/chat/imAccounts.js"/>
- <script type="application/javascript" src="chrome://messenger/content/chat/imStatusSelector.js"/>
- <script type="application/javascript" src="chrome://global/content/nsDragAndDrop.js" />
- <script type="application/javascript" src="chrome://global/content/nsTransferable.js" />
+ <script src="chrome://messenger/content/chat/imAccounts.js"/>
+ <script src="chrome://messenger/content/chat/imStatusSelector.js"/>
+ <script src="chrome://global/content/nsDragAndDrop.js" />
+ <script src="chrome://global/content/nsTransferable.js" />
 
  <stringbundle id="accountsBundle" src="chrome://messenger/locale/imAccounts.properties"/>
  <stringbundle id="chatBundle" src="chrome://messenger/locale/chat.properties"/>

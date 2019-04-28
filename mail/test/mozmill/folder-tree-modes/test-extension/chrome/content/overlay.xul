@@ -4,5 +4,5 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/javascript" src="chrome://testfoldertreemode/content/overlay.js"/>
+  <script src="chrome://testfoldertreemode/content/overlay.js"/>
 </overlay>

@@ -45,23 +45,23 @@
     <stringbundle id="bundle_read_smime" src="chrome://messenger-smime/locale/msgReadSMIMEOverlay.properties"/>
   </stringbundleset>
 
-  <script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/shareglue.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/commandglue.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/folderDisplay.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/messageDisplay.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/mailWindow.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/messageWindow.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/accountUtils.js"/>
-  <script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/nsContextMenu.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/mailContextMenus.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/phishingDetector.js"/>
-  <script type="application/javascript" src="chrome://communicator/content/contentAreaClick.js"/>
-  <script type="application/javascript" src="chrome://global/content/nsDragAndDrop.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/msgViewNavigation.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/editContactOverlay.js"/>
-  <script type="application/javascript" src="chrome://messenger/content/toolbarIconColor.js"/>
+  <script src="chrome://global/content/globalOverlay.js"/>
+  <script src="chrome://messenger/content/shareglue.js"/>
+  <script src="chrome://messenger/content/commandglue.js"/>
+  <script src="chrome://messenger/content/folderDisplay.js"/>
+  <script src="chrome://messenger/content/messageDisplay.js"/>
+  <script src="chrome://messenger/content/mailWindow.js"/>
+  <script src="chrome://messenger/content/messageWindow.js"/>
+  <script src="chrome://messenger/content/accountUtils.js"/>
+  <script src="chrome://global/content/contentAreaUtils.js"/>
+  <script src="chrome://messenger/content/nsContextMenu.js"/>
+  <script src="chrome://messenger/content/mailContextMenus.js"/>
+  <script src="chrome://messenger/content/phishingDetector.js"/>
+  <script src="chrome://communicator/content/contentAreaClick.js"/>
+  <script src="chrome://global/content/nsDragAndDrop.js"/>
+  <script src="chrome://messenger/content/msgViewNavigation.js"/>
+  <script src="chrome://messenger/content/editContactOverlay.js"/>
+  <script src="chrome://messenger/content/toolbarIconColor.js"/>
 
   <commandset id="mailCommands">
     <commandset id="mailFileMenuItems"/>
