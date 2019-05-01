@@ -69,6 +69,7 @@
 #include "nsIMsgMessageService.h"
 #include "nsIMsgHdr.h"
 #include "nsIMsgFolder.h"
+#include "nsMsgMessageFlags.h"
 #include "nsComposeStrings.h"
 #include "nsString.h"
 #include "nsMsgUtils.h"
