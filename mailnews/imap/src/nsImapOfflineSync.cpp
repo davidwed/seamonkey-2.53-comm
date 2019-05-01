@@ -9,6 +9,7 @@
 #include "nsImapOfflineSync.h"
 #include "nsImapMailFolder.h"
 #include "nsMsgFolderFlags.h"
+#include "nsMsgMessageFlags.h"
 #include "nsIRDFService.h"
 #include "nsMsgBaseCID.h"
 #include "nsRDFCID.h"
