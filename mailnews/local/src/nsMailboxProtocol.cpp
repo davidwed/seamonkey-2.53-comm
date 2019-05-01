@@ -15,7 +15,6 @@
 #include "nsMsgDBCID.h"
 #include "nsIMsgMailNewsUrl.h"
 #include "nsICopyMsgStreamListener.h"
-#include "nsMsgMessageFlags.h"
 #include "prtime.h"
 #include "mozilla/Logging.h"
 #include "prerror.h"

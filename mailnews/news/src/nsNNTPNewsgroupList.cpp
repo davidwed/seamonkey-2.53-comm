@@ -41,7 +41,7 @@
 #include "nsMsgUtils.h"
 
 #include "nsMsgDatabase.h"
-
+#include "nsMsgMessageFlags.h"
 #include "nsIDBFolderInfo.h"
 
 #include "nsNewsUtils.h"

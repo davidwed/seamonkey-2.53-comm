@@ -19,10 +19,6 @@ ChromeUtils.import("resource:///modules/gloda/gloda.js");
 ChromeUtils.import("resource:///modules/gloda/noun_tag.js");
 ChromeUtils.import("resource:///modules/mailServices.js");
 
-
-var nsMsgMessageFlags_Replied = Ci.nsMsgMessageFlags.Replied;
-var nsMsgMessageFlags_Forwarded = Ci.nsMsgMessageFlags.Forwarded;
-
 var EXT_BUILTIN = "built-in";
 
 /**
@@ -140,8 +136,8 @@ var GlodaExplicitAttr = {
     aGlodaMessage.read = aMsgHdr.isRead;
 
     let flags = aMsgHdr.flags;
-    aGlodaMessage.repliedTo = Boolean(flags & nsMsgMessageFlags_Replied);
-    aGlodaMessage.forwarded = Boolean(flags & nsMsgMessageFlags_Forwarded);
+    aGlodaMessage.repliedTo = Boolean(flags & Ci.nsMsgMessageFlags.Replied);
+    aGlodaMessage.forwarded = Boolean(flags & Ci.nsMsgMessageFlags.Forwarded);
 
     let tags = aGlodaMessage.tags = [];
 
