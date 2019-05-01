@@ -64,6 +64,7 @@
 #include "nsIMsgAttachment.h"
 #include "nsIMsgProgress.h"
 #include "nsMsgFolderFlags.h"
+#include "nsMsgMessageFlags.h"
 #include "nsIMsgDatabase.h"
 #include "nsStringStream.h"
 #include "nsIMutableArray.h"
