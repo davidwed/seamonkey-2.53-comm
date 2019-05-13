@@ -2129,6 +2129,7 @@ nsresult nsNNTPProtocol::DisplayArticle(nsIInputStream * inputStream, uint32_t l
   {
     nsresult rv = NS_OK;
     char *line = m_lineStreamBuffer->ReadNextLine(inputStream, line_length, pauseForMoreData, &rv, true);
+
     if (pauseForMoreData)
     {
       uint64_t inlength = 0;
@@ -2139,6 +2140,8 @@ nsresult nsNNTPProtocol::DisplayArticle(nsIInputStream * inputStream, uint32_t l
       PR_Free(line);
       return rv;
     }
+
+    if (!line) return NS_OK;
 
     // line only contains a single dot -> message end
     if (line_length == 1 + MSG_LINEBREAK_LEN && line[0] == '.') {
