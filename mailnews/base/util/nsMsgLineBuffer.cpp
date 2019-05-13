@@ -324,7 +324,7 @@ char * nsMsgLineStreamBuffer::ReadNextLine(nsIInputStream * aInputStream, uint32
     {
       if (prv)
         *prv = rv;
-      aNumBytesInLine = -1;
+      aNumBytesInLine = 0;
       return nullptr;
     }
     if (!nonBlockingStream && numBytesInStream == 0) // if no data available,
@@ -350,7 +350,7 @@ char * nsMsgLineStreamBuffer::ReadNextLine(nsIInputStream * aInputStream, uint32
       if (numBytesInStream >= numFreeBytesInBuffer)
       {
         int64_t growBy = (numBytesInStream - numFreeBytesInBuffer) * 2 + 1;
-        // GrowBuffer cannot handles over 4GB size
+        // GrowBuffer cannot handle over 4GB size.
         if (m_dataBufferSize + growBy > PR_UINT32_MAX)
           return nullptr;
         // try growing buffer by twice as much as we need.
