@@ -86,7 +86,7 @@ function testSmokeTest() {
     });
     let calendarList = lookup(CALENDARLIST);
     // Double click on bottom left.
-    controller.doubleClick(calendarList, 0, calendarList.getNode().boxObject.height);
+    controller.doubleClick(calendarList, 0, calendarList.getNode().height);
     wait_for_modal_dialog("Calendar:NewCalendarWizard", TIMEOUT_MODAL_DIALOG);
 }
 
