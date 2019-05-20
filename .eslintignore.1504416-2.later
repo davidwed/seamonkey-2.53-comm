@@ -1,0 +1,21 @@
+--- .eslintignore
++++ .eslintignore
+@@ -12,17 +12,17 @@ mozilla/**
+ 
+ # These directories don't contain any js and are not meant to
+ config/**
+ db/**
+ other-licenses/**
+ testing/**
+ 
+ # Temporarily disabled until the XUL parser is fixed.
+-calendar/base/content/calendar-calendars-list.xul
++calendar/lightning/content/messenger-overlay-sidebar.xul
+ calendar/providers/gdata/content/gdata-calendar-creation.xul
+ common/src/viewSource.xul
+ 
+ # We ignore all these directories by default, until we get them enabled.
+ # If you are enabling a directory, please add directory specific exclusions
+ # below.
+ build/**
+ suite/**
