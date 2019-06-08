@@ -531,32 +531,32 @@ nsNetscapeProfileMigratorBase::ReadBranch(const char * branchName,
     int32_t type;
     branch->GetPrefType(currPref, &type);
 
-    PrefBranchStruct* pref = new PrefBranchStruct;
-    if (!pref) {
+    PrefBranchStruct* prefBranch = new PrefBranchStruct;
+    if (!prefBranch) {
       NS_WARNING("Could not create new PrefBranchStruct");
       return;
     }
-    pref->prefName = currPref;
-    pref->type = type;
+    prefBranch->prefName = currPref;
+    prefBranch->type = type;
 
     switch (type) {
     case nsIPrefBranch::PREF_STRING:
-      rv = branch->GetCharPref(currPref, &pref->stringValue);
+      rv = branch->GetCharPref(currPref, &prefBranch->stringValue);
       break;
     case nsIPrefBranch::PREF_BOOL:
-      rv = branch->GetBoolPref(currPref, &pref->boolValue);
+      rv = branch->GetBoolPref(currPref, &prefBranch->boolValue);
       break;
     case nsIPrefBranch::PREF_INT:
-      rv = branch->GetIntPref(currPref, &pref->intValue);
+      rv = branch->GetIntPref(currPref, &prefBranch->intValue);
       break;
     default:
-      NS_WARNING("Invalid Pref Type in "
+      NS_WARNING("Invalid prefBranch Type in "
                  "nsNetscapeProfileMigratorBase::ReadBranch\n");
       break;
     }
 
     if (NS_SUCCEEDED(rv))
-      aPrefs.AppendElement(pref);
+      aPrefs.AppendElement(prefBranch);
   }
 }
 
