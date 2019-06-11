@@ -217,7 +217,7 @@ ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
                 onDeleteItem(deletedItem) {},
                 onError(calendar, errNo, message) {},
 
-                onPropertyChanged: (calendar, name, value, oldValue) => {
+                onPropertyChanged(calendar, name, value, oldValue) {
                     switch (name) {
                         case "color":
                             this.listTree.updateCalendarColor(calendar);
