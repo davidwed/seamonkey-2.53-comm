@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* exported switchToView, getSelectedDay, scheduleMidnightUpdate,
- *          updateStyleSheetForViews, observeViewDaySelect, toggleOrientation,
+ *          observeViewDaySelect, toggleOrientation,
  *          toggleWorkdaysOnly, toggleTasksInView, toggleShowCompletedInView,
  *          goToDate, getLastCalendarView, deleteSelectedEvents,
  *          editSelectedEvents, selectAllEvents
@@ -389,33 +389,6 @@ function getViewStyleSheet() {
         }
     }
     return getViewStyleSheet.sheet;
-}
-
-/**
- * Updates the view stylesheet to contain rules that give all boxes with class
- * .calendar-color-box and an attribute calendar-id="<id of the calendar>" the
- * background color of the specified calendar.
- *
- * @param aCalendar     The calendar to update the stylesheet for.
- */
-function updateStyleSheetForViews(aCalendar) {
-    if (!updateStyleSheetForViews.ruleCache) {
-        updateStyleSheetForViews.ruleCache = {};
-    }
-    let ruleCache = updateStyleSheetForViews.ruleCache;
-
-    if (!(aCalendar.id in ruleCache)) {
-        // We haven't create a rule for this calendar yet, do so now.
-        let sheet = getViewStyleSheet();
-        let ruleString = '.calendar-color-box[calendar-id="' + aCalendar.id + '"] {} ';
-        let ruleIndex = sheet.insertRule(ruleString, sheet.cssRules.length);
-
-        ruleCache[aCalendar.id] = sheet.cssRules[ruleIndex];
-    }
-
-    let color = aCalendar.getProperty("color") || "#A8C2E1";
-    ruleCache[aCalendar.id].style.backgroundColor = color;
-    ruleCache[aCalendar.id].style.color = cal.view.getContrastingTextColor(color);
 }
 
 /**
