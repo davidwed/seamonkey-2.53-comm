@@ -42,15 +42,7 @@ var gCategoriesPane = {
             parent.backupPrefList = [];
         }
 
-        let categories = document.getElementById("calendar.categories.names").value;
-
-        // If no categories are configured load a default set from properties file
-        if (!categories) {
-            categories = cal.category.setupDefaultCategories();
-            document.getElementById("calendar.categories.names").value = categories;
-        }
-
-        gCategoryList = cal.category.stringToArray(categories);
+        gCategoryList = cal.category.fromPrefs();
 
         this.updateCategoryList();
 
