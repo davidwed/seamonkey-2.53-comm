@@ -23,6 +23,11 @@ source-upload::
 
 # make -j1 because dependencies in l10n build targets don't work
 # with parallel builds
+distribution:
+	$(MAKE) -j1 -C suite/locales $@
+
+# make -j1 because dependencies in l10n build targets don't work
+# with parallel builds
 merge-% installers-% langpack-% chrome-% clobber-%:
 	$(MAKE) -j1 -C suite/locales $@
 
