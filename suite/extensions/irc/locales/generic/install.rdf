@@ -15,6 +15,7 @@
   <Description about="urn:mozilla:install-manifest"
                em:id="@INSTALL_EXTENSION_ID@"
                em:name="ChatZilla @MOZ_LANG_TITLE@ Language Pack"
+               em:internalName="langpack_cZ/@AB_CD@"
                em:version="@CHATZILLA_VERSION@"
                em:type="8"
                em:creator="@MOZ_LANGPACK_CREATOR@"
