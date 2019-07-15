@@ -202,3 +202,17 @@ ident:
 ifdef MOZ_IRC
 MOZ_PKG_EXTRAL10N += extensions/langpack-$(AB_CD)@chatzilla.mozilla.org=$(DIST)/xpi-stage/chatzilla-$(AB_CD)
 endif
+
+distribution:
+	$(MAKE) -C $(DEPTH)/tools/update-packaging complete-patch PKG_INST_PATH=
+	$(foreach locale,$(SHIPPED_LOCALES),$(MAKE) -C $(DEPTH)/suite/locales/ installers-$(locale) MOZ_MAKE_COMPLETE_MAR=1 ;)
+
+SHIPPED_LOCALES_FILE = $(topsrcdir)/suite/locales/shipped-locales
+ifeq ($(OS_ARCH), WINNT)
+SHIPPED_FILTER = -e linux -e osx
+else ifeq ($(OS_ARCH), Darwin)
+SHIPPED_FILTER = -e linux -e win32
+else
+SHIPPED_FILTER = -e osx -e win32
+endif
+SHIPPED_LOCALES := $(shell if test -f $(SHIPPED_LOCALES_FILE); then cat $(SHIPPED_LOCALES_FILE) |grep -v -e en-US $(SHIPPED_FILTER) | cut -d " " -f1; fi)
