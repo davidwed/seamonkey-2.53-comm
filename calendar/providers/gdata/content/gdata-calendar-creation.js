@@ -112,8 +112,7 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
             wizard.canAdvance = sessionGroup.value || (sessionName.value && sessionNameIsValid);
         } else if (currentPageId == "gdata-calendars") {
             let calendarList = document.getElementById("calendar-list");
-            let calendars = calendarList.selectedCalendars.filter(calendar => !calendar.getProperty("disabled") && !calendar.readOnly);
-            wizard.canAdvance = !!calendars.length;
+            wizard.canAdvance = !!calendarList.querySelector(".calendar-selected[checked]:not([readonly])");
         } else {
             protofunc();
         }
@@ -156,8 +155,14 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
         let calMgr = cal.getCalendarManager();
         let sessionMgr = getGoogleSessionManager();
         let sessionContainer = document.getElementById("gdata-session-group");
-        let calendarListWidget = document.getElementById("calendar-list");
-        calendarListWidget.clear();
+
+        let calendarList = document.getElementById("calendar-list");
+        while (calendarList.lastElementChild) {
+            calendarList.lastElementChild.remove();
+        }
+        let loadingItem = createXULElement("richlistitem");
+        loadingItem.setAttribute("loading", "true");
+        calendarList.appendChild(loadingItem);
 
         let session = sessionContainer.selectedItem.gdataSession;
         if (!session) {
@@ -165,7 +170,7 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
             session = sessionMgr.getSessionById(newSessionItem.value, true);
         }
 
-        Promise.all([session.getTasksList(), session.getCalendarList()]).then(([tasksLists, calendarList]) => {
+        Promise.all([session.getTasksList(), session.getCalendarList()]).then(([tasksLists, calendars]) => {
             let existing = new Set();
             let sessionPrefix = "googleapi://" + session.id;
             for (let calendar of calMgr.getCalendars({})) {
@@ -192,7 +197,7 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
                 }
                 return calendar;
             });
-            let calcals = calendarList.map((calendarEntry) => {
+            let calcals = calendars.map((calendarEntry) => {
                 let uri = "googleapi://" + session.id + "/?calendar=" + encodeURIComponent(calendarEntry.id);
                 let calendar = calMgr.createCalendar("gdata", Services.io.newURI(uri));
                 calendar.name = calendarEntry.summary;
@@ -204,12 +209,57 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
                 return calendar;
             });
 
-            let calendars = [calendarListWidget.mockCalendarHeader]
-                            .concat(calcals)
-                            .concat([calendarListWidget.mockTaskHeader])
-                            .concat(taskcals);
+            loadingItem.remove();
+            let strings = Services.strings.createBundle("chrome://gdata-provider/locale/gdata.properties");
 
-            calendarListWidget.calendars = calendars;
+            let header = createXULElement("richlistitem");
+            let headerLabel = createXULElement("label");
+            headerLabel.classList.add("header-label");
+            headerLabel.value = strings.GetStringFromName("calendarsHeader");
+            header.appendChild(headerLabel);
+            calendarList.appendChild(header);
+
+            for (let calendar of calcals) {
+                addCalendarItem(calendar);
+            }
+
+            header = createXULElement("richlistitem");
+            headerLabel = createXULElement("label");
+            headerLabel.classList.add("header-label");
+            headerLabel.value = strings.GetStringFromName("taskListsHeader");
+            header.appendChild(headerLabel);
+            calendarList.appendChild(header);
+
+            for (let calendar of taskcals) {
+                addCalendarItem(calendar);
+            }
+
+            function addCalendarItem(calendar) {
+                let item = createXULElement("richlistitem");
+                item.calendar = calendar;
+                item.setAttribute("calendar-id", calendar.id);
+                item.setAttribute("value", calendar.name);
+
+                let checkbox = createXULElement("checkbox");
+                checkbox.classList.add("calendar-selected");
+                if (calendar.readOnly) {
+                    checkbox.setAttribute("checked", "true");
+                    checkbox.setAttribute("readonly", "true");
+                }
+                item.appendChild(checkbox);
+
+                let image = createXULElement("image");
+                image.classList.add("calendar-color");
+                item.appendChild(image);
+                image.style.backgroundColor = calendar.getProperty("color");
+
+                let label = createXULElement("label");
+                label.classList.add("calendar-name");
+                label.setAttribute("value", calendar.name);
+                item.appendChild(label);
+
+                calendarList.appendChild(item);
+            }
         }, (e) => {
             Cu.reportError(e);
         });
@@ -217,9 +267,14 @@ ChromeUtils.import("resource://gdata-provider/modules/gdataUtils.jsm");
 
     this.gdataCalendarsAdvance = trycatch(() => {
         let calendarList = document.getElementById("calendar-list");
-        let calendars = calendarList.selectedCalendars.filter(calendar => !calendar.getProperty("disabled") && !calendar.readOnly);
+
         let calMgr = cal.getCalendarManager();
-        calendars.forEach(calMgr.registerCalendar, calMgr);
+        for (let item of calendarList.children) {
+            let checkbox = item.querySelector(".calendar-selected[checked]:not([readonly])");
+            if (checkbox) {
+                calMgr.registerCalendar(item.calendar);
+            }
+        }
         return true;
     });
 
