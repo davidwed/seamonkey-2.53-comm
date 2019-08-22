@@ -1,0 +1,21 @@
+--- msgMail3PaneWindow.js
++++ msgMail3PaneWindow.js
+@@ -1523,17 +1523,17 @@ var TabsInTitlebar = {
+ 
+   get systemSupported() {
+     let isSupported = false;
+     switch (AppConstants.MOZ_WIDGET_TOOLKIT) {
+       case "windows":
+       case "cocoa":
+         isSupported = true;
+         break;
+-      case "gtk3":
++      case "gtk":
+         isSupported = window.matchMedia("(-moz-gtk-csd-available)");
+         break;
+     }
+     delete this.systemSupported;
+     return this.systemSupported = isSupported;
+   },
+ 
+   get enabled() {
