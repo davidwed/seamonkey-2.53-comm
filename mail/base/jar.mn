@@ -118,6 +118,11 @@ messenger.jar:
 *   content/messenger/license.html                  (/mozilla/toolkit/content/license.html)
 % override chrome://global/content/license.html chrome://messenger/content/license.html
 
+*   content/messenger/buildconfig.html              (content/buildconfig.html)
+    content/messenger/buildconfig.css               (content/buildconfig.css)
+% override chrome://global/content/buildconfig.html chrome://messenger/content/buildconfig.html
+% override chrome://global/content/buildconfig.css chrome://messenger/content/buildconfig.css
+
 comm.jar:
 % content communicator %content/communicator/
    content/communicator/charsetOverlay.xul          (content/charsetOverlay.xul)
