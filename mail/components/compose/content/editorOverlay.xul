@@ -4,7 +4,7 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <!DOCTYPE overlay [
-<!ENTITY % editorOverlayDTD SYSTEM "chrome://editor/locale/editorOverlay.dtd">
+<!ENTITY % editorOverlayDTD SYSTEM "chrome://messenger/locale/messengercompose/editorOverlay.dtd">
 %editorOverlayDTD;
 <!ENTITY % utilityOverlayDTD SYSTEM
   "chrome://communicator/locale/utilityOverlay.dtd">
@@ -14,8 +14,8 @@
 <overlay id="editorOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script src="chrome://editor/content/editorUtilities.js"/>
-<script src="chrome://editor/content/ComposerCommands.js"/>
+<script src="chrome://messenger/content/messengercompose/editorUtilities.js"/>
+<script src="chrome://messenger/content/messengercompose/ComposerCommands.js"/>
 
   <keyset id="editorKeys">
     <key id="boldkb"         key="&styleBoldCmd.key;"       observes="cmd_bold" modifiers="accel"/>

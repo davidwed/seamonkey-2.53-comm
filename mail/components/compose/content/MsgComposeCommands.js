@@ -824,7 +824,7 @@ var defaultController = {
         var skipBlockQuotes =
           (window.document.documentElement.getAttribute("windowtype") ==
           "msgcompose");
-        window.openDialog("chrome://editor/content/EdSpellCheck.xul", "_blank",
+        window.openDialog("chrome://messenger/content/messengercompose/EdSpellCheck.xul", "_blank",
                           "dialog,close,titlebar,modal,resizable",
                           false, skipBlockQuotes, true);
       }
@@ -2941,7 +2941,7 @@ function GenericSendMessage(msgType)
       // focus on the mail body when we have to do a spellcheck.
       SetMsgBodyFrameFocus();
       window.cancelSendMessage = false;
-      window.openDialog("chrome://editor/content/EdSpellCheck.xul", "_blank",
+      window.openDialog("chrome://messenger/content/messengercompose/EdSpellCheck.xul", "_blank",
                         "dialog,close,titlebar,modal,resizable", true, true, false);
 
       if (window.cancelSendMessage)
