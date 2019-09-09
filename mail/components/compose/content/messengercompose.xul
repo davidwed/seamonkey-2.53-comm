@@ -7,7 +7,7 @@
 <?xml-stylesheet href="chrome://messenger/skin/folderMenus.css" type="text/css"?>
 <?xml-stylesheet href="chrome://messenger/skin/attachmentList.css" type="text/css"?>
 <?xml-stylesheet href="chrome://messenger/skin/smime/msgCompSMIMEOverlay.css" type="text/css"?>
-<?xul-overlay href="chrome://editor/content/editorOverlay.xul"?>
+<?xul-overlay href="chrome://messenger/content/messengercompose/editorOverlay.xul"?>
 #ifdef XP_MACOSX
 <?xul-overlay href="chrome://messenger/content/macMenuOverlay.xul"?>
 #endif
@@ -57,7 +57,7 @@
 <script src="chrome://messenger/content/accountUtils.js"/>
 <script src="chrome://messenger/content/mailCore.js"/>
 <script src="chrome://communicator/content/contentAreaClick.js"/>
-<script src="chrome://editor/content/editor.js"/>
+<script src="chrome://messenger/content/messengercompose/editor.js"/>
 <script src="chrome://messenger/content/messengercompose/MsgComposeCommands.js"/>
 <script src="chrome://messenger/content/messengercompose/bigFileObserver.js"/>
 <script src="chrome://messenger/content/messengercompose/cloudAttachmentLinkManager.js"/>
