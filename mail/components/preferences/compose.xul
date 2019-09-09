@@ -7,7 +7,7 @@
 <!DOCTYPE overlay [
 <!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
 <!ENTITY % composeDTD SYSTEM "chrome://messenger/locale/preferences/compose.dtd">
-<!ENTITY % editorOverlayDTD SYSTEM "chrome://editor/locale/editorOverlay.dtd">
+<!ENTITY % editorOverlayDTD SYSTEM "chrome://messenger/locale/messengercompose/editorOverlay.dtd">
 %brandDTD;
 %composeDTD;
 %editorOverlayDTD;
