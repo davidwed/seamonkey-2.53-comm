@@ -1,0 +1,21 @@
+--- nsSuiteApp.cpp
++++ nsSuiteApp.cpp
+@@ -220,17 +220,17 @@ static int do_main(int argc, char* argv[
+     return 255;
+   }
+ #endif
+   config.sandboxBrokerServices = brokerServices;
+   config.sandboxPermissionsService = permissionsService;
+ #endif
+ 
+ #ifdef LIBFUZZER
+-  if (getenv("LIBFUZZER"))
++  if (getenv("FUZZER"))
+     gBootstrap->XRE_LibFuzzerSetDriver(fuzzer::FuzzerDriver);
+ #endif
+ 
+   return gBootstrap->XRE_main(argc, argv, config);
+ }
+ 
+ static nsresult
+ InitXPCOMGlue()
