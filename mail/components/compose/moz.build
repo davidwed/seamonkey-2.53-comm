@@ -6,7 +6,7 @@
 JAR_MANIFESTS += ['jar.mn']
 
 EXTRA_JS_MODULES += [
-    'editorUtilities.js',
+    'editorUtilities.jsm',
 ]
 
 JS_PREFERENCE_PP_FILES += [
