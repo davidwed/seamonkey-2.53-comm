@@ -22,10 +22,7 @@ function SetupHTMLEditorCommands()
 
   commandTable.registerCommand("cmd_renderedHTMLEnabler", nsDummyHTMLCommand);
 
-  commandTable.registerCommand("cmd_grid",  nsGridCommand);
-
   commandTable.registerCommand("cmd_listProperties",  nsListPropertiesCommand);
-  commandTable.registerCommand("cmd_pageProperties",  nsPagePropertiesCommand);
   commandTable.registerCommand("cmd_colorProperties", nsColorPropertiesCommand);
   commandTable.registerCommand("cmd_increaseFontStep", nsIncreaseFontCommand);
   commandTable.registerCommand("cmd_decreaseFontStep", nsDecreaseFontCommand);
@@ -34,14 +31,7 @@ function SetupHTMLEditorCommands()
   commandTable.registerCommand("cmd_removeNamedAnchors", nsRemoveNamedAnchorsCommand);
   commandTable.registerCommand("cmd_editLink",        nsEditLinkCommand);
 
-  commandTable.registerCommand("cmd_form",          nsFormCommand);
-  commandTable.registerCommand("cmd_inputtag",      nsInputTagCommand);
   commandTable.registerCommand("cmd_inputimage",    nsInputImageCommand);
-  commandTable.registerCommand("cmd_textarea",      nsTextAreaCommand);
-  commandTable.registerCommand("cmd_select",        nsSelectCommand);
-  commandTable.registerCommand("cmd_button",        nsButtonCommand);
-  commandTable.registerCommand("cmd_label",         nsLabelCommand);
-  commandTable.registerCommand("cmd_fieldset",      nsFieldSetCommand);
   commandTable.registerCommand("cmd_isindex",       nsIsIndexCommand);
   commandTable.registerCommand("cmd_image",         nsImageCommand);
   commandTable.registerCommand("cmd_hline",         nsHLineCommand);
@@ -146,7 +136,6 @@ function SetupComposerWindowCommands()
   commandTable.registerCommand("cmd_save",           nsSaveCommand);
   commandTable.registerCommand("cmd_saveAs",         nsSaveAsCommand);
   commandTable.registerCommand("cmd_exportToText",   nsExportToTextCommand);
-  commandTable.registerCommand("cmd_saveAndChangeEncoding",  nsSaveAndChangeEncodingCommand);
   commandTable.registerCommand("cmd_publish",        nsPublishCommand);
   commandTable.registerCommand("cmd_publishAs",      nsPublishAsCommand);
   commandTable.registerCommand("cmd_publishSettings",nsPublishSettingsCommand);
@@ -585,42 +574,6 @@ var nsExportToTextCommand =
     }
   }
 }
-
-var nsSaveAndChangeEncodingCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    SetEditMode(gPreviousNonSourceDisplayMode);
-    window.ok = false;
-    window.exportToText = false;
-    var oldTitle = GetDocumentTitle();
-    window.openDialog("chrome://messenger/content/messengercompose/EditorSaveAsCharset.xul","_blank", "chrome,close,titlebar,modal,resizable=yes");
-
-    if (GetDocumentTitle() != oldTitle)
-      UpdateWindowTitle();
-
-    if (window.ok)
-    {
-      if (window.exportToText)
-      {
-        SaveDocument(true, true, "text/plain");
-      }
-      else
-      {
-        var editor = GetCurrentEditor();
-        SaveDocument(true, false, editor ? editor.contentsMIMEType : null);
-      }
-    }
-  }
-};
 
 var nsPublishCommand =
 {
@@ -2414,40 +2367,6 @@ var nsValidateCommand =
 };
 
 //-----------------------------------------------------------------------------------
-var nsFormCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdFormProps.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsInputTagCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdInputProps.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
 var nsInputImageCommand =
 {
   isCommandEnabled: function(aCommand, dummy)
@@ -2461,106 +2380,6 @@ var nsInputImageCommand =
   doCommand: function(aCommand)
   {
     window.openDialog("chrome://messenger/content/messengercompose/EdInputImage.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsTextAreaCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdTextAreaProps.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsSelectCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdSelectProps.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsButtonCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdButtonProps.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsLabelCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    var tagName = "label";
-    try {
-      var editor = GetCurrentEditor();
-      // Find selected label or if start/end of selection is in label
-      var labelElement = editor.getSelectedElement(tagName);
-      if (!labelElement)
-        labelElement = editor.getElementOrParentByTagName(tagName, editor.selection.anchorNode);
-      if (!labelElement)
-        labelElement = editor.getElementOrParentByTagName(tagName, editor.selection.focusNode);
-      if (labelElement) {
-        // We only open the dialog for an existing label
-        window.openDialog("chrome://messenger/content/messengercompose/EdLabelProps.xul", "_blank", "chrome,close,titlebar,modal", labelElement);
-      } else {
-        EditorSetTextProperty(tagName, "", "");
-      }
-    } catch (e) {}
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsFieldSetCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdFieldSetProps.xul", "_blank", "chrome,close,titlebar,modal");
   }
 };
 
@@ -2798,24 +2617,6 @@ var nsInsertBreakAllCommand =
 };
 
 //-----------------------------------------------------------------------------------
-var nsGridCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdSnapToGrid.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-
-//-----------------------------------------------------------------------------------
 var nsListPropertiesCommand =
 {
   isCommandEnabled: function(aCommand, dummy)
@@ -2832,29 +2633,6 @@ var nsListPropertiesCommand =
   }
 };
 
-
-//-----------------------------------------------------------------------------------
-var nsPagePropertiesCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    var oldTitle = GetDocumentTitle();
-    window.openDialog("chrome://messenger/content/messengercompose/EdPageProps.xul", "_blank", "chrome,close,titlebar,modal", "");
-
-    // Update main window title and
-    // recent menu data in prefs if doc title changed
-    if (GetDocumentTitle() != oldTitle)
-      UpdateWindowTitle();
-  }
-};
 
 //-----------------------------------------------------------------------------------
 var nsObjectPropertiesCommand =
@@ -2888,30 +2666,10 @@ var nsObjectPropertiesCommand =
         case 'hr':
           goDoCommand("cmd_hline");
           break;
-        case 'form':
-          goDoCommand("cmd_form");
-          break;
         case 'input':
           var type = element.getAttribute("type");
           if (type && type.toLowerCase() == "image")
             goDoCommand("cmd_inputimage");
-          else
-            goDoCommand("cmd_inputtag");
-          break;
-        case 'textarea':
-          goDoCommand("cmd_textarea");
-          break;
-        case 'select':
-          goDoCommand("cmd_select");
-          break;
-        case 'button':
-          goDoCommand("cmd_button");
-          break;
-        case 'label':
-          goDoCommand("cmd_label");
-          break;
-        case 'fieldset':
-          goDoCommand("cmd_fieldset");
           break;
         case 'table':
           EditorInsertOrEditTable(false);
