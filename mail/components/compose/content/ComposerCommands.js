@@ -31,7 +31,6 @@ function SetupHTMLEditorCommands()
   commandTable.registerCommand("cmd_removeNamedAnchors", nsRemoveNamedAnchorsCommand);
   commandTable.registerCommand("cmd_editLink",        nsEditLinkCommand);
 
-  commandTable.registerCommand("cmd_inputimage",    nsInputImageCommand);
   commandTable.registerCommand("cmd_isindex",       nsIsIndexCommand);
   commandTable.registerCommand("cmd_image",         nsImageCommand);
   commandTable.registerCommand("cmd_hline",         nsHLineCommand);
@@ -2367,23 +2366,6 @@ var nsValidateCommand =
 };
 
 //-----------------------------------------------------------------------------------
-var nsInputImageCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    window.openDialog("chrome://messenger/content/messengercompose/EdInputImage.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
 var nsIsIndexCommand =
 {
   isCommandEnabled: function(aCommand, dummy)
@@ -2665,11 +2647,6 @@ var nsObjectPropertiesCommand =
           break;
         case 'hr':
           goDoCommand("cmd_hline");
-          break;
-        case 'input':
-          var type = element.getAttribute("type");
-          if (type && type.toLowerCase() == "image")
-            goDoCommand("cmd_inputimage");
           break;
         case 'table':
           EditorInsertOrEditTable(false);
