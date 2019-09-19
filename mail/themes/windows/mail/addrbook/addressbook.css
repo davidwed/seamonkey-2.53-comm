@@ -1,0 +1,247 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* ===== addressbook.css ================================================
+  == Styles for the main Address Book window.
+  ======================================================================= */
+
+@import url("chrome://messenger/skin/");
+@import url("chrome://messenger/skin/shared/addressbook.css");
+
+/* ::::: directory pane adjustments ::::: */
+
+#abDirTreeHeader-title {
+  padding-inline-start: 4px;
+}
+
+/* ::::: results pane ::::: */
+
+#abResultsTree {
+  -moz-appearance:  none;
+  background-color: -moz-Field;
+  color: -moz-FieldText;
+  border-inline-end: 1px solid ThreeDHighlight;
+}
+
+#GeneratedName {
+  padding-inline-start: 30px;
+}
+
+/* ::::: card view pane ::::: */
+
+#CardViewBox {
+  -moz-user-focus: ignore;
+  overflow: auto;
+  min-width: 150px;
+  background-color: -moz-Field;
+  color: -moz-FieldText;
+}
+
+#CardViewInnerBox {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding: 0 8px;
+}
+
+#CardTitle {
+  font-size: 150%;
+  font-weight: bold;
+  border-bottom: 2px solid -moz-FieldText;
+  min-width: 120px;
+  margin: 0;
+}
+
+.cardViewGroup {
+  margin-top: 8px;
+  padding-bottom: 5px;
+  min-width: 50px;
+}
+
+/* :::: Toolbar :::: */
+
+#ab-toolbox:not(:-moz-lwtheme) {
+  -moz-appearance: none;
+  background-color: -moz-Dialog;
+  border-bottom: 1px solid ThreeDShadow;
+}
+
+toolbar:not(:-moz-lwtheme) {
+  -moz-appearance: none;
+}
+
+#ab-toolbox > toolbar {
+  /* force iconsize="small" on these toolbars */
+  counter-reset: smallicons;
+}
+
+#ab-toolbox > toolbar:not([type="menubar"]) {
+  padding: 2px 1px;
+}
+
+#ab-toolbox > toolbar:not([type="menubar"]):-moz-lwtheme {
+  text-shadow: none;
+}
+
+toolbox > toolbar:last-of-type {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+/* ::::: primary toolbar buttons ::::: */
+
+#button-newcard {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newcard");
+}
+
+#button-newlist {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newlist");
+}
+
+#button-editcard {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#editcard");
+}
+
+#button-newmessage {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newmessage");
+}
+
+#button-newim {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newim");
+}
+
+#button-abdelete {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#abdelete");
+}
+
+#ab-bar2[brighttext] #button-newcard {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newcard-inverted");
+}
+
+#ab-bar2[brighttext] #button-newlist {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newlist-inverted");
+}
+
+#ab-bar2[brighttext] #button-editcard {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#editcard-inverted");
+}
+
+#ab-bar2[brighttext] #button-newmessage {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newmessage-inverted");
+}
+
+#ab-bar2[brighttext] #button-newim {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newim-inverted");
+}
+
+#ab-bar2[brighttext] #button-abdelete {
+  list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#abdelete-inverted");
+}
+
+/* ::::: Search Textbox ::::: */
+
+#peopleSearchInput {
+  width: 20em;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-inline-start: 5px;
+}
+
+/* ::::: directory pane adjustments ::::: */
+
+@media (-moz-windows-default-theme) {
+  #dirTree {
+    background-color: #fafafa;
+  }
+
+  sidebarheader {
+    -moz-appearance: none;
+    background-color: #f8f8f8;
+    border-top: 0;
+    border-bottom: 1px solid #a9b1b8;
+  }
+}
+
+/* Don't use the listbox appearance as that gives us a blue-grey top border
+   that collides with the primary toolbar border */
+#dirTree {
+  border-inline-end: 1px solid transparent;
+}
+
+/* ::::: splitters ::::: */
+
+#dirTree-splitter {
+  border: none;
+  border-inline-end: 1px solid #a9b7c9;
+  min-width: 0;
+  width: 3px;
+  background-color: transparent;
+  margin-inline-start: -3px;
+  position: relative;
+  z-index: 10;
+}
+
+#results-splitter {
+  border: none;
+  border-top: 1px solid #a9b7c9;
+  min-height: 0;
+  height: 3px;
+  background-color: transparent;
+  margin-bottom: -3px;
+  position: relative;
+  z-index: 10;
+}
+
+/* ::::: card view pane ::::: */
+
+#CardViewOuterBox {
+  border: none;
+  border-top: 1px solid ThreeDShadow;
+}
+
+@media (-moz-windows-glass) {
+  #ab-toolbox:not(:-moz-lwtheme) {
+    color: black;
+    text-shadow: 0 0 .7em white, 0 0 .7em white, 0 1px 0 rgba(255, 255, 255, .4);
+    border-bottom-color: #aabccf;
+  }
+}
+
+@media (-moz-os-version: windows-win7) {
+  #ab-toolbox:not(:-moz-lwtheme) {
+  background-image: linear-gradient(rgba(255, 255, 255, .5),
+                    rgba(255, 255, 255, 0));
+  }
+}
+
+@media (-moz-os-version: windows-win7) and (-moz-windows-default-theme) {
+
+  #status-bar {
+    -moz-appearance: none;
+    border-style: none;
+    border-top: 1px solid ThreeDShadow;
+  }
+}
+
+@media (-moz-os-version: windows-win8) and (-moz-windows-default-theme),
+       (-moz-os-version: windows-win10) and (-moz-windows-default-theme) {
+  #button-newcard {
+    list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newcard-flat");
+  }
+
+  #button-newlist {
+    list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newlist-flat");
+  }
+
+  #button-editcard {
+    list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#editcard-flat");
+  }
+
+  #button-newmessage {
+    list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newmessage-flat");
+  }
+
+  #button-newim {
+    list-style-image: url("chrome://messenger/skin/addressbook/icons/addressbook-toolbar.svg#newim-flat");
+  }
+}

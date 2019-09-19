@@ -1,0 +1,99 @@
+/*
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+.quick-search-textbox {
+  padding-top: 1px;
+}
+
+.textbox-search-icon[searchbutton],
+.searchBox > .autocomplete-textbox-container > .autocomplete-icon,
+textbox:not([searchbutton]) > .textbox-input-box > .textbox-search-sign {
+  list-style-image: url(chrome://messenger/skin/icons/search-glass.svg);
+  -moz-context-properties: fill;
+  fill: currentColor;
+  opacity: 0.54;
+}
+
+.textbox-search-clear {
+  list-style-image: url(chrome://messenger/skin/icons/search-close.svg);
+  -moz-context-properties: fill;
+  fill: currentColor;
+  opacity: 0.8;
+}
+
+.textbox-search-clear:not([disabled]):hover {
+  -moz-image-region: auto;
+  opacity: 1;
+}
+
+.textbox-search-clear:not([disabled]):hover:active {
+  -moz-image-region: auto;
+  transform: scale(0.8);
+}
+
+/* things from xul.css that only exist if Thunderbird did not define
+ * AUTOCOMPLETE_OLD_STYLE
+ */
+
+.autocomplete-history-dropmarker {
+  display: none;
+}
+
+.autocomplete-history-dropmarker[enablehistory="true"] {
+  display: -moz-box;
+  -moz-binding: url("chrome://global/content/bindings/autocomplete.xml#history-dropmarker");
+}
+
+.remote-gloda-search-container {
+  padding-top: 3px;
+  padding-bottom: 2px;
+}
+
+.searchBox,
+#view-task-edit-field,
+#unifinder-task-edit-field  {
+  -moz-appearance: none;
+  background-clip: padding-box;
+  background-color: -moz-field;
+  border: 1px solid ThreeDShadow;
+  border-radius: var(--toolbarbutton-border-radius);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  padding: 3px;
+  margin: 0 3px;
+}
+
+.searchBox:hover,
+#view-task-edit-field:hover,
+#unifinder-task-edit-field:hover {
+  border-color: hsla(240,5%,5%,.35);
+  box-shadow: 0 1px 6px rgba(0,0,0,.1), 0 0 1px rgba(0,0,0,.1);
+}
+
+.searchBox[focused="true"],
+#view-task-edit-field[focused="true"],
+#unifinder-task-edit-field[focused="true"]  {
+  border-color: Highlight;
+}
+
+/* special treatment because this boxes are on the main toolbars */
+#searchInput:-moz-lwtheme,
+#IMSearchInput:-moz-lwtheme,
+#peopleSearchInput:-moz-lwtheme,
+.remote-gloda-search:-moz-lwtheme {
+  background-color: hsla(0,0%,100%,.8);
+  color: black;
+}
+
+#searchInput:-moz-lwtheme:hover,
+#searchInput:-moz-lwtheme[focused="true"],
+#IMSearchInput:-moz-lwtheme:hover,
+#IMSearchInput:-moz-lwtheme[focused="true"],
+#peopleSearchInput:-moz-lwtheme:hover,
+#peopleSearchInput:-moz-lwtheme[focused="true"],
+.remote-gloda-search:-moz-lwtheme:hover,
+.remote-gloda-search:-moz-lwtheme[focused="true"] {
+  background-color: white;
+}

@@ -1,0 +1,111 @@
+/*
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+.quick-search-button-image {
+  padding: 0;
+}
+
+.searchBox {
+  margin-top: 3px;
+  margin-bottom: 2px;
+  -moz-appearance: none;
+  background-clip: padding-box;
+  border: 1px solid hsla(240,5%,5%,.25);
+  border-radius: var(--toolbarbutton-border-radius);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  font: icon;
+  height: 24px;
+  padding: 1px;
+}
+
+.searchBox:hover,
+#view-task-edit-field:hover,
+#unifinder-task-edit-field:hover {
+  border-color: hsla(240,5%,5%,.35);
+  box-shadow: 0 1px 6px rgba(0,0,0,.1), 0 0 1px rgba(0,0,0,.1);
+}
+
+.searchBox[focused="true"] {
+  border-color: -moz-mac-focusring;
+  box-shadow: var(--focus-ring-box-shadow);
+}
+
+/* special treatment because this boxes are on the main toolbars */
+#searchInput,
+#IMSearchInput,
+#peopleSearchInput {
+  margin-top: 2px;
+  margin-bottom: 3px;
+}
+#searchInput:-moz-lwtheme,
+#IMSearchInput:-moz-lwtheme,
+#peopleSearchInput:-moz-lwtheme,
+.remote-gloda-search:-moz-lwtheme {
+  background-color: hsla(0,0%,100%,.8);
+  color: black;
+}
+
+#searchInput:-moz-lwtheme:hover,
+#searchInput:-moz-lwtheme[focused="true"],
+#IMSearchInput:-moz-lwtheme:hover,
+#IMSearchInput:-moz-lwtheme[focused="true"],
+#peopleSearchInput:-moz-lwtheme:hover,
+#peopleSearchInput:-moz-lwtheme[focused="true"],
+.remote-gloda-search:-moz-lwtheme:hover,
+.remote-gloda-search:-moz-lwtheme[focused="true"] {
+  background-color: white;
+}
+
+.searchBox[type="search"] {
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.searchBox > .textbox-input-box:before,
+.searchBox > .autocomplete-textbox-container > .textbox-input-box:before {
+  /* Because of bug 853415, we need to ordinal this to the first position: */
+  -moz-box-ordinal-group: 0;
+  content: '';
+  display: block;
+  -moz-box-align: center;
+  width: 16px;
+  height: 20px;
+  margin-inline-end: 4px;
+  background-image: url("chrome://messenger/skin/icons/search-indicator.png");
+  background-size: 16px 20px;
+}
+
+@media (min-resolution: 2dppx) {
+  .searchBox > .textbox-input-box:before,
+  .searchBox > .autocomplete-textbox-container > .textbox-input-box:before {
+    background-image: url("chrome://messenger/skin/icons/search-indicator@2x.png");
+    background-size: 16px 20px;
+  }
+}
+
+.searchBox:-moz-locale-dir(rtl) > .textbox-input-box:before,
+.searchBox:-moz-locale-dir(rtl) > .autocomplete-textbox-container > .textbox-input-box:before {
+  transform: scaleX(-1);
+}
+
+.remote-gloda-search-container {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+
+/* things from xul.css that only exist if Thunderbird did not define
+ * AUTOCOMPLETE_OLD_STYLE
+ */
+
+.autocomplete-history-dropmarker {
+  display: none;
+}
+
+.autocomplete-history-dropmarker[enablehistory="true"] {
+  display: -moz-box;
+  -moz-binding: url("chrome://global/content/bindings/autocomplete.xml#history-dropmarker");
+}
