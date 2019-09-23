@@ -13,7 +13,6 @@ MOZ_SUITE=1
 MOZ_BRANDING_DIRECTORY=suite/branding/nightly
 MOZ_OFFICIAL_BRANDING_DIRECTORY=suite/branding/nightly
 MOZ_EXTENSIONS_DEFAULT=" inspector irc"
-MOZ_ALLOW_LEGACY_EXTENSIONS=1
 MOZ_UPDATER=1
 # This should usually be the same as the value MAR_CHANNEL_ID.
 # If more than one ID is needed, then you should use a comma separated list
@@ -23,7 +22,6 @@ ACCEPTED_MAR_CHANNEL_IDS=seamonkey-comm-central
 MAR_CHANNEL_ID=seamonkey-comm-central
 MOZ_MORK=1
 MOZ_SERVICES_FXACCOUNTS=1
-MOZ_WEBM_ENCODER=1
 
 MOZ_APP_VERSION_TXT=${_topsrcdir}/$MOZ_BUILD_APP/config/version.txt
 MOZ_APP_VERSION=`cat $MOZ_APP_VERSION_TXT`
@@ -33,6 +31,10 @@ MOZ_APP_ID={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 MOZ_PROFILE_MIGRATOR=1
 MOZ_SEPARATE_MANIFEST_FOR_THEME_OVERRIDES=1
 
+if test "$NIGHTLY_BUILD"; then
+  MOZ_RUST_URLPARSE=1
+fi
+
 if test "$OS_ARCH" = "WINNT" -o \
         "$OS_ARCH" = "Linux"; then
   MOZ_BUNDLED_FONTS=1
@@ -40,3 +42,6 @@ fi
 
 # Include the DevTools client, not just the server (which is the default)
 MOZ_DEVTOOLS=all
+
+# Include Lightning
+MOZ_CALENDAR=1
