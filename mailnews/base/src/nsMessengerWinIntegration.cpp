@@ -87,8 +87,7 @@
 using namespace mozilla;
 
 // begin shameless copying from nsNativeAppSupportWin
-HWND hwndForDOMWindow( mozIDOMWindowProxy *window )
-{
+static HWND hwndForDOMWindow(mozIDOMWindowProxy *window) {
   if ( !window ) {
     return 0;
   }
