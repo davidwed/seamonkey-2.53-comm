@@ -591,7 +591,6 @@ MimeMultipartSigned_emit_child (MimeObject *obj)
     obj->options->headers != MimeHeadersCitation &&
     obj->options->write_html_p &&
     obj->options->output_fn &&
-    obj->options->headers != MimeHeadersCitation &&
     sig->crypto_closure)
   {
     char *html = (((MimeMultipartSignedClass *) obj->clazz)
