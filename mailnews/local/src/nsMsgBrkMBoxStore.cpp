@@ -622,14 +622,16 @@ nsMsgBrkMBoxStore::GetNewMsgOutputStream(nsIMsgFolder *aFolder,
   m_streamOutstandingFolder = aFolder;
 #endif
   *aReusable = true;
+
+  nsresult rv;
   nsCOMPtr<nsIFile> mboxFile;
-  aFolder->GetFilePath(getter_AddRefs(mboxFile));
+  rv = aFolder->GetFilePath(getter_AddRefs(mboxFile));
+  NS_ENSURE_SUCCESS(rv, rv);
   nsCOMPtr<nsIMsgDatabase> db;
   aFolder->GetMsgDatabase(getter_AddRefs(db));
   if (!db && !*aNewMsgHdr)
     NS_WARNING("no db, and no message header");
-  bool exists;
-  nsresult rv;
+  bool exists = false;
   mboxFile->Exists(&exists);
   if (!exists) {
     rv = mboxFile->Create(nsIFile::NORMAL_FILE_TYPE, 0600);
@@ -697,7 +699,8 @@ nsMsgBrkMBoxStore::DiscardNewMessage(nsIOutputStream *aOutputStream,
   nsCOMPtr<nsIMsgFolder> folder;
   nsresult rv = aNewHdr->GetFolder(getter_AddRefs(folder));
   NS_ENSURE_SUCCESS(rv, rv);
-  folder->GetFilePath(getter_AddRefs(mboxFile));
+  rv = folder->GetFilePath(getter_AddRefs(mboxFile));
+  NS_ENSURE_SUCCESS(rv, rv);
   return mboxFile->SetFileSize(hdrOffset);
 }
 
@@ -752,7 +755,8 @@ nsMsgBrkMBoxStore::GetMsgInputStream(nsIMsgFolder *aMsgFolder,
     *aOffset = ParseUint64Str(PromiseFlatCString(aMsgToken).get());
   *aReusable = true;
   nsCOMPtr<nsIFile> mboxFile;
-  aMsgFolder->GetFilePath(getter_AddRefs(mboxFile));
+  nsresult rv = aMsgFolder->GetFilePath(getter_AddRefs(mboxFile));
+  NS_ENSURE_SUCCESS(rv, rv);
   return NS_NewLocalFileInputStream(aResult, mboxFile);
 }
 
@@ -865,10 +869,10 @@ nsMsgBrkMBoxStore::GetOutputStream(nsIArray *aHdrArray,
       m_outputStreams.Remove(URI);
     }
   }
-  nsCOMPtr<nsIFile> mboxFile;
-  folder->GetFilePath(getter_AddRefs(mboxFile));
-  if (!outputStream)
-  {
+  if (!outputStream) {
+    nsCOMPtr<nsIFile> mboxFile;
+    rv = folder->GetFilePath(getter_AddRefs(mboxFile));
+    NS_ENSURE_SUCCESS(rv, rv);
     rv = MsgGetFileStream(mboxFile, getter_AddRefs(outputStream));
     seekableStream = do_QueryInterface(outputStream);
     if (NS_SUCCEEDED(rv))
