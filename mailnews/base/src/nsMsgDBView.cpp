@@ -5219,8 +5219,12 @@ nsresult nsMsgDBView::ExpandAll()
   return NS_OK;
 }
 
-NS_IMETHODIMP nsMsgDBView::GetThreadContainingMsgHdr(nsIMsgDBHdr *msgHdr, nsIMsgThread **pThread)
-{
+NS_IMETHODIMP
+nsMsgDBView::GetThreadContainingMsgHdr(nsIMsgDBHdr *msgHdr,
+                                       nsIMsgThread **pThread) {
+  if (!m_db) {
+    return NS_ERROR_FAILURE;
+  }
   return m_db->GetThreadContainingMsgHdr(msgHdr, pThread);
 }
 
