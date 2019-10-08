@@ -15,7 +15,7 @@
         ondialogaccept="Send();"
         buttonlabelaccept="&send.label;"
         buttonaccesskeyaccept="&send.accesskey;"
-        style="width: 75ch;">
+        style="width: 75ch; height: 20em;">
 
   <script type="application/javascript"
           src="chrome://messenger/content/messengercompose/askSendFormat.js"/>
@@ -23,8 +23,7 @@
   <stringbundle id="askSendFormatStringBundle"
                 src="chrome://messenger/locale/messengercompose/askSendFormat.properties"/>
 
-    <separator class="thin"/>
-    <hbox>
+    <hbox flex="1">
       <separator orient="vertical"/>
       <vbox id="askImageBox">
         <image id="convertDefault"/>
