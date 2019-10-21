@@ -26,12 +26,9 @@ function SetupHTMLEditorCommands()
   commandTable.registerCommand("cmd_colorProperties", nsColorPropertiesCommand);
   commandTable.registerCommand("cmd_increaseFontStep", nsIncreaseFontCommand);
   commandTable.registerCommand("cmd_decreaseFontStep", nsDecreaseFontCommand);
-  commandTable.registerCommand("cmd_advancedProperties", nsAdvancedPropertiesCommand);
   commandTable.registerCommand("cmd_objectProperties",   nsObjectPropertiesCommand);
   commandTable.registerCommand("cmd_removeNamedAnchors", nsRemoveNamedAnchorsCommand);
-  commandTable.registerCommand("cmd_editLink",        nsEditLinkCommand);
 
-  commandTable.registerCommand("cmd_isindex",       nsIsIndexCommand);
   commandTable.registerCommand("cmd_image",         nsImageCommand);
   commandTable.registerCommand("cmd_hline",         nsHLineCommand);
   commandTable.registerCommand("cmd_link",          nsLinkCommand);
@@ -63,7 +60,6 @@ function SetupHTMLEditorCommands()
   commandTable.registerCommand("cmd_JoinTableCells",     nsJoinTableCellsCommand);
   commandTable.registerCommand("cmd_SplitTableCell",     nsSplitTableCellCommand);
   commandTable.registerCommand("cmd_TableOrCellColor",   nsTableOrCellColorCommand);
-  commandTable.registerCommand("cmd_NormalizeTable",     nsNormalizeTableCommand);
   commandTable.registerCommand("cmd_smiley",             nsSetSmiley);
   commandTable.registerCommand("cmd_ConvertToTable",     nsConvertToTable);
 }
@@ -82,7 +78,6 @@ function SetupTextEditorCommands()
   commandTable.registerCommand("cmd_findPrev",   nsFindAgainCommand);
   commandTable.registerCommand("cmd_rewrap",     nsRewrapCommand);
   commandTable.registerCommand("cmd_spelling",   nsSpellingCommand);
-  commandTable.registerCommand("cmd_validate",   nsValidateCommand);
   commandTable.registerCommand("cmd_insertChars", nsInsertCharsCommand);
 }
 
@@ -96,9 +91,6 @@ function SetupComposerWindowCommands()
   //   specific to Web Composer window (file-related commands, HTML Source...)
   //   We can't use the composer controller created on the content window else
   //     we can't process commands when in HTMLSource editor
-  // IMPORTANT: For each of these commands, the doCommand method
-  //            must first call SetEditMode(gPreviousNonSourceDisplayMode);
-  //            to go from HTML Source mode to any other edit mode
 
   var windowControllers = window.controllers;
 
@@ -134,31 +126,10 @@ function SetupComposerWindowCommands()
   commandTable.registerCommand("cmd_open",           nsOpenCommand);
   commandTable.registerCommand("cmd_save",           nsSaveCommand);
   commandTable.registerCommand("cmd_saveAs",         nsSaveAsCommand);
-  commandTable.registerCommand("cmd_exportToText",   nsExportToTextCommand);
-  commandTable.registerCommand("cmd_publish",        nsPublishCommand);
-  commandTable.registerCommand("cmd_publishAs",      nsPublishAsCommand);
-  commandTable.registerCommand("cmd_publishSettings",nsPublishSettingsCommand);
-  commandTable.registerCommand("cmd_revert",         nsRevertCommand);
-  commandTable.registerCommand("cmd_openRemote",     nsOpenRemoteCommand);
-  commandTable.registerCommand("cmd_preview",        nsPreviewCommand);
-  commandTable.registerCommand("cmd_editSendPage",   nsSendPageCommand);
   commandTable.registerCommand("cmd_print",          nsPrintCommand);
   commandTable.registerCommand("cmd_printpreview",   nsPrintPreviewCommand);
   commandTable.registerCommand("cmd_printSetup",     nsPrintSetupCommand);
   commandTable.registerCommand("cmd_close",          nsCloseCommand);
-  commandTable.registerCommand("cmd_preferences",    nsPreferencesCommand);
-
-  // Edit Mode commands
-  if (GetCurrentEditorType() == "html")
-  {
-    commandTable.registerCommand("cmd_NormalMode",         nsNormalModeCommand);
-    commandTable.registerCommand("cmd_AllTagsMode",        nsAllTagsModeCommand);
-    commandTable.registerCommand("cmd_HTMLSourceMode",     nsHTMLSourceModeCommand);
-    commandTable.registerCommand("cmd_PreviewMode",        nsPreviewModeCommand);
-    commandTable.registerCommand("cmd_FinishHTMLSource",   nsFinishHTMLSource);
-    commandTable.registerCommand("cmd_CancelHTMLSource",   nsCancelHTMLSource);
-    commandTable.registerCommand("cmd_updateStructToolbar", nsUpdateStructToolbarCommand);
-  }
 
   windowControllers.insertControllerAt(0, editorController);
 
@@ -241,13 +212,9 @@ function goUpdateCommandState(command)
       case "cmd_backgroundColor":
       case "cmd_fontColor":
       case "cmd_fontFace":
-      case "cmd_fontSize":
-      case "cmd_absPos":
         pokeMultiStateUI(command, params);
         break;
 
-      case "cmd_decreaseZIndex":
-      case "cmd_increaseZIndex":
       case "cmd_indent":
       case "cmd_outdent":
       case "cmd_increaseFont":
@@ -301,7 +268,6 @@ function goDoCommandParams(command, params)
       {
         controller.doCommand(command);
       }
-      ResetStructToolbar();
     }
   }
   catch (e)
@@ -333,8 +299,6 @@ function doStyleUICommand(cmdStr)
     goDoCommandParams(cmdStr, cmdParams);
     if (cmdParams)
       pokeStyleUI(cmdStr, cmdParams.getBooleanValue("state_all"));
-
-    ResetStructToolbar();
   } catch(e) {}
 }
 
@@ -395,8 +359,6 @@ function doStatefulCommand(commandID, newState)
     goDoCommandParams(commandID, cmdParams);
 
     pokeMultiStateUI(commandID, cmdParams);
-
-    ResetStructToolbar();
   } catch(e) { dump("error thrown in doStatefulCommand: "+e+"\n"); }
 }
 
@@ -485,21 +447,6 @@ var nsOpenCommand =
   }
 };
 
-// STRUCTURE TOOLBAR
-//
-var nsUpdateStructToolbarCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    UpdateStructToolbar();
-    return true;
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-  doCommand: function(aCommand)  {}
-}
-
 // ******* File output commands and utilities ******** //
 //-----------------------------------------------------------------------------------
 var nsSaveCommand =
@@ -525,8 +472,6 @@ var nsSaveCommand =
     var editor = GetCurrentEditor();
     if (editor)
     {
-      if (IsHTMLEditor())
-        SetEditMode(gPreviousNonSourceDisplayMode);
       SaveDocument(IsUrlAboutBlank(GetDocumentUrl()), false, editor.contentsMIMEType);
     }
   }
@@ -547,127 +492,8 @@ var nsSaveAsCommand =
     var editor = GetCurrentEditor();
     if (editor)
     {
-      if (IsHTMLEditor())
-        SetEditMode(gPreviousNonSourceDisplayMode);
       SaveDocument(true, false, editor.contentsMIMEType);
     }
-  }
-}
-
-var nsExportToTextCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    if (GetCurrentEditor())
-    {
-      SetEditMode(gPreviousNonSourceDisplayMode);
-      SaveDocument(true, true, "text/plain");
-    }
-  }
-}
-
-var nsPublishCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    if (IsDocumentEditable())
-    {
-      // Always allow publishing when editing a local document,
-      //  otherwise the document modified state would prevent that
-      //  when you first open any local file.
-      try {
-        var docUrl = GetDocumentUrl();
-        return IsDocumentModified() || IsHTMLSourceChanged()
-               || IsUrlAboutBlank(docUrl) || GetScheme(docUrl) == "file";
-      } catch (e) {return false;}
-    }
-    return false;
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    if (GetCurrentEditor())
-    {
-      let docUrl = GetDocumentUrl();
-      let filename = GetFilename(docUrl);
-      let publishData;
-
-      // First check pref to always show publish dialog
-      let showPublishDialog = Services.prefs.getBoolPref("editor.always_show_publish_dialog");
-
-      if (!showPublishDialog && filename)
-      {
-        // Try to get publish data from the document url
-        publishData = CreatePublishDataFromUrl(docUrl);
-
-        // If none, use default publishing site? Need a pref for this
-        //if (!publishData)
-        //  publishData = GetPublishDataFromSiteName(GetDefaultPublishSiteName(), filename);
-      }
-
-      if (showPublishDialog || !publishData)
-      {
-        // Show the publish dialog
-        publishData = {};
-        window.ok = false;
-        let oldTitle = GetDocumentTitle();
-        window.openDialog("chrome://messenger/content/messengercompose/EditorPublish.xul", "_blank",
-                          "chrome,close,titlebar,modal", "", "", publishData);
-        if (GetDocumentTitle() != oldTitle)
-          UpdateWindowTitle();
-
-        if (!window.ok)
-          return false;
-      }
-      if (publishData)
-      {
-        SetEditMode(gPreviousNonSourceDisplayMode);
-        return Publish(publishData);
-      }
-    }
-    return false;
-  }
-}
-
-var nsPublishAsCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    if (GetCurrentEditor())
-    {
-      SetEditMode(gPreviousNonSourceDisplayMode);
-
-      window.ok = false;
-      var publishData = {};
-      var oldTitle = GetDocumentTitle();
-      window.openDialog("chrome://messenger/content/messengercompose/EditorPublish.xul", "_blank",
-                        "chrome,close,titlebar,modal", "", "", publishData);
-      if (GetDocumentTitle() != oldTitle)
-        UpdateWindowTitle();
-
-      if (window.ok)
-        return Publish(publishData);
-    }
-    return false;
   }
 }
 
@@ -1140,9 +966,7 @@ var gEditorOutputProgressListener =
             // this should cause notification to listeners that doc has changed
             editor.resetModificationCount();
 
-            // Set UI based on whether we're editing a remote or local url
-            SetSaveAndPublishUI(urlstring);
-
+            goUpdateCommand("cmd_save");
           } catch (e) {}
 
           // Save publishData to prefs
@@ -1686,7 +1510,7 @@ async function SaveDocument(aSaveAs, aSaveCopy, aMimeType)
       // this should cause notification to listeners that document has changed
 
       // Set UI based on whether we're editing a remote or local url
-      SetSaveAndPublishUI(urlstring);
+      goUpdateCommand("cmd_save");
     } catch (e) {}
   }
   else
@@ -1897,13 +1721,6 @@ function GetDocUrlFromPublishData(publishData)
   return url;
 }
 
-function SetSaveAndPublishUI(urlstring)
-{
-  // Be sure enabled state of toolbar buttons are correct
-  goUpdateCommand("cmd_save");
-  goUpdateCommand("cmd_publish");
-}
-
 function SetDocumentEditable(isDocEditable)
 {
   var editor = GetCurrentEditor();
@@ -1920,66 +1737,6 @@ function SetDocumentEditable(isDocEditable)
     window.updateCommands("create");
   }
 }
-
-// ****** end of save / publish **********//
-
-//-----------------------------------------------------------------------------------
-var nsPublishSettingsCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    if (GetCurrentEditor())
-    {
-      // Launch Publish Settings dialog
-
-      window.ok = window.openDialog("chrome://messenger/content/messengercompose/EditorPublishSettings.xul", "_blank", "chrome,close,titlebar,modal", "");
-      return window.ok;
-    }
-    return false;
-  }
-}
-
-//-----------------------------------------------------------------------------------
-var nsRevertCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() &&
-            IsDocumentModified() &&
-            !IsUrlAboutBlank(GetDocumentUrl()));
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    // Confirm with the user to abandon current changes
-    // Put the page title in the message string
-    let title = GetDocumentTitle();
-    let msg = GetString("AbandonChanges").replace(/%title%/,title);
-
-    let result = Services.prompt.confirmEx(window, GetString("RevertCaption"), msg,
-                   (Services.prompt.BUTTON_TITLE_REVERT * Services.prompt.BUTTON_POS_0) +
-                   (Services.prompt.BUTTON_TITLE_CANCEL * Services.prompt.BUTTON_POS_1),
-                   null, null, null, null, {value:0});
-
-    // Reload page if first button (Revert) was pressed
-    if (result == 0)
-    {
-      CancelHTMLSource();
-      EditorLoadUrl(GetDocumentUrl());
-    }
-  }
-};
 
 //-----------------------------------------------------------------------------------
 var nsCloseCommand =
@@ -2020,136 +1777,6 @@ async function CloseWindow()
 }
 
 //-----------------------------------------------------------------------------------
-var nsOpenRemoteCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return true;    // we can always do this
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    var params = { action: "2", url: "" };
-    openDialog("chrome://communicator/content/openLocation.xul", "_blank", "chrome,modal,titlebar", params);
-    var win = getTopWin();
-    switch (params.action) {
-      case "0": // current window
-        win.focus();
-        win.loadURI(params.url, null, null, true);
-        break;
-      case "1": // new window
-        openDialog(getBrowserURL(), "_blank", "all,dialog=no", params.url, null,
-                   null, null, true);
-        break;
-      case "2": // edit
-        editPage(params.url);
-        break;
-      case "3": // new tab
-        win.focus();
-        var browser = win.getBrowser();
-        browser.selectedTab = browser.addTab(params.url, {allowThirdPartyFixup: true});
-        break;
-      case "4": // private
-        openNewPrivateWith(params.url);
-        break;
-      default:
-        break;
-    }
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsPreviewCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() &&
-            IsHTMLEditor() &&
-            (DocumentHasBeenSaved() || IsDocumentModified()));
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: async function(aCommand)
-  {
-    // Don't continue if user canceled during prompt for saving
-    // DocumentHasBeenSaved will test if we have a URL and suppress "Don't Save" button if not
-    if (!(await CheckAndSaveDocument("cmd_preview", DocumentHasBeenSaved())))
-      return;
-
-    // Check if we saved again just in case?
-    if (DocumentHasBeenSaved())
-    {
-      let browser;
-      try {
-        // Find a browser with this URL
-        let enumerator = Services.wm.getEnumerator("navigator:browser");
-
-        var documentURI = GetDocumentUrl();
-        while (enumerator.hasMoreElements())
-        {
-          browser = enumerator.getNext();
-          if (browser && !browser.closed &&
-              (documentURI == browser.getBrowser().currentURI.spec))
-            break;
-
-          browser = null;
-        }
-      }
-      catch (ex) {}
-
-      // If none found, open a new browser
-      if (!browser)
-      {
-        browser = window.openDialog(getBrowserURL(), "_blank", "chrome,all,dialog=no", documentURI);
-      }
-      else
-      {
-        try {
-          browser.BrowserReloadSkipCache();
-          browser.focus();
-        } catch (ex) {}
-      }
-    }
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsSendPageCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() &&
-            (DocumentHasBeenSaved() || IsDocumentModified()));
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: async function(aCommand)
-  {
-    // Don't continue if user canceled during prompt for saving
-    // DocumentHasBeenSaved will test if we have a URL and suppress "Don't Save" button if not
-    if (!(await CheckAndSaveDocument("cmd_editSendPage", DocumentHasBeenSaved())))
-      return;
-
-    // Check if we saved again just in case?
-    if (DocumentHasBeenSaved())
-    {
-      // Launch Messenger Composer window with current page as contents
-      try
-      {
-        openComposeWindow(GetDocumentUrl(), GetDocumentTitle());
-      } catch (ex) { dump("Cannot Send Page: " + ex + "\n"); }
-    }
-  }
-};
-
-//-----------------------------------------------------------------------------------
 var nsPrintCommand =
 {
   isCommandEnabled: function(aCommand, dummy)
@@ -2162,8 +1789,6 @@ var nsPrintCommand =
 
   doCommand: function(aCommand)
   {
-    // In editor.js
-    SetEditMode(gPreviousNonSourceDisplayMode);
     try {
       let browser = GetCurrentEditorElement();
       PrintUtils.printWindow(browser.outerWindowID, browser);
@@ -2184,8 +1809,6 @@ var nsPrintPreviewCommand =
 
   doCommand: function(aCommand)
   {
-    // In editor.js
-    SetEditMode(gPreviousNonSourceDisplayMode);
     try {
       PrintUtils.printPreview(PrintPreviewListener);
     } catch (e) {}
@@ -2205,8 +1828,6 @@ var nsPrintSetupCommand =
 
   doCommand: function(aCommand)
   {
-    // In editor.js
-    SetEditMode(gPreviousNonSourceDisplayMode);
     PrintUtils.showPageSetup();
   }
 };
@@ -2305,85 +1926,6 @@ var nsSpellingCommand =
               "dialog,close,titlebar,modal,resizable", false, skipBlockQuotes, true);
     }
     catch(ex) {}
-  }
-};
-
-// Validate using http://validator.w3.org/file-upload.html
-var URL2Validate;
-var nsValidateCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return GetCurrentEditor() != null;
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: async function(aCommand)
-  {
-    // If the document hasn't been modified,
-    // then just validate the current url.
-    if (IsDocumentModified() || IsHTMLSourceChanged())
-    {
-      if (!(await CheckAndSaveDocument("cmd_validate", false)))
-        return;
-
-      // Check if we saved again just in case?
-      if (!DocumentHasBeenSaved())    // user hit cancel?
-        return;
-    }
-
-    URL2Validate = GetDocumentUrl();
-    // See if it's a file:
-    var ifile;
-    try {
-      var fileHandler = GetFileProtocolHandler();
-      ifile = fileHandler.getFileFromURLSpec(URL2Validate);
-      // nsIFile throws an exception if it's not a file url
-    } catch (e) { ifile = null; }
-    if (ifile)
-    {
-      URL2Validate = ifile.path;
-      var vwin = window.open("http://validator.w3.org/file-upload.html",
-                             "EditorValidate");
-      // Window loads asynchronously, so pass control to the load listener:
-      vwin.addEventListener("load", this.validateFilePageLoaded);
-    }
-    else
-    {
-      var vwin2 = window.open("http://validator.w3.org/check?uri="
-                              + URL2Validate
-                              + "&doctype=Inline",
-                              "EditorValidate");
-      // This does the validation, no need to wait for page loaded.
-    }
-  },
-  validateFilePageLoaded: function(event)
-  {
-    event.target.forms[0].uploaded_file.value = URL2Validate;
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsIsIndexCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    try {
-      var editor = GetCurrentEditor();
-      var isindexElement = editor.createElementWithDefaults("isindex");
-      isindexElement.setAttribute("prompt", editor.outputToString("text/plain", kOutputSelectionOnly));
-      editor.insertElementAtSelection(isindexElement, true);
-    } catch (e) {}
   }
 };
 
@@ -2792,26 +2334,6 @@ function doAdvancedProperties(element)
   }
 }
 
-var nsAdvancedPropertiesCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    // Launch AdvancedEdit dialog for the selected element
-    try {
-      var element = GetCurrentEditor().getSelectedElement("");
-      doAdvancedProperties(element);
-    } catch (e) {}
-  }
-};
-
 //-----------------------------------------------------------------------------------
 var nsColorPropertiesCommand =
 {
@@ -2897,95 +2419,6 @@ var nsRemoveNamedAnchorsCommand =
   }
 };
 
-
-//-----------------------------------------------------------------------------------
-var nsEditLinkCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    // Not really used -- this command is only in context menu, and we do enabling there
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    try {
-      var element = GetCurrentEditor().getSelectedElement("href");
-      if (element)
-        editPage(element.href);
-    } catch (e) {}
-    window.content.focus();
-  }
-};
-
-
-//-----------------------------------------------------------------------------------
-var nsNormalModeCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return IsHTMLEditor() && IsDocumentEditable();
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    SetEditMode(kDisplayModeNormal);
-  }
-};
-
-var nsAllTagsModeCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsHTMLEditor());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    SetEditMode(kDisplayModeAllTags);
-  }
-};
-
-var nsHTMLSourceModeCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsHTMLEditor());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    SetEditMode(kDisplayModeSource);
-  }
-};
-
-var nsPreviewModeCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsHTMLEditor());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    SetEditMode(kDisplayModePreview);
-  }
-};
 
 //-----------------------------------------------------------------------------------
 var nsInsertOrEditTableCommand =
@@ -3375,27 +2808,6 @@ var nsDeleteTableCellContentsCommand =
 
 
 //-----------------------------------------------------------------------------------
-var nsNormalizeTableCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return IsInTable();
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    // Use nullptr to let editor find table enclosing current selection
-    try {
-      GetCurrentTableEditor().normalizeTable(null);
-    } catch (e) {}
-    window.content.focus();
-  }
-};
-
-//-----------------------------------------------------------------------------------
 var nsJoinTableCellsCommand =
 {
   isCommandEnabled: function(aCommand, dummy)
@@ -3515,57 +2927,6 @@ var nsTableOrCellColorCommand =
 };
 
 //-----------------------------------------------------------------------------------
-var nsPreferencesCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return true;
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    goPreferences('composer_pane');
-  }
-};
-
-
-var nsFinishHTMLSource =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return true;
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    // In editor.js
-    SetEditMode(gPreviousNonSourceDisplayMode);
-  }
-};
-
-var nsCancelHTMLSource =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return true;
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    // In editor.js
-    CancelHTMLSource();
-  }
-};
-
 var nsConvertToTable =
 {
   isCommandEnabled: function(aCommand, dummy)
