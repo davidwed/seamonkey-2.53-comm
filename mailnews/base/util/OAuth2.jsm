@@ -18,158 +18,165 @@ Cu.importGlobalProperties(["fetch"]);
 var gConnecting = {};
 
 function OAuth2(aBaseURI, aScope, aAppKey, aAppSecret) {
-    this.authURI = aBaseURI + "oauth2/auth";
-    this.tokenURI = aBaseURI + "oauth2/token";
-    this.consumerKey = aAppKey;
-    this.consumerSecret = aAppSecret;
-    this.scope = aScope;
-    this.extraAuthParams = [];
+  this.authURI = aBaseURI + "oauth2/auth";
+  this.tokenURI = aBaseURI + "oauth2/token";
+  this.consumerKey = aAppKey;
+  this.consumerSecret = aAppSecret;
+  this.scope = aScope;
+  this.extraAuthParams = [];
 
-    this.log = Log4Moz.getConfiguredLogger("TBOAuth");
+  this.log = Log4Moz.getConfiguredLogger("TBOAuth");
 }
 
 OAuth2.prototype = {
-    consumerKey: null,
-    consumerSecret: null,
-    completionURI: "http://localhost",
-    requestWindowURI: "chrome://messenger/content/browserRequest.xul",
-    requestWindowFeatures: "chrome,private,centerscreen,width=980,height=750",
-    requestWindowTitle: "",
-    scope: null,
+  consumerKey: null,
+  consumerSecret: null,
+  completionURI: "http://localhost",
+  requestWindowURI: "chrome://messenger/content/browserRequest.xul",
+  requestWindowFeatures: "chrome,private,centerscreen,width=980,height=750",
+  requestWindowTitle: "",
+  scope: null,
 
-    accessToken: null,
-    refreshToken: null,
-    tokenExpires: 0,
+  accessToken: null,
+  refreshToken: null,
+  tokenExpires: 0,
 
-    connect: function connect(aSuccess, aFailure, aWithUI, aRefresh) {
+  connect(aSuccess, aFailure, aWithUI, aRefresh) {
 
-        this.connectSuccessCallback = aSuccess;
-        this.connectFailureCallback = aFailure;
+    this.connectSuccessCallback = aSuccess;
+    this.connectFailureCallback = aFailure;
 
-        if (!aRefresh && this.accessToken) {
-            aSuccess();
-        } else if (this.refreshToken) {
-            this.requestAccessToken(this.refreshToken, true);
-        } else {
-            if (!aWithUI) {
-                aFailure('{ "error": "auth_noui" }');
-                return;
-            }
-            if (gConnecting[this.authURI]) {
-                aFailure("Window already open");
-                return;
-            }
-            this.requestAuthorization();
-        }
-    },
-
-    requestAuthorization: function requestAuthorization() {
-        let params = [
-            ["response_type", "code"],
-            ["client_id", this.consumerKey],
-            ["redirect_uri", this.completionURI],
-        ];
-        // The scope can be optional.
-        if (this.scope) {
-            params.push(["scope", this.scope]);
-        }
-
-        // Add extra parameters
-        params.push(...this.extraAuthParams);
-
-        // Now map the parameters to a string
-        params = params.map(([k,v]) => k + "=" + encodeURIComponent(v)).join("&");
-
-        this._browserRequest = {
-            account: this,
-            url: this.authURI + "?" + params,
-            _active: true,
-            iconURI: "",
-            cancelled: function() {
-                if (!this._active) {
-                    return;
-                }
-
-                this.account.finishAuthorizationRequest();
-                this.account.onAuthorizationFailed(Cr.NS_ERROR_ABORT, '{ "error": "cancelled"}');
-            },
-
-            loaded: function (aWindow, aWebProgress) {
-                if (!this._active) {
-                    return;
-                }
-
-                this._listener = {
-                    window: aWindow,
-                    webProgress: aWebProgress,
-                    _parent: this.account,
-
-                    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
-                                                           Ci.nsISupportsWeakReference]),
-
-                    _cleanUp: function() {
-                      this.webProgress.removeProgressListener(this);
-                      this.window.close();
-                      delete this.window;
-                    },
-
-                    _checkForRedirect: function(aURL) {
-                      if (aURL.indexOf(this._parent.completionURI) != 0)
-                        return;
-
-                      this._parent.finishAuthorizationRequest();
-                      this._parent.onAuthorizationReceived(aURL);
-                    },
-
-                    onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus) {
-                      const wpl = Ci.nsIWebProgressListener;
-                      if (aStateFlags & (wpl.STATE_START | wpl.STATE_IS_NETWORK))
-                        this._checkForRedirect(aRequest.name);
-                    },
-                    onLocationChange: function(aWebProgress, aRequest, aLocation) {
-                      this._checkForRedirect(aLocation.spec);
-                    },
-                    onProgressChange: function() {},
-                    onStatusChange: function() {},
-                    onSecurityChange: function() {},
-                };
-                aWebProgress.addProgressListener(this._listener,
-                                                 Ci.nsIWebProgress.NOTIFY_ALL);
-                aWindow.document.title = this.account.requestWindowTitle;
-            }
-        };
-
-        this.wrappedJSObject = this._browserRequest;
-        gConnecting[this.authURI] = true;
-        Services.ww.openWindow(null, this.requestWindowURI, null, this.requestWindowFeatures, this);
-    },
-    finishAuthorizationRequest: function() {
-        gConnecting[this.authURI] = false;
-        if (!("_browserRequest" in this)) {
-            return;
-        }
-
-        this._browserRequest._active = false;
-        if ("_listener" in this._browserRequest) {
-            this._browserRequest._listener._cleanUp();
-        }
-        delete this._browserRequest;
-    },
-
-    // @see RFC 6749 section 4.1.2: Authorization Response
-    onAuthorizationReceived(aURL) {
-      this.log.info("OAuth2 authorization received: url=" + aURL);
-      let params = new URLSearchParams(aURL.split("?", 2)[1]);
-      if (params.has("code")) {
-        this.requestAccessToken(params.get("code"), false);
-      } else {
-        this.onAuthorizationFailed(null, aURL);
+    if (!aRefresh && this.accessToken) {
+      aSuccess();
+    } else if (this.refreshToken) {
+      this.requestAccessToken(this.refreshToken, true);
+    } else {
+      if (!aWithUI) {
+        aFailure('{ "error": "auth_noui" }');
+        return;
       }
-    },
+      if (gConnecting[this.authURI]) {
+        aFailure("Window already open");
+        return;
+      }
+      this.requestAuthorization();
+    }
+  },
 
-    onAuthorizationFailed: function(aError, aData) {
-        this.connectFailureCallback(aData);
-    },
+  requestAuthorization() {
+    let params = new URLSearchParams({
+      response_type: "code",
+      client_id: this.consumerKey,
+      redirect_uri: this.completionURI,
+    });
+
+    // The scope is optional.
+    if (this.scope) {
+      params.append("scope", this.scope);
+    }
+
+    for (let [name, value] of this.extraAuthParams) {
+      params.append(name, value);
+    }
+
+    let authEndpointURI = this.authURI + "?" + params.toString();
+    this.log.info(
+      "Interacting with the resource owner to obtain an authorization grant " +
+        "from the authorization endpoint: " +
+        authEndpointURI
+    );
+
+    this._browserRequest = {
+      account: this,
+      url: authEndpointURI,
+      _active: true,
+      iconURI: "",
+      cancelled: function() {
+        if (!this._active) {
+          return;
+        }
+
+        this.account.finishAuthorizationRequest();
+        this.account.onAuthorizationFailed(Cr.NS_ERROR_ABORT, '{ "error": "cancelled"}');
+      },
+
+      loaded: function (aWindow, aWebProgress) {
+        if (!this._active) {
+          return;
+        }
+
+        this._listener = {
+          window: aWindow,
+          webProgress: aWebProgress,
+          _parent: this.account,
+
+          QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
+                                                 Ci.nsISupportsWeakReference]),
+
+          _cleanUp: function() {
+            this.webProgress.removeProgressListener(this);
+            this.window.close();
+            delete this.window;
+          },
+
+          _checkForRedirect: function(aURL) {
+            if (aURL.indexOf(this._parent.completionURI) != 0)
+              return;
+
+            this._parent.finishAuthorizationRequest();
+            this._parent.onAuthorizationReceived(aURL);
+          },
+
+          onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus) {
+            const wpl = Ci.nsIWebProgressListener;
+            if (aStateFlags & (wpl.STATE_START | wpl.STATE_IS_NETWORK))
+              this._checkForRedirect(aRequest.name);
+          },
+          onLocationChange: function(aWebProgress, aRequest, aLocation) {
+            this._checkForRedirect(aLocation.spec);
+          },
+          onProgressChange: function() {},
+          onStatusChange: function() {},
+          onSecurityChange: function() {},
+        };
+        aWebProgress.addProgressListener(this._listener,
+                                         Ci.nsIWebProgress.NOTIFY_ALL);
+        aWindow.document.title = this.account.requestWindowTitle;
+      }
+    };
+
+    this.wrappedJSObject = this._browserRequest;
+    gConnecting[this.authURI] = true;
+    Services.ww.openWindow(null, this.requestWindowURI, null, this.requestWindowFeatures, this);
+  },
+
+  finishAuthorizationRequest() {
+    gConnecting[this.authURI] = false;
+    if (!("_browserRequest" in this)) {
+      return;
+    }
+
+    this._browserRequest._active = false;
+    if ("_listener" in this._browserRequest) {
+      this._browserRequest._listener._cleanUp();
+    }
+    delete this._browserRequest;
+  },
+
+  // @see RFC 6749 section 4.1.2: Authorization Response
+  onAuthorizationReceived(aURL) {
+    this.log.info("OAuth2 authorization received: url=" + aURL);
+    let params = new URLSearchParams(aURL.split("?", 2)[1]);
+    if (params.has("code")) {
+      this.requestAccessToken(params.get("code"), false);
+    } else {
+      this.onAuthorizationFailed(null, aURL);
+    }
+  },
+
+  onAuthorizationFailed(aError, aData) {
+    this.connectFailureCallback(aData);
+  },
 
   /**
    * Request a new access token, or refresh an existing one.
@@ -185,17 +192,20 @@ OAuth2.prototype = {
     data.append("client_secret", this.consumerSecret);
 
     if (aRefresh) {
+      this.log.info(
+        `Making a refresh request to the token endpoint: ${this.tokenURI}`
+      );
       data.append("grant_type", "refresh_token");
       data.append("refresh_token", aCode);
     } else {
+      this.log.info(
+        `Making access token request to the token endpoint: ${this.tokenURI}`
+      );
       data.append("grant_type", "authorization_code");
       data.append("code", aCode);
       data.append("redirect_uri", this.completionURI);
     }
 
-    this.log.info(
-      `Making access token request to the token endpoint: ${this.tokenURI}`
-    );
     fetch(this.tokenURI, {
       method: "POST",
       cache: "no-cache",
@@ -203,6 +213,18 @@ OAuth2.prototype = {
     })
       .then(response => response.json())
       .then(result => {
+        if ("error" in result) {
+          // RFC 6749 section 5.2. Error Response
+          this.log.info(
+            `The authorization server returned an error response: ${JSON.stringify(
+              result
+            )}`
+          );
+          this.connectFailureCallback(result);
+          return;
+        }
+
+        // RFC 6749 section 5.1. Successful Response
         this.log.info("The authorization server issued an access token.");
         this.accessToken = result.access_token;
         if ("refresh_token" in result) {
@@ -213,14 +235,10 @@ OAuth2.prototype = {
         } else {
           this.tokenExpires = Number.MAX_VALUE;
         }
-        this.tokenType = result.token_type;
         this.connectSuccessCallback();
       })
       .catch(err => {
-        // Getting an access token failed.
-        this.log.info(
-          `The authorization server returned an error response: ${err}`
-        );
+        this.log.info(`Connection to authorization server failed: ${err}`);
         this.connectFailureCallback(err);
       });
   },
