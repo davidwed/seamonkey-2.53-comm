@@ -50,8 +50,6 @@ private:
     bool                    fPartialUIDFetch;
     uint32_t                fNumAdded;
     bool                    fStartCapture;
-    // Keywords (aka, tags) in FLAGS response to SELECT defined by other clients
-    nsTArray<nsCString>     fOtherKeywords;
     mozilla::Mutex mLock;
 };
 
