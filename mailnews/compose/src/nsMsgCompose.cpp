@@ -1342,6 +1342,9 @@ NS_IMETHODIMP nsMsgCompose::SendMsg(MSG_DeliverMode deliverMode, nsIMsgIdentity 
   }
   if (!msgBody.IsEmpty())
   {
+    // Ensure body ends in <CRLF> to avoid SMTP server timeout when sent.
+    if (!StringEndsWith(msgBody, NS_LITERAL_STRING("\r\n")))
+      msgBody.AppendLiteral("\r\n");
     bool isAsciiOnly = NS_IsAscii(static_cast<const char16_t*>(msgBody.get()));
     // Convert body to mail charset
     nsCString outCString;
