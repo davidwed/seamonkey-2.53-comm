@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/DownloadTaskbarProgress.jsm");
+Components.utils.import("resource://gre/modules/DownloadsTaskbar.jsm");
 Components.utils.import("resource:///modules/WindowsPreviewPerTab.jsm");
 
 this.__defineGetter__("PluralForm", function() {
