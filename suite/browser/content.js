@@ -6,7 +6,6 @@
 /* This content script should work in any browser or iframe and should not
  * depend on the frame being contained in tabbrowser. */
 
-ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 ChromeUtils.defineModuleGetter(this, "LoginManagerContent",

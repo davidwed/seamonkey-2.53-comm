@@ -4,15 +4,14 @@
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
-ChromeUtils.import("resource://gre/modules/Downloads.jsm");
 
-ChromeUtils.defineModuleGetter(this, "DownloadsCommon",
-  "resource:///modules/DownloadsCommon.jsm");
-ChromeUtils.defineModuleGetter(this, "PlacesUtils",
-  "resource://gre/modules/PlacesUtils.jsm");
-ChromeUtils.defineModuleGetter(this, "FileUtils",
-  "resource://gre/modules/FileUtils.jsm");
+XPCOMUtils.defineLazyModuleGetters(this, {
+  PluralForm: "resource://gre/modules/PluralForm.jsm",
+  Downloads: "resource://gre/modules/Downloads.jsm",
+  DownloadsCommon: "resource:///modules/DownloadsCommon.jsm",
+  PlacesUtils: "resource://gre/modules/PlacesUtils.jsm",
+  FileUtils: "resource://gre/modules/FileUtils.jsm",
+});
 
 var gDownloadTree;
 var gDownloadTreeView;
