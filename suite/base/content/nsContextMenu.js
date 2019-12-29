@@ -14,9 +14,8 @@
 ------------------------------------------------------------------------------*/
 
 ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.import("resource://gre/modules/LoginManagerContextMenu.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-var gContextMenuContentData = null;
 
 XPCOMUtils.defineLazyGetter(this, "InlineSpellCheckerUI", function() {
   return new InlineSpellChecker();
@@ -36,6 +35,12 @@ XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
                                   "resource:///modules/ShellService.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
                                   "resource://gre/modules/NetUtil.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "LoginHelper",
+  "resource://gre/modules/LoginHelper.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "LoginManagerContent",
+  "resource://gre/modules/LoginManagerContent.jsm");
+
+var gContextMenuContentData = null;
 
 function nsContextMenu(aXulMenu, aIsShift, aEvent) {
   this.shouldDisplay = true;
@@ -62,11 +67,11 @@ nsContextMenu.prototype = {
 
     this.initPopupPrincipal();
 
-    // Initialize (disable/remove) menu items.
-    this.initItems();
     // Initialize gContextMenuContentData.
     if (aEvent)
       this.initContentData(aEvent);
+    // Initialize (disable/remove) menu items.
+    this.initItems();
   },
 
   initContentData: function(aEvent) {
@@ -119,6 +124,7 @@ nsContextMenu.prototype = {
       frameOuterWindowID: doc.defaultView.QueryInterface(Ci.nsIInterfaceRequestor)
                                          .getInterface(Ci.nsIDOMWindowUtils)
                                          .outerWindowID,
+      loginFillInfo: LoginManagerContent.getFieldContext(popupNode),
     };
   },
 
@@ -127,6 +133,7 @@ nsContextMenu.prototype = {
     InlineSpellCheckerUI.clearSuggestionsFromMenu();
     InlineSpellCheckerUI.clearDictionaryListFromMenu();
     InlineSpellCheckerUI.uninit();
+    LoginManagerContextMenu.clearLoginsFromMenu(document);
   },
 
   initItems: function() {
@@ -140,6 +147,7 @@ nsContextMenu.prototype = {
     this.initClipboardItems();
     this.initMetadataItems();
     this.initMediaPlayerItems();
+    this.initPasswordManagerItems();
   },
 
   initPageMenuSeparator: function() {
@@ -502,6 +510,60 @@ nsContextMenu.prototype = {
     this.showItem("context-media-sep-commands", onMedia);
   },
 
+  initPasswordManagerItems: function() {
+    let fillMenu = document.getElementById("fill-login");
+    // If no fill Menu, probably mailContext so nothing to set up.
+    if (!fillMenu)
+      return;
+
+    let loginFillInfo = gContextMenuContentData && gContextMenuContentData.loginFillInfo;
+
+    // If we could not find a password field we
+    // don't want to show the form fill option.
+    let showFill = loginFillInfo && loginFillInfo.passwordField.found;
+
+    // Disable the fill option if the user has set a master password
+    // or if the password field or target field are disabled.
+    let disableFill = !loginFillInfo ||
+                      !Services.logins ||
+                      !Services.logins.isLoggedIn ||
+                      loginFillInfo.passwordField.disabled ||
+                      (!this.onPassword && loginFillInfo.usernameField.disabled);
+
+    this.showItem("fill-login-separator", showFill);
+    this.showItem("fill-login", showFill);
+    this.setItemAttr("fill-login", "disabled", disableFill);
+
+    // Set the correct label for the fill menu
+    if (this.onPassword) {
+      fillMenu.setAttribute("label", fillMenu.getAttribute("label-password"));
+      fillMenu.setAttribute("accesskey", fillMenu.getAttribute("accesskey-password"));
+    } else {
+      fillMenu.setAttribute("label", fillMenu.getAttribute("label-login"));
+      fillMenu.setAttribute("accesskey", fillMenu.getAttribute("accesskey-login"));
+    }
+
+    if (!showFill || disableFill) {
+      return;
+    }
+    let documentURI = gContextMenuContentData.documentURIObject;
+    let fragment = LoginManagerContextMenu.addLoginsToMenu(this.target, this.browser, documentURI);
+
+    this.showItem("fill-login-no-logins", !fragment);
+
+    if (!fragment) {
+      return;
+    }
+    let popup = document.getElementById("fill-login-popup");
+    let insertBeforeElement = document.getElementById("fill-login-no-logins");
+    popup.insertBefore(fragment, insertBeforeElement);
+  },
+
+  openPasswordManager: function() {
+    // LoginHelper.openPasswordManager(window, gContextMenuContentData.documentURIObject.host);
+    toDataManager(gContextMenuContentData.documentURIObject.host + '|passwords');
+  },
+
   /**
    * Retrieve the array of CSS selectors corresponding to the provided node. The first item
    * of the array is the selector of the node in its owner document. Additional items are
@@ -537,12 +599,6 @@ nsContextMenu.prototype = {
     //this.isRemote = gContextMenuContentData && gContextMenuContentData.isRemote;
 
     const xulNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    if (aNode.nodeType == Node.DOCUMENT_NODE ||
-        // Not display on XUL element but relax for <label class="text-link">
-        (aNode.namespaceURI == xulNS && !isXULTextLinkLabel(aNode))) {
-      this.shouldDisplay = false;
-      return;
-    }
 
     // Initialize contextual info.
     this.onImage               = false;
@@ -576,9 +632,17 @@ nsContextMenu.prototype = {
     this.isContentSelected     = false;
     this.onEditableArea        = false;
     this.canSpellCheck         = false;
+    this.onPassword            = false;
 
     // Remember the node that was clicked.
     this.target = aNode;
+
+    if (aNode.nodeType == Node.DOCUMENT_NODE ||
+        // Not display on XUL element but relax for <label class="text-link">
+        (aNode.namespaceURI == xulNS && !isXULTextLinkLabel(aNode))) {
+      this.shouldDisplay = false;
+      return;
+    }
 
     let editFlags = SpellCheckHelper.isEditable(this.target, window);
     this.browser = this.target.ownerDocument.defaultView
@@ -636,6 +700,7 @@ nsContextMenu.prototype = {
         this.onTextInput = (editFlags & SpellCheckHelper.TEXTINPUT) !== 0;
         this.onNumeric = (editFlags & SpellCheckHelper.NUMERIC) !== 0;
         this.onEditableArea = (editFlags & SpellCheckHelper.EDITABLE) !== 0;
+        this.onPassword = (editFlags & SpellCheckHelper.PASSWORD) !== 0;
         if (this.onEditableArea) {
           InlineSpellCheckerUI.init(this.target.QueryInterface(Ci.nsIDOMNSEditableElement).editor);
           InlineSpellCheckerUI.initFromEvent(aRangeParent, aRangeOffset);
