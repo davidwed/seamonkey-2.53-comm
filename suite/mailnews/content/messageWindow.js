@@ -440,11 +440,6 @@ function GetLoadedMsgFolder()
   return gCurrentFolderUri ? GetMsgFolderFromUri(gCurrentFolderUri) : null;
 }
 
-function GetSelectedFolderURI()
-{
-  return gCurrentFolderUri;
-}
-
 function GetLoadedMessage()
 {
   return gCurrentMessageUri;
