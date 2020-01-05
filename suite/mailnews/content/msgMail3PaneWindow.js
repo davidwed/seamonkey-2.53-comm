@@ -1191,6 +1191,13 @@ function TreeOnMouseDown(event)
     ChangeSelectionWithoutContentLoad(event, event.target.parentNode);
 }
 
+function FolderPaneContextMenuNewTab(event) {
+  var bgLoad = Services.prefs.getBoolPref("mail.tabs.loadInBackground");
+  if (event.shiftKey)
+    bgLoad = !bgLoad;
+  MsgOpenNewTabForFolder(bgLoad);
+}
+
 function FolderPaneOnClick(event)
 {
   // usually, we're only interested in tree content clicks, not scrollbars etc.
@@ -1202,7 +1209,7 @@ function FolderPaneOnClick(event)
   {
     if (AllowOpenTabOnMiddleClick())
     {
-      MsgOpenNewTabForFolder();
+      FolderPaneContextMenuNewTab(event);
       RestoreSelectionWithoutContentLoad(GetFolderTree());
       return;
     }
@@ -1236,7 +1243,7 @@ function FolderPaneDoubleClick(folderIndex, event)
   // We either open the folder in a tab or a new window...
   if (AllowOpenTabOnDoubleClick())
   {
-    MsgOpenNewTabForFolder();
+    FolderPaneContextMenuNewTab(event);
   }
   else
   {
@@ -1250,6 +1257,14 @@ function FolderPaneDoubleClick(folderIndex, event)
   // This will happen if we don't prevent the event from bubbling to the
   // default handler in tree.xml.
   event.stopPropagation();
+}
+
+function OpenMessageInNewTab(event) {
+  var bgLoad = Services.prefs.getBoolPref("mail.tabs.loadInBackground");
+  if (event.shiftKey)
+    bgLoad = !bgLoad;
+
+  MsgOpenNewTabForMessage(bgLoad);
 }
 
 function ChangeSelection(tree, newIndex)
