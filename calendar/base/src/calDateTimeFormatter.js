@@ -70,14 +70,21 @@ calDateTimeFormatter.prototype = {
      * @return {String}                The date as a string.
      */
     _inTimezone: function(aDate, aOptions) {
-        let timezone = aDate.timezone;
-        // we set the tz only if we have a valid tz - otherwise localtime will be used on formatting.
-        if (timezone && (timezone.isUTC || timezone.icalComponent)) {
-            aOptions.timeZone = timezone.tzid;
-        }
+      let formatter = new Services.intl.DateTimeFormat(undefined, aOptions);
 
-        let formatter = new Services.intl.DateTimeFormat(undefined, aOptions);
-        return formatter.format(cal.dtz.dateTimeToJsDate(aDate));
+      let timezone = aDate.timezone;
+      // We set the tz only if we have a valid tz - otherwise localtime will be used on formatting.
+      if (timezone && (timezone.isUTC || timezone.icalComponent)) {
+        aOptions.timeZone = timezone.tzid;
+        try {
+          formatter = new Services.intl.DateTimeFormat(undefined, aOptions);
+        } catch (ex) {
+          // Non-IANA timezones throw a RangeError.
+          cal.WARN(ex);
+        }
+      }
+
+      return formatter.format(cal.dtz.dateTimeToJsDate(aDate));
     },
 
     formatTimeInterval: function(aStartDate, aEndDate) {
