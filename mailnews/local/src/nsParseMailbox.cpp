@@ -607,9 +607,10 @@ NS_IMETHODIMP nsParseMailMessageState::Clear()
   m_envelope.ResetWritePos();
   m_receivedTime = 0;
   m_receivedValue.Truncate();
-  for (uint32_t i = 0; i < m_customDBHeaders.Length(); i++)
+  for (uint32_t i = 0; i < m_customDBHeaders.Length(); i++) {
     m_customDBHeaderValues[i].length = 0;
-
+  }
+  m_headerstartpos = 0;
   return NS_OK;
 }
 
@@ -1283,7 +1284,7 @@ nsresult nsParseMailMessageState::FinalizeHeaders()
   char md5_data [50];
 
   uint32_t flags = 0;
-  uint32_t delta = 0;
+  uint32_t deltaToMozStatus = 0;
   nsMsgPriorityValue priorityFlags = nsMsgPriority::notSet;
   uint32_t labelFlags = 0;
 
@@ -1336,10 +1337,10 @@ nsresult nsParseMailMessageState::FinalizeHeaders()
       priorityFlags = (nsMsgPriorityValue) ((flags & nsMsgMessageFlags::Priorities) >> 13);
       flags &= ~nsMsgMessageFlags::Priorities;
     }
-    delta = (m_headerstartpos +
-      (mozstatus->value - m_headers.GetBuffer()) -
-      (2 + X_MOZILLA_STATUS_LEN)    /* 2 extra bytes for ": ". */
-      ) - m_envelope_pos;
+
+    deltaToMozStatus =
+        m_headerstartpos + (mozstatus->value - m_headers.GetBuffer()) -
+        (X_MOZILLA_STATUS_LEN + 2 /* for ": " */) - m_envelope_pos;
   }
 
   if (mozstatus2)
@@ -1424,10 +1425,17 @@ nsresult nsParseMailMessageState::FinalizeHeaders()
         labelFlags = ((flags & nsMsgMessageFlags::Labels) >> 25);
         m_newMsgHdr->SetLabel(labelFlags);
       }
-      if (delta < 0xffff)
-      {    /* Only use if fits in 16 bits. */
-        m_newMsgHdr->SetStatusOffset((uint16_t) delta);
-        if (!m_IgnoreXMozillaStatus) {  // imap doesn't care about X-MozillaStatus
+      NS_ASSERTION(!mozstatus || deltaToMozStatus < 0xffff,
+                   "unexpected deltaToMozStatus");
+      if (mozstatus &&
+          deltaToMozStatus < 0xffff) { /* Only use if fits in 16 bits. */
+        m_newMsgHdr->SetStatusOffset((uint16_t)deltaToMozStatus);
+        if (!m_IgnoreXMozillaStatus) {  // imap doesn't care about
+                                        // X-MozillaStatus
+          // TODO: Clarify, why is it necessary to query the value we've just
+          // set? Does querying trigger some kind of side effect? Or is the
+          // following assertion check the only need for querying? If it seems
+          // unnecessary, the following lines should be removed.
           uint32_t offset;
           (void)m_newMsgHdr->GetStatusOffset(&offset);
           NS_ASSERTION(offset < 10000, "invalid status offset"); /* ### Debugging hack */
