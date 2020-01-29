@@ -432,20 +432,10 @@ nsPop3Protocol::MarkMsgForHost(const char *hostName, const char *userName,
   return NS_OK;
 }
 
-
-
-NS_IMPL_ADDREF_INHERITED(nsPop3Protocol, nsMsgProtocol)
-NS_IMPL_RELEASE_INHERITED(nsPop3Protocol, nsMsgProtocol)
-
-
-
-NS_INTERFACE_MAP_BEGIN(nsPop3Protocol)
-  NS_INTERFACE_MAP_ENTRY(nsIPop3Protocol)
-  NS_INTERFACE_MAP_ENTRY(nsIMsgAsyncPromptListener)
-  NS_INTERFACE_MAP_ENTRY(nsIProtocolProxyCallback)
-NS_INTERFACE_MAP_END_INHERITING(nsMsgProtocol)
-
 // nsPop3Protocol class implementation
+
+NS_IMPL_ISUPPORTS_INHERITED(nsPop3Protocol, nsMsgProtocol,
+                            msgIOAuth2ModuleListener, nsIProtocolProxyCallback)
 
 nsPop3Protocol::nsPop3Protocol(nsIURI* aURL)
 : nsMsgProtocol(aURL),
@@ -514,21 +504,28 @@ nsPop3Protocol::OnProxyAvailable(nsICancelable *aRequest, nsIChannel *aChannel,
   return rv;
 }
 
-nsresult nsPop3Protocol::InitializeInternal(nsIProxyInfo* aProxyInfo)
-{
+nsresult nsPop3Protocol::InitializeInternal(nsIProxyInfo* aProxyInfo) {
   nsresult rv;
-
   m_proxyRequest = nullptr;
 
   NS_ENSURE_TRUE(m_url, NS_ERROR_NOT_INITIALIZED);
 
   // extract out message feedback if there is any.
   nsCOMPtr<nsIMsgMailNewsUrl> mailnewsUrl = do_QueryInterface(m_url);
-  if (mailnewsUrl)
-  {
+  if (mailnewsUrl) {
     nsCOMPtr<nsIMsgIncomingServer> server;
     mailnewsUrl->GetServer(getter_AddRefs(server));
     NS_ENSURE_TRUE(server, NS_MSG_INVALID_OR_MISSING_SERVER);
+
+    // Query for OAuth2 support. If the POP server preferences don't allow
+    // for OAuth2, then don't carry around the OAuth2 module any longer
+    // since we won't need it.
+    mOAuth2Support = do_CreateInstance(MSGIOAUTH2MODULE_CONTRACTID);
+    if (mOAuth2Support) {
+      bool supportsOAuth = false;
+      mOAuth2Support->InitFromMail(server, &supportsOAuth);
+      if (!supportsOAuth) mOAuth2Support = nullptr;
+    }
 
     rv = server->GetSocketType(&m_socketType);
     NS_ENSURE_SUCCESS(rv, rv);
@@ -1419,12 +1416,10 @@ int32_t nsPop3Protocol::Pop3SendData(const char * dataBuffer, bool aSuppressLogg
   return -1;
 }
 
-/*
+/**
  * POP3 AUTH extension
  */
-
-int32_t nsPop3Protocol::SendAuth()
-{
+int32_t nsPop3Protocol::SendAuth() {
   MOZ_LOG(POP3LOGMODULE, LogLevel::Debug, (POP3LOG("SendAuth()")));
 
   if(!m_pop3ConData->command_succeeded)
@@ -1494,6 +1489,8 @@ int32_t nsPop3Protocol::AuthResponse(nsIInputStream* inputStream,
         SetCapFlag(POP3_HAS_AUTH_PLAIN);
     else if (!PL_strcasecmp (line, "LOGIN"))
         SetCapFlag(POP3_HAS_AUTH_LOGIN);
+    else if (!PL_strcasecmp(line, "XOAUTH2"))
+      SetCapFlag(POP3_HAS_AUTH_XOAUTH2);
 
     PR_Free(line);
     return 0;
@@ -1545,65 +1542,52 @@ int32_t nsPop3Protocol::CapaResponse(nsIInputStream* inputStream,
 
     MOZ_LOG(POP3LOGMODULE, LogLevel::Info, (POP3LOG("RECV: %s"), line));
 
-    if (!PL_strcmp(line, "."))
-    {
-        // now that we've read all the CAPA responses, go for it
-        m_pop3ConData->next_state = POP3_PROCESS_AUTH;
-        m_pop3ConData->pause_for_read = false; /* don't pause */
-    }
-    else
-    if (!PL_strcasecmp(line, "XSENDER"))
-    {
-        SetCapFlag(POP3_HAS_XSENDER);
-        m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
-    }
-    else
-    // see RFC 2449, chapter 6.4
-    if (!PL_strcasecmp(line, "RESP-CODES"))
-    {
-        SetCapFlag(POP3_HAS_RESP_CODES);
-        m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
-    }
-    else
-    // see RFC 3206, chapter 6
-    if (!PL_strcasecmp(line, "AUTH-RESP-CODE"))
-    {
-        SetCapFlag(POP3_HAS_AUTH_RESP_CODE);
-        m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
-    }
-    else
-    // see RFC 2595, chapter 4
-    if (!PL_strcasecmp(line, "STLS"))
-    {
+    if (!PL_strcmp(line, ".")) {
+      // now that we've read all the CAPA responses, go for it
+      m_pop3ConData->next_state = POP3_PROCESS_AUTH;
+      m_pop3ConData->pause_for_read = false; /* don't pause */
+    } else if (!PL_strcasecmp(line, "XSENDER")) {
+      SetCapFlag(POP3_HAS_XSENDER);
+      m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
+    } else if (!PL_strcasecmp(line, "RESP-CODES")) {
+      // see RFC 2449, chapter 6.4
+      SetCapFlag(POP3_HAS_RESP_CODES);
+      m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
+    } else if (!PL_strcasecmp(line, "AUTH-RESP-CODE")) {
+      // see RFC 3206, chapter 6
+      SetCapFlag(POP3_HAS_AUTH_RESP_CODE);
+      m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
+    } else if (!PL_strcasecmp(line, "STLS")) {
+      // see RFC 2595, chapter 4
       SetCapFlag(POP3_HAS_STLS);
       m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
-    }
-    else
-    // see RFC 2449, chapter 6.3
-    if (!PL_strncasecmp(line, "SASL", 4) && strlen(line) > 6)
-    {
-        nsAutoCString responseLine;
-        responseLine.Assign(line + 5);
+    } else if (!PL_strncasecmp(line, "SASL", 4) && strlen(line) > 6) {
+      // see RFC 2449, chapter 6.3
+      nsAutoCString responseLine;
+      responseLine.Assign(line + 5);
 
-        if (responseLine.Find("PLAIN", /* ignoreCase = */ true) >= 0)
-            SetCapFlag(POP3_HAS_AUTH_PLAIN);
+      if (responseLine.Find("PLAIN", /* ignoreCase = */ true) >= 0)
+          SetCapFlag(POP3_HAS_AUTH_PLAIN);
 
-        if (responseLine.Find("LOGIN", /* ignoreCase = */ true) >= 0)
-            SetCapFlag(POP3_HAS_AUTH_LOGIN);
+      if (responseLine.Find("LOGIN", /* ignoreCase = */ true) >= 0)
+          SetCapFlag(POP3_HAS_AUTH_LOGIN);
 
-        if (responseLine.Find("GSSAPI", /* ignoreCase = */ true) >= 0)
-            SetCapFlag(POP3_HAS_AUTH_GSSAPI);
+      if (responseLine.Find("GSSAPI", /* ignoreCase = */ true) >= 0)
+          SetCapFlag(POP3_HAS_AUTH_GSSAPI);
 
-        if (responseLine.Find("CRAM-MD5", /* ignoreCase = */ true) >= 0)
-          SetCapFlag(POP3_HAS_AUTH_CRAM_MD5);
+      if (responseLine.Find("CRAM-MD5", /* ignoreCase = */ true) >= 0)
+        SetCapFlag(POP3_HAS_AUTH_CRAM_MD5);
 
-        if (responseLine.Find("NTLM", /* ignoreCase = */ true) >= 0)
-          SetCapFlag(POP3_HAS_AUTH_NTLM);
+      if (responseLine.Find("NTLM", /* ignoreCase = */ true) >= 0)
+        SetCapFlag(POP3_HAS_AUTH_NTLM);
 
-        if (responseLine.Find("MSN", /* ignoreCase = */ true) >= 0)
-          SetCapFlag(POP3_HAS_AUTH_NTLM|POP3_HAS_AUTH_MSN);
+      if (responseLine.Find("MSN", /* ignoreCase = */ true) >= 0)
+        SetCapFlag(POP3_HAS_AUTH_NTLM|POP3_HAS_AUTH_MSN);
 
-        m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
+      if (responseLine.Find("XOAUTH2", /* ignoreCase = */ true) >= 0)
+        SetCapFlag(POP3_HAS_AUTH_XOAUTH2);
+
+      m_pop3Server->SetPop3CapabilityFlags(m_pop3ConData->capability_flags);
     }
 
     PR_Free(line);
@@ -1685,6 +1669,9 @@ void nsPop3Protocol::InitPrefAuthMethods(int32_t authMethodPrefValue)
     case nsMsgAuthMethod::GSSAPI:
       m_prefAuthMethods = POP3_HAS_AUTH_GSSAPI;
       break;
+    case nsMsgAuthMethod::OAuth2:
+      m_prefAuthMethods = POP3_HAS_AUTH_XOAUTH2;
+      break;
     case nsMsgAuthMethod::secure:
       m_prefAuthMethods = POP3_HAS_AUTH_APOP |
           POP3_HAS_AUTH_CRAM_MD5 | POP3_HAS_AUTH_GSSAPI |
@@ -1698,15 +1685,20 @@ void nsPop3Protocol::InitPrefAuthMethods(int32_t authMethodPrefValue)
       // fall to any
       MOZ_FALLTHROUGH;
     case nsMsgAuthMethod::anything:
-      m_prefAuthMethods = POP3_HAS_AUTH_USER |
-          POP3_HAS_AUTH_LOGIN | POP3_HAS_AUTH_PLAIN |
-          POP3_HAS_AUTH_CRAM_MD5 | POP3_HAS_AUTH_APOP |
-          POP3_HAS_AUTH_GSSAPI |
-          POP3_HAS_AUTH_NTLM | POP3_HAS_AUTH_MSN;
+      m_prefAuthMethods =
+          POP3_HAS_AUTH_USER | POP3_HAS_AUTH_LOGIN | POP3_HAS_AUTH_PLAIN |
+          POP3_HAS_AUTH_CRAM_MD5 | POP3_HAS_AUTH_APOP | POP3_HAS_AUTH_GSSAPI |
+          POP3_HAS_AUTH_NTLM | POP3_HAS_AUTH_MSN | POP3_HAS_AUTH_XOAUTH2;
       // TODO needed?
       break;
   }
-  NS_ASSERTION(m_prefAuthMethods != POP3_AUTH_MECH_UNDEFINED,
+
+  // Only enable OAuth2 support if we can do the lookup.
+  if ((m_prefAuthMethods & POP3_HAS_AUTH_XOAUTH2) && !mOAuth2Support) {
+    m_prefAuthMethods &= ~POP3_HAS_AUTH_XOAUTH2;  // disable it
+  }
+
+NS_ASSERTION(m_prefAuthMethods != POP3_AUTH_MECH_UNDEFINED,
       "POP: InitPrefAuthMethods() didn't work");
 }
 
@@ -1724,10 +1716,23 @@ nsresult nsPop3Protocol::ChooseAuthMethod()
            GetCapFlags(), m_prefAuthMethods, m_failedAuthMethods, availCaps));
   MOZ_LOG(POP3LOGMODULE, LogLevel::Debug,
           (POP3LOG("(GSSAPI = 0x%X, CRAM = 0x%X, APOP = 0x%X, NTLM = 0x%X, "
-           "MSN =  0x%X, PLAIN = 0x%X, LOGIN = 0x%X, USER/PASS = 0x%X)"),
+                   "MSN = 0x%X, PLAIN = 0x%X, LOGIN = 0x%X, USER/PASS = 0x%X, "
+                   "XOAUTH2 = 0x%X)"),
            POP3_HAS_AUTH_GSSAPI, POP3_HAS_AUTH_CRAM_MD5, POP3_HAS_AUTH_APOP,
            POP3_HAS_AUTH_NTLM, POP3_HAS_AUTH_MSN, POP3_HAS_AUTH_PLAIN,
-           POP3_HAS_AUTH_LOGIN, POP3_HAS_AUTH_USER));
+           POP3_HAS_AUTH_LOGIN, POP3_HAS_AUTH_USER, POP3_HAS_AUTH_XOAUTH2));
+
+  MOZ_LOG(
+      POP3LOGMODULE, LogLevel::Debug,
+      (POP3LOG("(Ehabled - GSSAPI=%d, CRAM=%d, APOP=%d, NTLM=%d, "
+               "MSN=%d, PLAIN=%d, LOGIN=%d, USER/PASS=%d, "
+               "XOAUTH2=%d)"),
+       !!(POP3_HAS_AUTH_GSSAPI & availCaps),
+       !!(POP3_HAS_AUTH_CRAM_MD5 & availCaps),
+       !!(POP3_HAS_AUTH_APOP & availCaps), !!(POP3_HAS_AUTH_NTLM & availCaps),
+       !!(POP3_HAS_AUTH_MSN & availCaps), !!(POP3_HAS_AUTH_PLAIN & availCaps),
+       !!(POP3_HAS_AUTH_LOGIN & availCaps), !!(POP3_HAS_AUTH_USER & availCaps),
+       !!(POP3_HAS_AUTH_XOAUTH2 & availCaps)));
 
   if (POP3_HAS_AUTH_GSSAPI & availCaps)
     m_currentAuthMethod = POP3_HAS_AUTH_GSSAPI;
@@ -1745,22 +1750,24 @@ nsresult nsPop3Protocol::ChooseAuthMethod()
     m_currentAuthMethod = POP3_HAS_AUTH_LOGIN;
   else if (POP3_HAS_AUTH_USER & availCaps)
     m_currentAuthMethod = POP3_HAS_AUTH_USER;
-  else
-  {
+  else if (POP3_HAS_AUTH_XOAUTH2 & availCaps)
+    m_currentAuthMethod = POP3_HAS_AUTH_XOAUTH2;
+  else {
     // there are no matching login schemes at all, per server and prefs
     m_currentAuthMethod = POP3_AUTH_MECH_UNDEFINED;
-    MOZ_LOG(POP3LOGMODULE, LogLevel::Debug, (POP3LOG("no auth method remaining")));
+    MOZ_LOG(POP3LOGMODULE, LogLevel::Debug,
+            (POP3LOG("No auth method remaining")));
     return NS_ERROR_FAILURE;
   }
   MOZ_LOG(POP3LOGMODULE, LogLevel::Debug,
-          (POP3LOG("trying auth method 0x%X"), m_currentAuthMethod));
+          (POP3LOG("Trying auth method 0x%X"), m_currentAuthMethod));
   return NS_OK;
 }
 
 void nsPop3Protocol::MarkAuthMethodAsFailed(int32_t failedAuthMethod)
 {
   MOZ_LOG(POP3LOGMODULE, LogLevel::Debug,
-          (POP3LOG("marking auth method 0x%X failed"), failedAuthMethod));
+          (POP3LOG("Marking auth method 0x%X failed"), failedAuthMethod));
   m_failedAuthMethods |= failedAuthMethod;
 }
 
@@ -1769,7 +1776,8 @@ void nsPop3Protocol::MarkAuthMethodAsFailed(int32_t failedAuthMethod)
  */
 void nsPop3Protocol::ResetAuthMethods()
 {
-  MOZ_LOG(POP3LOGMODULE, LogLevel::Debug, (POP3LOG("resetting (failed) auth methods")));
+  MOZ_LOG(POP3LOGMODULE, LogLevel::Debug,
+          (POP3LOG("Resetting (failed) auth methods")));
   m_currentAuthMethod = POP3_AUTH_MECH_UNDEFINED;
   m_failedAuthMethods = 0;
 }
@@ -1878,6 +1886,11 @@ int32_t nsPop3Protocol::ProcessAuth()
         m_pop3ConData->command_succeeded = true;
         m_pop3ConData->next_state = POP3_NEXT_AUTH_STEP;
         break;
+      case POP3_HAS_AUTH_XOAUTH2:
+        MOZ_LOG(POP3LOGMODULE, LogLevel::Debug, (POP3LOG("POP XOAUTH2")));
+        m_pop3ConData->command_succeeded = true;
+        m_pop3ConData->next_state = POP3_AUTH_OAUTH2_RESPONSE;
+        break;
       default:
         MOZ_LOG(POP3LOGMODULE, LogLevel::Error,
                 (POP3LOG("POP: m_currentAuthMethod has unknown value")));
@@ -1885,8 +1898,51 @@ int32_t nsPop3Protocol::ProcessAuth()
     }
 
     m_pop3ConData->pause_for_read = false;
-
     return 0;
+}
+
+int32_t nsPop3Protocol::AuthOAuth2Response() {
+  if (!mOAuth2Support) {
+    return Error("pop3AuthMechNotSupported");
+  }
+  nsresult rv = mOAuth2Support->Connect(true, this);
+  if (NS_FAILED(rv)) {
+    MOZ_LOG(POP3LOGMODULE, LogLevel::Error,
+            (POP3LOG("OAuth2 authorizattion failed")));
+    return -1;
+  }
+  m_pop3ConData->pause_for_read = true;
+  return 0;
+}
+
+/** msgIOAuth2ModuleListener implementation */
+nsresult nsPop3Protocol::OnSuccess(const nsACString &aOAuth2String) {
+  MOZ_ASSERT(mOAuth2Support, "Can't do anything without OAuth2 support");
+  // Send the AUTH XOAUTH2 command, and then siphon us back to the regular
+  // authentication login stream.
+  nsAutoCString cmd;
+  cmd.AppendLiteral("AUTH XOAUTH2 ");
+  cmd += aOAuth2String;
+  cmd += CRLF;
+  m_pop3ConData->next_state = POP3_WAIT_FOR_RESPONSE;
+  m_pop3ConData->next_state_after_response = POP3_NEXT_AUTH_STEP;
+  m_pop3ConData->pause_for_read = true;
+  m_password_already_sent = true;
+  if (Pop3SendData(cmd.get(), true)) {
+    MOZ_LOG(POP3LOGMODULE, LogLevel::Error,
+            (POP3LOG("POP: XOAUTH2 authentication failed")));
+    m_pop3ConData->next_state = POP3_ERROR_DONE;
+  }
+  ProcessProtocolState(nullptr, nullptr, 0, 0);
+  return NS_OK;
+}
+
+/** msgIOAuth2ModuleListener implementation */
+nsresult nsPop3Protocol::OnFailure(nsresult aError) {
+  MOZ_LOG(POP3LOGMODULE, mozilla::LogLevel::Debug,
+          ("OAuth2 login error %08x", (uint32_t)aError));
+  m_pop3ConData->next_state = POP3_ERROR_DONE;
+  return ProcessProtocolState(nullptr, nullptr, 0, 0);
 }
 
 /**
@@ -1901,9 +1957,8 @@ int32_t nsPop3Protocol::NextAuthStep()
     if (m_pop3ConData->command_succeeded)
     {
         if (m_password_already_sent || // (also true for GSSAPI)
-            m_currentAuthMethod == POP3_HAS_AUTH_NONE)
-        {
-            MOZ_LOG(POP3LOGMODULE, LogLevel::Debug, (POP3LOG("login succeeded")));
+            m_currentAuthMethod == POP3_HAS_AUTH_NONE) {
+            MOZ_LOG(POP3LOGMODULE, LogLevel::Debug, (POP3LOG("Login succeeded")));
             m_nsIPop3Sink->SetUserAuthenticated(true);
             ClearFlag(POP3_PASSWORD_FAILED);
             if (m_pop3ConData->verify_logon)
@@ -3909,6 +3964,10 @@ nsresult nsPop3Protocol::ProcessProtocolState(nsIURI * url, nsIInputStream * aIn
 
     case POP3_AUTH_GSSAPI_STEP:
       status = AuthGSSAPIResponse(false);
+      break;
+
+    case POP3_AUTH_OAUTH2_RESPONSE:
+      status = AuthOAuth2Response();
       break;
 
     case POP3_SEND_USERNAME:
