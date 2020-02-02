@@ -157,24 +157,13 @@ toolbar[labelalign="end"] .toolbarbutton-1 > hbox > vbox {
 .button-toolbar, 
 .button-toolbar[disabled="true"]:hover,
 .button-toolbar[disabled="true"]:hover:active {
-  -moz-border-top-colors: transparent ThreeDHighlight;
-  -moz-border-right-colors: transparent ThreeDShadow;
-  -moz-border-bottom-colors: transparent ThreeDShadow;
-  -moz-border-left-colors: transparent ThreeDHighlight;
+  padding: 1px;
+  border-color: ThreeDHighlight ThreeDShadow ThreeDShadow ThreeDHighlight;
 }
   
-.button-toolbar:hover {
-  -moz-border-top-colors: ThreeDDarkShadow ThreeDHighlight;
-  -moz-border-right-colors: ThreeDDarkShadow ThreeDShadow;
-  -moz-border-bottom-colors: ThreeDDarkShadow ThreeDShadow;
-  -moz-border-left-colors: ThreeDDarkShadow ThreeDHighlight;
-}
-
+.button-toolbar:hover,
 .button-toolbar:hover:active {
-  -moz-border-top-colors: ThreeDDarkShadow ThreeDShadow;
-  -moz-border-right-colors: ThreeDDarkShadow ThreeDHighlight;
-  -moz-border-bottom-colors: ThreeDDarkShadow ThreeDHighlight;
-  -moz-border-left-colors: ThreeDDarkShadow ThreeDShadow;
+  border-color: ThreeDDarkShadow;
 }
 
 /* ::::: taskbuttons ::::: */
@@ -205,27 +194,17 @@ toolbar[labelalign="end"] .toolbarbutton-1 > hbox > vbox {
 @media (-moz-windows-classic) {
 
   .toolbarbutton-menubutton-dropmarker {
-    border: 1px solid;
+    border: 1px solid transparent;
     padding: 2px;
-    -moz-border-top-colors: transparent;
-    -moz-border-right-colors: transparent;
-    -moz-border-bottom-colors: transparent;
-    -moz-border-left-colors: transparent;
   }
 
   toolbarbutton[type="menu-button"]:hover > .toolbarbutton-menubutton-dropmarker:not([disabled="true"]) {
-    -moz-border-top-colors: ThreeDHighlight;
-    -moz-border-right-colors: ThreeDShadow;
-    -moz-border-bottom-colors: ThreeDShadow;
-    -moz-border-left-colors: ThreeDHighlight;
+    border-color: ThreeDHighlight ThreeDShadow ThreeDShadow ThreeDHighlight;
   }
 
   toolbarbutton[type="menu-button"]:hover:active > .toolbarbutton-menubutton-dropmarker:not([disabled="true"]),
   toolbarbutton[type="menu-button"][open="true"] > .toolbarbutton-menubutton-dropmarker:not([disabled="true"]) {
-    -moz-border-top-colors: ThreeDShadow;
-    -moz-border-right-colors: ThreeDHighlight;
-    -moz-border-bottom-colors: ThreeDHighlight;
-    -moz-border-left-colors: ThreeDShadow;
+    border-color: ThreeDShadow ThreeDHighlight ThreeDHighlight ThreeDShadow;
     padding-top: 3px;
     padding-bottom: 1px;
     padding-inline-start: 3px;

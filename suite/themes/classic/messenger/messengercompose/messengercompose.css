@@ -208,9 +208,9 @@ toolbar[iconsize="small"] > #button-save[disabled="true"] {
 
 #compose-toolbar-sizer {
   border-top-width: 1px;
+  border-top-color: ThreeDHighlight;
   border-left: none;
   border-right: none;
-  -moz-border-top-colors: ThreeDHighlight;
 }
 
 #msgSubject {
@@ -270,21 +270,15 @@ treechildren::-moz-tree-image(subscribed-news) {
   -moz-box-align: center;
   -moz-box-pack: center;
   margin: 0;
-  border: 2px solid;
-  -moz-border-top-colors: ThreeDHighlight ThreeDLightShadow;
-  -moz-border-right-colors: ThreeDDarkShadow ThreeDShadow;
-  -moz-border-bottom-colors: ThreeDDarkShadow ThreeDShadow;
-  -moz-border-left-colors: ThreeDHighlight ThreeDLightShadow;
+  border: 1px solid;
+  border-color: ThreeDLightShadow ThreeDDarkShadow ThreeDDarkShadow ThreeDLightShadow;
   background-color: ThreeDFace;
   color: ButtonText;
   list-style-image: url("chrome://global/skin/arrow/arrow-dn.gif");
 }
 
 .menulist-compact[open="true"] {
-  -moz-border-top-colors: ThreeDDarkShadow ThreeDShadow;
-  -moz-border-right-colors: ThreeDDarkShadow ThreeDHighlight;
-  -moz-border-bottom-colors: ThreeDDarkShadow ThreeDHighlight;
-  -moz-border-left-colors: ThreeDDarkShadow ThreeDShadow;
+  border-color: ThreeDDarkShadow;
 }
 
 .menulist-compact[disabled="true"] {
