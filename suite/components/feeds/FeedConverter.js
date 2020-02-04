@@ -5,7 +5,6 @@
 
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/debug.js");
 
 const TYPE_MAYBE_FEED = "application/vnd.mozilla.maybe.feed";
 const TYPE_MAYBE_VIDEO_FEED = "application/vnd.mozilla.maybe.video.feed";
@@ -418,8 +417,10 @@ FeedResultService.prototype = {
    * See nsIFeedResultService.idl
    */
   addFeedResult: function addFeedResult(feedResult) {
-    NS_ASSERT(feedResult != null, "null feedResult!");
-    NS_ASSERT(feedResult.uri != null, "null URI!");
+    if (feedResult == null)
+      throw new Error("null feedResult!");
+    if (feedResult.uri == null)
+      throw new Error("null URI!");
     var spec = feedResult.uri.spec;
     if (!this._results[spec])
       this._results[spec] = [];
@@ -430,7 +431,8 @@ FeedResultService.prototype = {
    * See nsIFeedResultService.idl
    */
   getFeedResult: function getFeedResult(uri) {
-    NS_ASSERT(uri != null, "null URI!");
+    if (uri == null)
+      throw new Error("null URI!");
     var resultList = this._results[uri.spec];
     for (let i = 0; i < resultList.length; ++i) {
       if (resultList[i].uri == uri)
@@ -443,7 +445,8 @@ FeedResultService.prototype = {
    * See nsIFeedResultService.idl
    */
   removeFeedResult: function removeFeedResult(uri) {
-    NS_ASSERT(uri != null, "null URI!");
+    if (uri == null)
+      throw new Error("null URI!");
     var resultList = this._results[uri.spec];
     if (!resultList)
       return;
