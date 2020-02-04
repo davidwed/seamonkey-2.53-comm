@@ -132,7 +132,8 @@ var BookmarkPropertiesPanel = {
         return this._strings.getString("dialogTitleAddLivemark");
 
       // add folder
-      NS_ASSERT(this._itemType == BOOKMARK_FOLDER, "Unknown item type");
+      if (this._itemType != BOOKMARK_FOLDER)
+        throw new Error("Unknown item type");
       if (this._URIs.length)
         return this._strings.getString("dialogTitleAddMulti");
 
@@ -152,7 +153,8 @@ var BookmarkPropertiesPanel = {
     this._action = dialogInfo.action == "add" ? ACTION_ADD : ACTION_EDIT;
     this._hiddenRows = dialogInfo.hiddenRows ? dialogInfo.hiddenRows : [];
     if (this._action == ACTION_ADD) {
-      NS_ASSERT("type" in dialogInfo, "missing type property for add action");
+      if (!("type" in dialogInfo))
+        throw new Error("missing type property for add action");
 
       if ("title" in dialogInfo)
         this._title = dialogInfo.title;
@@ -170,8 +172,8 @@ var BookmarkPropertiesPanel = {
         case "bookmark":
           this._itemType = BOOKMARK_ITEM;
           if ("uri" in dialogInfo) {
-            NS_ASSERT(dialogInfo.uri instanceof Ci.nsIURI,
-                      "uri property should be a uri object");
+            if (!(dialogInfo.uri instanceof Ci.nsIURI))
+              throw new Error("uri property should be a uri object");
             this._uri = dialogInfo.uri;
             if (typeof(this._title) != "string") {
               this._title = this._getURITitleFromHistory(this._uri) ||
@@ -248,7 +250,8 @@ var BookmarkPropertiesPanel = {
    * @returns a title string
    */
   _getURITitleFromHistory: function BPP__getURITitleFromHistory(aURI) {
-    NS_ASSERT(aURI instanceof Ci.nsIURI);
+    if (!(aURI instanceof Ci.nsIURI))
+      throw new Error("aURI should be a uri object");
 
     // get the title from History
     return PlacesUtils.history.getPageTitle(aURI);
