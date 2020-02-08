@@ -51,6 +51,9 @@ XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
 XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
                                   "resource:///modules/ShellService.jsm");
 
+XPCOMUtils.defineLazyModuleGetter(this, "AppConstants",
+                                  "resource://gre/modules/AppConstants.jsm");
+
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   var tmp = {};
   Cu.import("resource://devtools/shared/Loader.jsm", tmp);
@@ -848,6 +851,10 @@ SuiteGlue.prototype = {
    * having updates off and an old build that likely should be updated.
    */
   _shouldShowUpdateWarning: function () {
+    // If the Updater is not available we don't show the warning.
+    if (!AppConstants.MOZ_UPDATER) {
+      return false;
+    }
     // Look for an unconditional override pref. If set, do what it says.
     // (true --> never show, false --> always show)
     try {
