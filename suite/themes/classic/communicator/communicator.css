@@ -228,3 +228,26 @@ treecols:-moz-lwtheme {
     border-width: 1px !important;
   }
 }
+
+%ifdef MOZ_WIDGET_GTK
+/* Fixes to correctly display colorpickers and filefields under newer
+ * GTK3 versions */
+
+/* colorpicker button */
+
+colorpicker[type="button"] {
+  -moz-appearance: button;
+  width: 56px;
+  height: 24px;
+}
+
+/* filefield */
+
+.fileFieldContentBox {
+  padding-inline-start: 3px;
+  margin-inline-start: -4px;
+  margin-inline-end: -4px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+%endif
