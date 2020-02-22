@@ -612,8 +612,7 @@ var PlacesUIUtils = {
    * @see documentation at the top of bookmarkProperties.js
    * @return true if any transaction has been performed, false otherwise.
    */
-  showBookmarkDialog:
-  function PUIU_showBookmarkDialog(aInfo, aParentWindow) {
+  showBookmarkDialog(aInfo, aParentWindow) {
     // Preserve size attributes differently based on the fact the dialog has
     // a folder picker or not, since it needs more horizontal space than the
     // other controls.
@@ -625,8 +624,33 @@ var PlacesUIUtils = {
                     "chrome://communicator/content/places/bookmarkProperties.xul";
 
     let features = "centerscreen,chrome,modal,resizable=yes";
+
+    let topUndoEntry;
+    let batchBlockingDeferred;
+
+    if (this.useAsyncTransactions) {
+      // Set the transaction manager into batching mode.
+      topUndoEntry = PlacesTransactions.topUndoEntry;
+      batchBlockingDeferred = PromiseUtils.defer();
+      PlacesTransactions.batch(async () => {
+        await batchBlockingDeferred.promise;
+      });
+    }
+
     aParentWindow.openDialog(dialogURL, "", features, aInfo);
-    return ("performed" in aInfo && aInfo.performed);
+
+    let performed = ("performed" in aInfo && aInfo.performed);
+
+    if (this.useAsyncTransactions) {
+      batchBlockingDeferred.resolve();
+
+      if (!performed &&
+          topUndoEntry != PlacesTransactions.topUndoEntry) {
+        PlacesTransactions.undo().catch(Cu.reportError);
+      }
+    }
+
+    return performed;
   },
 
   _getTopBrowserWin: function PUIU__getTopBrowserWin() {
