@@ -2735,7 +2735,9 @@ NS_IMETHODIMP QuotingOutputStreamListener::OnStopRequest(nsIRequest *request, ns
           }
         }
       }
-      if (type == nsIMsgCompType::ReplyToSender || type == nsIMsgCompType::Reply)
+      if (type == nsIMsgCompType::ReplyToSenderAndGroup ||
+          type == nsIMsgCompType::ReplyToSender ||
+          type == nsIMsgCompType::Reply)
       {
         if (isReplyToSelf)
         {
