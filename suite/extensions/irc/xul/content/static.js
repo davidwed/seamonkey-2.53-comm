@@ -6,7 +6,7 @@
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 
-const __cz_version   = "0.9.94";
+const __cz_version   = "0.9.95";
 const __cz_condition = "green";
 const __cz_suffix    = "";
 const __cz_guid      = "59c81df5-4b7a-477b-912d-4e0fdf64e5f2";
@@ -1774,8 +1774,8 @@ var testURLs = [
     "irc://irc.foo.org/?msg=hello%20there",
     "irc://irc.foo.org/?msg=hello%20there&ignorethis",
     "irc://irc.foo.org/%23mozilla,needkey?msg=hello%20there&ignorethis",
-    "irc://moznet/",
-    "irc://moznet/,isserver",
+    "irc://freenode/",
+    "irc://freenode/,isserver",
     "irc://[fe80::5d49:767b:4b68:1b17]",
     "irc://[fe80::5d49:767b:4b68:1b17]/",
     "irc://[fe80::5d49:767b:4b68:1b17]:6666",
