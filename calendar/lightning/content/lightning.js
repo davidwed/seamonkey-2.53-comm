@@ -137,9 +137,6 @@ pref("calendar.threading.latency ", 250);
 // will get multiple password dialogs (one for each calendar)
 pref("calendar.network.multirealm", false);
 
-// Set up user agent
-#expand pref("calendar.useragent.extra", "Lightning/__LIGHTNING_VERSION__");
-
 // Disable use of system colors in minimonth and calendar views
 pref("calendar.view.useSystemColors", false);
 
