@@ -361,6 +361,7 @@ pref("mail.biff.show_new_alert",     true);
 pref("mail.calendar-integration.opt-out", false);
 
 pref("mailnews.ui.deleteMarksRead", true);
+pref("mailnews.ui.deleteAlwaysSelectedMessages", false);
 
 // The maximum amount of decoded image data we'll willingly keep around (we
 // might keep around more than this, but we'll try to get down to this value).
