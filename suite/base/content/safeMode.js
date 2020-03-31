@@ -16,11 +16,7 @@ function clearAllPrefs() {
 
   // Remove the pref-overrides dir, if it exists.
   try {
-    var fileLocator = Cc["@mozilla.org/file/directory_service;1"]
-                        .getService(Ci.nsIProperties);
-    const NS_APP_PREFS_OVERRIDE_DIR = "PrefDOverride";
-    var prefOverridesDir = fileLocator.get(NS_APP_PREFS_OVERRIDE_DIR,
-                                           Ci.nsIFile);
+    var prefOverridesDir = Services.dirsvc.get("PrefDOverride", Ci.nsIFile);
     prefOverridesDir.remove(true);
   } catch (ex) {
     Cu.reportError(ex);
@@ -32,12 +28,8 @@ function restoreDefaultBookmarks() {
 }
 
 function deleteLocalstore() {
-  const nsIDirectoryServiceContractID = "@mozilla.org/file/directory_service;1";
-  const nsIProperties = Ci.nsIProperties;
-  var directoryService = Cc[nsIDirectoryServiceContractID]
-                           .getService(nsIProperties);
   // Delete the old localstore otherwise it will get imported.
-  var localstoreFile = directoryService.get("LStoreS", Ci.nsIFile);
+  var localstoreFile = Services.dirsvc.get("LStoreS", Ci.nsIFile);
   if (localstoreFile.exists())
     localstoreFile.remove(false);
   // Delete the new xulstore file.
