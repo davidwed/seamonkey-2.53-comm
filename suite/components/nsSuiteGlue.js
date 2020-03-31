@@ -1164,13 +1164,9 @@ SuiteGlue.prototype = {
       }
     } catch (ex) {}
 
-    // try to get dictionary preference and initialize with blank if not set
+    // Try to get dictionary preference and adjust if not valid.
     var prefName = "spellchecker.dictionary";
-    var prefValue = "";
-
-    try {
-      prefValue = Services.prefs.getCharPref(prefName);
-    } catch (ex) {}
+    var prefValue = Services.prefs.getCharPref(prefName);
 
     // replace underscore with dash if found in language
     if (/_/.test(prefValue)) {
