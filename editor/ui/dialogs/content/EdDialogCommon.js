@@ -690,8 +690,7 @@ var NotAnInlineParent = [
 
 function nodeIsBreak(editor, node)
 {
-  // XXX This doesn't work because .localName is lowercase (see bug 1306060).
-  return !node || node.localName == 'BR' || editor.nodeIsBlock(node);
+  return !node || node.localName == "br" || editor.nodeIsBlock(node);
 }
 
 function InsertElementAroundSelection(element)
@@ -715,31 +714,37 @@ function InsertElementAroundSelection(element)
     }
 
     // Flatten the selection to child nodes of the common ancestor
-    while (range.startContainer != range.commonAncestorContainer)
+    while (range.startContainer != range.commonAncestorContainer) {
       range.setStartBefore(range.startContainer);
-    while (range.endContainer != range.commonAncestorContainer)
+    }
+    while (range.endContainer != range.commonAncestorContainer) {
       range.setEndAfter(range.endContainer);
+    }
 
-    if (editor.nodeIsBlock(element))
+    if (editor.nodeIsBlock(element)) {
       // Block element parent must be a valid block
-      while (!IsBlockParent.includes(range.commonAncestorContainer.localName))
+      while (!IsBlockParent.includes(range.commonAncestorContainer.localName)) {
         range.selectNode(range.commonAncestorContainer);
-    else
-    {
+      }
+    } else {
       // Fail if we're not inserting a block (use setInlineProperty instead)
       if (!nodeIsBreak(editor, range.commonAncestorContainer))
         return false;
-      else if (NotAnInlineParent.includes(range.commonAncestorContainer.localName))
+
+      if (NotAnInlineParent.includes(range.commonAncestorContainer.localName)) {
         // Inline element parent must not be an invalid block
-        do range.selectNode(range.commonAncestorContainer);
-        while (NotAnInlineParent.includes(range.commonAncestorContainer.localName));
-      else
+        do {
+          range.selectNode(range.commonAncestorContainer);
+        } while (NotAnInlineParent.includes(range.commonAncestorContainer.localName));
+      } else {
         // Further insert block check
-        for (var i = range.startOffset; ; i++)
+        for (var i = range.startOffset; ; i++) {
           if (i == range.endOffset)
             return false;
-          else if (nodeIsBreak(editor, range.commonAncestorContainer.childNodes[i]))
+          if (nodeIsBreak(editor, range.commonAncestorContainer.childNodes[i]))
             break;
+        }
+      }
     }
 
     // The range may be contained by body text, which should all be selected.
@@ -781,8 +786,7 @@ function InsertElementAroundSelection(element)
     else
     {
       // Also move a trailing <br>
-      // XXX This doesn't work because .localName is lowercase (see bug 1306060).
-      if (start && start.localName == 'BR')
+      if (start && start.localName == "br")
       {
         editor.deleteNode(start);
         editor.insertNode(start, element, element.childNodes.length);
