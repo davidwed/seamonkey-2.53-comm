@@ -1059,6 +1059,7 @@ var gEditorOutputProgressListener =
          && gPersistObj && requestSpec
          && (gPersistObj.currentState != gPersistObj.PERSIST_STATE_FINISHED))
     {
+      document.getElementById("navigator-throbber").setAttribute("busy", "true");
       try {
         // Add url to progress dialog's list showing each file uploading
         gProgressDialog.SetProgressStatus(GetFilename(requestSpec), "busy");
@@ -1068,6 +1069,7 @@ var gEditorOutputProgressListener =
     // Detect end of file upload of any file:
     if (aStateFlags & nsIWebProgressListener.STATE_STOP)
     {
+      document.getElementById("navigator-throbber").removeAttribute("busy");
       // ignore aStatus == kErrorBindingAborted; check http response for possible errors
       try {
         // check http channel for response: 200 range is ok; other ranges are not
