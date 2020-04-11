@@ -266,14 +266,14 @@ function BuildRecentPagesMenu()
   var menuIndex = 1;
   for (var i = 0; i < historyCount; i++)
   {
-    var url = GetStringPref("editor.history_url_" + i);
+    var url = Services.prefs.getStringPref("editor.history_url_" + i, "");
 
     // Skip over current url
     if (url && url != curUrl)
     {
       // Build the menu
-      var title = GetStringPref("editor.history_title_" + i);
-      var fileType = GetStringPref("editor.history_type_" + i);
+      var title = Services.prefs.getStringPref("editor.history_title_" + i, "");
+      var fileType = Services.prefs.getStringPref("editor.history_type_" + i, "");
       AppendRecentMenuitem(popup, title, url, fileType, menuIndex);
       menuIndex++;
     }
@@ -318,11 +318,11 @@ function EditorInitFileMenu()
 
   if (Services.prefs.getIntPref("editor.history.url_maximum", 10))
   {
-    historyUrl = GetStringPref("editor.history_url_0");
+    historyUrl = Services.prefs.getStringPref("editor.history_url_0", "");
 
     // See if there's more if current file is only entry in history list.
     if (historyUrl && historyUrl == docUrl)
-      historyUrl = GetStringPref("editor.history_url_1");
+      historyUrl = Services.prefs.getStringPref("editor.history_url_1", "");
   }
   SetElementEnabledById("menu_RecentFiles", historyUrl != "");
 }
