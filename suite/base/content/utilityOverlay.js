@@ -98,7 +98,7 @@ function InitProxyMenu()
   // Checking for proxy manual settings.
   var proxyManuallyConfigured = false;
   for (var i = 0; i < kProxyManual.length; i++) {
-    if (GetStringPref(kProxyManual[i]) != "") {
+    if (Services.prefs.getStringPref(kProxyManual[i], "") != "") {
       proxyManuallyConfigured = true;
       break;
     }
@@ -113,7 +113,7 @@ function InitProxyMenu()
 
   //Checking for proxy PAC settings.
   var proxyAutoConfigured = false;
-  if (GetStringPref("network.proxy.autoconfig_url") != "")
+  if (Services.prefs.getStringPref("network.proxy.autoconfig_url", "") != "")
     proxyAutoConfigured = true;
 
   if (proxyAutoConfigured && !proxyLocked) {
@@ -144,18 +144,9 @@ function setProxyTypeUI()
 
 function SetStringPref(aPref, aValue)
 {
-  const nsISupportsString = Ci.nsISupportsString;
   try {
     Services.prefs.setStringPref(aPref, aValue);
   } catch (e) {}
-}
-
-function GetStringPref(name)
-{
-  try {
-    return Services.prefs.getStringPref(name);
-  } catch (e) {}
-  return "";
 }
 
 function GetLocalizedStringPref(aPrefName, aDefaultValue)
