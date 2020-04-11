@@ -408,14 +408,6 @@ function GetFileProtocolHandler()
   return handler.QueryInterface(Ci.nsIFileProtocolHandler);
 }
 
-function GetStringPref(name)
-{
-  try {
-    return Services.prefs.getStringPref(name);
-  } catch (e) {}
-  return "";
-}
-
 function SetStringPref(aPrefName, aPrefValue)
 {
   try {
