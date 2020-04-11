@@ -923,7 +923,7 @@ function Startup()
           uriArray = getHomePage();
           break;
         case 2:
-          uriArray = [GetStringPref("browser.history.last_page_visited")];
+          uriArray = [Services.prefs.getStringPref("browser.history.last_page_visited", "")];
           break;
       }
     }
@@ -1750,7 +1750,7 @@ function BrowserOpenTab()
         uriToLoad = GetLocalizedStringPref("browser.startup.homepage");
         break;
       case 2:
-        uriToLoad = GetStringPref("browser.history.last_page_visited");
+        uriToLoad = Services.prefs.getStringPref("browser.history.last_page_visited", "");
         break;
     }
 
