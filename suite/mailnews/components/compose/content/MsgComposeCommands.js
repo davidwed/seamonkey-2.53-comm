@@ -3219,9 +3219,7 @@ function SwitchElementFocus(event)
 
 function loadHTMLMsgPrefs()
 {
-  // This version of GetStringPref() comes from editorUtilities.js instead of
-  // utilitiesOverlay.js
-  var fontFace = GetStringPref("msgcompose.font_face");
+  var fontFace = Services.prefs.getStringPref("msgcompose.font_face", "");
   doStatefulCommand("cmd_fontFace", fontFace);
 
   var fontSize = Services.prefs.getCharPref("msgcompose.font_size", "");
