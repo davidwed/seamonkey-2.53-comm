@@ -1605,8 +1605,15 @@ calDavCalendar.prototype = {
                 let authTitle = cal.l10n.getAnyString(
                     "global", "commonDialogs", "EnterUserPasswordFor2", [this.name]
                 );
-                this.oauth = new OAuth2(OAUTH_BASE_URI, OAUTH_SCOPE,
-                                        OAUTH_CLIENT_ID, OAUTH_HASH);
+                this.oauth =
+                  new OAuth2(
+                    OAUTH_BASE_URI + "oauth2/auth",
+                    OAUTH_BASE_URI + "oauth2/token",
+                    OAUTH_SCOPE,
+                    OAUTH_CLIENT_ID,
+                    OAUTH_HASH
+                  );
+
                 this.oauth.requestWindowTitle = authTitle;
                 this.oauth.requestWindowFeatures = "chrome,private,centerscreen,width=430,height=750";
 
