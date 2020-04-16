@@ -67,9 +67,9 @@ OAuth2Module.prototype = {
 
     // Username is needed to generate the XOAUTH2 string.
     this._username = aUsername;
-    // LoginURL is needed to save the refresh token in the password manager.
-    this._loginUrl = "oauth://" + issuer;
-    // We use the scope to indicate the realm.
+    // loginOrigin is needed to save the refresh token in the password manager.
+    this._loginOrigin = "oauth://" + issuer;
+    // We use the scope to indicate realm when storing in the password manager.
     this._scope = scope;
 
     // Define the OAuth property and store it.
@@ -102,9 +102,12 @@ OAuth2Module.prototype = {
   },
 
   get refreshToken() {
-    let loginMgr = Cc["@mozilla.org/login-manager;1"]
-                     .getService(Ci.nsILoginManager);
-    let logins = loginMgr.findLogins({}, this._loginUrl, null, this._scope);
+    let logins = Services.logins.findLogins(
+      {},
+      this._loginOrigin,
+      null,
+      this._scope
+    );
     for (let login of logins) {
       if (login.username == this._username)
         return login.password;
@@ -112,22 +115,24 @@ OAuth2Module.prototype = {
     return '';
   },
   set refreshToken(token) {
-    let loginMgr = Cc["@mozilla.org/login-manager;1"]
-                     .getService(Ci.nsILoginManager);
-
     // Check if we already have a login with this username, and modify the
     // password on that, if we do.
-    let logins = loginMgr.findLogins({}, this._loginUrl, null, this._scope);
+    let logins = Services.logins.findLogins(
+      {},
+      this._loginOrigin,
+      null,
+      this._scope
+    );
     for (let login of logins) {
       if (login.username == this._username) {
         if (token) {
           let propBag = Cc["@mozilla.org/hash-property-bag;1"].
                         createInstance(Ci.nsIWritablePropertyBag);
           propBag.setProperty("password", token);
-          loginMgr.modifyLogin(login, propBag);
+          Services.logins.modifyLogin(login, propBag);
         }
         else
-          loginMgr.removeLogin(login);
+          Services.logins.removeLogin(login);
         return token;
       }
     }
@@ -136,9 +141,16 @@ OAuth2Module.prototype = {
     if (token) {
       let login = Cc["@mozilla.org/login-manager/loginInfo;1"]
                     .createInstance(Ci.nsILoginInfo);
-      login.init(this._loginUrl, null, this._scope, this._username, token,
-        '', '');
-      loginMgr.addLogin(login);
+      login.init(
+        this._loginOrigin,
+        null,
+        this._scope,
+        this._username,
+        token,
+        "",
+        ""
+      );
+      Services.logins.addLogin(login);
     }
     return token;
   },
@@ -171,7 +183,7 @@ OAuth2Module.prototype = {
 
     let asyncprompter = Components.classes["@mozilla.org/messenger/msgAsyncPrompter;1"]
                                   .getService(Components.interfaces.nsIMsgAsyncPrompter);
-    let promptkey = this._loginUrl + "/" + this._username;
+    let promptkey = this._loginOrigin + "/" + this._username;
     asyncprompter.queueAsyncAuthPrompt(promptkey, false, promptlistener);
   },
 };
