@@ -50,8 +50,6 @@ AccountConfig.prototype =
    */
   incomingAlternatives : null,
   outgoingAlternatives : null,
-  // OAuth2 configuration, if needed.
-  oauthSettings : null,
   // just an internal string to refer to this. Do not show to user.
   id : null,
   // who created the config.
@@ -114,6 +112,9 @@ AccountConfig.prototype =
       // When user hits delete, delete from local store and from server
       deleteOnServerWhenLocalDelete : true,
       downloadOnBiff : true,
+
+      // OAuth2 configuration, if needed.
+      oauthSettings: null,
     };
   },
   /**
@@ -139,6 +140,9 @@ AccountConfig.prototype =
       existingServerKey : null,
       // user display value for existingServerKey
       existingServerLabel : null,
+
+      // OAuth2 configuration, if needed.
+      oauthSettings: null,
     };
   },
 

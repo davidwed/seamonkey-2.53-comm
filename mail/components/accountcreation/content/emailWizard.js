@@ -1033,11 +1033,13 @@ EmailConfigWizard.prototype =
     if (iDetails) {
       gEmailWizardLogger.info("OAuth2 details for incoming server " +
         config.incoming.hostname + " is " + iDetails);
-      config.oauthSettings = {};
-      [config.oauthSettings.issuer, config.oauthSettings.scope] = iDetails;
-      // oauthsettings are not stored nor changeable in the user interface, so just
-      // store them in the base configuration.
-      this._currentConfig.oauthSettings = config.oauthSettings;
+      config.incoming.oauthSettings = {};
+      [
+        config.incoming.oauthSettings.issuer,
+        config.incoming.oauthSettings.scope,
+      ] = iDetails;
+      this._currentConfig.incoming.oauthSettings =
+        config.incoming.oauthSettings;
     }
 
     // outgoing server
@@ -1062,11 +1064,13 @@ EmailConfigWizard.prototype =
     if (oDetails) {
       gEmailWizardLogger.info("OAuth2 details for outgoing server " +
         config.outgoing.hostname + " is " + oDetails);
-      config.oauthSettings = {};
-      [config.oauthSettings.issuer, config.oauthSettings.scope] = oDetails;
-      // oauthsettings are not stored nor changeable in the user interface, so just
-      // store them in the base configuration.
-      this._currentConfig.oauthSettings = config.oauthSettings;
+      config.outgoing.oauthSettings = {};
+      [
+        config.outgoing.oauthSettings.issuer,
+        config.outgoing.oauthSettings.scope,
+      ] = oDetails;
+      this._currentConfig.outgoing.oauthSettings =
+        config.outgoing.oauthSettings;
     }
 
 
@@ -1621,9 +1625,14 @@ EmailConfigWizard.prototype =
 
         // We loaded dynamic client registration, fill this data back in to the
         // config set.
-        if (successfulConfig.oauthSettings)
-          self._currentConfig.oauthSettings = successfulConfig.oauthSettings;
-
+        if (successfulConfig.incoming.oauthSettings) {
+          self._currentConfig.incoming.oauthSettings =
+            successfulConfig.incoming.oauthSettings;
+        }
+        if (successfulConfig.outgoing.oauthSettings) {
+          self._currentConfig.outgoing.oauthSettings =
+            successfulConfig.outgoing.oauthSettings;
+        }
         self.finish();
       },
       function(e) // failed
