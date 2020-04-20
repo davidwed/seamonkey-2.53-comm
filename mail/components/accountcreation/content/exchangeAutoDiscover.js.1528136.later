@@ -1,0 +1,58 @@
+--- exchangeAutoDiscover.js
++++ exchangeAutoDiscover.js
+@@ -230,17 +230,16 @@ function readAutoDiscoverXML(autoDiscove
+ 
+   var config = new AccountConfig();
+   config.source = AccountConfig.kSourceExchange;
+   config.incoming.username = username || "%EMAILADDRESS%";
+   config.incoming.socketType = 2; // only https supported
+   config.incoming.port = 443;
+   config.incoming.auth = Ci.nsMsgAuthMethod.passwordCleartext;
+   config.incoming.authAlternatives = [Ci.nsMsgAuthMethod.OAuth2];
+-  config.oauthSettings = {};
+   config.outgoing.addThisServer = false;
+   config.outgoing.useGlobalPreferredServer = true;
+ 
+   for (let protocolX of array_or_undef(xml.$Protocol)) {
+     try {
+       let type = sanitize.enum(
+         protocolX.Type,
+         ["WEB", "EXHTTP", "EXCH", "EXPR", "POP3", "IMAP", "SMTP"],
+@@ -349,17 +348,17 @@ function readAutoDiscoverXML(autoDiscove
+       // else unknown or unsupported protocol
+     } catch (e) {
+       logException(e);
+     }
+   }
+ 
+   // OAuth2 settings, so that createInBackend() doesn't bail out
+   if (config.incoming.owaURL || config.incoming.ewsURL) {
+-    config.oauthSettings = {
++    config.incoming.oauthSettings = {
+       issuer: config.incoming.hostname,
+       scope: config.incoming.owaURL || config.incoming.ewsURL,
+     };
+   }
+ 
+   return config;
+ }
+ /* eslint-enable complexity */
+@@ -542,18 +541,16 @@ function detectStandardProtocols(config,
+   config2.incomingAlternatives = config.incomingAlternatives;
+   config2.incomingAlternatives.push(config.incoming); // type=exchange
+ 
+   config2.outgoingAlternatives = config.outgoingAlternatives;
+   if (config.outgoing.hostname) {
+     config2.outgoingAlternatives.push(config.outgoing);
+   }
+ 
+-  config2.oauthSettings = config.oauthSettings;
+-
+   guessConfig(
+     domain,
+     function(type, hostname, port, ssl, done, config) {
+       gEmailWizardLogger.info(
+         `Probing exchange server ${hostname} for ${type} protocol support.`
+       );
+     },
+     function(probedConfig) {
