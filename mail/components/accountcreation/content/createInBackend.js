@@ -29,8 +29,11 @@ function createAccountInBackend(config)
     rememberPassword(inServer, config.incoming.password);
 
   if (inServer.authMethod == Ci.nsMsgAuthMethod.OAuth2) {
-    inServer.setCharValue("oauth2.scope", config.oauthSettings.scope);
-    inServer.setCharValue("oauth2.issuer", config.oauthSettings.issuer);
+    inServer.setCharValue("oauth2.scope", config.incoming.oauthSettings.scope);
+    inServer.setCharValue(
+      "oauth2.issuer",
+      config.incoming.oauthSettings.issuer
+    );
   }
 
   // SSL
@@ -108,11 +111,15 @@ function createAccountInBackend(config)
     }
 
     if (outServer.authMethod == Ci.nsMsgAuthMethod.OAuth2) {
-      let pref = "mail.smtpserver." + outServer.key + ".";
-      Services.prefs.setCharPref(pref + "oauth2.scope",
-                                 config.oauthSettings.scope);
-      Services.prefs.setCharPref(pref + "oauth2.issuer",
-                                 config.oauthSettings.issuer);
+      let prefBranch = "mail.smtpserver." + outServer.key + ".";
+      Services.prefs.setCharPref(
+        prefBranch + "oauth2.scope",
+        config.outgoing.oauthSettings.scope
+      );
+      Services.prefs.setCharPref(
+        prefBranch + "oauth2.issuer",
+        config.outgoing.oauthSettings.issuer
+      );
     }
 
     if (config.outgoing.socketType == 1) // no SSL
