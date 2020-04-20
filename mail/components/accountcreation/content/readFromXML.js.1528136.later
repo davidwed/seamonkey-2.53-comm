@@ -1,0 +1,21 @@
+--- readFromXML.js
++++ readFromXML.js
+@@ -150,17 +150,17 @@ function readFromXML(clientConfigXML) {
+         }
+         try {
+           if ("easURL" in iX) {
+             iO.easURL = sanitize.url(iX.easURL);
+           }
+         } catch (e) {
+           logException(e);
+         }
+-        d.oauthSettings = {
++        iO.oauthSettings = {
+           issuer: iO.hostname,
+           scope: iO.owaURL || iO.ewsURL || iO.easURL,
+         };
+       }
+       // defaults are in accountConfig.js
+       if (iO.type == "pop3" && "pop3" in iX) {
+         try {
+           if ("leaveMessagesOnServer" in iX.pop3) {
