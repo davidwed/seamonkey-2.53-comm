@@ -158,7 +158,8 @@ enum Pop3StatesEnum {
     POP3_OBTAIN_PASSWORD_BEFORE_PASSWORD,       // 49
     POP3_FINISH_OBTAIN_PASSWORD_BEFORE_PASSWORD,  // 50
 
-    POP3_AUTH_OAUTH2_RESPONSE,  // 51
+    POP3_AUTH_OAUTH2_RESPONSE,   // 51
+    POP3_AUTH_OAUTH2_AUTH_STEP,  // 52
 };
 
 
@@ -198,7 +199,11 @@ typedef struct _Pop3ConData {
     uint32_t capability_flags; /* What capability this server has? */
 
     Pop3StatesEnum next_state;  /* the next state or action to be taken */
+
+    /* When in the generic POP3_WAIT_FOR_RESPONSE state, this indicates which
+     * state we want to go to when a successful response arrives. */
     Pop3StatesEnum next_state_after_response;
+
     bool pause_for_read;       /* Pause now for next read? */
 
     bool command_succeeded;   /* did the last command succeed? */
@@ -299,6 +304,11 @@ private:
   nsCString m_senderInfo;
   nsCString m_commandResponse;
   nsCString m_GSSAPICache;
+  /**
+   * For keeping track of the OAuth2 string to send, if it's long and can't be
+   * sent with the command directly.
+   */
+  nsCString m_OAuth2String;
 
   // Used for asynchronous password prompts to store the password temporarily.
   nsString m_passwordResult;
@@ -400,6 +410,7 @@ private:
   int32_t SendXsender();
   int32_t XsenderResponse();
   int32_t SendRetr();
+  int32_t OAuth2AuthStep();
 
   int32_t RetrResponse(nsIInputStream* inputStream, uint32_t length);
   int32_t TopResponse(nsIInputStream* inputStream, uint32_t length);
