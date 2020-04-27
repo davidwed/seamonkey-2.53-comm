@@ -5,6 +5,7 @@
 
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/OAuth2Providers.jsm");
 
 // be real hacky with document.getElementById until document.controls works
 // with the new XUL widgets
@@ -63,6 +64,10 @@ function initSmtpSettings(server) {
 
     if (MailServices.smtp.defaultServer)
       onLockPreference();
+
+    // Hide OAuth2 option if we can't use it.
+    let details = OAuth2Providers.getHostnameDetails(server.hostname);
+    document.getElementById("authMethod-oauth2").hidden = !details;
 
     // Hide deprecated/hidden auth options, unless selected
     hideUnlessSelected(document.getElementById("authMethod-anysecure"));
