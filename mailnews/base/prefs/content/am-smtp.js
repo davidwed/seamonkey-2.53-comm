@@ -5,7 +5,6 @@
 
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
-ChromeUtils.import("resource:///modules/OAuth2Providers.jsm");
 
 var gSmtpServerListWindow =
 {
@@ -151,12 +150,6 @@ var gSmtpServerListWindow =
     }
 
     if (authStr) {
-      let details = OAuth2Providers.getHostnameDetails(aServer.hostname);
-      if (!details) {
-        document.getElementById("authMethod-oauth2")
-                .toggleAttribute("disabled", true);
-      }
-
       document.getElementById("authMethodValue").value =
           this.mBundle.getString(authStr);
     }
