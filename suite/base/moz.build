@@ -15,3 +15,28 @@ DEFINES['APP_LICENSE_BLOCK'] = '%s/content/overrides/app-license.html' % SRCDIR
 
 for var in ('MOZ_APP_NAME', 'MOZ_MACBUNDLE_NAME'):
     DEFINES[var] = CONFIG[var]
+
+# For customized buildconfig
+DEFINES['TOPOBJDIR'] = TOPOBJDIR
+
+DEFINES['SEAMONKEY_DEVELOPER_WWW'] = "https://www.seamonkey-project.org/dev/"
+
+for var in ('CC', 'CC_VERSION', 'CXX', 'RUSTC', 'RUSTC_VERSION'):
+    if CONFIG[var]:
+        DEFINES[var] = CONFIG[var]
+
+for var in ('MOZ_CONFIGURE_OPTIONS', 'target', 'MOZ_APP_DISPLAYNAME', 'SEAMONKEY_VERSION_DISPLAY',):
+    DEFINES[var] = CONFIG[var]
+
+DEFINES['CFLAGS'] = ' '.join(CONFIG['OS_CFLAGS'])
+
+rustflags = CONFIG['RUSTFLAGS']
+if not rustflags:
+    rustflags = []
+DEFINES['RUSTFLAGS'] = ' '.join(rustflags)
+
+cxx_flags = []
+for var in ('OS_CPPFLAGS', 'OS_CXXFLAGS', 'DEBUG', 'OPTIMIZE', 'FRAMEPTR'):
+    cxx_flags += COMPILE_FLAGS[var] or []
+
+DEFINES['CXXFLAGS'] = ' '.join(cxx_flags)
