@@ -4,11 +4,50 @@
 
 from __future__ import print_function, unicode_literals
 
-import sys
 import os
+import subprocess
+import sys
 from datetime import datetime
 
 import buildconfig
+
+def get_program_output(*command):
+    try:
+        with open(os.devnull) as stderr:
+            return subprocess.check_output(command, stderr=stderr)
+    except:
+        return None
+
+
+def get_repo_info(path):
+    if os.path.exists(os.path.join(path, '.hg')):
+        repo = get_program_output('hg', '-R', path, 'paths', 'default')
+        if repo:
+            repo = repo.strip()
+            if repo.startswith('ssh://'):
+                repo = 'https://' + repo[6:]
+            repo = repo.rstrip('/')
+            rev = get_program_output('hg', '-R', path, 'parent', '--template={node}')
+            return repo, rev
+
+    if os.path.exists(os.path.join(path, '.git')):
+        cwd = os.getcwd()
+        os.chdir(path)
+        rev = None
+        repo = get_program_output('git', 'config', '--get', 'remote.origin.url')
+        if repo:
+            repo = repo.strip()
+            if repo.startswith('ssh://'):
+                repo = 'https://' + repo[6:]
+            repo = repo.rstrip('/.git')
+            rev = get_program_output('git', 'rev-parse', '--short', 'HEAD')
+            rev = rev.rstrip('\n')
+
+        os.chdir(cwd)
+        return repo, rev
+
+    return None, None
+
 
 def get_gecko_repo_info():
     repo = buildconfig.substs.get('MOZ_GECKO_SOURCE_REPO', None)
@@ -17,14 +56,20 @@ def get_gecko_repo_info():
         repo = buildconfig.substs.get('MOZ_SOURCE_REPO', None)
         rev = buildconfig.substs.get('MOZ_SOURCE_CHANGESET', None)
 
-    return repo, rev
+    if repo:
+        return repo, rev
+
+    return get_repo_info(buildconfig.topsrcdir)
 
 
 def get_comm_repo_info():
     repo = buildconfig.substs.get('MOZ_COMM_SOURCE_REPO', None)
     rev = buildconfig.substs.get('MOZ_COMM_SOURCE_CHANGESET', None)
 
-    return repo, rev
+    if repo:
+        return repo, rev
+
+    return get_repo_info(os.path.join(buildconfig.topsrcdir, '..'))
 
 
 def get_source_url(repo, rev):
