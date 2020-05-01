@@ -325,8 +325,8 @@ nsLDAPConnection::AddPendingOperation(uint32_t aOperationID, nsILDAPOperation *a
     MutexAutoLock lock(mPendingOperationsMutex);
     mPendingOperations.Put((uint32_t)aOperationID, aOperation);
     MOZ_LOG(gLDAPLogModule, mozilla::LogLevel::Debug,
-           ("pending operation added; total pending operations now = %d\n",
-            mPendingOperations.Count()));
+            ("Operation id=%d added (%d now pending)", aOperationID,
+             mPendingOperations.Count()));
   }
 
   nsresult rv;
@@ -360,16 +360,12 @@ nsLDAPConnection::RemovePendingOperation(uint32_t aOperationID)
 {
   NS_ENSURE_TRUE(aOperationID > 0, NS_ERROR_UNEXPECTED);
 
-  MOZ_LOG(gLDAPLogModule, mozilla::LogLevel::Debug,
-         ("nsLDAPConnection::RemovePendingOperation(): operation removed\n"));
-
   {
     MutexAutoLock lock(mPendingOperationsMutex);
     mPendingOperations.Remove(aOperationID);
     MOZ_LOG(gLDAPLogModule, mozilla::LogLevel::Debug,
-           ("nsLDAPConnection::RemovePendingOperation(): operation "
-            "removed; total pending operations now = %d\n",
-            mPendingOperations.Count()));
+            ("Operation id=%d removed (%d now pending)", aOperationID,
+             mPendingOperations.Count()));
   }
 
   return NS_OK;
@@ -636,9 +632,17 @@ NS_IMETHODIMP nsLDAPConnectionRunnable::Run()
     case 0:
       // XXX do we need a timer?
       return thread->Dispatch(this, nsIEventTarget::DISPATCH_NORMAL);
-    case -1:
-      NS_ERROR("We don't know what went wrong with the ldap operation");
+    case -1: {
+      int errCode;
+      ldap_get_option(mConnection->mConnectionHandle, LDAP_OPT_ERROR_NUMBER,
+                      &errCode);
+      MOZ_LOG(gLDAPLogModule, mozilla::LogLevel::Error,
+              ("ldap_result() failed (on id=%d): %s", mOperationID,
+               ldap_err2string(errCode)));
+      // Remove operation from the Pending table.
+      mConnection->RemovePendingOperation((uint32_t)mOperationID);
       return NS_ERROR_FAILURE;
+    }
 
     case LDAP_RES_SEARCH_ENTRY:
     case LDAP_RES_SEARCH_REFERENCE:
