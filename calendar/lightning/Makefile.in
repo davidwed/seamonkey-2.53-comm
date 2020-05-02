@@ -15,7 +15,7 @@ DEFINES += -DLIGHTNING_PRERELEASE_VERSION=1
 endif
 
 # Gecko milestone
-GRE_MILESTONE = $(shell $(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py $(DIST)/bin/platform.ini Build Milestone)
+GRE_MILESTONE = $(shell $(PYTHON3) $(moztopsrcdir)/config/printconfigsetting.py $(DIST)/bin/platform.ini Build Milestone)
 ifdef GRE_MILESTONE
 DEFINES += -DGRE_MILESTONE=$(GRE_MILESTONE)
 endif
@@ -50,7 +50,7 @@ DEFINES += -DTHUNDERBIRD_VERSION=$(THUNDERBIRD_VERSION) \
            -DXPI_EM_ID='$(XPI_EM_ID)' \
            $(NULL)
 
-MOZ_BUILDID = $(shell $(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py $(DIST)/bin/application.ini App BuildID)
+MOZ_BUILDID = $(shell $(PYTHON3) $(moztopsrcdir)/config/printconfigsetting.py $(DIST)/bin/application.ini App BuildID)
 DEFINES += -DMOZ_BUILDID=$(MOZ_BUILDID)
 
 LOCALE_TOPDIR=$(commtopsrcdir)

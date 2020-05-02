@@ -99,13 +99,13 @@ endif
 
 ident:
 	@printf 'comm_revision '
-	@$(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py \
+	@$(PYTHON3) $(moztopsrcdir)/config/printconfigsetting.py \
 	    $(STAGEDIST)/application.ini App SourceStamp
 	@printf 'moz_revision '
-	@$(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py \
+	@$(PYTHON3) $(moztopsrcdir)/config/printconfigsetting.py \
 	    $(STAGEDIST)/platform.ini Build SourceStamp
 	@printf 'buildid '
-	@$(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py \
+	@$(PYTHON3) $(moztopsrcdir)/config/printconfigsetting.py \
 	    $(STAGEDIST)/application.ini App BuildID
 
 #These make targets call prepare-repackages by setting different UPLOAD_DIR
