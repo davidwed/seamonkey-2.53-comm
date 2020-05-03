@@ -366,6 +366,8 @@ var ResultsPaneController =
       case "cmd_selectAll":
       case "cmd_delete":
       case "button_delete":
+      case "cmd_printpreview":
+      case "cmd_print":
       case "cmd_printcardpreview":
       case "cmd_printcard":
       case "cmd_properties":
@@ -416,6 +418,14 @@ var ResultsPaneController =
           }
         }
         return (enabled && (numSelected > 0));
+      case "cmd_printpreview":
+      case "cmd_print":
+        // cmd_printpreview and cmd_print are currently only used in SeaMonkey.
+        var enabled = (GetNumSelectedCards() > 0);
+        document.querySelectorAll("[command=cmd_print]").forEach(e => {
+          e.disabled = !enabled;
+        });
+        return enabled;
       case "cmd_printcardpreview":
       case "cmd_printcard":
         return (GetNumSelectedCards() > 0);
@@ -479,6 +489,14 @@ var ResultsPaneController =
       case "cmd_delete":
       case "button_delete":
         AbDelete();
+        break;
+      case "cmd_printpreview":
+        // cmd_printpreview is currently only used in SeaMonkey.
+        AbPrintPreviewCard();
+        break;
+      case "cmd_print":
+        // cmd_print is currently only used in SeaMonkey.
+        AbPrintCard();
         break;
       case "cmd_properties":
         AbEditSelectedCard();
