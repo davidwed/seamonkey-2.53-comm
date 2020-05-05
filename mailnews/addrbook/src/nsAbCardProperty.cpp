@@ -51,12 +51,7 @@ static const AppendItem NAME_ATTRS_ARRAY[] = {
   {kDisplayNameProperty, "propertyDisplayName", eAppendLabel},
   {kNicknameProperty, "propertyNickname", eAppendLabel},
   {kPriEmailProperty, "", eAppendLine},
-#ifndef MOZ_THUNDERBIRD
-  {k2ndEmailProperty, "", eAppendLine},
-  {kScreenNameProperty, "propertyScreenName", eAppendLabel}
-#else
   {k2ndEmailProperty, "", eAppendLine}
-#endif
 };
 
 static const AppendItem PHONE_ATTRS_ARRAY[] = {
@@ -94,8 +89,6 @@ static const AppendItem CUSTOM_ATTRS_ARRAY[] = {
   {kNotesProperty, "", eAppendLine}
 };
 
-#ifdef MOZ_THUNDERBIRD
-
 static const AppendItem CHAT_ATTRS_ARRAY[] = {
   {kGtalkProperty, "propertyGtalk", eAppendLabel},
   {kAIMProperty, "propertyAIM", eAppendLabel},
@@ -107,7 +100,6 @@ static const AppendItem CHAT_ATTRS_ARRAY[] = {
   {kXMPPProperty, "propertyXMPP", eAppendLabel},
   {kIRCProperty, "propertyIRC", eAppendLabel}
 };
-#endif
 
 nsAbCardProperty::nsAbCardProperty()
   : m_IsMailList(false)
@@ -817,9 +809,7 @@ nsresult nsAbCardProperty::ConvertToXMLPrintData(nsAString &aXMLSubstr)
 
   if (!m_IsMailList) {
     rv = AppendSection(CUSTOM_ATTRS_ARRAY, sizeof(CUSTOM_ATTRS_ARRAY)/sizeof(AppendItem), NS_LITERAL_STRING("headingOther"), bundle, conv, xmlStr);
-#ifdef MOZ_THUNDERBIRD
     rv = AppendSection(CHAT_ATTRS_ARRAY, sizeof(CHAT_ATTRS_ARRAY)/sizeof(AppendItem), NS_LITERAL_STRING("headingChat"), bundle, conv, xmlStr);
-#endif
   }
   else {
     rv = AppendSection(CUSTOM_ATTRS_ARRAY, sizeof(CUSTOM_ATTRS_ARRAY)/sizeof(AppendItem), NS_LITERAL_STRING("headingDescription"),
