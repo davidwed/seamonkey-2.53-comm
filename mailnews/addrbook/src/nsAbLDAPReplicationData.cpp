@@ -21,7 +21,6 @@ NS_IMPL_ISUPPORTS(nsAbLDAPProcessReplicationData, nsIAbLDAPProcessReplicationDat
 nsAbLDAPProcessReplicationData::nsAbLDAPProcessReplicationData() :
   nsAbLDAPListenerBase(),
   mState(kIdle),
-  mProtocol(-1),
   mCount(0),
   mDBOpen(false),
   mInitialized(false)
@@ -81,13 +80,6 @@ NS_IMETHODIMP nsAbLDAPProcessReplicationData::GetReplicationState(int32_t *aRepl
 {
     NS_ENSURE_ARG_POINTER(aReplicationState);
     *aReplicationState = mState;
-    return NS_OK;
-}
-
-NS_IMETHODIMP nsAbLDAPProcessReplicationData::GetProtocolUsed(int32_t *aProtocolUsed)
-{
-    NS_ENSURE_ARG_POINTER(aProtocolUsed);
-    *aProtocolUsed = mProtocol;
     return NS_OK;
 }
 
