@@ -8,7 +8,6 @@
 
 #include "mozilla/Attributes.h"
 #include "nsAbDirProperty.h"
-#include "nsAbLDAPDirectoryModify.h"
 #include "nsIAbDirectoryQuery.h"
 #include "nsIAbDirectorySearch.h"
 #include "nsIAbDirSearchListener.h"
@@ -19,7 +18,6 @@
 
 class nsAbLDAPDirectory :
   public nsAbDirProperty,             // nsIAbDirectory
-  public nsAbLDAPDirectoryModify,
   public nsIAbDirectorySearch,
   public nsIAbLDAPDirectory,
   public nsIAbDirSearchListener
@@ -68,8 +66,6 @@ protected:
 
   mozilla::Mutex mLock;
   nsCOMPtr<nsIAbDirectoryQuery> mDirectoryQuery;
-  nsCOMPtr<nsIMutableArray> mSearchServerControls;
-  nsCOMPtr<nsIMutableArray> mSearchClientControls;
 };
 
 #endif
