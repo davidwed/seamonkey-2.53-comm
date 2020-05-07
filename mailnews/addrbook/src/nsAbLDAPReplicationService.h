@@ -19,8 +19,6 @@ public:
 
   nsAbLDAPReplicationService();
 
-  int32_t DecideProtocol();
-
 protected:
   virtual ~nsAbLDAPReplicationService();
   nsCOMPtr<nsIAbLDAPReplicationQuery> mQuery;
