@@ -9,7 +9,6 @@
 #include "nsILDAPErrors.h"
 #include "nsILDAPOperation.h"
 #include "nsIAbLDAPAttributeMap.h"
-#include "nsIAbLDAPCard.h"
 #include "nsAbUtils.h"
 #include "nsAbBaseCID.h"
 #include "nsString.h"
@@ -38,8 +37,6 @@ public:
                                nsILDAPURL* searchUrl,
                                nsILDAPConnection* connection,
                                nsIAbDirectoryQueryArguments* queryArguments,
-                               nsIMutableArray* serverSearchControls,
-                               nsIMutableArray* clientSearchControls,
                                const nsACString &login,
                                const nsACString &mechanism,
                                const int32_t resultLimit = -1,
@@ -68,9 +65,6 @@ protected:
   bool mFinished;
   bool mCanceled;
   bool mWaitingForPrevQueryToFinish;
-
-  nsCOMPtr<nsIMutableArray> mServerSearchControls;
-  nsCOMPtr<nsIMutableArray> mClientSearchControls;
 };
 
 
@@ -82,8 +76,6 @@ nsAbQueryLDAPMessageListener::nsAbQueryLDAPMessageListener(
         nsILDAPURL* searchUrl,
         nsILDAPConnection* connection,
         nsIAbDirectoryQueryArguments* queryArguments,
-        nsIMutableArray* serverSearchControls,
-        nsIMutableArray* clientSearchControls,
         const nsACString &login,
         const nsACString &mechanism,
         const int32_t resultLimit,
@@ -95,9 +87,7 @@ nsAbQueryLDAPMessageListener::nsAbQueryLDAPMessageListener(
   mResultLimit(resultLimit),
   mFinished(false),
   mCanceled(false),
-  mWaitingForPrevQueryToFinish(false),
-  mServerSearchControls(serverSearchControls),
-  mClientSearchControls(clientSearchControls)
+  mWaitingForPrevQueryToFinish(false)
 {
   mSaslMechanism.Assign(mechanism);
 }
@@ -224,12 +214,6 @@ nsresult nsAbQueryLDAPMessageListener::DoTask()
   rv = mSearchUrl->GetAttributes(attributes);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  rv = mOperation->SetServerControls(mServerSearchControls);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  rv = mOperation->SetClientControls(mClientSearchControls);
-  NS_ENSURE_SUCCESS(rv, rv);
-
   return mOperation->SearchExt(dn, scope, filter, attributes, mTimeOut,
                                mResultLimit);
 }
@@ -261,16 +245,11 @@ nsresult nsAbQueryLDAPMessageListener::OnLDAPMessageSearchEntry(nsILDAPMessage *
   nsCOMPtr<nsIAbLDAPAttributeMap> map = do_QueryInterface(iSupportsMap, &rv);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  nsCOMPtr<nsIAbCard> card = do_CreateInstance(NS_ABLDAPCARD_CONTRACTID, &rv);
+  nsCOMPtr<nsIAbCard> card =
+      do_CreateInstance(NS_ABCARDPROPERTY_CONTRACTID, &rv);
   NS_ENSURE_SUCCESS(rv, rv);
 
   rv = map->SetCardPropertiesFromLDAPMessage(aMessage, card);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  nsCOMPtr<nsIAbLDAPCard> ldapCard = do_QueryInterface(card, &rv);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  rv = ldapCard->SetMetaProperties(aMessage);
   NS_ENSURE_SUCCESS(rv, rv);
 
   return mResultListener->OnQueryFoundCard(card);
@@ -521,17 +500,6 @@ NS_IMETHODIMP nsAbLDAPDirectoryQuery::DoQuery(nsIAbDirectory *aDirectory,
     }
   }
 
-  nsCOMPtr<nsIAbLDAPDirectory> abLDAPDir = do_QueryInterface(aDirectory, &rv);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  nsCOMPtr<nsIMutableArray> serverSearchControls;
-  rv = abLDAPDir->GetSearchServerControls(getter_AddRefs(serverSearchControls));
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  nsCOMPtr<nsIMutableArray> clientSearchControls;
-  rv = abLDAPDir->GetSearchClientControls(getter_AddRefs(clientSearchControls));
-  NS_ENSURE_SUCCESS(rv, rv);
-
   // Create the new connection (which cause the old one to be dropped if necessary)
   mConnection = do_CreateInstance(NS_LDAPCONNECTION_CONTRACTID, &rv);
   NS_ENSURE_SUCCESS(rv, rv);
@@ -544,7 +512,6 @@ NS_IMETHODIMP nsAbLDAPDirectoryQuery::DoQuery(nsIAbDirectory *aDirectory,
   nsAbQueryLDAPMessageListener* _messageListener =
     new nsAbQueryLDAPMessageListener(resultListener, mDirectoryUrl, url,
                                      mConnection, aArguments,
-                                     serverSearchControls, clientSearchControls,
                                      mCurrentLogin, mCurrentMechanism,
                                      aResultLimit, aTimeOut);
   if (_messageListener == NULL)
