@@ -44,9 +44,8 @@ protected:
   nsCOMPtr <nsIFile> mReplicationFile;
   nsCOMPtr <nsIFile> mBackupReplicationFile;
 
-  // state of processing, protocol used and count of results
+  // state of processing and count of results
   int32_t         mState;
-  int32_t         mProtocol;
   int32_t         mCount;
   bool            mDBOpen;
   bool            mInitialized;
