@@ -330,10 +330,6 @@ pref("mail.threadpane.use_correspondents", true);
 // 0-Accept, 1-dontAcceptForeign, 2-dontUse
 pref("network.cookie.cookieBehavior", 0);
 
-// clear the SeaMonkey pref, so we don't hear about how we don't have a chrome
-// package registered for editor-region while opening about:config
-pref("editor.throbber.url", "");
-
 // 0=as attachment 2=default forward as inline with attachments
 pref("mail.forward_message_mode", 2);
 
