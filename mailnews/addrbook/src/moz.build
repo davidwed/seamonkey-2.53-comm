@@ -12,6 +12,7 @@ EXPORTS += [
 SOURCES += [
     'nsAbAddressCollector.cpp',
     'nsAbBooleanExpression.cpp',
+    'nsAbBoolExprToLDAPFilter.cpp',
     'nsAbBSDirectory.cpp',
     'nsAbCardProperty.cpp',
     'nsAbContentHandler.cpp',
@@ -19,6 +20,13 @@ SOURCES += [
     'nsAbDirectoryQueryProxy.cpp',
     'nsAbDirFactoryService.cpp',
     'nsAbDirProperty.cpp',
+    'nsAbLDAPDirectory.cpp',
+    'nsAbLDAPDirectoryQuery.cpp',
+    'nsAbLDAPDirFactory.cpp',
+    'nsAbLDAPListenerBase.cpp',
+    'nsAbLDAPReplicationData.cpp',
+    'nsAbLDAPReplicationQuery.cpp',
+    'nsAbLDAPReplicationService.cpp',
     'nsAbLDIFService.cpp',
     'nsAbManager.cpp',
     'nsAbMDBCard.cpp',
@@ -56,31 +64,11 @@ if CONFIG['OS_ARCH'] == 'Darwin':
         'nsAbOSXUtils.mm',
     ]
 
-if CONFIG['MOZ_LDAP_XPCOM']:
-    SOURCES += [
-        'nsAbBoolExprToLDAPFilter.cpp',
-        'nsAbLDAPDirectory.cpp',
-        'nsAbLDAPDirectoryQuery.cpp',
-        'nsAbLDAPDirFactory.cpp',
-        'nsAbLDAPListenerBase.cpp',
-        'nsAbLDAPReplicationData.cpp',
-        'nsAbLDAPReplicationQuery.cpp',
-        'nsAbLDAPReplicationService.cpp',
-    ]
-
-    EXTRA_COMPONENTS += [
-        'nsAbLDAPAutoCompleteSearch.js',
-    ]
-
-    DEFINES['MOZ_LDAP_XPCOM'] = True
-
 EXTRA_COMPONENTS += [
     'nsAbAutoCompleteMyDomain.js',
     'nsAbAutoCompleteSearch.js',
     'nsAbLDAPAttributeMap.js',
-]
-
-EXTRA_PP_COMPONENTS += [
+    'nsAbLDAPAutoCompleteSearch.js',
     'nsAddrbook.manifest',
 ]
 
