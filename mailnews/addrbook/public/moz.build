@@ -18,6 +18,10 @@ XPIDL_SOURCES += [
     'nsIAbDirSearchListener.idl',
     'nsIAbItem.idl',
     'nsIAbLDAPAttributeMap.idl',
+    'nsIAbLDAPDirectory.idl',
+    'nsIAbLDAPReplicationData.idl',
+    'nsIAbLDAPReplicationQuery.idl',
+    'nsIAbLDAPReplicationService.idl',
     'nsIAbLDIFService.idl',
     'nsIAbListener.idl',
     'nsIAbManager.idl',
@@ -29,14 +33,6 @@ XPIDL_SOURCES += [
     'nsIAddrDBListener.idl',
     'nsIMsgVCardService.idl',
 ]
-
-if CONFIG['MOZ_LDAP_XPCOM']:
-    XPIDL_SOURCES += [
-        'nsIAbLDAPDirectory.idl',
-        'nsIAbLDAPReplicationData.idl',
-        'nsIAbLDAPReplicationQuery.idl',
-        'nsIAbLDAPReplicationService.idl',
-    ]
 
 XPIDL_MODULE = 'addrbook'
 
