@@ -45,16 +45,6 @@ MOZ_ARG_ENABLE_BOOL(calendar,
 AC_SUBST(MOZ_CALENDAR)
 
 dnl =========================================================
-dnl = LDAP
-dnl =========================================================
-MOZ_ARG_DISABLE_BOOL(ldap,
-[  --disable-ldap          Disable LDAP support],
-    MOZ_LDAP_XPCOM=,
-    MOZ_LDAP_XPCOM=1)
-
-AC_SUBST(MOZ_LDAP_XPCOM)
-
-dnl =========================================================
 dnl = MAPI support (Windows only)
 dnl =========================================================
 
