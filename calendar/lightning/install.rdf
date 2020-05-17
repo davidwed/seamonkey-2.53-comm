@@ -39,7 +39,11 @@
     <em:creator>Mozilla Calendar Project</em:creator>
     <em:homepageURL>https://www.mozilla.org/projects/calendar/</em:homepageURL>
     <em:iconURL>chrome://calendar/skin/cal-icon32.png</em:iconURL>
+#ifdef MOZ_THUNDERBIRD
     <em:optionsURL>chrome://messenger/content/preferences/preferences.xul</em:optionsURL>
+#else
+    <em:optionsURL>chrome://communicator/content/pref/preferences.xul</em:optionsURL>
+#endif
     <em:strictCompatibility>true</em:strictCompatibility>
   </Description>
 </RDF>
