@@ -38,8 +38,14 @@ const NS_ERROR_NO_CONTENT = NS_ERROR_MODULE_NETWORK_BASE + 17;
 
 
 function spawnChatZilla(uri) {
-    const cpmm = Cc["@mozilla.org/childprocessmessagemanager;1"]
-                  .getService(Ci.nsISyncMessageSender);
+    var cpmm;
+    // Ci.nsISyncMessageSender went in Gecko 61.
+    if (Ci.nsISyncMessageSender) {
+        cpmm = Cc["@mozilla.org/childprocessmessagemanager;1"]
+                 .getService(Ci.nsISyncMessageSender);
+    } else {
+        cpmm = Cc["@mozilla.org/childprocessmessagemanager;1"].getService();
+    }
     cpmm.sendAsyncMessage("ChatZilla:SpawnChatZilla", { uri });
 }
 

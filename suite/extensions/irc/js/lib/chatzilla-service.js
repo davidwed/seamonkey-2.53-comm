@@ -175,7 +175,16 @@ ProcessHandler.prototype =
         if (topic !== "profile-after-change")
             return;
 
-        const ppmm = Cc[PPMM_CONTRACTID].getService(Ci.nsIMessageBroadcaster);
+        var ppmm;
+        // Ci.nsIMessageBroadcaster went in Gecko 61.
+        if (Ci.nsIMessageBroadcaster)
+        {
+            ppmm = Cc[PPMM_CONTRACTID].getService(Ci.nsIMessageBroadcaster);
+        }
+        else
+        {
+            ppmm = Cc[PPMM_CONTRACTID].getService();
+        }
         ppmm.loadProcessScript("chrome://chatzilla/content/lib/js/chatzilla-protocol-script.js", true);
         ppmm.addMessageListener("ChatZilla:SpawnChatZilla", this);
     },
