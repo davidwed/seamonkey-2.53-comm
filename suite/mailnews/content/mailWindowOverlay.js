@@ -2498,12 +2498,11 @@ function HandleJunkStatusChanged(folder)
   if (GetNumSelectedMessages() == 1)
     msgHdr = messenger.msgHdrFromURI(loadedMessage);
 
-  var junkBarWasDisplayed = gMessageNotificationBar.mMsgNotificationBar.getNotificationWithValue("junkContent");
+  var junkBarWasDisplayed = gMessageNotificationBar.isShowingJunkNotification();
   gMessageNotificationBar.setJunkMsg(msgHdr);
-  var isJunk = gMessageNotificationBar.mMsgNotificationBar.getNotificationWithValue("junkContent");
 
   // Only reload message if junk bar display state has changed.
-  if (msgHdr && junkBarWasDisplayed != isJunk)
+  if (msgHdr && junkBarWasDisplayed != gMessageNotificationBar.isShowingJunkNotification())
   {
     // We may be forcing junk mail to be rendered with sanitized html.
     // In that scenario, we want to reload the message if the status has just
@@ -2513,6 +2512,9 @@ function HandleJunkStatusChanged(folder)
     // Only bother doing this if we are modifying the html for junk mail...
     if (sanitizeJunkMail)
     {
+      let junkScore = msgHdr.getStringProperty("junkscore");
+      let isJunk = (junkScore == Ci.nsIJunkMailPlugin.IS_SPAM_SCORE);
+
       // If the current row isn't going to change, reload to show sanitized or
       // unsanitized. Otherwise we wouldn't see the reloaded version anyway.
 
@@ -2563,10 +2565,9 @@ var gMessageNotificationBar =
 
     goUpdateCommand('button_junk');
 
-    let oldNotif = this.mMsgNotificationBar.getNotificationWithValue("junkContent");
     if (isJunk)
     {
-      if (!oldNotif)
+      if (!this.isShowingJunkNotification())
       {
         let brandName = this.mBrandBundle.getString("brandShortName");
         let junkBarMsg = this.mStringBundle.getFormattedString('junkBarMessage',
@@ -2600,6 +2601,10 @@ var gMessageNotificationBar =
   },
 
   remoteOrigins: null,
+
+  isShowingJunkNotification: function() {
+    return !!this.mMsgNotificationBar.getNotificationWithValue("junkContent");
+  },
 
   setRemoteContentMsg: function(aMsgHdr, aContentURI, aCanOverride)
   {
