@@ -261,7 +261,7 @@ function BuildRecentPagesMenu()
   // Current page is the "0" item in the list we save in prefs,
   //  but we don't include it in the menu.
   var curUrl = StripPassword(GetDocumentUrl());
-  var historyCount = GetIntPref("editor.history.url_maximum", 10);
+  var historyCount = Services.prefs.getIntPref("editor.history.url_maximum", 10);
 
   var menuIndex = 1;
   for (var i = 0; i < historyCount; i++)
@@ -316,7 +316,7 @@ function EditorInitFileMenu()
   // Enable recent pages submenu if there are any history entries in prefs.
   var historyUrl = "";
 
-  if (GetIntPref("editor.history.url_maximum", 10))
+  if (Services.prefs.getIntPref("editor.history.url_maximum", 10))
   {
     historyUrl = GetStringPref("editor.history_url_0");
 
