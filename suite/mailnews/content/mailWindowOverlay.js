@@ -2976,14 +2976,17 @@ function IgnoreMDNResponse()
   gMessageNotificationBar.mdnGenerator.userDeclined();
 }
 
-function MsgSearchMessages()
-{
-  var preselectedFolder = null;
-  if ("GetFirstSelectedMsgFolder" in window)
-    preselectedFolder = GetFirstSelectedMsgFolder();
-
-  var args = { folder: preselectedFolder };
-  OpenOrFocusWindow(args, "mailnews:search", "chrome://messenger/content/SearchDialog.xul");
+/**
+ * Opens a search window with the given folder, or the displayed one if none is
+ * chosen.
+ *
+ * @param [aFolder] the folder to open the search window for, if different from
+ *                  the displayed one
+ */
+function MsgSearchMessages(aFolder) {
+  let folder = aFolder || gFolderDisplay.displayedFolder;
+  OpenOrFocusWindow({ folder: folder }, "mailnews:search",
+                    "chrome://messenger/content/SearchDialog.xul");
 }
 
 function MsgJunkMailInfo(aCheckFirstUse)
