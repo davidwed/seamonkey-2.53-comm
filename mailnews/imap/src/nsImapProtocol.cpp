@@ -3201,10 +3201,10 @@ nsImapProtocol::GetArbitraryHeadersToDownload(nsCString &aResult)
     m_imapServerSink->GetArbitraryHeaders(aResult);
 }
 
-void
-nsImapProtocol::AdjustChunkSize()
-{
+void nsImapProtocol::AdjustChunkSize() {
   int32_t deltaInSeconds;
+
+  m_endTime = PR_Now();
   PRTime2Seconds(m_endTime - m_startTime, &deltaInSeconds);
   m_trackingTime = false;
   if (deltaInSeconds < 0)
