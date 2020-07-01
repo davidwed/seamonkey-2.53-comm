@@ -55,7 +55,7 @@ TK_DEFINES = $(firstword \
 include $(topsrcdir)/config/rules.mk
 
 ifneq (en-US,$(AB_CD))
-libs realchrome::
+misc realchrome::
 	@echo "Comparing $(AB_CD) to en-US"
 	@$(PERL) $(topsrcdir)/toolkit/locales/compare-locales.pl $(srcdir)/en-US $(LOCALE_SRCDIR)
 	$(call py_action,preprocessor,$(DEFINES) $(ACDEFINES) \
@@ -63,11 +63,11 @@ libs realchrome::
 	  $(srcdir)/generic/install.rdf -o $(DIST)/xpi-stage/$(XPI_NAME)/install.rdf)
 endif
 
-libs-%: AB_CD=$*
-libs-%:
+l10n-%: AB_CD=$*
+l10n-%:
 	# XXX: it would be nice if we could just do nothing if no langpack is being done
 	#  currently, we just go and (re)build en-US if called with a non-supported locale
-	$(MAKE) libs AB_CD=$*
+	$(MAKE) l10n AB_CD=$*
 
 repackage-zip: $(STAGEDIST)
 ifneq (en-US,$(AB_CD))
