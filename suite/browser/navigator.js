@@ -102,12 +102,14 @@ var ZoomListeners =
 
   onContentPrefSet: function (aGroup, aName, aValue)
   {
-    updateZoomStatus();
+    // Make sure zoom values loaded before updating
+    window.setTimeout(updateZoomStatus, 0);
   },
 
   onContentPrefRemoved: function (aGroup, aName)
   {
-    updateZoomStatus();
+    // Make sure zoom values loaded before updating
+    window.setTimeout(updateZoomStatus, 0);
   },
 
   handleResult: function(aPref)
@@ -117,8 +119,7 @@ var ZoomListeners =
 
   onLocationChange: function(aURI)
   {
-    // Make sure zoom values loaded before updating
-    window.setTimeout(updateZoomStatus(), 0);
+    updateZoomStatus();
   }
 };
 
