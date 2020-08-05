@@ -1,0 +1,25 @@
+--- OTR.jsm
++++ OTR.jsm
+@@ -1257,21 +1257,17 @@ var OTR = {
+     }
+ 
+     if (!om.cancelled) {
+       // OTR handshakes only work while both peers are online.
+       // Sometimes we want to include a special whitespace suffix,
+       // which the OTR protocol uses to signal that the sender is willing
+       // to start an OTR session. Don't do that for offline messages.
+       // See: https://bugs.otr.im/lib/libotr/issues/102
+-      if (
+-        isOnline(conv) === 0 ||
+-        // Twitter trims tweets.
+-        conv.account.protocol.normalizedName === "twitter"
+-      ) {
++      if (isOnline(conv) === 0) {
+         let ind = msg.indexOf(OTRLib.OTRL_MESSAGE_TAG_BASE);
+         if (ind > -1) {
+           msg = msg.substring(0, ind);
+           let context = this.getContext(conv);
+           context._context.contents.otr_offer = OTRLib.otr_offer.OFFER_NOT;
+         }
+       }
+ 
