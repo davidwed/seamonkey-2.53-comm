@@ -4,8 +4,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 GeckoProgram(CONFIG['MOZ_APP_NAME'])
-USE_LIBS += ['mozglue']
+
 SOURCES += ['nsSuiteApp.cpp']
+
 LOCAL_INCLUDES += [
     '!/build',
     '/mozilla/toolkit/xre',
