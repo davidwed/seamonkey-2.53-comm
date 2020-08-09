@@ -24,31 +24,6 @@ _ABS_XPI_STAGE_PATH = $(ABS_DIST)/xpi-stage
 ENUS_PKGNAME=$(subst .$(AB_CD),.en-US,$(XPI_PKGNAME))
 XPI_ZIP_IN=$(_ABS_XPI_STAGE_PATH)/$(ENUS_PKGNAME).xpi
 
-
-# This variable is to allow the wget-en-US target to know which ftp server to download from
-ifndef EN_US_BINARY_URL
-ifdef DOWNLOAD_HOST
-# If this url is missing, and DOWNLOAD_HOST is defined its probably the release
-# run where we can't influence the download location. Fake it from the env vars
-# we have
-BUILD_NR=$(shell echo $(POST_UPLOAD_CMD) | sed -n -e 's/.*-n \([0-9]*\).*/\1/p')
-CANDIDATE_NR=$(if $(LIGHTNING_VERSION),$(LIGHTNING_VERSION),$(XPI_VERSION))
-EN_US_BINARY_URL=http://$(DOWNLOAD_HOST)/pub/calendar/lightning/candidates/$(CANDIDATE_NR)-candidates/build$(BUILD_NR)/$(MOZ_PKG_PLATFORM)
-endif
-endif
-
-# Check if EN_US_BINARY_URL has finally been set
-ifdef EN_US_BINARY_URL
-# If so, we are expected to unpack when the language pack is created
-ensure-stage-dir: wget-en-US unpack
-else
-# If not, use the existing lightning from xpi-stage, or warn that the var is not set.
-ensure-stage-dir:
-ifeq (,$(wildcard $(XPI_STAGE_PATH)/$(XPI_NAME)/))
-	$(error You must set EN_US_BINARY_URL)
-endif
-endif
-
 $(XPI_STAGE_PATH):
 	mkdir -p $@
 
@@ -56,20 +31,6 @@ $(XPI_ZIP_IN): ensure-stage-dir
 
 # Target Directory used for the l10n files
 L10N_TARGET = $(XPI_STAGE_PATH)/$(XPI_NAME)-$(AB_CD)
-
-# function print_ltnconfig(section,configname)
-print_ltnconfig = $(shell $(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py $(XPI_STAGE_PATH)/$(XPI_NAME)/app.ini $1 $2)
-
-wget-en-US:
-ifeq (thunderbird,$(MOZ_APP_NAME))
-FINAL_BINARY_URL = $(subst thunderbird,calendar/lightning,$(EN_US_BINARY_URL))
-else
-FINAL_BINARY_URL = $(subst seamonkey,calendar/lightning,$(subst latest-comm-central-trunk,latest-comm-central,$(EN_US_BINARY_URL)))
-endif
-wget-en-US: $(XPI_STAGE_PATH)
-	(cd $(XPI_STAGE_PATH) && $(WGET) -nv -N $(FINAL_BINARY_URL)/$(ENUS_PKGNAME).xpi)
-	@echo "Downloaded $(FINAL_BINARY_URL)/$(ENUS_PKGNAME) to $(XPI_ZIP_IN)"
-
 
 # We're unpacking directly into FINAL_TARGET, this keeps code to do manual
 # repacks cleaner.
@@ -109,7 +70,7 @@ langpack-%: AB_CD=$*
 langpack-%:
 	$(MAKE) AB_CD=$(AB_CD) ensure-stage-dir
 	$(MAKE) L10N_XPI_NAME=$(L10N_XPI_NAME) L10N_XPI_PKGNAME=$(L10N_XPI_PKGNAME) AB_CD=$(AB_CD) \
-	  recreate-platformini repack-stage repack-process-extrafiles libs-$(AB_CD)
+	  repack-stage repack-process-extrafiles libs-$(AB_CD)
 	@echo "Done packaging $(L10N_XPI_PKGNAME).xpi"
 
 clobber-%: AB_CD=$*
@@ -145,51 +106,3 @@ libs-%:
 # The calling makefile might need to process some extra files. Provide an empty
 # rule to overwrite
 repack-process-extrafiles:
-
-# When repackaging Lightning from the builder, platform.ini is not yet created.
-# Recreate it from the app.ini bundled with the downloaded xpi.
-$(DIST)/bin/platform.ini:
-	mkdir -p $(@D)
-	echo "[Build]" >> $(DIST)/bin/platform.ini
-	echo "Milestone=$(call print_ltnconfig,Gecko,MaxVersion)" >> $(DIST)/bin/platform.ini
-	echo "SourceStamp=$(call print_ltnconfig,Build,SourceStamp)" >> $(DIST)/bin/platform.ini
-	echo "SourceRepository=$(call print_ltnconfig,Build,SourceRepository)" >> $(DIST)/bin/platform.ini
-	echo "BuildID=$(call print_ltnconfig,App,BuildID)" >> $(DIST)/bin/platform.ini
-
-recreate-platformini: $(DIST)/bin/platform.ini
-
-
-# Lightning uses Thunderbird's build machinery, so we need to hack the post
-# upload command to use Lightning's directories and version.
-upload: upload-$(AB_CD)
-
-upload-%: AB_CD=$*
-upload-%: LTN_UPLOAD_CMD := $(patsubst $(THUNDERBIRD_VERSION)%,$(LIGHTNING_VERSION),$(subst thunderbird,calendar/lightning,$(POST_UPLOAD_CMD)))
-upload-%: stage-upload-%
-	POST_UPLOAD_CMD="$(LTN_UPLOAD_CMD)" \
-	  $(PYTHON) $(MOZILLA_DIR)/build/upload.py --base-path $(DIST) \
-	  --properties-file $(DIST)/$(XPI_NAME)_build_properties.json \
-	  "$(DIST)/$(MOZ_PKG_PLATFORM)/$(XPI_PKGNAME).xpi"
-
-stage-upload-%: AB_CD=$*
-stage-upload-%:
-	$(NSINSTALL) -D $(DIST)/$(MOZ_PKG_PLATFORM)
-	$(call install_cmd,$(IFLAGS1) $(XPI_STAGE_PATH)/$(XPI_PKGNAME).xpi $(DIST)/$(MOZ_PKG_PLATFORM))
-
-ifdef XPI_INSTALL_EXTENSION
-ifndef XPI_NAME
-$(error XPI_NAME must be set for XPI_INSTALL_EXTENSION)
-endif
-tools::
-	$(RM) -r '$(DIST)/bin$(DIST_SUBDIR:%=/%)/extensions/$(XPI_INSTALL_EXTENSION)'
-	$(NSINSTALL) -D '$(DIST)/bin$(DIST_SUBDIR:%=/%)/extensions/$(XPI_INSTALL_EXTENSION)'
-	$(call copy_dir,$(FINAL_TARGET),$(DIST)/bin$(DIST_SUBDIR:%=/%)/extensions/$(XPI_INSTALL_EXTENSION))
-
-ifeq (cocoa,$(MOZ_WIDGET_TOOLKIT))
-# If the macbundle dist dir was already created, sync the xpi here to avoid
-# the need to make -C objdir/mail/app each time
-tools::
-	[ -d $(DIST)/$(MOZ_MACBUNDLE_NAME) ] && rsync -aL $(FINAL_TARGET)/ $(DIST)/$(MOZ_MACBUNDLE_NAME)/Contents/Resources/extensions/$(XPI_INSTALL_EXTENSION) || true
-endif
-
-endif
