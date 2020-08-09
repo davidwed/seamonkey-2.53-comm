@@ -145,7 +145,7 @@ function OpenBrowserWindow()
     // current charset menu setting from the current document
     // and use it to initialize the new browser window
     return window.openDialog(getBrowserURL(), "_blank",
-                             "chrome,all,dialog=no", null,
+                             "chrome,all,dialog=no,non-private", null,
                              "charset=" + window.content.document.characterSet);
   }
 
@@ -153,7 +153,7 @@ function OpenBrowserWindow()
     // if a browser window already exists then set startpage to null so
     // navigator.js can check pref for how new window should be opened
     return win.openDialog(getBrowserURL(), "_blank",
-                          "chrome,all,dialog=no", null);
+                          "chrome,all,dialog=no,non-private", null);
   }
 
   // open the first browser window as if we were starting up
