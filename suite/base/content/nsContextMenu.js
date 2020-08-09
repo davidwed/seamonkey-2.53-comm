@@ -30,9 +30,11 @@ XPCOMUtils.defineLazyGetter(this, "PageMenuParent", function() {
 });
 
 XPCOMUtils.defineLazyModuleGetter(this, "DevToolsShim",
-  "chrome://devtools-shim/content/DevToolsShim.jsm");
+                                  "chrome://devtools-shim/content/DevToolsShim.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "findCssSelector",
-  "resource://gre/modules/css-selector.js");
+                                  "resource://gre/modules/css-selector.js");
+XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
+                                  "resource:///modules/ShellService.jsm");
 
 function nsContextMenu(aXulMenu, aIsShift, aEvent) {
   this.shouldDisplay = true;
@@ -236,14 +238,9 @@ nsContextMenu.prototype = {
                     this.onCanvas || this.onVideo || this.onAudio));
     // Set Desktop Background depends on whether an image was clicked on,
     // and requires the shell service.
-    var canSetDesktopBackground = false;
-    if ("@mozilla.org/suite/shell-service;1" in Components.classes) try {
-      canSetDesktopBackground =
-          Components.classes["@mozilla.org/suite/shell-service;1"]
-                    .getService(Components.interfaces.nsIShellService)
-                    .canSetDesktopBackground;
-    } catch (e) {
-    }
+    var canSetDesktopBackground = ShellService &&
+                                  ShellService.canSetDesktopBackground;
+
     this.showItem("context-setDesktopBackground",
                   canSetDesktopBackground && (this.onLoadedImage || this.onStandaloneImage));
 
