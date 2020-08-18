@@ -69,9 +69,6 @@ $(list-json): $(call mkdir_deps,$(SEARCHPLUGINS_PATH)) $(if $(IS_LANGUAGE_REPACK
 	$(call py_action,generate_searchjson,$(srcdir)/search/list.json $(AB_CD) $(list-json))
 searchplugins:: $(list-json)
 
-$(DIST)/branding:
-	$(NSINSTALL) -D $@
-
 libs-%: AB_CD=$*
 libs-%:
 # merge if we're not en-US. Conditional function because
