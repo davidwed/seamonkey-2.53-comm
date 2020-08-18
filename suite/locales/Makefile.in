@@ -71,9 +71,6 @@ $(list-json): $(call mkdir_deps,$(SEARCHPLUGINS_PATH)) $(if $(IS_LANGUAGE_REPACK
 	$(call py_action,generate_searchjson,$(srcdir)/search/list.json $(AB_CD) $(list-json))
 searchplugins:: $(list-json)
 
-$(DIST)/branding:
-	$(NSINSTALL) -D $@
-
 PROFILE_CHROME = userChrome-example.css userContent-example.css
 
 NO_JA_JP_MAC_AB_CD := $(if $(filter ja-JP-mac, $(AB_CD)),ja,$(AB_CD))
