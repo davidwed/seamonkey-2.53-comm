@@ -729,6 +729,12 @@ nsresult nsMsgHdr::GetUInt64Column(mdb_token token, uint64_t *pvalue, uint64_t d
  *     function, as if you are around to make a second call, it means we found
  *     a properly formatted message-id and so we should only look for more
  *     properly formatted message-ids.
+ *     NOTE: this option will also strip off a single leading '<' if there is
+ *     one. Some examples:
+ *        "   foo" => "foo"
+ *        "  <bar" => "bar"
+ *        "<<<foo" => "<<foo"
+ *        "<foo@bar>" => "foo@bar"  (completed message-id)
  * @returns The next starting position of this routine, which may be pointing at
  *     a nul '\0' character to indicate termination.
  */
@@ -764,12 +770,13 @@ const char *nsMsgHdr::GetNextReference(const char *startNextRef,
         // do nothing, make default case mean you didn't get whitespace
         break;
       case '<':
-        firstMessageIdChar = ++ptr; // skip over the '<'
-        foundLessThan = true; // (flag to stop)
-        // intentional fallthrough so whitespaceEndedAt will definitely have
+        firstMessageIdChar = ptr + 1;  // skip over the '<'
+        foundLessThan = true;          // (flag to stop)
+        // Ensure whitespaceEndedAt skips the leading '<' and is set to
         //  a non-NULL value, just in case the message-id is not valid (no '>')
         //  and the old-school support is desired.
-        MOZ_FALLTHROUGH;
+        if (!whitespaceEndedAt) whitespaceEndedAt = ptr + 1;
+        break;
       default:
         if (!whitespaceEndedAt)
             whitespaceEndedAt = ptr;
