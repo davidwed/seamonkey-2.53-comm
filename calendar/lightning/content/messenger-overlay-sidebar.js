@@ -30,8 +30,8 @@ var calendarTabMonitor = {
         // type definitions. To make sure the commands are correctly disabled,
         // we want to update calendar/task commands when switching away from
         // those tabs.
-        if (aOldTab.mode.name == "calendar" ||
-            aOldTab.mode.name == "task") {
+        if (aOldTab && (aOldTab.mode.name == "calendar" ||
+                        aOldTab.mode.name == "task")) {
             calendarController.updateCommands();
             calendarController2.updateCommands();
         }

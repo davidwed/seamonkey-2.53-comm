@@ -1,0 +1,21 @@
+--- calendar-unifinder.js
++++ calendar-unifinder.js
+@@ -38,17 +38,17 @@ var gUnifinderNeedsRefresh = true;
+ /**
+  * Checks if the unifinder is hidden
+  *
+  * @return      Returns true if the unifinder is hidden.
+  */
+ function isUnifinderHidden() {
+   let tabmail = document.getElementById("tabmail");
+   return (
+-    tabmail.currentTabInfo.mode.type != "calendar" ||
++    tabmail.currentTabInfo?.mode.type != "calendar" ||
+     document.getElementById("bottom-events-box").hidden
+   );
+ }
+ 
+ /**
+  * Returns the current filter applied to the unifinder.
+  *
+  * @return      The string name of the applied filter.
