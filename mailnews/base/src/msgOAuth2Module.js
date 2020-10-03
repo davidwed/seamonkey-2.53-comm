@@ -30,7 +30,7 @@ OAuth2Module.prototype = {
   },
   initFromMail(aServer) {
     return this._initPrefs("mail.server." + aServer.key + ".",
-      aServer.username, aServer.realHostName);
+      aServer.realUsername, aServer.realHostName);
   },
   _initPrefs(root, aUsername, aHostname) {
     // Load all of the parameters from preferences.
