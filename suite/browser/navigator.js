@@ -4,24 +4,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource:///modules/WindowsPreviewPerTab.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/WindowsPreviewPerTab.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
-this.__defineGetter__("PluralForm", function() {
-  ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
-  return this.PluralForm;
+XPCOMUtils.defineLazyModuleGetters(this, {
+  NetUtil: "resource://gre/modules/NetUtil.jsm",
+  PluralForm: "resource://gre/modules/PluralForm.jsm",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.jsm",
+  PromiseUtils: "resource://gre/modules/PromiseUtils.jsm",
+  SafeBrowsing: "resource://gre/modules/SafeBrowsing.jsm",
+  SitePermissions: "resource:///modules/SitePermissions.jsm",
 });
-this.__defineSetter__("PluralForm", function (val) {
-  delete this.PluralForm;
-  return this.PluralForm = val;
-});
-
-ChromeUtils.defineModuleGetter(this, "SitePermissions",
-  "resource:///modules/SitePermissions.jsm");
-
-ChromeUtils.defineModuleGetter(this, "SafeBrowsing",
-  "resource://gre/modules/SafeBrowsing.jsm");
 
 XPCOMUtils.defineLazyScriptGetter(this, "gEditItemOverlay",
                                   "chrome://communicator/content/places/editBookmarkOverlay.js");
