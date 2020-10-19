@@ -1529,7 +1529,7 @@ function openUILinkIn(url, where, aAllowThirdPartyFixup, aPostData, aReferrerURI
 
   params.fromChrome = true;
 
-  openLinkIn(url, where, params);
+  return openLinkIn(url, where, params);
 }
 
 function openLinkIn(url, where, params)
