@@ -175,7 +175,7 @@ NNTP_RFC977_handler.prototype = {
        return info[1];
 
      var response = info[1]+'\n';
-     response += info[0].fullText.replace("(?=\n).", "..");
+     response += info[0].fullText.replace(/^\./gm, "..");
      response += ".";
      return response;
   },
@@ -185,7 +185,7 @@ NNTP_RFC977_handler.prototype = {
        return info[1];
 
      var response = info[1]+'\n';
-     response += info[0].body.replace("(?=\n).","..");
+     response += info[0].body.replace(/^\./gm, "..");
      response += ".";
      return response;
   },
