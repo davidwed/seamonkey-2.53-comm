@@ -390,11 +390,8 @@ chrome/comm/content/branding/icon32.png
 chrome/comm/content/branding/icon48.png
 chrome/comm/content/branding/icon64.png
 chrome/comm/content/branding/icon128.png
-chrome/icons/default/main-window.png
-chrome/icons/default/main-window16.png
-chrome/icons/default/main-window48.png
-chrome/icons/default/default.png
 chrome/icons/default/default16.png
+chrome/icons/default/default32.png
 chrome/icons/default/default48.png
 chrome/icons/default/default64.png
 chrome/icons/default/default128.png
