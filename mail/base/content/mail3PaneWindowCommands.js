@@ -528,21 +528,24 @@ var DefaultController =
       {
         let folders = gFolderTreeView.getSelectedFolders();
         let canCompact = function canCompact(folder) {
-          return !folder.isServer &&
-            !(folder.flags & Ci.nsMsgFolderFlags.Virtual) &&
-            (folder.server.type != "imap" || folder.server.canCompactFoldersOnServer) &&
-            folder.isCommandEnabled("button_compact");
-        }
+          return (
+            !folder.isServer &&
+            !folder.getFlag(Ci.nsMsgFolderFlags.Virtual) &&
+            folder.server.canCompactFoldersOnServer &&
+            folder.isCommandEnabled("button_compact")
+          );
+        };
         return folders && folders.every(canCompact);
       }
       case "cmd_compactFolder":
       {
         let folders = gFolderTreeView.getSelectedFolders();
         let canCompactAll = function canCompactAll(folder) {
-          return (folder.server.type != "imap" ||
-                  folder.server.canCompactFoldersOnServer) &&
-                  folder.isCommandEnabled("cmd_compactFolder") ;
-        }
+          return (
+            folder.server.canCompactFoldersOnServer &&
+            folder.isCommandEnabled("cmd_compactFolder")
+          );
+        };
         return folders && folders.every(canCompactAll);
       }
       case "cmd_setFolderCharset":
