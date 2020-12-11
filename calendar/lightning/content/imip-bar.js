@@ -43,11 +43,13 @@ var ltnImipBar = {
         // We need to extend the HideMessageHeaderPane function to also hide the
         // message header pane. Otherwise, the imip bar will still be shown when
         // changing folders.
-        ltnImipBar.tbHideMessageHeaderPane = HideMessageHeaderPane;
-        HideMessageHeaderPane = function() {
+        if (!ltnImipBar.tbHideMessageHeaderPane) {
+          ltnImipBar.tbHideMessageHeaderPane = HideMessageHeaderPane;
+          HideMessageHeaderPane = function() {
             ltnImipBar.resetBar();
             ltnImipBar.tbHideMessageHeaderPane.apply(null, arguments);
-        };
+          };
+        }
 
         // Set up our observers
         Services.obs.addObserver(ltnImipBar, "onItipItemCreation");
