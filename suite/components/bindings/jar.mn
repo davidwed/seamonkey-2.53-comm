@@ -1,0 +1,10 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+comm.jar:
+   content/communicator/bindings/findbar.xml                        (findbar.xml)
+   content/communicator/bindings/general.xml                        (general.xml)
+   content/communicator/bindings/notification.xml                   (notification.xml)
+*  content/communicator/bindings/prefwindow.xml                     (prefwindow.xml)
+   content/communicator/bindings/toolbar.xml                        (toolbar.xml)
