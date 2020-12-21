@@ -3,10 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-XPCOMUtils.defineLazyModuleGetter(this, "AppConstants",
-  "resource://gre/modules/AppConstants.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
 // Global Variables
 var helpExternal;
@@ -29,8 +26,7 @@ const MAX_HISTORY_MENU_ITEMS = 6;
 const platform = getCurrentPlatform();
 
 // Resources
-const RDF = Cc["@mozilla.org/rdf/rdf-service;1"]
-              .getService(Ci.nsIRDFService);
+const RDF = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService);
 const RDF_ROOT = RDF.GetResource("urn:root");
 const NC_PANELLIST = RDF.GetResource(NC + "panellist");
 const NC_PANELID = RDF.GetResource(NC + "panelid");

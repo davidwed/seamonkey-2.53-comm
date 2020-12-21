@@ -1,5 +1,4 @@
 /* -*- indent-tabs-mode: nil; js-indent-level: 2 -*- */
-/* vim: set ts=2 et sw=2 tw=80 filetype=javascript: */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -12,16 +11,15 @@ ChromeUtils.import("resource://gre/modules/Timer.jsm");
 // PlacesUtils exposes multiple symbols, so we can't use defineLazyModuleGetter.
 ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
 
-ChromeUtils.defineModuleGetter(this, "PluralForm",
-  "resource://gre/modules/PluralForm.jsm");
-ChromeUtils.defineModuleGetter(this, "PrivateBrowsingUtils",
-  "resource://gre/modules/PrivateBrowsingUtils.jsm");
-ChromeUtils.defineModuleGetter(this, "NetUtil",
-  "resource://gre/modules/NetUtil.jsm");
-ChromeUtils.defineModuleGetter(this, "RecentWindow",
-  "resource:///modules/RecentWindow.jsm");
-ChromeUtils.defineModuleGetter(this, "PlacesTransactions",
-  "resource://gre/modules/PlacesTransactions.jsm");
+XPCOMUtils.defineLazyModuleGetters(this, {
+  PluralForm: "resource://gre/modules/PluralForm.jsm",
+  NetUtil: "resource://gre/modules/NetUtil.jsm",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.jsm",
+  RecentWindow: "resource:///modules/RecentWindow.jsm",
+  PromiseUtils: "resource://gre/modules/PromiseUtils.jsm",
+  PlacesTransactions: "resource://gre/modules/PlacesTransactions.jsm",
+});
+
 // ChromeUtils.defineModuleGetter(this, "Weave",
 //   "resource://services-sync/main.js");
 
