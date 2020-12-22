@@ -203,7 +203,7 @@ endif
 
 distribution:
 	$(MAKE) -C $(DEPTH)/tools/update-packaging complete-patch PKG_INST_PATH=
-	$(foreach locale,$(SHIPPED_LOCALES),$(MAKE) -C $(DEPTH)/suite/locales/ installers-$(locale) MOZ_MAKE_COMPLETE_MAR=1 ;)
+	$(foreach locale,$(SHIPPED_LOCALES),$(MAKE) -C $(DEPTH)/comm/suite/locales/ installers-$(locale) MOZ_MAKE_COMPLETE_MAR=1 ;)
 
 SHIPPED_LOCALES_FILE = $(commtopsrcdir)/suite/locales/shipped-locales
 ifeq ($(OS_ARCH), WINNT)
