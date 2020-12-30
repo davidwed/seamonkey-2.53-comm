@@ -2326,9 +2326,12 @@ var nsRewrapCommand =
   getCommandStateParams: function(aCommand, aParams, aRefCon) {},
   doCommandParams: function(aCommand, aParams, aRefCon) {},
 
-  doCommand: function(aCommand)
-  {
-    GetCurrentEditor().QueryInterface(Ci.nsIEditorMailSupport).rewrap(false);
+  doCommand: function(aCommand) {
+    // We only want to respect new lines when using the web composer.
+    let respectNewLines = IsWebComposer();
+    GetCurrentEditor()
+      .QueryInterface(Ci.nsIEditorMailSupport)
+      .rewrap(respectNewLines);
   }
 };
 
