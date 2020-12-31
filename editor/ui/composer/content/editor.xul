@@ -113,7 +113,6 @@
 
   <broadcasterset id="editorBroadcasters">
     <broadcaster id="Communicator:WorkMode"/>
-    <broadcaster id="args" value="about:blank"/>
   </broadcasterset>
 
   <broadcasterset id="mainBroadcasterSet"/>
