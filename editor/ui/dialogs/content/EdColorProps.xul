@@ -22,7 +22,6 @@
   <script type="application/javascript" src="chrome://editor/content/EdColorProps.js"/>
 
   <spacer id="location" offsetY="50" persist="offsetX offsetY"/>
-  <broadcaster id="args" value=""/>
 
   <groupbox align="start">
     <caption label="&pageColors.label;"/>
