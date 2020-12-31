@@ -42,7 +42,6 @@ function SetupHTMLEditorCommands()
   commandTable.registerCommand("cmd_button",        nsButtonCommand);
   commandTable.registerCommand("cmd_label",         nsLabelCommand);
   commandTable.registerCommand("cmd_fieldset",      nsFieldSetCommand);
-  commandTable.registerCommand("cmd_isindex",       nsIsIndexCommand);
   commandTable.registerCommand("cmd_image",         nsImageCommand);
   commandTable.registerCommand("cmd_hline",         nsHLineCommand);
   commandTable.registerCommand("cmd_link",          nsLinkCommand);
@@ -2564,28 +2563,6 @@ var nsFieldSetCommand =
   doCommand: function(aCommand)
   {
     window.openDialog("chrome://editor/content/EdFieldSetProps.xul", "_blank", "chrome,close,titlebar,modal");
-  }
-};
-
-//-----------------------------------------------------------------------------------
-var nsIsIndexCommand =
-{
-  isCommandEnabled: function(aCommand, dummy)
-  {
-    return (IsDocumentEditable() && IsEditingRenderedHTML());
-  },
-
-  getCommandStateParams: function(aCommand, aParams, aRefCon) {},
-  doCommandParams: function(aCommand, aParams, aRefCon) {},
-
-  doCommand: function(aCommand)
-  {
-    try {
-      var editor = GetCurrentEditor();
-      var isindexElement = editor.createElementWithDefaults("isindex");
-      isindexElement.setAttribute("prompt", editor.outputToString("text/plain", kOutputSelectionOnly));
-      editor.insertElementAtSelection(isindexElement, true);
-    } catch (e) {}
   }
 };
 
