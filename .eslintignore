@@ -21,7 +21,6 @@ testing/**
 # below.
 build/**
 chat/**
-editor/**
 im/**
 ldap/**
 mail/**
