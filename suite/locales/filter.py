@@ -8,7 +8,6 @@ def test(mod, path, entity=None):
   if mod not in ("netwerk", "dom", "toolkit", "security/manager",
                  "devtools/client", "devtools/shared",
                  "suite",
-                 "editor/ui",
                  "extensions/spellcheck",
                  "suite/branding/seamonkey",
                  "services/sync"):
