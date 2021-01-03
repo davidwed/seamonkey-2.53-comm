@@ -86,10 +86,6 @@ locales = [
     l10n = "{l}chat/**"
 
 [[paths]]
-    reference = "editor/ui/locales/en-US/**"
-    l10n = "{l}editor/ui/**"
-
-[[paths]]
     reference = "other-licenses/branding/thunderbird/locales/en-US/**"
     l10n = "{l}other-licenses/branding/thunderbird/**"
 
