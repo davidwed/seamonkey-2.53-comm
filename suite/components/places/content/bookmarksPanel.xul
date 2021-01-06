@@ -20,10 +20,8 @@
       onload="init();"
       onunload="SidebarUtils.setMouseoverURL('');">
 
-  <script type="application/javascript"
-          src="chrome://communicator/content/bookmarks/sidebarUtils.js"/>
-  <script type="application/javascript"
-          src="chrome://communicator/content/bookmarks/bookmarksPanel.js"/>
+  <script src="chrome://communicator/content/bookmarks/sidebarUtils.js"/>
+  <script src="chrome://communicator/content/bookmarks/bookmarksPanel.js"/>
 
   <commandset id="placesCommands"/>
   <commandset id="editMenuCommands"/>
