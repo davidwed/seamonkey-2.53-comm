@@ -25,10 +25,8 @@
       onload="HistorySidebarInit();"
       onunload="SidebarUtils.setMouseoverURL('');">
 
-  <script type="application/javascript"
-          src="chrome://communicator/content/bookmarks/sidebarUtils.js"/>
-  <script type="application/javascript"
-          src="chrome://communicator/content/places/history-panel.js"/>
+  <script src="chrome://communicator/content/bookmarks/sidebarUtils.js"/>
+  <script src="chrome://communicator/content/places/history-panel.js"/>
 
   <commandset id="editMenuCommands"/>
   <commandset id="placesCommands"/>
