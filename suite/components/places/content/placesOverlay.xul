@@ -13,19 +13,17 @@
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/javascript"
-          src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/javascript"><![CDATA[
+  <script src="chrome://global/content/globalOverlay.js"/>
+  <script>
+  <![CDATA[
     ChromeUtils.import("resource://gre/modules/PlacesUtils.jsm");
     ChromeUtils.defineModuleGetter(window,
       "PlacesUIUtils", "resource:///modules/PlacesUIUtils.jsm");
     ChromeUtils.defineModuleGetter(window,
       "PlacesTransactions", "resource://gre/modules/PlacesTransactions.jsm");
   ]]></script>
-  <script type="application/javascript"
-          src="chrome://communicator/content/places/controller.js"/>
-  <script type="application/javascript"
-          src="chrome://communicator/content/places/treeView.js"/>
+  <script src="chrome://communicator/content/places/controller.js"/>
+  <script src="chrome://communicator/content/places/treeView.js"/>
 
   <!-- Bookmarks and history tooltip -->
   <tooltip id="bhTooltip" noautohide="true"
