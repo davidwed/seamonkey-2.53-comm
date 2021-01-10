@@ -109,11 +109,10 @@ function SetUpTree(forceToServer, getOnlyNew)
   catch (e)
   {
     if (e.result == 0x80550014) {  // NS_MSG_ERROR_OFFLINE
-      // Hack for TB 60 reusing a string from offline.properties.
-      let offlineBundle = document.getElementById("bundle_offlinePrompts");
-      gStatusFeedback.setStatusString(offlineBundle.getString("offlineTooltip"));
+      gStatusFeedback.setStatusString(gSubscribeBundle.getString("offlineState"));
     } else {
       Cu.reportError("Failed to populate subscribe tree: " + e);
+      gStatusFeedback.setStatusString(gSubscribeBundle.getString("errorPopulating"));
     }
     Stop();
   }
