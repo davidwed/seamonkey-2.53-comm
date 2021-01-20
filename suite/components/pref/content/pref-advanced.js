@@ -8,7 +8,6 @@ ChromeUtils.defineModuleGetter(this, "ShellService",
 
 function Startup()
 {
-  SysPrefCheck();
   ShellServiceCheck();
   CrashReportsCheck();
 }
@@ -17,18 +16,8 @@ function Startup()
  * System preferences
  */
 
-function SysPrefCheck()
-{
-  const kPrefService = "@mozilla.org/system-preference-service;1";
-  let visible = kPrefService in Cc &&
-    Cc[kPrefService].getService() instanceof Ci.nsIPrefBranch;
-  document.getElementById("systemPrefs").hidden = !visible;
-}
-
 function ShellServiceCheck()
 {
-  const NS_SHELLSERVICE_CID = "@mozilla.org/suite/shell-service;1";
-
   if (ShellService) try {
     ShellService.shouldCheckDefaultClient;
     document.getElementById("checkDefault").hidden = false;
