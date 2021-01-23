@@ -398,17 +398,24 @@ SuiteGlue.prototype = {
     timer.init(this, 3000, timer.TYPE_ONE_SHOT);
   },
 
-  _migrateUI: function()
-  {
-    const UI_VERSION = 5;
+  /**
+   * Determine if the UI has been upgraded for this release. If not
+   * reset or migrate some user configurations depending on the migration
+   * level.
+   */
+  _migrateUI() {
+    // If for some reason a later profile was downleveled we delete the 2.57+
+    // migration version so that all later migration steps are rerun.
+    if (Services.prefs.prefHasUserValue("suite.migration.version2")) {
+      Services.prefs.clearUserPref("suite.migration.version2");
+    }
+
+    const UI_VERSION = 7;
 
     // If the pref is not set this is a new or pre SeaMonkey 2.49 profile.
     // We can't tell so we just run migration with version 0.
-    let currentUIVersion = 0;
-
-    if (Services.prefs.prefHasUserValue("suite.migration.version")) {
-      currentUIVersion = Services.prefs.getIntPref("suite.migration.version");
-    }
+    let currentUIVersion =
+      Services.prefs.getIntPref("suite.migration.version", 0);
 
     if (currentUIVersion >= UI_VERSION)
       return;
@@ -474,7 +481,7 @@ SuiteGlue.prototype = {
       } catch (ex) {}
     }
 
-    // Pretend currentUIVersion 3 never happend (used in 2.57 for a time and became 6).
+    // Pretend currentUIVersion 3 never happened (used in 2.57 for a time and became 6).
 
     // Remove obsolete download preferences set by user.
     if (currentUIVersion < 4) {
@@ -516,6 +523,8 @@ SuiteGlue.prototype = {
         }
       }
     }
+
+    // Pretend currentUIVersion 6 and 7 never happened (used in 2.57 for a time).
 
     // Update the migration version.
     Services.prefs.setIntPref("suite.migration.version", UI_VERSION);
