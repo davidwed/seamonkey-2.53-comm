@@ -39,17 +39,19 @@ var sRDF = null;
 var sNameProperty = null;
 var sDictCount = 0;
 
-/* Create message window object. This is use by mail-offline.js and therefore should not be renamed. We need to avoid doing
-   this kind of cross file global stuff in the future and instead pass this object as parameter when needed by function
-   in the other js file.
-*/
-var msgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
-                  .createInstance(Ci.nsIMsgWindow);
-var gMessenger = Cc["@mozilla.org/messenger;1"]
-                   .createInstance(Ci.nsIMessenger);
+/**
+ * Global message window object. This is used by mail-offline.js and therefore
+ * should not be renamed. We need to avoid doing this kind of cross file global
+ * stuff in the future and instead pass this object as parameter when needed by
+ * functions in the other js file.
+ */
+var msgWindow;
+
+var gMessenger;
 
 /**
- * Global variables, need to be re-initialized every time mostly because we need to release them when the window close
+ * Global variables, need to be re-initialized every time mostly because
+ * we need to release them when the window closes.
  */
 var gHideMenus;
 var gMsgCompose;
@@ -82,7 +84,6 @@ var gReceiptOptionChanged;
 var gDSNOptionChanged;
 var gAttachVCardOptionChanged;
 
-var gMailSession;
 var gAutoSaveInterval;
 var gAutoSaveTimeout;
 var gAutoSaveKickedIn;
@@ -92,6 +93,7 @@ var kComposeAttachDirPrefName = "mail.compose.attach.dir";
 
 function InitializeGlobalVariables()
 {
+  gMessenger = Cc["@mozilla.org/messenger;1"].createInstance(Ci.nsIMessenger);
   gAccountManager = Cc["@mozilla.org/messenger/account-manager;1"].getService(Ci.nsIMsgAccountManager);
 
   gMsgCompose = null;
@@ -106,7 +108,6 @@ function InitializeGlobalVariables()
   gSavedSendNowKey = null;
   gSendFormat = nsIMsgCompSendFormat.AskUser;
   gCharsetConvertManager = Cc['@mozilla.org/charset-converter-manager;1'].getService(Ci.nsICharsetConverterManager);
-  gMailSession = Cc["@mozilla.org/messenger/services/session;1"].getService(Ci.nsIMsgMailSession);
   gHideMenus = false;
   // We are storing the value of the bool logComposePerformance inorder to avoid logging unnecessarily.
   if (sMsgComposeService)
@@ -116,6 +117,9 @@ function InitializeGlobalVariables()
   gReceiptOptionChanged = false;
   gDSNOptionChanged = false;
   gAttachVCardOptionChanged = false;
+  msgWindow = Cc["@mozilla.org/messenger/msgwindow;1"]
+                .createInstance(Ci.nsIMsgWindow);
+  MailServices.mailSession.AddMsgWindow(msgWindow);
 }
 InitializeGlobalVariables();
 
@@ -126,7 +130,11 @@ function ReleaseGlobalVariables()
   gCharsetConvertManager = null;
   gMsgCompose = null;
   gOriginalMsgURI = null;
-  gMailSession = null;
+  gMessenger = null;
+  sComposeMsgsBundle = null;
+  sBrandBundle = null;
+  MailServices.mailSession.RemoveMsgWindow(msgWindow);
+  msgWindow = null;
 }
 
 function disableEditableFields()
@@ -1509,6 +1517,10 @@ function ComposeUnload()
     gMsgCompose.UnregisterStateListener(stateListener);
   if (gAutoSaveTimeout)
     clearTimeout(gAutoSaveTimeout);
+  if (msgWindow)
+    msgWindow.closeWindow();
+
+  ReleaseGlobalVariables();
 }
 
 function ComposeSetCharacterSet(aEvent)
