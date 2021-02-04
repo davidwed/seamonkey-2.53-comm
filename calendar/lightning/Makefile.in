@@ -47,7 +47,7 @@ DEFINES += -DTHUNDERBIRD_VERSION=$(THUNDERBIRD_VERSION) \
            -DSEAMONKEY_VERSION=$(SEAMONKEY_VERSION) \
            -DSEAMONKEY_MAXVERSION=$(SEAMONKEY_MAXVERSION) \
            -DLIGHTNING_VERSION=$(LIGHTNING_VERSION) \
-           -DXPI_EM_ID="$(XPI_EM_ID)" \
+           -DXPI_EM_ID='$(XPI_EM_ID)' \
            $(NULL)
 
 MOZ_BUILDID = $(shell $(PYTHON) $(moztopsrcdir)/config/printconfigsetting.py $(DIST)/bin/application.ini App BuildID)
