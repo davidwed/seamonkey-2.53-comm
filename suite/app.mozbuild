@@ -12,9 +12,6 @@ include('/toolkit/toolkit.mozbuild')
 if CONFIG['MOZ_EXTENSIONS']:
     DIRS += ['/extensions']
 
-if CONFIG['MOZ_IRC']:
-    DIRS += ['/extensions/irc']
-
 if CONFIG['MOZ_DOMINSPECTOR']:
     DIRS += ['/extensions/inspector']
 

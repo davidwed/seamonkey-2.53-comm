@@ -4,11 +4,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-DEPTH=../../..
+DEPTH=../../../../..
 topsrcdir=@top_srcdir@
 srcdir=@srcdir@
 VPATH=@srcdir@
-relativesrcdir = extensions/irc/locales
+relativesrcdir = comm/suite/extensions/irc/locales
 
 include $(srcdir)/../maxversions.mk
 
@@ -35,6 +35,7 @@ ifneq (en-US,$(AB_CD))
 XPI_NAME               = chatzilla-$(AB_CD)
 INSTALL_EXTENSION_ID   = langpack-$(AB_CD)@chatzilla.mozilla.org
 XPI_PKGNAME            = chatzilla-$(CHATZILLA_VERSION).$(AB_CD)
+relativesrcdir         = extensions/irc/locales
 endif
 
 DEFINES += -DAB_CD=$(AB_CD) \
