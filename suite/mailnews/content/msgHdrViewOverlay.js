@@ -933,7 +933,7 @@ function UpdateMessageHeaders()
         {
           let folder = null;
           if (gCurrentFolderUri)
-            folder = GetMsgFolderFromUri(gCurrentFolderUri);
+            folder = MailUtils.getFolderForURI(gCurrentFolderUri);
           setTitleFromFolder(folder, headerField.headerValue);
         }
       } catch (ex) {}
