@@ -10,6 +10,7 @@ ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
 ChromeUtils.import("resource:///modules/folderUtils.jsm");
 ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
 
 /**
  * interfaces
@@ -3057,7 +3058,7 @@ function DisplaySaveFolderDlg(folderURI)
   }
 
   if (showDialog){
-    var msgfolder = GetMsgFolderFromUri(folderURI, true);
+    let msgfolder = MailUtils.getFolderForURI(folderURI, true);
     if (!msgfolder)
       return;
     var checkbox = {value:0};
