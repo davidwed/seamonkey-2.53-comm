@@ -4,6 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
+ChromeUtils.import("resource:///modules/MailUtils.js");
 
 var searchSessionContractID = "@mozilla.org/messenger/searchSession;1";
 var gDBView;
@@ -336,7 +337,7 @@ function updateSearchFolderPicker(folderURI)
     SetFolderPicker(folderURI, gFolderPicker.id);
 
     // use the URI to get the real folder
-    gMsgFolderSelected = GetMsgFolderFromUri(folderURI);
+    gMsgFolderSelected = MailUtils.getFolderForURI(folderURI);
 
     var searchSubFolders = document.getElementById("checkSearchSubFolders");
     if (searchSubFolders)
