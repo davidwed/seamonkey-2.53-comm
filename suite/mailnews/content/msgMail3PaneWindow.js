@@ -3,8 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* This is where functions related to the 3 pane window are kept */
+ChromeUtils.import("resource:///modules/MailUtils.js");
 ChromeUtils.import("resource:///modules/msgDBCacheManager.js");
+
+/* This is where functions related to the 3 pane window are kept */
 
 // from MailNewsTypes.h
 const nsMsgKey_None = 0xFFFFFFFF;
@@ -1363,7 +1365,7 @@ function EnsureFolderIndex(builder, msgFolder)
 
 function SelectFolder(folderUri)
 {
-  let msgFolder = GetMsgFolderFromUri(folderUri);
+  let msgFolder = MailUtils.getFolderForURI(folderUri);
   SelectMsgFolder(msgFolder);
 }
 

@@ -9,6 +9,7 @@ ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
 ChromeUtils.import("resource:///modules/FeedUtils.jsm");
 ChromeUtils.import("resource:///modules/folderUtils.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/MailUtils.js");
 
 const kClassicMailLayout  = 0;
 const kWideMailLayout     = 1;
@@ -738,7 +739,7 @@ function PopulateHistoryMenu(menuPopup, navOffset)
        i += navOffset, ++itemCount)
   {
     var menuText = "";
-    let folder = GetMsgFolderFromUri(historyArray[i * 2 + 1]);
+    let folder = MailUtils.getFolderForURI(historyArray[i * 2 + 1]);
     if (!IsCurrentLoadedFolder(folder))
       menuText += folder.prettyName + ": ";
 
@@ -1124,7 +1125,7 @@ BatchMessageMover.prototype =
         archiveGranularity = identity.archiveGranularity;
         archiveKeepFolderStructure = identity.archiveKeepFolderStructure;
       }
-      let archiveFolder = GetMsgFolderFromUri(archiveFolderUri, false);
+      let archiveFolder = MailUtils.getFolderForURI(archiveFolderUri, false);
 
       let copyBatchKey = msgHdr.folder.URI + '\000' + monthFolderName;
       if (!(copyBatchKey in this._batches))
@@ -1217,7 +1218,7 @@ BatchMessageMover.prototype =
     if (moveArray.length == 0)
       return this.processNextBatch(); // continue processing
 
-    let archiveFolder = GetMsgFolderFromUri(archiveFolderUri, false);
+    let archiveFolder = MailUtils.getFolderForURI(archiveFolderUri, false);
     let dstFolder = archiveFolder;
     // For folders on some servers (e.g. IMAP), we need to create the
     // sub-folders asynchronously, so we chain the urls using the listener
@@ -1236,7 +1237,7 @@ BatchMessageMover.prototype =
     if (granularity >= Ci.nsIMsgIdentity.perYearArchiveFolders)
     {
       archiveFolderUri += "/" + msgYear;
-      dstFolder = GetMsgFolderFromUri(archiveFolderUri, false);
+      dstFolder = MailUtils.getFolderForURI(archiveFolderUri, false);
       if (!dstFolder.parent)
       {
         dstFolder.createStorageIfMissing(this);
@@ -1247,7 +1248,7 @@ BatchMessageMover.prototype =
     if (granularity >= Ci.nsIMsgIdentity.perMonthArchiveFolders)
     {
       archiveFolderUri += "/" + msgMonth;
-      dstFolder = GetMsgFolderFromUri(archiveFolderUri, false);
+      dstFolder = MailUtils.getFolderForURI(archiveFolderUri, false);
       if (!dstFolder.parent)
       {
         dstFolder.createStorageIfMissing(this);
