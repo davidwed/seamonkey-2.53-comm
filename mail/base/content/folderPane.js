@@ -774,8 +774,12 @@ var gFolderTreeView = {
       if (!targetFolder.canFileMessages)
         return false;
       for (let i = 0; i < dt.mozItemCount; i++) {
-        let extFile = dt.mozGetDataAt("application/x-moz-file", i)
-                        .QueryInterface(Ci.nsIFile);
+        let extFile = dt.mozGetDataAt("application/x-moz-file", i);
+        if (!extFile) {
+          continue;
+        }
+
+        extFile = extFile.QueryInterface(Ci.nsIFile);
         return extFile.isFile();
       }
     }
