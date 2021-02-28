@@ -59,14 +59,3 @@ LOCALE_RELATIVEDIR=calendar/lightning
 include $(topsrcdir)/config/rules.mk
 include $(srcdir)/versions.mk
 include $(srcdir)/lightning-tests.mk
-
-ident:
-	@printf 'comm_revision '
-	@$(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py \
-	    $(FINAL_TARGET)/app.ini App SourceStamp
-	@printf 'moz_revision '
-	@$(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py \
-	    $(FINAL_TARGET)/app.ini Build SourceStamp
-	@printf 'buildid '
-	@$(PYTHON) $(MOZILLA_SRCDIR)/config/printconfigsetting.py \
-	    $(FINAL_TARGET)/app.ini App BuildID
