@@ -8,16 +8,17 @@
  * for shared application glue for the Communicator suite of applications
  **/
 
-// Services = object with smart getters for common XPCOM services
-ChromeUtils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-ChromeUtils.defineModuleGetter(this, "RecentWindow",
-                               "resource:///modules/RecentWindow.jsm");
+XPCOMUtils.defineLazyModuleGetters(this, {
+  BrowserUtils: "resource://gre/modules/BrowserUtils.jsm",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.jsm",
+  RecentWindow: "resource:///modules/RecentWindow.jsm",
+});
 
 // XPCOMUtils.defineLazyGetter(this, "Weave", function() {
-// let tmp = {};
+//   let tmp = {};
 //   ChromeUtils.import("resource://services-sync/main.js", tmp);
 //   return tmp.Weave;
 // });

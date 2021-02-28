@@ -6,53 +6,29 @@ const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
-ChromeUtils.import("resource://gre/modules/osfile.jsm");
-ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-ChromeUtils.import("resource://gre/modules/LoginManagerParent.jsm");
-ChromeUtils.import("resource:///modules/Sanitizer.jsm");
 ChromeUtils.import("resource:///modules/mailnewsMigrator.js");
 
-ChromeUtils.defineModuleGetter(this, "NetUtil",
-  "resource://gre/modules/NetUtil.jsm");
-
-ChromeUtils.defineModuleGetter(this, "FileUtils",
-  "resource://gre/modules/FileUtils.jsm");
-
-ChromeUtils.defineModuleGetter(this, "PlacesUtils",
-  "resource://gre/modules/PlacesUtils.jsm");
-
-ChromeUtils.defineModuleGetter(this, "PlacesBackups",
-  "resource://gre/modules/PlacesBackups.jsm");
-
-ChromeUtils.defineModuleGetter(this, "AsyncShutdown",
-  "resource://gre/modules/AsyncShutdown.jsm");
-
-ChromeUtils.defineModuleGetter(this, "AutoCompletePopup",
-  "resource://gre/modules/AutoCompletePopup.jsm");
-
-ChromeUtils.defineModuleGetter(this, "BookmarkHTMLUtils",
-  "resource://gre/modules/BookmarkHTMLUtils.jsm");
-
-ChromeUtils.defineModuleGetter(this, "BookmarkJSONUtils",
-  "resource://gre/modules/BookmarkJSONUtils.jsm");
-
-ChromeUtils.defineModuleGetter(this, "RecentWindow",
-  "resource:///modules/RecentWindow.jsm");
-
-ChromeUtils.defineModuleGetter(this, "Integration",
-  "resource://gre/modules/Integration.jsm");
-
-ChromeUtils.defineModuleGetter(this, "PermissionUI",
-  "resource:///modules/PermissionUI.jsm");
-
-ChromeUtils.defineModuleGetter(this, "DownloadsCommon",
-  "resource:///modules/DownloadsCommon.jsm");
-
-ChromeUtils.defineModuleGetter(this, "ShellService",
-  "resource:///modules/ShellService.jsm");
-
-ChromeUtils.defineModuleGetter(this, "AppConstants",
-  "resource://gre/modules/AppConstants.jsm");
+XPCOMUtils.defineLazyModuleGetters(this, {
+  AddonManager: "resource://gre/modules/AddonManager.jsm",
+  LoginManagerParent: "resource://gre/modules/LoginManagerParent.jsm",
+  NetUtil: "resource://gre/modules/NetUtil.jsm",
+  FileUtils: "resource://gre/modules/FileUtils.jsm",
+  OS: "resource://gre/modules/osfile.jsm",
+  PlacesUtils: "resource://gre/modules/PlacesUtils.jsm",
+  PlacesBackups: "resource://gre/modules/PlacesBackups.jsm",
+  AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
+  AutoCompletePopup: "resource://gre/modules/AutoCompletePopup.jsm",
+  BookmarkHTMLUtils: "resource://gre/modules/BookmarkHTMLUtils.jsm",
+  BookmarkJSONUtils: "resource://gre/modules/BookmarkJSONUtils.jsm",
+  RecentWindow: "resource:///modules/RecentWindow.jsm",
+  Sanitizer: "resource:///modules/Sanitizer.jsm",
+  ShellService: "resource:///modules/ShellService.jsm",
+  DownloadsCommon: "resource:///modules/DownloadsCommon.jsm",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.jsm",
+  Integration: "resource://gre/modules/Integration.jsm",
+  PermissionUI: "resource:///modules/PermissionUI.jsm",
+  AppConstants: "resource://gre/modules/AppConstants.jsm",
+});
 
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   var tmp = {};
