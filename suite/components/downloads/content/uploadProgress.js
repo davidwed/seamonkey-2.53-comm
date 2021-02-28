@@ -1,17 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/DownloadUtils.jsm");
+ 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/DownloadUtils.jsm");
 
 const kInterval = 750; // Default to .75 seconds.
 
-var gPersist = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-                         .createInstance(Components.interfaces.nsIWebBrowserPersist);
-var gSource = window.arguments[0].QueryInterface(Components.interfaces.nsIFileURL);
-var gTarget = window.arguments[1].QueryInterface(Components.interfaces.nsIURL);
+var gPersist = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+                 .createInstance(Ci.nsIWebBrowserPersist);
+var gSource = window.arguments[0].QueryInterface(Ci.nsIFileURL);
+var gTarget = window.arguments[1].QueryInterface(Ci.nsIURL);
 var gFileName = gSource.file.leafName;
 var gFileSize = gSource.file.fileSize;
 var gPercent = -1;
@@ -33,7 +33,7 @@ function onLoad()
   gSize = document.getElementById("size");
   gProgress = document.getElementById("progressText");
   gMeter = document.getElementById("progress");
-  var status = gBundle.getString("notStarted");
+  var status = gBundle.getString("stateNotStarted");
   document.title =
       gBundle.getFormattedString("progressTitle", [gFileName, status]);
   gStatus.value = status;
@@ -52,7 +52,7 @@ function onLoad()
 function onUnload()
 {
   if (gPersist)
-    gPersist.cancel(Components.results.NS_BINDING_ABORTED);
+    gPersist.cancel(Cr.NS_BINDING_ABORTED);
   gPersist = null;
 }
 
@@ -71,11 +71,11 @@ var gProgressListener = {
 
   // Look for STATE_STOP and close dialog to indicate completion when it happens.
   onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus) {
-    if (aRequest instanceof Components.interfaces.nsIChannel &&
+    if (aRequest instanceof Ci.nsIChannel &&
         aRequest.URI.equals(gTarget) &&
-        aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP) {
+        aStateFlags & Ci.nsIWebProgressListener.STATE_STOP) {
       gPersist = null;
-      var status = gBundle.getString("finished");
+      var status = gBundle.getString("stateCompleted");
       setPercent(100, status);
       gStatus.value = status;
       gSize.value = DownloadUtils.getTransferTotal(gFileSize, gFileSize);
@@ -95,7 +95,7 @@ var gProgressListener = {
   onProgressChange64: function(aWebProgress, aRequest,
                                aCurSelfProgress, aMaxSelfProgress,
                                aCurTotalProgress, aMaxTotalProgress) {
-    if (aRequest instanceof Components.interfaces.nsIChannel &&
+    if (aRequest instanceof Ci.nsIChannel &&
         aRequest.URI.equals(gTarget)) {
       // Get current time.
       var now = Date.now();
@@ -113,7 +113,7 @@ var gProgressListener = {
       var elapsed = (now - gStartTime) / 1000;
 
       // Calculate percentage.
-      var status = gBundle.getString("uploading");
+      var status = gBundle.getString("stateUploading");
       var percent = -1;
       if (gFileSize > 0)
         percent = Math.floor(aCurTotalProgress * 100 / gFileSize);
@@ -149,7 +149,7 @@ var gProgressListener = {
   // Look for error notifications and display alert to user.
   onStatusChange: function(aWebProgress, aRequest, aStatus, aMessage) {
     // Check for error condition (only if dialog is still open).
-    if (!Components.results.isSuccessCode(aStatus)) {
+    if (!Cr.isSuccessCode(aStatus)) {
       // Display error alert (using text supplied by back-end).
       Services.prompt.alert(window, document.title, aMessage);
       // Close the dialog.
@@ -167,23 +167,23 @@ var gProgressListener = {
   // ---------- nsISupports methods ----------
 
   QueryInterface: XPCOMUtils.generateQI([
-                      Components.interfaces.nsIWebProgressListener2,
-                      Components.interfaces.nsIWebProgressListener,
-                      Components.interfaces.nsIInterfaceRequestor]),
+                      Ci.nsIWebProgressListener2,
+                      Ci.nsIWebProgressListener,
+                      Ci.nsIInterfaceRequestor]),
 
   // ---------- nsIInterfaceRequestor methods ----------
 
   getInterface: function(aIID) {
-    if (aIID.equals(Components.interfaces.nsIPrompt) ||
-        aIID.equals(Components.interfaces.nsIAuthPrompt)) {
+    if (aIID.equals(Ci.nsIPrompt) ||
+        aIID.equals(Ci.nsIAuthPrompt)) {
       var prompt;
-      if (aIID.equals(Components.interfaces.nsIPrompt))
+      if (aIID.equals(Ci.nsIPrompt))
         prompt = Services.ww.getNewPrompter(window);
       else
         prompt = Services.ww.getNewAuthPrompter(window);
       return prompt;
     }
 
-    throw Components.results.NS_ERROR_NO_INTERFACE;
+    throw Cr.NS_ERROR_NO_INTERFACE;
   }
 }
