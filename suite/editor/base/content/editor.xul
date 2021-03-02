@@ -274,6 +274,7 @@
     <toolbarbutton id="linkButton"/>
     <toolbarbutton id="namedAnchorButton"/>
     <toolbarbutton id="imageButton"/>
+    <toolbarbutton id="formButton"/>
     <toolbarbutton id="hlineButton"/>
     <toolbarbutton id="tableButton"/>
     <toolbarbutton id="spellingButton"/>
