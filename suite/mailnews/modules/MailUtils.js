@@ -5,6 +5,7 @@
 var EXPORTED_SYMBOLS = ["MailUtils"];
 
 ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 /**
@@ -21,9 +22,7 @@ var MailUtils =
    */
   discoverFolders: function MailUtils_discoverFolders()
   {
-    let accountManager = Cc["@mozilla.org/messenger/account-manager;1"]
-                           .getService(Ci.nsIMsgAccountManager);
-    let servers = accountManager.allServers;
+    let servers = MailServices.accounts.allServers;
     for (let server of fixIterator(servers, Ci.nsIMsgIncomingServer))
       server.rootFolder.subFolders;
   },
