@@ -167,11 +167,9 @@ function DropOnFolderTree(aRow, aOrientation)
       array.appendElement(folder);
       try
       {
-        gCopyService.CopyFolders(array,
-                                 targetFolder,
-                                 (folder.server == targetFolder.server),
-                                 null,
-                                 msgWindow);
+        MailServices.copy.CopyFolders(array, targetFolder,
+                                      (folder.server == targetFolder.server),
+                                      null, msgWindow);
       }
       // Ignore known errors from canceled warning dialogs.
       catch (ex if (ex.result == NS_MSG_FOLDER_EXISTS)) {}
@@ -225,8 +223,8 @@ function DropOnFolderTree(aRow, aOrientation)
     Services.prefs.setBoolPref("mail.last_msg_movecopy_was_move", isMove);
     // ### ugh, so this won't work with cross-folder views. We would
     // really need to partition the messages by folder.
-    gCopyService.CopyMessages(sourceFolder, array, targetFolder, isMove, null,
-                              msgWindow, true);
+    MailServices.copy.CopyMessages(sourceFolder, array, targetFolder, isMove,
+                                   null, msgWindow, true);
   }
   else if (types.includes("application/x-moz-file"))
   {
@@ -235,8 +233,8 @@ function DropOnFolderTree(aRow, aOrientation)
       let extFile = dt.mozGetDataAt("application/x-moz-file", i)
                       .QueryInterface(Ci.nsIFile);
       if (extFile.isFile() && /\.eml$/i.test(extFile.leafName))
-        gCopyService.CopyFileMessage(extFile, targetFolder, null, false, 1,
-                                     "", null, msgWindow);
+        MailServices.copy.CopyFileMessage(extFile, targetFolder, null, false,
+                                          1, "", null, msgWindow);
     }
   }
   else if (types.includes("text/x-moz-url"))
@@ -338,7 +336,7 @@ function DropOnThreadPane(aEvent)
     let extFile = dt.mozGetDataAt("application/x-moz-file", i)
                     .QueryInterface(Ci.nsIFile);
     if (extFile.isFile() && /\.eml$/i.test(extFile.leafName))
-      gCopyService.CopyFileMessage(extFile, gMsgFolderSelected, null, false, 1,
-                                   "", null, msgWindow);
+      MailServices.copy.CopyFileMessage(extFile, gMsgFolderSelected, null,
+                                        false, 1, "", null, msgWindow);
   }
 }
