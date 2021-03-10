@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+ChromeUtils.import("resource:///modules/mailServices.js");
+
 function Startup()
 {
   UpdateDependentElement("manualMark", "manualMarkMode");
@@ -36,9 +38,5 @@ function ResetTrainingData()
     return;
 
   // otherwise go ahead and remove the training data
-  var junkmailPlugin = Cc["@mozilla.org/messenger/filter-plugin;1?name=bayesianfilter"]
-                         .getService(Ci.nsIJunkMailPlugin);
-
-  if (junkmailPlugin)
-    junkmailPlugin.resetTrainingData();
+  MailServices.junk.resetTrainingData();
 }
