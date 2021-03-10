@@ -340,9 +340,7 @@ var DefaultController =
       case "cmd_markAsNotPhish":
         return (GetNumSelectedMessages() > 0 && checkMsgHdrPropertyIsNot("notAPhishMessage", kNotAPhishMessage));
       case "cmd_displayMsgFilters":
-        let mgr = Cc["@mozilla.org/messenger/account-manager;1"]
-                    .getService(Ci.nsIMsgAccountManager);
-        return mgr.accounts.length > 0;
+        return MailServices.accounts.accounts.length > 0;
       case "cmd_applyFilters":
         if (gDBView)
           gDBView.getCommandStatus(nsMsgViewCommandType.applyFilters, enabled, checkStatus);
@@ -845,9 +843,7 @@ function IsSendUnsentMsgsEnabled(folderResource)
     identity = getIdentityForServer(folders[0].server);
 
   if (!identity)
-    identity = Cc["@mozilla.org/messenger/account-manager;1"]
-                 .getService(Ci.nsIMsgAccountManager)
-                 .defaultAccount.defaultIdentity;
+    identity = MailServices.accounts.defaultAccount.defaultIdentity;
 
   return msgSendLater.hasUnsentMessages(identity);
 }
