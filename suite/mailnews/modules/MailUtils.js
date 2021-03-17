@@ -23,8 +23,17 @@ var MailUtils =
   discoverFolders: function MailUtils_discoverFolders()
   {
     let servers = MailServices.accounts.allServers;
-    for (let server of fixIterator(servers, Ci.nsIMsgIncomingServer))
-      server.rootFolder.subFolders;
+    for (let server of fixIterator(servers, Ci.nsIMsgIncomingServer)) {
+      // Bug 466311 Sometimes this can throw file not found, we're unsure
+      // why, but catch it and log the fact.
+      try {
+        server.rootFolder.subFolders;
+      }
+      catch (ex) {
+        Services.console.logStringMessage("Discovering folders for account failed with " +
+                                          "exception: " + ex);
+      }
+    }
   },
 
   /**
