@@ -38,9 +38,9 @@ spinbuttons {
 }
 
 .spinbuttons-up {
-  list-style-image: url("chrome://global/skin/scrollbar/mini-btn-up.gif");
+  list-style-image: url("chrome://global/skin/scrollbar/mini-btn-up.png");
 }
 
 .spinbuttons-down {
-  list-style-image: url("chrome://global/skin/scrollbar/mini-btn-dn.gif");
+  list-style-image: url("chrome://global/skin/scrollbar/mini-btn-dn.png");
 }
