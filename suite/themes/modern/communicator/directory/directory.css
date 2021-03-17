@@ -17,19 +17,19 @@
 
 treechildren::-moz-tree-image(FilenameColumn) {
   margin-inline-end: 2px;
-  list-style-image: url("chrome://communicator/skin/directory/file-icon.gif");
+  list-style-image: url("chrome://communicator/skin/directory/file-icon.png");
 }
 
 treechildren::-moz-tree-image(FilenameColumn, container) {
-  list-style-image: url("chrome://communicator/skin/directory/file-folder-closed.gif");
+  list-style-image: url("chrome://communicator/skin/directory/file-folder-closed.png");
 }
 
 treechildren::-moz-tree-image(FilenameColumn, container, open) {
-  list-style-image: url("chrome://communicator/skin/directory/file-folder-open.gif");
+  list-style-image: url("chrome://communicator/skin/directory/file-folder-open.png");
 }
 
 treechildren::-moz-tree-image(FilenameColumn, loading) {
-  list-style-image: url("chrome://communicator/skin/icons/loading.gif");
+  list-style-image: url("chrome://communicator/skin/icons/loading.png");
 }
 
 treechildren::-moz-tree-cell-text(symbolic-link) {
