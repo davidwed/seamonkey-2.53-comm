@@ -78,17 +78,17 @@ timepicker[disabled="true"] {
 }
 
 .datepicker-previous {
-  list-style-image: url("chrome://global/skin/arrow/arrow-lft.gif");
+  list-style-image: url("chrome://global/skin/arrow/arrow-lft.png");
 }
 
 .datepicker-next {
-  list-style-image: url("chrome://global/skin/arrow/arrow-rit.gif");
+  list-style-image: url("chrome://global/skin/arrow/arrow-rit.png");
 }
 
 .datepicker-previous[disabled="true"] {
-  list-style-image: url("chrome://global/skin/arrow/arrow-lft-dis.gif");
+  list-style-image: url("chrome://global/skin/arrow/arrow-lft-dis.png");
 }
 
 .datepicker-next[disabled="true"] {
-  list-style-image: url("chrome://global/skin/arrow/arrow-rit-dis.gif");
+  list-style-image: url("chrome://global/skin/arrow/arrow-rit-dis.png");
 }
