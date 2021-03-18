@@ -21,23 +21,23 @@
 /* ::::: toolbar buttons ::::: */
 
 #btnSelecting {
-  list-style-image: url("chrome://inspector/skin/btnSelecting.gif");
+  list-style-image: url("chrome://inspector/skin/btnSelecting.png");
 }
 
 #btnSelecting[checked="true"] {
-  list-style-image: url("chrome://inspector/skin/btnSelecting-act.gif");
+  list-style-image: url("chrome://inspector/skin/btnSelecting-act.png");
 }
 
 #btnSelecting[disabled="true"] {
-  list-style-image: url("chrome://inspector/skin/btnSelecting-dis.gif");
+  list-style-image: url("chrome://inspector/skin/btnSelecting-dis.png");
 }
 
 #btnFind {
-  list-style-image: url("chrome://inspector/skin/btnFind.gif");
+  list-style-image: url("chrome://inspector/skin/btnFind.png");
 }
 
 #btnFind[disabled="true"] {
-  list-style-image: url("chrome://inspector/skin/btnFind-dis.gif");
+  list-style-image: url("chrome://inspector/skin/btnFind-dis.png");
 }
 
 .viewer-list, .viewer-menu {

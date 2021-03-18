@@ -43,7 +43,7 @@ box[orient="vertical"] > .titled-splitter {
 }
 
 .titledsplitter-closeimage {
-  list-style-image: url("chrome://inspector/skin/titledsplitter-close.gif");
+  list-style-image: url("chrome://inspector/skin/titledsplitter-close.png");
 }
 
 .titledsplitter-closebutton:hover:active {
