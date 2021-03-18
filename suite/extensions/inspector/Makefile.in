@@ -11,7 +11,7 @@ VPATH = @srcdir@
 
 include $(DEPTH)/config/autoconf.mk
 
-DOMi_VERSION = 2.0.17.2
+DOMi_VERSION = 2.0.18
 
 XPI_NAME               = inspector
 INSTALL_EXTENSION_ID   = inspector@mozilla.org
