@@ -11,19 +11,19 @@ domi-panel[disabled="true"] > .viewer-pane-box-1 {
 }
 
 .viewer-list {
-  list-style-image: url("chrome://inspector/skin/iconViewerList.gif");
+  list-style-image: url("chrome://inspector/skin/iconViewerList.png");
 }
 
 .viewer-list[disabled="true"] {
-  list-style-image: url("chrome://inspector/skin/iconViewerList-dis.gif");
+  list-style-image: url("chrome://inspector/skin/iconViewerList-dis.png");
 }
 
 .viewer-menu {
-  list-style-image: url("chrome://inspector/skin/iconViewerMenu.gif");
+  list-style-image: url("chrome://inspector/skin/iconViewerMenu.png");
 }
 
 .viewer-menu[disabled="true"] {
-  list-style-image: url("chrome://inspector/skin/iconViewerMenu-dis.gif");
+  list-style-image: url("chrome://inspector/skin/iconViewerMenu-dis.png");
 }
 
 .viewer-menu > .toolbarbutton-menu-dropmarker {

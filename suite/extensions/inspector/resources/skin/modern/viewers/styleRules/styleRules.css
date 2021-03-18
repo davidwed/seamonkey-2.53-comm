@@ -6,11 +6,11 @@
 @import url("chrome://inspector/content/extensions/treeEditable.css");
 
 #olcPropPriority {
-  list-style-image: url("chrome://inspector/skin/iconImportant.gif");
+  list-style-image: url("chrome://inspector/skin/iconImportant.png");
 }
 
 #olbStyleProps::-moz-tree-image(olcPropPriority, important) {
-  list-style-image: url("chrome://inspector/skin/iconImportant.gif");
+  list-style-image: url("chrome://inspector/skin/iconImportant.png");
 }
 
 /* ::::: default column widths ::::: */
