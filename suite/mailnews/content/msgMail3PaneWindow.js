@@ -158,7 +158,6 @@ var folderListener =
       var eventType = event.toString();
       if (eventType == "FolderLoaded") {
         if (folder) {
-          const nsMsgFolderFlags = Ci.nsMsgFolderFlags;
           var scrolled = false;
           var msgFolder = folder.QueryInterface(Ci.nsIMsgFolder);
           var uri = folder.URI;
@@ -212,7 +211,8 @@ var folderListener =
             gCurrentLoadingFolderURI = "";
             // Scroll to message for virtual folders is done in
             // gSearchNotificationListener.OnSearchDone (see searchBar.js).
-            if (!scrolled && !(gMsgFolderSelected.flags & nsMsgFolderFlags.Virtual))
+            if (!scrolled &&
+                !(gMsgFolderSelected.flags & Ci.nsMsgFolderFlags.Virtual))
               ScrollToMessageAfterFolderLoad(msgFolder);
             SetBusyCursor(window, false);
           }
@@ -239,7 +239,7 @@ var folderListener =
               ViewChangeByFolder(gMsgFolderSelected);
             }
             else if (gMsgFolderSelected &&
-                     gMsgFolderSelected.flags & nsMsgFolderFlags.Virtual)
+                     gMsgFolderSelected.flags & Ci.nsMsgFolderFlags.Virtual)
             {
               viewDebug("selected folder is virtual\n");
               gDefaultSearchViewTerms = null;
