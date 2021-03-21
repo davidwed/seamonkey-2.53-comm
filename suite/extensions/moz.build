@@ -13,8 +13,7 @@ if CONFIG['MOZ_IRC']:
         'irc',
     ]
 
-# for later
-# if CONFIG['MOZ_DOMINSPECTOR']:
-#     DIRS += [
-#         'inspector',
-#     ]
+if CONFIG['MOZ_DOMINSPECTOR']:
+    DIRS += [
+        'inspector',
+    ]
