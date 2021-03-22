@@ -308,7 +308,8 @@ var FeedSubscriptions = {
     getImageSrc: function(aRow, aCol)
     {
       let item = this.getItemAtIndex(aRow);
-      if ((item.folder && item.folder.isServer) || item.open)
+      if (!item.properties ||
+          (item.folder && item.folder.isServer) || item.open)
         return "";
 
       if (!item.open &&
