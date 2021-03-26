@@ -617,13 +617,14 @@
           menu.setAttribute("special", type);
           menu.setAttribute("generated", "true");
 
-          let popup = document.createElement("menupopup");
-          popup.setAttribute("class", this.getAttribute("class"));
-          popup.addEventListener("popupshowing",
-                                 () => this._buildSpecialSubmenu(menu),
-                                 { once: true });
+          let menupopup = document.createElement("menupopup");
+          menupopup.setAttribute("class", this.getAttribute("class"));
+          menupopup
+            .addEventListener("popupshowing",
+                              () => this._buildSpecialSubmenu(menu, menupopup),
+                              { once: true });
 
-          menu.appendChild(popup);
+          menu.appendChild(menupopup);
           this.appendChild(menu);
         ]]></body>
       </method>
@@ -634,6 +635,7 @@
         -->
       <method name="_buildSpecialSubmenu">
         <parameter name="menu"/>
+        <parameter name="menupopup"/>
         <body><![CDATA[
           let specialType = menu.getAttribute("special");
           if (this._initializedSpecials.has(specialType))
@@ -700,7 +702,7 @@
             node.setAttribute("class", "folderMenuItem menuitem-iconic");
             this._setCssSelectors(folderItem.folder, node);
             node.setAttribute("generated", "true");
-            menu.menupopup.appendChild(node);
+            menupopup.appendChild(node);
           }
 
           if (specialFoldersMap.length == 0)
