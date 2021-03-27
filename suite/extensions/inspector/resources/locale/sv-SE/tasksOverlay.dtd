@@ -4,8 +4,4 @@
 
 <!ENTITY inspectorTaskCmd.label "DOM-granskaren">
 <!ENTITY inspectorTaskCmd.commandkey "g">
-<!ENTITY inspectorTaskCmd.accesskey.ff "n">
 <!ENTITY inspectorTaskCmd.accesskey "G">
-
-<!ENTITY inspectPageTaskCmd.label "Granska sida">
-<!ENTITY inspectPageTaskCmd.accesskey "g">
