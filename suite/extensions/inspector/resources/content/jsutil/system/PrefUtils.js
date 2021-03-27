@@ -53,14 +53,7 @@ var PrefUtils =
     var type = this.mPrefs.getPrefType(aName);
     try {
       if (type == nsIPrefBranch.PREF_STRING) {
-        if (Services.vc.compare(Services.appinfo.platformVersion, "55.0a1") >= 0) {
-          this.mPrefs.setStringPref(aName, aValue);
-        } else {
-          var str = Components.classes["@mozilla.org/supports-string;1"]
-                              .createInstance(Components.interfaces.nsISupportsString);
-          str.data = aValue;
-          this.mPrefs.setComplexValue(aName, Components.interfaces.nsISupportsString, str);
-        }
+        this.mPrefs.setStringPref(aName, aValue);
       } else if (type == nsIPrefBranch.PREF_BOOL) {
         this.mPrefs.setBoolPref(aName, aValue);
       } else if (type == nsIPrefBranch.PREF_INT) {
@@ -78,10 +71,7 @@ var PrefUtils =
     var type = this.mPrefs.getPrefType(aName);
     try {
       if (type == nsIPrefBranch.PREF_STRING) {
-        if (Services.vc.compare(Services.appinfo.platformVersion, "55.0a1") >= 0) {
-          return this.mPrefs.getStringPref(aName);
-        }
-        return this.mPrefs.getComplexValue(aName, Components.interfaces.nsISupportsString).data;
+        return this.mPrefs.getStringPref(aName);
       } else if (type == nsIPrefBranch.PREF_BOOL) {
         return this.mPrefs.getBoolPref(aName);
       } else if (type == nsIPrefBranch.PREF_INT) {
