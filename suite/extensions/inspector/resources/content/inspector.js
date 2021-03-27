@@ -65,13 +65,6 @@ function InspectorApp_initialize()
   }
   inspector.initialize(initNode, initURI);
 
-  // Fix up content primary for older versions.
-  // See bug 1324899.
-  if (Services.vc.compare(Services.appinfo.platformVersion, "53.0a1") < 0) {
-    document.getElementById("ifBrowser").setAttribute("type",
-                                                      "content-primary");
-  }
-
   // Enable/disable Mac outlier keys.
   if (kIsMac) {
     document.getElementById("keyEnterLocation2").setAttribute("disabled",
