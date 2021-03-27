@@ -28,7 +28,7 @@ function Flasher(aColor, aThickness, aDuration, aSpeed, aInvert)
   document.querySelector(HIGHLIGHTED_PSEUDO_CLASS);
   this.mIOService = XPCU.getService("@mozilla.org/network/io-service;1", "nsIIOService");
   this.mDOMUtils = XPCU.getService("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
-  this.mShell = XPCU.getService("@mozilla.org/inspector/flasher;1", "inIFlasher") || this.mDOMUtils;
+  this.mShell = this.mDOMUtils;
   this.color = aColor;
   this.thickness = aThickness;
   this.invert = aInvert;
@@ -165,127 +165,6 @@ Flasher.prototype =
 
 };
 
-////////////////////////////////////////////////////////////////////////////
-//// class LegacyFlasher
-
-function LegacyFlasher(aColor, aThickness, aDuration, aSpeed, aInvert)
-{
-  this.mShell = XPCU.getService("@mozilla.org/inspector/flasher;1", "inIFlasher");
-  this.color = aColor;
-  this.mShell.thickness = aThickness;
-  this.mShell.invert = aInvert;
-  this.duration = aDuration;
-  this.mSpeed = aSpeed;
-}
-
-LegacyFlasher.prototype =
-{
-  ////////////////////////////////////////////////////////////////////////////
-  //// Initialization
-
-  mFlashTimeout: null,
-  mElement:null,
-  mRegistryId: null,
-  mFlashes: 0,
-  mStartTime: 0,
-  mDuration: 0,
-  mSpeed: 0,
-
-  ////////////////////////////////////////////////////////////////////////////
-  //// Properties
-
-  get flashing() { return this.mFlashTimeout != null; },
-
-  get element() { return this.mElement; },
-  set element(val)
-  {
-    if (val && val.nodeType == Node.ELEMENT_NODE) {
-      this.mElement = val;
-      this.mShell.scrollElementIntoView(val);
-    } else
-      throw "Invalid node type.";
-  },
-
-  get color() { return this.mShell.color; },
-  set color(aVal)
-  {
-    try {
-      this.mShell.color = aVal;
-    }
-    catch (e) { // Catch exception in case aVal is an invalid or empty value.
-      Components.utils.reportError(e);
-    }
-    return aVal;
-  },
-
-  get thickness() { return this.mShell.thickness; },
-  set thickness(aVal) { this.mShell.thickness = aVal; },
-
-  get duration() { return this.mDuration; },
-  set duration(aVal) { this.mDuration = aVal; },
-
-  get speed() { return this.mSpeed; },
-  set speed(aVal) { this.mSpeed = aVal; },
-
-  get invert() { return this.mShell.invert; },
-  set invert(aVal) { this.mShell.invert = aVal; },
-
-  // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-  // :::::::::::::::::::: Methods ::::::::::::::::::::::::::::
-  // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-  start: function(aDuration, aSpeed, aHold)
-  {
-    this.mUDuration = aDuration ? aDuration*1000 : this.mDuration;
-    this.mUSpeed = aSpeed ? aSpeed : this.mSpeed
-    this.mHold = aHold;
-    this.mFlashes = 0;
-    this.mStartTime = new Date();
-    this.doFlash();
-  },
-
-  doFlash: function()
-  {
-    if (this.mHold || this.mFlashes%2) {
-      this.paintOn();
-    } else {
-      this.paintOff();
-    }
-    this.mFlashes++;
-
-    if (this.mUDuration < 0 || new Date() - this.mStartTime < this.mUDuration) {
-      this.mFlashTimeout = window.setTimeout(this.timeout, this.mUSpeed, this);
-    } else {
-      this.stop();
-    }
-  },
-
-  timeout: function(self)
-  {
-    self.doFlash();
-  },
-
-  stop: function()
-  {
-    if (this.flashing) {
-      window.clearTimeout(this.mFlashTimeout);
-      this.mFlashTimeout = null;
-      this.paintOff();
-    }
-  },
-
-  paintOn: function()
-  {
-    this.mShell.drawElementOutline(this.mElement);
-  },
-
-  paintOff: function()
-  {
-    this.mShell.repaintElement(this.mElement);
-  }
-
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 //// DOMIFlasher
 
@@ -347,14 +226,8 @@ DOMIFlasher.prototype =
 
   init: function DOMIFlasher_init()
   {
-    // See Bug 368608 comment 43. Flasher should work in Gecko 25 and up.
-    if (Services.vc.compare(Services.appinfo.platformVersion, "25.0a2") >= 0) {
-      this.mFlasher = new Flasher(this.color, this.thickness, this.duration,
-                                  this.speed, this.invert);
-    } else {
-      this.mFlasher = new LegacyFlasher(this.color, this.thickness,
-                                        this.duration, this.speed, this.invert);
-    }
+    this.mFlasher = new Flasher(this.color, this.thickness, this.duration,
+                                this.speed, this.invert);
 
     PrefUtils.addObserver("inspector.blink.", this);
 
