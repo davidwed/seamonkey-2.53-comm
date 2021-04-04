@@ -87,6 +87,7 @@
                 <deck id="subscribedeck" selectedIndex="0" flex="1">
                   <hbox id="normalview">
                     <tree id="subscribeTree"
+                          persist="collapsed"
                           treelines="true"
                           flex="1"
                           hidecolumnpicker="true"
@@ -95,13 +96,20 @@
                           onkeypress="SubscribeOnKeyPress(event, false);"
                           onclick="SubscribeOnClick(event, false);">
                       <treecols id="theSubscribeColumns">
-                        <treecol id="nameColumn" primary="true" flex="10"
-                                 hideheader="true" crop="center"/>
+                        <treecol id="nameColumn"
+                                 label="..."
+                                 primary="true"
+                                 flex="10"
+                                 crop="center"
+                                 sortDirection="ascending"/>
                         <splitter class="tree-splitter"/>
-                        <treecol id="subscribedColumn" type="checkbox" flex="1"
-                                 hideheader="true"/>
+                        <treecol id="subscribedColumn"
+                                 label="&subscribedHeader.label;"
+                                 cycler="true"
+                                 type="checkbox"
+                                 flex="1"/>
                       </treecols>
-                      <treechildren id="subscribeTreeBody"/>
+                      <treechildren id="subscribeTreeBody" persist="collapsed"/>
                     </tree>
                   </hbox>
 
@@ -112,12 +120,17 @@
                           onkeypress="SubscribeOnKeyPress(event, true);"
                           onclick="SubscribeOnClick(event, true);">
                       <treecols>
-                        <treecol id="nameColumn2" primary="true"
-                                 flex="10" hideheader="true"
+                        <treecol id="nameColumn2"
+                                 label="..."
+                                 primary="true"
+                                 flex="10"
                                  sortDirection="ascending"/>
                         <splitter class="tree-splitter"/>
                         <treecol id="subscribedColumn2"
-                                 flex="1" hideheader="true"/>
+                                 label="&subscribedHeader.label;"
+                                 cycler="true"
+                                 type="checkbox"
+                                 flex="1"/>
                       </treecols>
                       <treechildren id="searchTreeBody"/>
                     </tree>
