@@ -35,6 +35,7 @@ function SetServerTypeSpecificTextValues()
 
   // set the server specific ui elements
   let subscribeLabelString = gSubscribeBundle.getString("subscribeLabel-" + serverType);
+  let nameColumnLabel = gSubscribeBundle.getString("columnHeader-" + serverType);
   let currentListTab  = "currentListTab-" + serverType;
   let currentListTabLabel     = gSubscribeBundle.getString(currentListTab + ".label");
   let currentListTabAccesskey = gSubscribeBundle.getString(currentListTab + ".accesskey");
@@ -43,6 +44,8 @@ function SetServerTypeSpecificTextValues()
   document.getElementById("currentListTab").setAttribute("accesskey", currentListTabAccesskey);
   document.getElementById("newGroupsTab").collapsed = (serverType != "nntp"); // show newGroupsTab only for nntp servers
   document.getElementById("subscribeLabel").setAttribute("value", subscribeLabelString);
+  document.getElementById("nameColumn").setAttribute("label", nameColumnLabel);
+  document.getElementById("nameColumn2").setAttribute("label",nameColumnLabel);
 }
 
 function onServerClick(aFolder)
