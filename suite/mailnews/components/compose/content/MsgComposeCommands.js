@@ -56,7 +56,6 @@ var gMessenger;
 var gHideMenus;
 var gMsgCompose;
 var gOriginalMsgURI;
-var gAccountManager;
 var gWindowLocked;
 var gContentChanged;
 var gAutoSaving;
@@ -94,7 +93,6 @@ var kComposeAttachDirPrefName = "mail.compose.attach.dir";
 function InitializeGlobalVariables()
 {
   gMessenger = Cc["@mozilla.org/messenger;1"].createInstance(Ci.nsIMessenger);
-  gAccountManager = Cc["@mozilla.org/messenger/account-manager;1"].getService(Ci.nsIMsgAccountManager);
 
   gMsgCompose = null;
   gOriginalMsgURI = null;
@@ -125,7 +123,6 @@ InitializeGlobalVariables();
 
 function ReleaseGlobalVariables()
 {
-  gAccountManager = null;
   gCurrentIdentity = null;
   gCharsetConvertManager = null;
   gMsgCompose = null;
@@ -548,7 +545,7 @@ var defaultController =
       //Edit Menu
       case "cmd_account"            :
         let currentAccountKey = getCurrentAccountKey();
-        let account = gAccountManager.getAccount(currentAccountKey);
+        let account = MailServices.accounts.getAccount(currentAccountKey);
         MsgAccountManager(null, account.incomingServer);
         break;
       case "cmd_preferences"        : DoCommandPreferences(); break;
@@ -1260,9 +1257,9 @@ function ComposeStartup(aParams)
   // An identity with no email is likely not valid.
   if (!params.identity || !params.identity.email) {
     // no pre selected identity, so use the default account
-    var identities = gAccountManager.defaultAccount.identities;
+    var identities = MailServices.accounts.defaultAccount.identities;
     if (identities.length == 0)
-      identities = gAccountManager.allIdentities;
+      identities = MailServices.accounts.allIdentities;
     params.identity = identities.queryElementAt(0, Ci.nsIMsgIdentity);
   }
 
@@ -1613,7 +1610,7 @@ function GenericSendMessage(msgType) {
     // Check if the user tries to send a message to a newsgroup through a mail
     // account.
     var currentAccountKey = getCurrentAccountKey();
-    var account = gAccountManager.getAccount(currentAccountKey);
+    var account = MailServices.accounts.getAccount(currentAccountKey);
     if (!account) {
       throw "UNEXPECTED: currentAccountKey '" + currentAccountKey +
           "' has no matching account!";
@@ -1983,11 +1980,13 @@ function addRecipientsToIgnoreList(aAddressesToAdd)
   if (InlineSpellCheckerUI.enabled)
   {
     // break the list of potentially many recipients back into individual names
-    var hdrParser = Cc["@mozilla.org/messenger/headerparser;1"].getService(Ci.nsIMsgHeaderParser);
     var emailAddresses = {};
     var names = {};
     var fullNames = {};
-    var numAddresses = hdrParser.parseHeadersWithArray(aAddressesToAdd, emailAddresses, names, fullNames);
+    var numAddresses =
+      MailServices.headerParser.parseHeadersWithArray(aAddressesToAdd,
+                                                      emailAddresses, names,
+                                                      fullNames);
     var tokenizedNames = [];
 
     // each name could consist of multiple words delimited by commas and/or spaces.
@@ -2229,7 +2228,7 @@ function getCurrentIdentityKey()
 
 function getIdentityForKey(key)
 {
-    return gAccountManager.getIdentity(key);
+    return MailServices.accounts.getIdentity(key);
 }
 
 function getCurrentIdentity()
@@ -2749,7 +2748,7 @@ function LoadIdentity(startup)
         identityElement.value = identityElement.selectedItem.value;
 
         var idKey = identityElement.selectedItem.getAttribute("identitykey");
-        gCurrentIdentity = gAccountManager.getIdentity(idKey);
+        gCurrentIdentity = MailServices.accounts.getIdentity(idKey);
 
         let accountKey = null;
         if (identityElement.selectedItem)
