@@ -323,43 +323,44 @@ nsSubscribableServer::FreeRows()
   return NS_OK;
 }
 
-nsresult
-nsSubscribableServer::CreateNode(SubscribeTreeNode *parent, const char *name, const nsACString &aPath, SubscribeTreeNode **result)
-{
-    NS_ASSERTION(result && name, "result or name is null");
-    NS_ENSURE_ARG_POINTER(result);
-    NS_ENSURE_ARG_POINTER(name);
+nsresult nsSubscribableServer::CreateNode(SubscribeTreeNode* parent,
+                                          const char* name,
+                                          const nsACString& aPath,
+                                          SubscribeTreeNode** result) {
+ NS_ASSERTION(result && name, "result or name is null");
+ NS_ENSURE_ARG_POINTER(result);
+ NS_ENSURE_ARG_POINTER(name);
+ *result = nullptr;
 
-    *result = new SubscribeTreeNode();
-    if (!*result) return NS_ERROR_OUT_OF_MEMORY;
+ SubscribeTreeNode* node = new SubscribeTreeNode();
 
-    (*result)->name = strdup(name);
-    if (!(*result)->name) return NS_ERROR_OUT_OF_MEMORY;
-
-    (*result)->path.Assign(aPath);
-
-    (*result)->parent = parent;
-    (*result)->prevSibling = nullptr;
-    (*result)->nextSibling = nullptr;
-    (*result)->firstChild = nullptr;
-    (*result)->lastChild = nullptr;
-    (*result)->isSubscribed = false;
-    (*result)->isSubscribable = false;
+  node->name = strdup(name);
+  if (!(node->name)) {
+    delete node;
+    return NS_ERROR_OUT_OF_MEMORY;
+  }
+  node->path.Assign(aPath);
+  node->parent = parent;
+  node->prevSibling = nullptr;
+  node->nextSibling = nullptr;
+  node->firstChild = nullptr;
+  node->lastChild = nullptr;
+  node->isSubscribed = false;
+  node->isSubscribable = false;
 #ifdef HAVE_SUBSCRIBE_DESCRIPTION
-    (*result)->description = nullptr;
+  node->description = nullptr;
 #endif
 #ifdef HAVE_SUBSCRIBE_MESSAGES
-    (*result)->messages = 0;
+  node->messages = 0;
 #endif
-    (*result)->cachedChild = nullptr;
+  node->isOpen = true;
+  node->cachedChild = nullptr;
+  if (parent) {
+    parent->cachedChild = node;
+  }
 
-    if (parent) {
-        parent->cachedChild = *result;
-    }
-
-    (*result)->isOpen = true;
-
-    return NS_OK;
+  *result = node;
+  return NS_OK;
 }
 
 nsresult
