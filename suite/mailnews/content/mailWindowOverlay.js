@@ -2978,6 +2978,13 @@ function MailToolboxCustomizeInit()
 function MailToolboxCustomizeDone(aToolboxChanged)
 {
   toolboxCustomizeDone("mail-menubar", getMailToolbox(), aToolboxChanged);
+
+  // Make sure the folder location picker is initialized.
+  let folderContainer = document.getElementById("folder-location-container");
+  if (folderContainer &&
+      folderContainer.parentNode.localName != "toolbarpalette") {
+    FolderPaneSelectionChange();
+  }
 }
 
 function MailToolboxCustomizeChange(event)
