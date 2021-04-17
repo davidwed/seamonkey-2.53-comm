@@ -620,6 +620,8 @@ var MessageWindowController =
       case "cmd_settingsOffline":
       case "cmd_createFilterFromPopup":
       case "cmd_createFilterFromMenu":
+      case "cmd_viewAllHeader":
+      case "cmd_viewNormalHeader":
         return true;
       case "cmd_synchronizeOffline":
       case "cmd_downloadFlagged":
@@ -696,6 +698,8 @@ var MessageWindowController =
       case "cmd_markAllRead":
       case "cmd_markThreadAsRead":
       case "cmd_markReadByDate":
+      case "cmd_viewAllHeader":
+      case "cmd_viewNormalHeader":
         return true;
       case "cmd_markAsFlagged":
       case "button_file":
@@ -880,6 +884,12 @@ var MessageWindowController =
         return;
       case "cmd_markReadByDate":
         MsgMarkReadByDate();
+        return;
+      case "cmd_viewAllHeader":
+        MsgViewAllHeaders();
+        return;
+      case "cmd_viewNormalHeader":
+        MsgViewNormalHeaders();
         return;
       case "cmd_markAsFlagged":
         MsgMarkAsFlagged(null);
