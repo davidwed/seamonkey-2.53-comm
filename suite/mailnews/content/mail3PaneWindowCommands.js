@@ -203,6 +203,8 @@ var DefaultController =
       case "cmd_selectAll":
       case "cmd_selectThread":
       case "cmd_selectFlagged":
+      case "cmd_viewAllHeader":
+      case "cmd_viewNormalHeader":
         return true;
       case "cmd_downloadFlagged":
       case "cmd_downloadSelected":
@@ -312,6 +314,8 @@ var DefaultController =
         }
         return false;
       case "cmd_printSetup":
+      case "cmd_viewAllHeader":
+      case "cmd_viewNormalHeader":
         return true;
       case "cmd_markAsFlagged":
       case "button_file":
@@ -674,6 +678,12 @@ var DefaultController =
         return;
       case "cmd_markAsFlagged":
         MsgMarkAsFlagged(null);
+        return;
+      case "cmd_viewAllHeader":
+        MsgViewAllHeaders();
+        return;
+      case "cmd_viewNormalHeader":
+        MsgViewNormalHeaders();
         return;
       case "cmd_markAsJunk":
         JunkSelectedMessages(true);

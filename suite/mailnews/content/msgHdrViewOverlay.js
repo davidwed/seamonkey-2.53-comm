@@ -226,6 +226,9 @@ function OnLoadMsgHeaderPane()
   gShowCondensedEmailAddresses = Services.prefs.getBoolPref("mail.showCondensedAddresses");
 
   Services.prefs.addObserver("mail.showCondensedAddresses", MsgHdrViewObserver);
+  Services.prefs.addObserver("mail.show_headers", MsgHdrViewObserver);
+  Services.prefs.addObserver("mailnews.display.html_as", MsgHdrViewObserver);
+  Services.prefs.addObserver("mail.inline_attachments", MsgHdrViewObserver);
 
   initializeHeaderViewTables();
 
@@ -247,6 +250,9 @@ function OnLoadMsgHeaderPane()
 function OnUnloadMsgHeaderPane()
 {
   Services.prefs.removeObserver("mail.showCondensedAddresses", MsgHdrViewObserver);
+  Services.prefs.removeObserver("mail.show_headers", MsgHdrViewObserver);
+  Services.prefs.removeObserver("mailnews.display.html_as", MsgHdrViewObserver);
+  Services.prefs.removeObserver("mail.inline_attachments", MsgHdrViewObserver);
 
   MailServices.ab.removeAddressBookListener(AddressBookListener);
 
@@ -255,16 +261,17 @@ function OnUnloadMsgHeaderPane()
     { bubbles: false, cancelable: true }));
 }
 
-const MsgHdrViewObserver =
-{
-  observe: function(subject, topic, prefName)
-  {
-    // verify that we're changing the mail pane config pref
-    if (topic == "nsPref:changed")
-    {
-      if (prefName == "mail.showCondensedAddresses")
-      {
-        gShowCondensedEmailAddresses = Services.prefs.getBoolPref("mail.showCondensedAddresses");
+const MsgHdrViewObserver = {
+  observe: function(subject, topic, prefName) {
+    // Verify that we're changing mail pane config prefs.
+    if (topic == "nsPref:changed") {
+      if (prefName == "mail.showCondensedAddresses") {
+        gShowCondensedEmailAddresses =
+          Services.prefs.getBoolPref("mail.showCondensedAddresses");
+        ReloadMessage();
+      } else if (prefName == "mail.show_headers" ||
+                 prefName == "mailnews.display.html_as" ||
+                 prefName == "mail.inline_attachments") {
         ReloadMessage();
       }
     }
