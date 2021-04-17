@@ -774,12 +774,7 @@ function MsgCloseTabOrWindow()
 
 function GetNumSelectedMessages()
 {
-  try {
-    return gDBView.numSelected;
-  }
-  catch (ex) {
-    return 0;
-  }
+  return gDBView ? gDBView.numSelected : 0;
 }
 
 var gLastFocusedElement=null;
