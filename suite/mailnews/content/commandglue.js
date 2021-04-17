@@ -25,19 +25,6 @@ var gPrevFolderFlags;
 var gPrevSelectedFolder;
 var gMsgFolderSelected;
 
-function GetServer(uri)
-{
-    if (!uri) return null;
-    try {
-        var folder = MailUtils.getFolderForURI(uri, true);
-        return folder.server;
-    }
-    catch (ex) {
-        dump("GetServer("+uri+") failed, ex="+ex+"\n");
-    }
-    return null;
-}
-
 function setTitleFromFolder(msgfolder, subject)
 {
     var title = subject || "";
@@ -287,8 +274,6 @@ function RerootFolder(uri, newFolder, viewType, viewFlags, sortType, sortOrder)
   }
   // that should have initialized gDBView, now re-root the thread pane
   RerootThreadPane();
-
-  UpdateLocationBar(gMsgFolderSelected);
 
   UpdateStatusMessageCounts(gMsgFolderSelected);
 
@@ -653,8 +638,19 @@ function CreateDBView(msgFolder, viewType, viewFlags, sortType, sortOrder)
 
 function FolderPaneSelectionChange()
 {
-    var folderTree = document.getElementById("folderTree");
-    var folderSelection = folderTree.view.selection;
+    let folders = GetSelectedMsgFolders();
+    if (folders.length) {
+      let locationItem = document.getElementById("locationFolders");
+      if (locationItem &&
+          locationItem.parentNode.parentNode.localName != "toolbarpalette") {
+        let msgFolder = folders[0];
+        locationItem.setAttribute("label", msgFolder.prettyName);
+        document.getElementById("folderLocationPopup")
+                ._setCssSelectors(msgFolder, locationItem);
+      }
+    }
+
+    let folderSelection = gFolderTreeView.selection;
 
     // This prevents a folder from being loaded in the case that the user
     // has right-clicked on a folder different from the one that was
@@ -668,7 +664,6 @@ function FolderPaneSelectionChange()
     gVirtualFolderTerms = null;
     gXFVirtualFolderTerms = null;
 
-    let folders = GetSelectedMsgFolders();
     if (folders.length == 1)
     {
         let msgFolder = folders[0];
@@ -681,7 +676,6 @@ function FolderPaneSelectionChange()
         let realFolder = msgFolder;
         gPrevSelectedFolder = gMsgFolderSelected;
         gMsgFolderSelected = msgFolder;
-        UpdateLocationBar(gMsgFolderSelected);
         var folderFlags = msgFolder.flags;
         const kVirtual = Ci.nsMsgFolderFlags.Virtual;
         // if this is same folder, and we're not showing a virtual folder
@@ -892,21 +886,12 @@ function  CreateVirtualFolder(newName, parentFolder, searchFolderURIs, searchTer
 }
 
 var searchSessionContractID = "@mozilla.org/messenger/searchSession;1";
-var gSearchView;
 var gSearchSession;
 
-var nsIMsgFolder = Ci.nsIMsgFolder;
-var nsIMsgWindow = Ci.nsIMsgWindow;
 var nsMsgSearchScope = Ci.nsMsgSearchScope;
 
-var gFolderDatasource;
-var gFolderPicker;
-var gStatusBar = null;
 var gMessengerBundle = null;
 
-// Datasource search listener -- made global as it has to be registered
-// and unregistered in different functions.
-var gDataSourceSearchListener;
 var gViewSearchListener;
 
 function GetScopeForFolder(folder)
@@ -916,10 +901,11 @@ function GetScopeForFolder(folder)
 
 function setupXFVirtualFolderSearch(folderUrisToSearch, searchTerms, searchOnline)
 {
-    var count = new Object;
+  var count = new Object;
   var i;
 
-    gSearchSession = Cc[searchSessionContractID].createInstance(Ci.nsIMsgSearchSession);
+  gSearchSession = Cc[searchSessionContractID]
+                     .createInstance(Ci.nsIMsgSearchSession);
 
   for (i in folderUrisToSearch)
     {
