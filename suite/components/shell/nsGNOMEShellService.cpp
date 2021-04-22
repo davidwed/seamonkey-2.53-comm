@@ -27,7 +27,7 @@
 #include "imgIContainer.h"
 #include "mozilla/Sprintf.h"
 #if defined(MOZ_WIDGET_GTK)
-#include "nsIImageToPixbuf.h"
+#include "nsImageToPixbuf.h"
 #endif
 #include "nsXULAppAPI.h"
 #include "gfxPlatform.h"
@@ -289,12 +289,10 @@ static nsresult WriteImage(const nsCString &aPath, imgIContainer *aImage) {
 #if !defined(MOZ_WIDGET_GTK)
   return NS_ERROR_NOT_AVAILABLE;
 #else
-  nsCOMPtr<nsIImageToPixbuf> imgToPixbuf =
-      do_GetService("@mozilla.org/widget/image-to-gdk-pixbuf;1");
-  if (!imgToPixbuf) return NS_ERROR_NOT_AVAILABLE;
-
-  GdkPixbuf *pixbuf = imgToPixbuf->ConvertImageToPixbuf(aImage);
-  if (!pixbuf) return NS_ERROR_NOT_AVAILABLE;
+  GdkPixbuf* pixbuf = nsImageToPixbuf::ImageToPixbuf(aImage);
+  if (!pixbuf) {
+    return NS_ERROR_NOT_AVAILABLE;
+  }
 
   gboolean res = gdk_pixbuf_save(pixbuf, aPath.get(), "png", nullptr, nullptr);
 
