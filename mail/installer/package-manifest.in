@@ -99,6 +99,7 @@
 #endif
 #endif
 #ifdef MOZ_GTK
+@BINPATH@/@DLL_PREFIX@mozgtk@DLL_SUFFIX@
 #endif
 
 ; Optional RSS extension
