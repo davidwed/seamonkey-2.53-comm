@@ -107,7 +107,7 @@ l10n-%:
 # we need the current value of AB_CD.
 	$(if $(filter en-US,$(AB_CD)),, @$(MAKE) merge-$*)
 	$(NSINSTALL) -D $(DIST)/install
-	@$(MAKE) -C $(DEPTH)/toolkit/locales l10n-$*
+	@$(MAKE) -C $(DEPTH)/toolkit/locales l10n-$* XPI_ROOT_APPID='$(XPI_ROOT_APPID)'
 #	@$(MAKE) -C $(DEPTH)/services/sync/locales AB_CD=$* XPI_NAME=locale-$*
 	@$(MAKE) -C ../../calendar/locales AB_CD=$* XPI_NAME=locale-$*
 ifdef MOZ_IRC
@@ -118,7 +118,7 @@ ifdef MOZ_DEBUGQA
 endif
 	@$(MAKE) -C $(DEPTH)/extensions/spellcheck/locales AB_CD=$* XPI_NAME=locale-$*
 	@$(MAKE) -C $(DEPTH)/intl/locales AB_CD=$* XPI_NAME=locale-$*
-	@$(MAKE) -C $(DEPTH)/devtools/client/locales AB_CD=$* XPI_NAME=locale-$*
+	@$(MAKE) -C $(DEPTH)/devtools/client/locales AB_CD=$* XPI_NAME=locale-$* XPI_ROOT_APPID='$(XPI_ROOT_APPID)'
 	@$(MAKE) l10n AB_CD=$* XPI_NAME=locale-$* PREF_DIR=defaults/pref
 	@$(MAKE) -C $(DEPTH)/$(MOZ_BRANDING_DIRECTORY)/locales AB_CD=$* XPI_NAME=locale-$*
 
