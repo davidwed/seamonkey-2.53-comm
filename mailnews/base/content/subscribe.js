@@ -7,7 +7,7 @@ ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 
 var gSubscribeTree = null;
 var gSubscribeBody = null;
-var gSearchTree;
+var gSearchTree = null;
 var okCallback = null;
 var gChangeTable = {};
 var gServerURI = null;
@@ -17,7 +17,6 @@ var gNameFieldLabel = null;
 var gStatusFeedback;
 var gSubscribeDeck = null;
 var gSearchView = null;
-var gSearchTreeBoxObject = null;
 var gSubscribeBundle;
 
 function Stop()
@@ -118,7 +117,6 @@ function SetUpTree(forceToServer, getOnlyNew)
   }
 }
 
-
 function SubscribeOnUnload()
 {
   try {
@@ -148,7 +146,6 @@ function SubscribeOnLoad()
   gSubscribeTree = document.getElementById("subscribeTree");
   gSubscribeBody = document.getElementById("subscribeTreeBody");
   gSearchTree = document.getElementById("searchTree");
-  gSearchTreeBoxObject = document.getElementById("searchTree").treeBoxObject;
   gNameField = document.getElementById("namefield");
   gNameFieldLabel = document.getElementById("namefieldlabel");
 
@@ -236,13 +233,14 @@ function subscribeCancel()
 
 function SetState(name, state)
 {
-  var changed = gSubscribableServer.setState(name, state);
-  if (changed)
-    StateChanged(name, state);
-}
+  // If the state is undefined then assume we want to toggle the current state.
+  if (state == undefined)
+    state = !gSubscribableServer.isSubscribed(name);
 
-function StateChanged(name,state)
-{
+  var changed = gSubscribableServer.setState(name, state);
+  if (!changed)
+    return;
+
   if (gServerURI in gChangeTable) {
     if (name in gChangeTable[gServerURI]) {
       var oldValue = gChangeTable[gServerURI][name];
@@ -259,121 +257,76 @@ function StateChanged(name,state)
   }
 }
 
+function SetStateRange(inSearchMode, state) {
+  // We need to iterate over the tree selection, and set the state for all rows
+  // in the selection.
+  let view = inSearchMode ? gSearchView : gSubscribeTree.view;
+  let tree = inSearchMode ? gSearchTree : gSubscribeTree;
+  let nameId = inSearchMode ? "nameColumn2" : "nameColumn";
+
+  let sel = view.selection;
+  for (let i = 0; i < sel.getRangeCount(); ++i) {
+    let start = {};
+    let end = {};
+    sel.getRangeAt(i, start, end);
+    for (let k = start.value; k <= end.value; ++k) {
+      SetState(view.getCellValue(k, tree.columns[nameId]), state);
+    }
+  }
+
+  // Force a repaint.
+  tree.treeBoxObject.invalidate();
+}
+
 function InSearchMode()
 {
   // search is the second card in the deck
   return (gSubscribeDeck.getAttribute("selectedIndex") == "1");
 }
 
-function SearchOnClick(event)
-{
-  // we only care about button 0 (left click) events
-  if (event.button != 0 || event.originalTarget.localName != "treechildren") return;
-
-  var row = {}, col = {}, childElt = {};
-  gSearchTreeBoxObject.getCellAt(event.clientX, event.clientY, row, col, childElt);
-  if (row.value == -1 || row.value > gSearchView.rowCount-1)
-    return;
-
-  if (col.value.id == "subscribedColumn2") {
-    if (event.detail != 2) {
-      // single clicked on the check box
-      // (in the "subscribedColumn2" column) reverse state
-      // if double click, do nothing
-      ReverseStateFromRow(row.value);
-    }
-  } else if (event.detail == 2) {
-    // double clicked on a row, reverse state
-    ReverseStateFromRow(row.value);
-  }
-
-  // invalidate the row
-  InvalidateSearchTreeRow(row.value);
-}
-
-function ReverseStateFromRow(aRow)
-{
-  // To determine if the row is subscribed or not,
-  // we get the properties for the "subscribedColumn2" cell in the row
-  // and look for the "subscribed" property.
-  // If the "subscribed" string is in the list of properties
-  // we are subscribed.
-  let col = gSearchTree.columns["nameColumn2"];
-  let name = gSearchView.getCellValue(aRow, col);
-  let isSubscribed = gSubscribableServer.isSubscribed(name);
-  SetStateFromRow(aRow, !isSubscribed);
-}
-
-function SetStateFromRow(row, state)
-{
-  var col = gSearchTree.columns["nameColumn2"];
-  var name = gSearchView.getCellValue(row, col);
-  SetState(name, state);
-}
-
 function SetSubscribeState(state)
 {
   try {
-    // we need to iterate over the tree selection, and set the state for
-    // all rows in the selection
-    var inSearchMode = InSearchMode();
-    var view = inSearchMode ? gSearchView : gSubscribeTree.view;
-    var colId = inSearchMode ? "nameColumn2" : "nameColumn";
-
-    var sel = view.selection;
-    for (var i = 0; i < sel.getRangeCount(); ++i) {
-      var start = {}, end = {};
-      sel.getRangeAt(i, start, end);
-      for (var k = start.value; k <= end.value; ++k) {
-        if (inSearchMode)
-          SetStateFromRow(k, state);
-        else {
-          let name = view.getCellValue(k, gSubscribeTree.columns[colId]);
-          SetState(name, state, k);
-        }
-      }
-    }
-
-    if (inSearchMode) {
-      // force a repaint
-      InvalidateSearchTree();
-    }
+    SetStateRange(InSearchMode(), state);
   }
   catch (ex) {
     dump("SetSubscribedState failed:  " + ex + "\n");
   }
 }
 
-function ReverseStateFromNode(row)
-{
-  let name = gSubscribeTree.view.getCellValue(row, gSubscribeTree.columns["nameColumn"]);
-  SetState(name, !gSubscribableServer.isSubscribed(name), row);
-}
-
-function SubscribeOnClick(event)
-{
-  // we only care about button 0 (left click) events
+function SubscribeOnClick(event, inSearchMode) {
+  // We only care about button 0 (left click) events.
   if (event.button != 0 || event.originalTarget.localName != "treechildren")
    return;
 
-  var row = {}, col = {}, obj = {};
-  gSubscribeTree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
-  if (row.value == -1 || row.value > (gSubscribeTree.view.rowCount - 1))
+  let tree = inSearchMode ? gSearchTree : gSubscribeTree;
+  let view = inSearchMode ? gSearchView : gSubscribeTree.view;
+
+  let row = {};
+  let col = {};
+  let obj = {};
+  tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+  if (row.value == -1 || row.value > (view.rowCount - 1))
     return;
 
+  let nameId = inSearchMode ? "nameColumn2" : "nameColumn";
+
   if (event.detail == 2) {
-    // only toggle subscribed state when double clicking something
-    // that isn't a container
-    if (!gSubscribeTree.view.isContainer(row.value)) {
-      ReverseStateFromNode(row.value);
-      return;
+    // Only toggle subscribed state when double clicking something that isn't a
+    // container or is in search mode.
+    if (inSearchMode || !view.isContainer(row.value)) {
+      SetState(view.getCellValue(row.value, tree.columns[nameId]));
     }
+  } else if (event.detail == 1) {
+    let subId = inSearchMode ? "subscribedColumn2" : "subscribedColumn";
+    // If the user single clicks on the subscribe check box, we handle it here.
+    if (col.value.id == subId)
+      SetState(view.getCellValue(row.value, tree.columns[nameId]));
   }
-  else if (event.detail == 1)
-  {
-    // if the user single clicks on the subscribe check box, we handle it here
-    if (col.value.id == "subscribedColumn")
-      ReverseStateFromNode(row.value);
+
+  if (inSearchMode) {
+    // Invalidate the row.
+    tree.treeBoxObject.invalidateRow(row);
   }
 }
 
@@ -410,16 +363,6 @@ function ShowNewGroupsList()
   SetUpTree(true, true);
 }
 
-function InvalidateSearchTreeRow(row)
-{
-    gSearchTreeBoxObject.invalidateRow(row);
-}
-
-function InvalidateSearchTree()
-{
-    gSearchTreeBoxObject.invalidate();
-}
-
 function SwitchToNormalView()
 {
   // the first card in the deck is the "normal" view
@@ -440,13 +383,14 @@ function Search()
     gSubscribableServer.setSearchValue(searchValue);
 
     if (!gSearchView && gSubscribableServer) {
-    gSearchView = gSubscribableServer.QueryInterface(Ci.nsITreeView);
+      gSearchView = gSubscribableServer.QueryInterface(Ci.nsITreeView);
       gSearchView.selection = null;
-    gSearchTreeBoxObject.view = gSearchView;
-  }
+      gSearchTree.treeBoxObject.view = gSearchView;
+    }
   }
   else {
     SwitchToNormalView();
+    gSubscribeTree.focus();
   }
 }
 
@@ -458,35 +402,10 @@ function CleanUpSearchView()
   }
 }
 
-function onSearchTreeKeyPress(event)
-{
-  // for now, only do something on space key
+function SubscribeOnKeyPress(event, inSearchMode){
+  // For now, only do something on space key.
   if (event.charCode != KeyEvent.DOM_VK_SPACE)
     return;
 
-  var treeSelection = gSearchView.selection;
-  for (var i=0;i<treeSelection.getRangeCount();i++) {
-    var start = {}, end = {};
-    treeSelection.getRangeAt(i,start,end);
-    for (var k=start.value;k<=end.value;k++)
-      ReverseStateFromRow(k);
-
-    // force a repaint
-    InvalidateSearchTree();
-  }
-}
-
-function onSubscribeTreeKeyPress(event)
-{
-  // for now, only do something on space key
-  if (event.charCode != KeyEvent.DOM_VK_SPACE)
-    return;
-
-  var treeSelection = gSubscribeTree.view.selection;
-  for (var i=0;i<treeSelection.getRangeCount();i++) {
-    var start = {}, end = {};
-    treeSelection.getRangeAt(i,start,end);
-    for (var k=start.value;k<=end.value;k++)
-      ReverseStateFromNode(k);
-  }
+  SetStateRange(inSearchMode);
 }
