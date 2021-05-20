@@ -1062,8 +1062,8 @@ NS_IMETHODIMP nsImapIncomingServer::PossibleImapMailbox(const nsACString& folder
   bool explicitlyVerify = false;
 
   *aNewFolder = false;
-  nsCOMPtr<nsIMsgFolder> a_nsIFolder;
-  rv = GetRootFolder(getter_AddRefs(a_nsIFolder));
+  nsCOMPtr<nsIMsgFolder> rootFolder;
+  rv = GetRootFolder(getter_AddRefs(rootFolder));
 
   if(NS_FAILED(rv))
     return rv;
@@ -1082,13 +1082,13 @@ NS_IMETHODIMP nsImapIncomingServer::PossibleImapMailbox(const nsACString& folder
   {
     // Make sure the imapmailfolder object has the right delimiter because the unsubscribed
     // folders (those not in the 'lsub' list) have the delimiter set to the default ('^').
-    if (a_nsIFolder && !dupFolderPath.IsEmpty())
+    if (rootFolder && !dupFolderPath.IsEmpty())
     {
       nsCOMPtr<nsIMsgFolder> msgFolder;
       bool isNamespace = false;
       bool noSelect = false;
 
-      rv = a_nsIFolder->FindSubFolder(dupFolderPath, getter_AddRefs(msgFolder));
+      rv = rootFolder->FindSubFolder(dupFolderPath, getter_AddRefs(msgFolder));
       NS_ENSURE_SUCCESS(rv,rv);
       m_subscribeFolders.AppendObject(msgFolder);
       noSelect = (boxFlags & kNoselect) != 0;
@@ -1104,7 +1104,7 @@ NS_IMETHODIMP nsImapIncomingServer::PossibleImapMailbox(const nsACString& folder
     }
   }
 
-  hostFolder = do_QueryInterface(a_nsIFolder, &rv);
+  hostFolder = do_QueryInterface(rootFolder, &rv);
   if (NS_FAILED(rv))
     return rv;
 
@@ -1161,7 +1161,7 @@ NS_IMETHODIMP nsImapIncomingServer::PossibleImapMailbox(const nsACString& folder
   uri.Append('/');
   uri.Append(dupFolderPath);
   bool caseInsensitive = MsgLowerCaseEqualsLiteral(dupFolderPath, "inbox");
-  a_nsIFolder->GetChildWithURI(uri, true, caseInsensitive, getter_AddRefs(child));
+  rootFolder->GetChildWithURI(uri, true, caseInsensitive, getter_AddRefs(child));
   // if we couldn't find this folder by URI, tell the imap code it's a new folder to us
   *aNewFolder = !child;
   if (child)
@@ -1174,7 +1174,7 @@ NS_IMETHODIMP nsImapIncomingServer::PossibleImapMailbox(const nsACString& folder
       nsCOMPtr <nsIMsgFolder> parent;
       bool parentIsNew;
       caseInsensitive = MsgLowerCaseEqualsLiteral(parentName, "inbox");
-      a_nsIFolder->GetChildWithURI(parentUri, true, caseInsensitive, getter_AddRefs(parent));
+      rootFolder->GetChildWithURI(parentUri, true, caseInsensitive, getter_AddRefs(parent));
       if (!parent /* || parentFolder->GetFolderNeedsAdded()*/)
       {
         PossibleImapMailbox(parentName, hierarchyDelimiter, kNoselect | // be defensive
@@ -1185,7 +1185,7 @@ NS_IMETHODIMP nsImapIncomingServer::PossibleImapMailbox(const nsACString& folder
     rv = hostFolder->CreateClientSubfolderInfo(dupFolderPath, hierarchyDelimiter,boxFlags, false);
     NS_ENSURE_SUCCESS(rv, rv);
     caseInsensitive = MsgLowerCaseEqualsLiteral(dupFolderPath, "inbox");
-    a_nsIFolder->GetChildWithURI(uri, true, caseInsensitive, getter_AddRefs(child));
+    rootFolder->GetChildWithURI(uri, true, caseInsensitive, getter_AddRefs(child));
   }
   if (child)
   {
