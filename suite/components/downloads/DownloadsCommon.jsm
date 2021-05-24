@@ -621,7 +621,7 @@ DownloadsDataCtor.prototype = {
       case 0:
         Cc["@mozilla.org/suite/suiteglue;1"]
           .getService(Ci.nsISuiteGlue)
-          .showDownloadManager(download);
+          .showDownloadManager(true);
         break;
       case 1:
         Services.ww.openWindow(null, PROGRESS_DIALOG_URL, null,
