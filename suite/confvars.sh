@@ -47,9 +47,8 @@ MOZ_CALENDAR=1
 MOZ_IRC=1
 MOZ_DOMINSPECTOR=1
 
-if [[ $MOZ_APP_VERSION == *a* ]]; then
-  MOZ_DEBUGQA=1
-fi
+# frg private patch always build debugQA extension
+MOZ_DEBUGQA=1
 
 if [[ $MOZ_IRC == 1 ]]; then
   MOZ_EXTENSIONS_DEFAULT='irc'
