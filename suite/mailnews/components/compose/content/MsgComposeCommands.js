@@ -3299,7 +3299,7 @@ function AutoSave()
 function removeQueryPart(aURL, aQuery)
 {
   // Quick pre-check.
-  if (aURL.indexOf(aQuery) < 0)
+  if (!aURL.includes(aQuery))
     return aURL;
 
   let indexQM = aURL.indexOf("?");
