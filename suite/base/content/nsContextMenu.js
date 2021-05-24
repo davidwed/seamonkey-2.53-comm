@@ -88,7 +88,7 @@ nsContextMenu.prototype = {
         let imageCache = Cc["@mozilla.org/image/tools;1"]
                            .getService(Ci.imgITools)
                            .getImgCacheForDocument(doc);
-        let props = imageCache.findEntryProperties(popupNode.currentURI);
+        let props = imageCache.findEntryProperties(popupNode.currentURI, doc);
         if (props) {
           let nsISupportsCString = Ci.nsISupportsCString;
           contentType = props.get("type", nsISupportsCString).data;
