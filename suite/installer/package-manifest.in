@@ -305,10 +305,13 @@
 @RESPATH@/components/storage.xpt
 @RESPATH@/components/SuiteBrowser.manifest
 @RESPATH@/components/suitecommon.xpt
-@RESPATH@/components/SuiteCommon.manifest
-@RESPATH@/components/suitefeeds.xpt
+@RESPATH@/components/suite-components.xpt
+@RESPATH@/components/SuiteComponents.manifest
+@RESPATH@/components/suite-feeds.xpt
 @RESPATH@/components/SuiteFeeds.manifest
 @RESPATH@/components/suitemigration.xpt
+@RESPATH@/components/suite-sidebar.xpt
+@RESPATH@/components/SuiteSidebar.manifest
 @RESPATH@/components/telemetry.xpt
 @RESPATH@/components/toolkit_asyncshutdown.xpt
 @RESPATH@/components/toolkit_filewatcher.xpt
@@ -452,6 +455,7 @@
 @RESPATH@/components/nsSearchService.js
 @RESPATH@/components/nsSearchSuggestions.js
 @RESPATH@/components/nsSessionStartup.js
+@RESPATH@/components/nsSessionStartup.manifest
 @RESPATH@/components/nsSessionStore.js
 @RESPATH@/components/nsSidebar.js
 @RESPATH@/components/nsSuiteGlue.js
