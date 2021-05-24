@@ -1,10 +1,12 @@
+/* -*- indent-tabs-mode: nil; js-indent-level: 2 -*- */
+/* vim: set ts=2 et sw=2 tw=80 filetype=javascript: */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 "use strict";
 
-this.EXPORTED_SYMBOLS = [
+var EXPORTED_SYMBOLS = [
   "PermissionUI",
 ];
 
@@ -72,7 +74,7 @@ XPCOMUtils.defineLazyGetter(this, "gNotificationBundle", function() {
                  .createBundle("chrome://communicator/locale/notification.properties");
 });
 
-this.PermissionUI = {};
+var PermissionUI = {};
 
 /**
  * PermissionPromptPrototype should be subclassed by callers that
@@ -83,7 +85,7 @@ this.PermissionUI = {};
  * nsIContentPermissionRequest, you'll want to subclass
  * PermissionPromptForRequestPrototype instead.
  */
-this.PermissionPromptPrototype = {
+var PermissionPromptPrototype = {
   /**
    * Returns the associated <xul:browser> for the request. This should
    * work for the e10s and non-e10s case.
@@ -360,7 +362,7 @@ PermissionUI.PermissionPromptPrototype = PermissionPromptPrototype;
  * nsIContentPermissionRequest, this should be subclassed
  * rather than PermissionPromptPrototype.
  */
-this.PermissionPromptForRequestPrototype = {
+var PermissionPromptForRequestPrototype = {
   __proto__: PermissionPromptPrototype,
 
   get browser() {
