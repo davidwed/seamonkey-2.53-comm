@@ -519,7 +519,7 @@ SuiteGlue.prototype = {
                       "downloads", "cookies", "cache", "sessions",
                       "offlineApps" ];
 
-      for (pref of prefs) {
+      for (let pref of prefs) {
         try {
           let prefOld = "privacy.item." + pref;
 
