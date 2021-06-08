@@ -252,7 +252,7 @@
       <button id="navigator-throbber"
               oncommand="goClickThrobber('editor.throbber.url', event)"
               onclick="checkForMiddleClick(this, event);"
-              tooltiptext="&throbber.tooltip;">
+              tooltiptext="&throbber.tooltip2;">
         <observes element="Editor:Throbber" attribute="busy"/>
       </button>
     </hbox>
