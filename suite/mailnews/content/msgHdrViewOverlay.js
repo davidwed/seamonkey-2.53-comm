@@ -498,7 +498,7 @@ var messageHeaderSink = {
         var fromMailboxes = kMailboxSeparator +
           msgHeaderParser.extractHeaderAddressMailboxes(
             currentHeaderData.from.headerValue) + kMailboxSeparator;
-        if (fromMailboxes.indexOf(senderMailbox) >= 0)
+        if (fromMailboxes.includes(senderMailbox))
           delete currentHeaderData.sender;
       }
 
@@ -709,7 +709,7 @@ function SetTagHeader()
   if (label)
   {
     var labelKey = "$label" + label;
-    if (msgKeyArray.indexOf(labelKey) < 0)
+    if (!msgKeyArray.includes(labelKey))
       msgKeyArray.unshift(labelKey);
   }
 
