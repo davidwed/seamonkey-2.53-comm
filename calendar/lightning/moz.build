@@ -23,7 +23,6 @@ else:
 export('DIST_SUBDIR')
 
 FINAL_TARGET_PP_FILES += [
-    'app.ini',
     'install.rdf',
 ]
 
@@ -54,7 +53,4 @@ with Files('content/suite-*'):
     BUG_COMPONENT = ('Calendar', 'Lightning: SeaMonkey Integration')
 
 with Files('build/**'):
-    BUG_COMPONENT = ('Calendar', 'Build Config')
-
-with Files('app.ini'):
     BUG_COMPONENT = ('Calendar', 'Build Config')
