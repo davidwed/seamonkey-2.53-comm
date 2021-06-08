@@ -9,8 +9,12 @@
  **/
 
 // Services = object with smart getters for common XPCOM services
+ChromeUtils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetter(this, "RecentWindow",
+                                  "resource:///modules/RecentWindow.jsm");
 
 // XPCOMUtils.defineLazyGetter(this, "Weave", function() {
 // let tmp = {};
@@ -576,9 +580,17 @@ function goClickThrobber(urlPref, aEvent)
     openUILinkIn(url, whereToOpenLink(aEvent, false, true, true));
 }
 
-function getTopWin()
-{
-  return top.gPrivate || Services.wm.getMostRecentWindow("navigator:browser");
+function getTopWin(skipPopups) {
+  // If this is called in a browser window, use that window regardless of
+  // whether it's the frontmost window, since commands can be executed in
+  // background windows (bug 626148).
+  if (top.document.documentElement.getAttribute("windowtype") == "navigator:browser" &&
+      (!skipPopups || top.toolbar.visible))
+    return top;
+
+  let isPrivate = PrivateBrowsingUtils.isWindowPrivate(window);
+  return RecentWindow.getMostRecentBrowserWindow({private: isPrivate,
+                                                  allowPopups: !skipPopups});
 }
 
 function isRestricted( url )
@@ -1533,7 +1545,14 @@ function openLinkIn(url, where, params)
     return null;
   }
 
+  // Establish which window we'll load the link in.
   var w = getTopWin();
+  // We don't want to open tabs in popups, so try to find a non-popup window in
+  // that case.
+  if ((where == "tab" || where == "tabshifted") && w && !w.toolbar.visible) {
+    w = getTopWin(true);
+    aRelatedToCurrent = false;
+  }
 
   // Teach the principal about the right OA to use, e.g. in case when
   // opening a link in a new private window, or in a new container tab.
