@@ -27,7 +27,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "PlacesTransactions",
 const gInContentProcess = Services.appinfo.processType == Ci.nsIXULRuntime.PROCESS_TYPE_CONTENT;
 const FAVICON_REQUEST_TIMEOUT = 60 * 1000;
 // Map from windows to arrays of data about pending favicon loads.
-let gFaviconLoadDataMap = new Map();
+var gFaviconLoadDataMap = new Map();
 
 // copied from utilityOverlay.js
 const TAB_DROP_TYPE = "application/x-moz-tabbrowser-tab";
@@ -69,7 +69,7 @@ function IsLivemark(aItemId) {
   return self.ids.has(aItemId);
 }
 
-let InternalFaviconLoader = {
+var InternalFaviconLoader = {
   /**
    * This gets called for every inner window that is destroyed.
    * In the parent process, we process the destruction ourselves. In the child process,
