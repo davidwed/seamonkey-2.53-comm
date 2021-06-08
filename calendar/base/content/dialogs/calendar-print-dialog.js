@@ -236,8 +236,14 @@ function refreshHtml(finishFunc) {
             Components.utils.reportError("Calendar print dialog:refreshHtml: " + e);
         }
 
+        // Temporary Fix for showing print preview in SeaMonkey 2.53 after
+        // backporting Bug 1101381. See Bug 1584803.
+        let iframeDoc = document.getElementById("content").contentDocument;
+        // eslint-disable-next-line no-unsanitized/property
+        iframeDoc.documentElement.innerHTML = printContent;
+        iframeDoc.title = settings.title;
         printContent = "data:text/html," + encodeURIComponent(printContent);
-        document.getElementById("content").src = printContent;
+        // document.getElementById("content").src = printContent;
 
         if (finishFunc) {
             finishFunc();
