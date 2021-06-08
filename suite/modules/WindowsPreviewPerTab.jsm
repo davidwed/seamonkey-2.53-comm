@@ -1,5 +1,6 @@
-/* vim: se cin sw=2 ts=2 et filetype=javascript :
- * This Source Code Form is subject to the terms of the Mozilla Public
+/* -*- indent-tabs-mode: nil; js-indent-level: 2 -*- */
+/* vim: set ts=2 et sw=2 tw=80 filetype=javascript: */
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 /*
@@ -41,7 +42,7 @@
  * buttons appear on the taskbar, so a magic pref-controlled number determines
  * when this threshold has been crossed.
  */
-this.EXPORTED_SYMBOLS = ["AeroPeek"];
+var EXPORTED_SYMBOLS = ["AeroPeek"];
 
 
 ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
@@ -617,7 +618,7 @@ TabWindow.prototype = {
 
 // This object acts as global storage and external interface for this feature.
 // It maintains the values of the prefs.
-this.AeroPeek = {
+var AeroPeek = {
   available: false,
   // Does the pref say we're enabled?
   _prefenabled: false,
