@@ -3,6 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
+                                  "resource:///modules/ShellService.jsm");
+
 // The contents of this file will be loaded into the scope of the object
 // <prefpane id="navigator_pane">!
 
@@ -213,7 +218,7 @@ function SelectFile()
                    nsIFilePicker.filterImages);
 
   fp.open(rv => {
-    if (rv == nsIFilePicker.returnOK && fp.fileURL.spec && 
+    if (rv == nsIFilePicker.returnOK && fp.fileURL.spec &&
         fp.fileURL.spec.length > 0) {
       UpdateHomePageList(fp.fileURL.spec);
     }
@@ -267,28 +272,18 @@ function WriteConcurrentTabs()
 
 function ApplySetAsDefaultBrowser()
 {
-  const nsIShellService = Components.interfaces.nsIShellService;
-  var shellSvc = Components.classes["@mozilla.org/suite/shell-service;1"]
-                           .getService(nsIShellService);
-
-  shellSvc.setDefaultClient(false, false, nsIShellService.BROWSER);
-  shellSvc.shouldBeDefaultClientFor |= nsIShellService.BROWSER;
+  ShellService.setDefaultClient(false, false, Ci.nsIShellService.BROWSER);
+  ShellService.shouldBeDefaultClientFor |= Ci.nsIShellService.BROWSER;
 }
 
 function IsDefaultBrowser()
 {
-  const nsIShellService = Components.interfaces.nsIShellService;
-  var shellSvc = Components.classes["@mozilla.org/suite/shell-service;1"]
-                           .getService(nsIShellService);
-
-  return shellSvc.isDefaultClient(false, nsIShellService.BROWSER);
+  return ShellService.isDefaultClient(false, Ci.nsIShellService.BROWSER);
 }
 
 function InitPlatformIntegration()
 {
-  const NS_SHELLSERVICE_CID = "@mozilla.org/suite/shell-service;1";
-
-  if (NS_SHELLSERVICE_CID in Components.classes) try {
+  if (ShellService) try {
     var desc = document.getElementById("defaultBrowserDesc");
     if (IsDefaultBrowser())
       desc.textContent = desc.getAttribute("desc1");

@@ -53,6 +53,9 @@ XPCOMUtils.defineLazyModuleGetter(this, "PermissionUI",
 XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
                                   "resource:///modules/DownloadsCommon.jsm");
 
+XPCOMUtils.defineLazyModuleGetter(this, "ShellService",
+                                  "resource:///modules/ShellService.jsm");
+
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
   var tmp = {};
   Components.utils.import("resource://devtools/shared/Loader.jsm", tmp);
@@ -867,19 +870,14 @@ SuiteGlue.prototype = {
   // This will do nothing on platforms without a shell service.
   _checkForDefaultClient: function checkForDefaultClient(aWindow)
   {
-    const NS_SHELLSERVICE_CID = "@mozilla.org/suite/shell-service;1";
-    if (NS_SHELLSERVICE_CID in Components.classes) try {
-      var nsIShellService = Components.interfaces.nsIShellService;
-
-      var shellService = Components.classes[NS_SHELLSERVICE_CID]
-                                   .getService(nsIShellService);
-      var appTypes = shellService.shouldBeDefaultClientFor;
+    if (ShellService) try {
+      var appTypes = ShellService.shouldBeDefaultClientFor;
 
       // Show the default client dialog only if we should check for the default
       // client and we aren't already the default for the stored app types in
       // shell.checkDefaultApps.
-      if (appTypes && shellService.shouldCheckDefaultClient &&
-          !shellService.isDefaultClient(true, appTypes)) {
+      if (appTypes && ShellService.shouldCheckDefaultClient &&
+          !ShellService.isDefaultClient(true, appTypes)) {
         aWindow.openDialog("chrome://communicator/content/defaultClientDialog.xul",
                            "DefaultClient",
                            "modal,centerscreen,chrome,resizable=no");
