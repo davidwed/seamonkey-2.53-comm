@@ -17,6 +17,7 @@ ChromeUtils.import("resource://gre/modules/BrowserUtils.jsm");
 ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm");
 ChromeUtils.import("resource://gre/modules/LoginManagerContextMenu.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "InlineSpellCheckerUI", function() {
   return new InlineSpellChecker();
@@ -28,18 +29,14 @@ XPCOMUtils.defineLazyGetter(this, "PageMenuParent", function() {
   return new tmp.PageMenuParent();
 });
 
-ChromeUtils.defineModuleGetter(this, "DevToolsShim",
-                               "chrome://devtools-shim/content/DevToolsShim.jsm");
-ChromeUtils.defineModuleGetter(this, "findCssSelector",
-                               "resource://gre/modules/css-selector.js");
-ChromeUtils.defineModuleGetter(this, "ShellService",
-                               "resource:///modules/ShellService.jsm");
-ChromeUtils.defineModuleGetter(this, "NetUtil",
-                               "resource://gre/modules/NetUtil.jsm");
-ChromeUtils.defineModuleGetter(this, "LoginHelper",
-  "resource://gre/modules/LoginHelper.jsm");
-ChromeUtils.defineModuleGetter(this, "LoginManagerContent",
-  "resource://gre/modules/LoginManagerContent.jsm");
+XPCOMUtils.defineLazyModuleGetters(this, {
+  findCssSelector: "resource://gre/modules/css-selector.js",
+  LoginHelper: "resource://gre/modules/LoginHelper.jsm",
+  LoginManagerContent: "resource://gre/modules/LoginManagerContent.jsm",
+  DevToolsShim: "chrome://devtools-shim/content/DevToolsShim.jsm",
+  NetUtil: "resource://gre/modules/NetUtil.jsm",
+  ShellService: "resource:///modules/ShellService.jsm",
+});
 
 var gContextMenuContentData = null;
 
