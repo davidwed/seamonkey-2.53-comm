@@ -65,7 +65,6 @@ const DEBUGGER_REMOTE_PORT = "devtools.debugger.remote-port";
 const DEBUGGER_FORCE_LOCAL = "devtools.debugger.force-local";
 const DEBUGGER_WIFI_VISIBLE = "devtools.remote.wifi.visible";
 const DOWNLOAD_MANAGER_URL = "chrome://communicator/content/downloads/downloadmanager.xul";
-const PROGRESS_DIALOG_URL = "chrome://communicator/content/downloads/progressDialog.xul";
 const PREF_FOCUS_WHEN_STARTING = "browser.download.manager.focusWhenStarting";
 const PREF_FLASH_COUNT = "browser.download.manager.flashCount";
 
@@ -82,7 +81,6 @@ function SuiteGlue() {
 
 SuiteGlue.prototype = {
   _saveSession: false,
-  _sound: null,
   _isIdleObserver: false,
   _isPlacesDatabaseLocked: false,
   _migrationImportsDefaultBookmarks: false,
@@ -224,9 +222,6 @@ SuiteGlue.prototype = {
         subject.QueryInterface(Components.interfaces.nsISupportsPRBool);
         subject.data = true;
         break;
-      case "dl-done":
-        this._playDownloadSound();
-        break;
       case "places-init-complete":
         if (!this._migrationImportsDefaultBookmarks)
           this._initPlaces(false);
@@ -329,7 +324,6 @@ SuiteGlue.prototype = {
     Services.obs.addObserver(this, "weave:service:ready", true);
     Services.obs.addObserver(this, "weave:engine:clients:display-uri", true);
     Services.obs.addObserver(this, "session-save", true);
-    Services.obs.addObserver(this, "dl-done", true);
     Services.obs.addObserver(this, "places-init-complete", true);
     Services.obs.addObserver(this, "places-shutdown", true);
     Services.obs.addObserver(this, "browser-search-engine-modified", true);
@@ -751,22 +745,6 @@ SuiteGlue.prototype = {
           }
         }
         break;
-      }
-    }
-  },
-
-  _playDownloadSound: function()
-  {
-    if (Services.prefs.getBoolPref("browser.download.finished_download_sound")) {
-      if (!this._sound)
-        this._sound = Components.classes["@mozilla.org/sound;1"]
-                                .createInstance(Components.interfaces.nsISound);
-      try {
-        var url = Services.prefs.getComplexValue("browser.download.finished_sound_url",
-                                                 Components.interfaces.nsISupportsString);
-        this._sound.play(Services.io.newURI(url.data));
-      } catch (e) {
-        this._sound.beep();
       }
     }
   },
