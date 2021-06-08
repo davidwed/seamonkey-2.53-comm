@@ -49,10 +49,6 @@ DEFINES += -DMOZ_GTK3=1
 endif
 endif
 
-ifdef _MSC_VER
-DEFINES += -D_MSC_VER=$(_MSC_VER)
-endif
-
 ifdef MOZ_SYSTEM_NSPR
 DEFINES += -DMOZ_SYSTEM_NSPR=1
 endif
