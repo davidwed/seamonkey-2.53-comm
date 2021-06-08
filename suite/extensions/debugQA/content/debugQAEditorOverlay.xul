@@ -69,12 +69,8 @@
                   oncommand="EditorTestTableLayout()"/>
         <menuitem label="&showEmbeddedCmd.label;"
                   oncommand="EditorShowEmbeddedObjects()"/>
-        <menuitem label="&dumpContentCmd.label;"
-                  oncommand="EditorDumpContent()"/>
         <menuitem label="&testDocumentCmd.label;"
                   oncommand="EditorTestDocument()"/>
-        <menuitem label="&runUnitTestsCmd.label;"
-                  oncommand="EditorUnitTests()"/>
         <menuseparator/>
         <menuitem label="&dumpUndoStack.label;"
                   oncommand="DumpUndoStack()"/>
