@@ -40,7 +40,8 @@ var okCallback = null;
    (server vs. newsserver)
 */
 
-Cu.import("resource:///modules/mailServices.js");
+ChromeUtils.import("resource:///modules/FeedUtils.jsm");
+ChromeUtils.import("resource:///modules/mailServices.js");
 
 var contentWindow;
 
@@ -389,6 +390,11 @@ function createAccount(accountData)
 {
   // Retrieve the server (data) from the account data.
   var server = accountData.incomingServer;
+
+  // Use createRssAccount for Feed accounts.
+  if (server.type == "rss") {
+    return FeedUtils.createRssAccount(server.prettyName);
+  }
 
   // for news, username is always null
   var username = (server.type == "nntp") ? null : server.username;
