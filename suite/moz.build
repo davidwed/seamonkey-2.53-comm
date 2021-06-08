@@ -10,8 +10,8 @@ if 'pre' in CONFIG['MOZ_APP_VERSION'] or 'a' in CONFIG['MOZ_APP_VERSION']:
     DIRS += ['debugQA']
 
 DIRS += [
+    'base',
     'browser',
-    'common',
     'components',
     'locales',
     'mailnews',
