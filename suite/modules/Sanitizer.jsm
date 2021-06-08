@@ -7,8 +7,17 @@ var EXPORTED_SYMBOLS = ["Sanitizer"];
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
+
+XPCOMUtils.defineLazyModuleGetter(this, "AppConstants",
+                                  "resource://gre/modules/AppConstants.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "PlacesUtils",
+                                  "resource://gre/modules/PlacesUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "FormHistory",
                                   "resource://gre/modules/FormHistory.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "Downloads",
+                                  "resource://gre/modules/Downloads.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
+                                  "resource:///modules/DownloadsCommon.jsm");
 
 var Sanitizer = {
   get _prefs() {
@@ -297,17 +306,16 @@ var Sanitizer = {
     },
 
     downloads: {
-      clear: function() {
-        var dlMgr = Components.classes["@mozilla.org/download-manager;1"]
-                              .getService(Components.interfaces.nsIDownloadManager);
-        dlMgr.cleanUp();
+      // Just say yes to avoid adding some async logic.
+      canClear: true,
+      async clear() {
+        try {
+          // Clear all completed/cancelled downloads.
+          let list = await Downloads.getList(Downloads.ALL);
+          list.removeFinished(null);
+        } finally {
+        }
       },
-
-      get canClear() {
-        var dlMgr = Components.classes["@mozilla.org/download-manager;1"]
-                              .getService(Components.interfaces.nsIDownloadManager);
-        return dlMgr.canCleanUp;
-      }
     },
 
     passwords: {
