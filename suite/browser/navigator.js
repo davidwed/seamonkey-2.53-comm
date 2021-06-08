@@ -2453,20 +2453,19 @@ function BrowserViewSource(aBrowser) {
 // imageElement - image to load in the Media Tab of the Page Info window;
 //                can be null/omitted
 function BrowserPageInfo(doc, initialTab, imageElement) {
-  if (!doc)
-    doc = window.content.document;
-  var relatedUrl = doc.location.toString();
   var args = {doc: doc, initialTab: initialTab, imageElement: imageElement};
+  var windows = Services.wm.getEnumerator("Browser:page-info");
 
-  var enumerator = Services.wm.getEnumerator("Browser:page-info");
-  // Check for windows matching the url
-  while (enumerator.hasMoreElements()) {
-    let win = enumerator.getNext();
+  var documentURL = doc ? doc.location : window.gBrowser.selectedBrowser.contentDocumentAsCPOW.location;
+
+  // Check for windows matching the url.
+  while (windows.hasMoreElements()) {
+    let win = windows.getNext();
     if (win.closed) {
       continue;
     }
     if (win.document.documentElement
-           .getAttribute("relatedUrl") == relatedUrl) {
+           .getAttribute("relatedUrl") == documentURL) {
       win.focus();
       win.resetPageInfo(args);
       return win;
@@ -2475,7 +2474,7 @@ function BrowserPageInfo(doc, initialTab, imageElement) {
   // We didn't find a matching window, so open a new one.
   return window.openDialog("chrome://navigator/content/pageinfo/pageInfo.xul",
                            "_blank",
-                           "chrome,dialog=no",
+                           "chrome,dialog=no,resizable",
                            args);
 }
 
