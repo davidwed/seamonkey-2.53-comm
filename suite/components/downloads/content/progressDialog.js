@@ -268,12 +268,12 @@ var ProgressDlgController = {
         showDownload(gDownload);
         break;
       case "cmd_openReferrer":
-        openUILink(gDownload.referrer.spec);
+        openUILink(gDownload.source.referrer);
         break;
       case "cmd_copyLocation":
         var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
                           .getService(Ci.nsIClipboardHelper);
-        clipboard.copyString(gDownload.source.spec);
+        clipboard.copyString(gDownload.source.url);
         break;
     }
   },
