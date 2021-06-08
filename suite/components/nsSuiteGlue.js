@@ -382,7 +382,7 @@ SuiteGlue.prototype = {
 
   _migrateUI: function()
   {
-    const UI_VERSION = 4;
+    const UI_VERSION = 5;
 
     // If the pref is not set this is a new or pre SeaMonkey 2.49 profile.
     // We can't tell so we just run migration with version 0.
@@ -456,7 +456,7 @@ SuiteGlue.prototype = {
       } catch (ex) {}
     }
 
-    // Pretend currentUIVersion 3 never happend (used in 2.57 for a time and became 5).
+    // Pretend currentUIVersion 3 never happend (used in 2.57 for a time and became 6).
 
     // Remove obsolete download preferences set by user.
     if (currentUIVersion < 4) {
@@ -483,6 +483,20 @@ SuiteGlue.prototype = {
           Services.prefs.clearUserPref("browser.download.manager.closeWhenDone");
         }
       } catch (ex) {}
+    }
+
+    if (currentUIVersion < 5) {
+      // Delete obsolete ssl and strict transport security permissions.
+      let perms = Services.perms.enumerator;
+      while (perms.hasMoreElements()) {
+        let perm = perms.getNext();
+        if (perm.type == "falsestart-rc4" ||
+            perm.type == "falsestart-rsa" ||
+            perm.type == "sts/use" ||
+            perm.type == "sts/subd") {
+          Services.perms.removePermission(perm);
+        }
+      }
     }
 
     // Update the migration version.
