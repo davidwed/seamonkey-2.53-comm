@@ -1459,7 +1459,7 @@ SuiteGlue.prototype = {
  * PermissionUI.jsm for an example of how to provide a new prompt
  * from an add-on.
  */
-const ContentPermissionIntegration = {
+var ContentPermissionIntegration = {
   /**
    * Creates a PermissionPrompt for a given permission type and
    * nsIContentPermissionRequest.
