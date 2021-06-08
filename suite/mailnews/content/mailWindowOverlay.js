@@ -1438,11 +1438,6 @@ function MsgCreateFilter()
      top.MsgFilters(emailAddress, folder);
 }
 
-function MsgHome(url)
-{
-  window.open(url, "_blank", "chrome,dependent=yes,all");
-}
-
 function MsgNewFolder(callBackFunctionName)
 {
     var preselectedFolder = GetFirstSelectedMsgFolder();
@@ -1576,11 +1571,6 @@ function MsgOpenFromFile()
     window.openDialog("chrome://messenger/content/messageWindow.xul", "_blank",
                     "all,chrome,dialog=no,status,toolbar", uri);
   });
-}
-
-function MsgOpenNewWindowForMsgHdr(hdr)
-{
-  MsgOpenNewWindowForFolder(hdr.folder.URI, hdr.messageKey);
 }
 
 function MsgOpenNewWindowForFolder(uri, key)
@@ -2115,13 +2105,6 @@ function IsGetNextNMessagesEnabled()
     return false;
 }
 
-function IsEmptyTrashEnabled()
-{
-  var folderURI = GetSelectedFolderURI();
-  var server = GetServer(folderURI);
-  return (server && server.canEmptyTrashOnExit ? IsMailFolderSelected() : false);
-}
-
 function IsCompactFolderEnabled()
 {
   var server = GetServer(GetSelectedFolderURI());
@@ -2130,36 +2113,30 @@ function IsCompactFolderEnabled()
       isCommandEnabled("cmd_compactFolder"));   // checks e.g. if IMAP is offline
 }
 
-var gReplyAllButton = null;
-var gDeleteButton = null;
-
 function SetUpToolbarButtons(uri)
 {
-    // Eventually, we might want to set up the toolbar differently for imap,
-    // pop, and news. For now, just tweak it based on if it is news or not.
-    var forNews = isNewsURI(uri);
+  let deleteButton = document.getElementById("button-delete");
+  let replyAllButton = document.getElementById("button-replyall");
 
-    if(!gDeleteButton) gDeleteButton = document.getElementById("button-delete");
-    if (!gReplyAllButton) gReplyAllButton = document.getElementById("button-replyall");
+  // Eventually, we might want to set up the toolbar differently for imap,
+  // pop, and news. For now, just tweak it based on if it is news or not.
+  let forNews = isNewsURI(uri);
 
-    gDeleteButton.hidden = forNews;
-    if (forNews) {
-        gReplyAllButton.setAttribute("type", "menu-button");
-        gReplyAllButton.setAttribute("tooltiptext", gReplyAllButton.getAttribute("tooltiptextnews"));
-    }
-    else {
-        gReplyAllButton.removeAttribute("type");
-        gReplyAllButton.setAttribute("tooltiptext", gReplyAllButton.getAttribute("tooltiptextmail"));
-    }
+  deleteButton.hidden = forNews;
+  if (forNews) {
+    replyAllButton.setAttribute("type", "menu-button");
+    replyAllButton.setAttribute("tooltiptext",
+                                replyAllButton.getAttribute("tooltiptextnews"));
+  } else {
+    replyAllButton.removeAttribute("type");
+    replyAllButton.setAttribute("tooltiptext",
+                                replyAllButton.getAttribute("tooltiptextmail"));
+  }
 }
-
-var gMessageBrowser;
 
 function getMessageBrowser()
 {
-  if (!gMessageBrowser)
-    gMessageBrowser = document.getElementById("messagepane");
-  return gMessageBrowser;
+  return document.getElementById("messagepane");
 }
 
 // The zoom manager, view source and possibly some other functions still rely
@@ -2168,11 +2145,6 @@ function getBrowser()
 {
   return GetTabMail() ? GetTabMail().getBrowserForSelectedTab() :
                         getMessageBrowser();
-}
-
-function getMarkupDocumentViewer()
-{
-  return getMessageBrowser().markupDocumentViewer;
 }
 
 function MsgSynchronizeOffline()
