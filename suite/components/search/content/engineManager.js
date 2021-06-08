@@ -180,11 +180,12 @@ var gEngineManagerDialog = {
     if (tree.editingColumn)
       return;
 
-    var isMac = Application.platformIsMac;
-    if (aEvent.keyCode == (isMac ? KeyEvent.DOM_VK_RETURN : KeyEvent.DOM_VK_F2))
-      if (tree.startEditing(gEngineView.selectedIndex,
-                            tree.columns.engineKeyword))
-        aEvent.preventDefault();
+    if (aEvent.keyCode == (AppConstants.platform == "macosx" ?
+                             KeyEvent.DOM_VK_RETURN : KeyEvent.DOM_VK_F2) &&
+        tree.startEditing(gEngineView.selectedIndex,
+                          tree.columns.engineKeyword)) {
+      aEvent.preventDefault();
+    }
   }
 };
 
