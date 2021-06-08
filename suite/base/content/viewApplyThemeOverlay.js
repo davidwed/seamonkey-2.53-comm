@@ -38,7 +38,7 @@ function getNewThemes()
 {
   // get URL for more themes from prefs
   try {
-    openTopWin(Services.urlFormatter.formatURLPref("extensions.getMoreThemesURL"));
+    openURL(Services.urlFormatter.formatURLPref("extensions.getMoreThemesURL"));
   }
   catch (e) {
     dump(e);
@@ -49,7 +49,7 @@ function getPersonas()
 {
   // get URL for more themes from prefs
   try {
-    openTopWin(Services.urlFormatter.formatURLPref("extensions.getPersonasURL"));
+    openURL(Services.urlFormatter.formatURLPref("extensions.getPersonasURL"));
   }
   catch (e) {
     dump(e);
