@@ -514,11 +514,11 @@ var dlTreeController = {
         showDownload(selItemData[0]);
         break;
       case "cmd_openReferrer":
-        openUILink(selItemData[0].referrer);
+        openUILink(selItemData[0].source.referrer);
         break;
       case "cmd_copyLocation":
         var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"]
-                                  .getService(Ci.nsIClipboardHelper);
+                          .getService(Ci.nsIClipboardHelper);
         var uris = [];
         for (let dldata of selItemData)
           uris.push(dldata.source.url);
