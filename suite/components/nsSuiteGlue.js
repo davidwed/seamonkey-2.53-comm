@@ -43,7 +43,8 @@ XPCOMUtils.defineLazyModuleGetter(this, "BookmarkJSONUtils",
 
 XPCOMUtils.defineLazyModuleGetter(this, "RecentWindow",
                                   "resource:///modules/RecentWindow.jsm");
-XPCOMUtils.defineLazyScriptGetter(this, "DownloadsCommon",
+
+XPCOMUtils.defineLazyModuleGetter(this, "DownloadsCommon",
                                   "resource:///modules/DownloadsCommon.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "DebuggerServer", () => {
@@ -1228,7 +1229,7 @@ SuiteGlue.prototype = {
           gDownloadManager = null;
         });
         // Attach the taskbar progress meter to the download manager window.
-        Components.utils.import("resource:///modules/DownloadsTaskbar.jsm", {})
+        Cu.import("resource:///modules/DownloadsTaskbar.jsm", {})
                   .DownloadsTaskbar.attachIndicator(gDownloadManager);
       });
     } else if (!aDownload ||
