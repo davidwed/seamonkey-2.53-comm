@@ -50,9 +50,7 @@ var Utilities = {
   makeURI: function smileutil_makeURI(aSpec) {
     if (!aSpec)
       return null;
-    var ios = Cc["@mozilla.org/network/io-service;1"]
-                .getService(Ci.nsIIOService);
-    return ios.newURI(aSpec);
+    return Services.io.newURI(aSpec);
   },
 
   free: function smileutil_free() {
