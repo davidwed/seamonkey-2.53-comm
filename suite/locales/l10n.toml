@@ -43,6 +43,10 @@ locales = [
     reference = "{mozilla}/services/sync/locales/en-US/**"
     l10n = "{l}services/sync/**"
 
+[[paths]]
+    reference = "suite/branding/seamonkey/locales/en-US/**"
+    l10n = "{l}suite/branding/seamonkey/**"
+
 [[includes]]
     path = "{mozilla}/devtools/client/locales/l10n.toml"
 
