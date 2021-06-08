@@ -17,6 +17,8 @@ XPCOMUtils.defineLazyModuleGetter(this, "PrivateBrowsingUtils",
   "resource://gre/modules/PrivateBrowsingUtils.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "LoginFormFactory",
   "resource://gre/modules/LoginManagerContent.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "setTimeout",
+  "resource://gre/modules/Timer.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "Feeds",
   "resource:///modules/Feeds.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "PlacesUIUtils",
@@ -68,9 +70,6 @@ let PageInfoListener = {
   },
 
   receiveMessage: function(message) {
-    this.imageViewRows = [];
-    this.linkViewRows = [];
-    this.formViewRows = [];
     let strings = message.data.strings;
     let window;
     let document;
@@ -100,17 +99,6 @@ let PageInfoListener = {
     // Separate step so page info dialog isn't blank while waiting for this
     // to finish.
     this.getMediaInfo(document, window, strings);
-
-    // Send the message after all the media elements have been walked through.
-    let pageInfoMediaData = {imageViewRows: this.imageViewRows,
-                             linkViewRows: this.linkViewRows,
-                             formViewRows: this.formViewRows};
-
-    this.imageViewRows = null;
-    this.linkViewRows = null;
-    this.formViewRows = null;
-
-    sendAsyncMessage("PageInfo:mediaData", pageInfoMediaData);
   },
 
   getImageInfo: function(imageElement) {
@@ -229,26 +217,40 @@ let PageInfoListener = {
     return frameList;
   },
 
-  processFrames: function(document, frameList, strings)
+  async processFrames(document, frameList, strings)
   {
+    let nodeCount = 0;
     for (let doc of frameList) {
       let iterator = doc.createTreeWalker(doc, content.NodeFilter.SHOW_ELEMENT);
 
+      // Goes through all the elements on the doc.
       while (iterator.nextNode()) {
-        this.getMediaNode(document, strings, iterator.currentNode);
+        this.getMediaItems(document, strings, iterator.currentNode);
+
+        if (++nodeCount % 500 == 0) {
+          // setTimeout every 500 elements so we don't keep blocking the
+          // content process.
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
       }
     }
+    // Send that page info media fetching has finished.
+    sendAsyncMessage("PageInfo:mediaData", {isComplete: true});
   },
 
-  getMediaNode: function(document, strings, elem)
+  getMediaItems: function(document, strings, elem)
   {
-    // Check for images defined in CSS (e.g. background, borders),
-    // any node may have multiple.
+    // Check for images defined in CSS (e.g. background, borders).
     let computedStyle = elem.ownerDocument.defaultView.getComputedStyle(elem, "");
+    // A node can have multiple media items associated with it - for example,
+    // multiple background images.
+    let imageItems = [];
+    let formItems = [];
+    let linkItems = [];
 
     let addImage = (url, type, alt, elem, isBg) => {
       let element = this.serializeElementInfo(document, url, type, alt, elem, isBg);
-      this.imageViewRows.push([url, type, alt, element, isBg]);
+      imageItems.push([url, type, alt, element, isBg]);
     };
 
     if (computedStyle) {
@@ -281,13 +283,13 @@ let PageInfoListener = {
 
     let addForm = (elem) => {
       let element = this.serializeFormInfo(document, elem, strings);
-      this.formViewRows.push([elem.name, elem.method, elem.action, element]);
+      formItems.push([elem.name, elem.method, elem.action, element]);
     };
 
     // One swi^H^H^Hif-else to rule them all.
     if (elem instanceof content.HTMLAnchorElement) {
-      this.linkViewRows.push([this.getValueText(elem), elem.href,
-                              strings.linkAnchor, elem.target, elem.accessKey]);
+      linkItems.push([this.getValueText(elem), elem.href, strings.linkAnchor,
+                      elem.target, elem.accessKey]);
     }
     else if (elem instanceof content.HTMLImageElement) {
       addImage(elem.src, strings.mediaImg,
@@ -295,8 +297,7 @@ let PageInfoListener = {
                elem, false);
     }
     else if (elem instanceof content.HTMLAreaElement) {
-      this.linkViewRows.push([elem.alt, elem.href,
-                              strings.linkArea, elem.target, ""]);
+      linkItems.push([elem.alt, elem.href, strings.linkArea, elem.target, ""]);
     }
     else if (elem instanceof content.HTMLVideoElement) {
       addImage(elem.currentSrc, strings.mediaVideo, "", elem, false);
@@ -311,17 +312,16 @@ let PageInfoListener = {
           addImage(elem.href, strings.mediaLink, "", elem, false);
         }
         else if (/(?:^|\s)stylesheet(?:\s|$)/i.test(rel)) {
-          this.linkViewRows.push([elem.rel, elem.href,
-                                  strings.linkStylesheet, elem.target, ""]);
+          linkItems.push([elem.rel, elem.href, strings.linkStylesheet,
+                          elem.target, ""]);
         }
         else {
-          this.linkViewRows.push([elem.rel, elem.href,
-                                  strings.linkRel, elem.target, ""]);
+          linkItems.push([elem.rel, elem.href, strings.linkRel,
+                          elem.target, ""]);
         }
       }
       else {
-        this.linkViewRows.push([elem.rev, elem.href,
-                                strings.linkRev, elem.target, ""]);
+        linkItems.push([elem.rev, elem.href, strings.linkRev, elem.target, ""]);
       }
     }
     else if (elem instanceof content.HTMLInputElement ||
@@ -334,15 +334,14 @@ let PageInfoListener = {
           // Fall through, <input type="image"> submits, too
         case "submit":
           if ("form" in elem && elem.form) {
-            this.linkViewRows.push([elem.value || this.getValueText(elem) ||
-                                    strings.linkSubmit, elem.form.action,
-                                    strings.linkSubmission,
-                                    elem.form.target, ""]);
+            linkItems.push([elem.value || this.getValueText(elem) ||
+                            strings.linkSubmit, elem.form.action,
+                            strings.linkSubmission, elem.form.target, ""]);
           }
           else {
-            this.linkViewRows.push([elem.value || this.getValueText(elem) ||
-                                    strings.linkSubmit, "",
-                                    strings.linkSubmission, "", ""]);
+            linkItems.push([elem.value || this.getValueText(elem) ||
+                            strings.linkSubmit, "",
+                            strings.linkSubmission, "", ""]);
           }
       }
     }
@@ -362,8 +361,7 @@ let PageInfoListener = {
         href = makeURLAbsolute(elem.baseURI, href,
                                elem.ownerDocument.characterSet);
       } catch (e) {}
-      this.linkViewRows.push([this.getValueText(elem), href, strings.linkX,
-                              "", ""]);
+      linkItems.push([this.getValueText(elem), href, strings.linkX, "", ""]);
     }
     else if (elem.hasAttributeNS(XLinkNS, "href")) {
       let href = elem.getAttributeNS(XLinkNS, "href");
@@ -376,15 +374,17 @@ let PageInfoListener = {
         addImage(href, strings.mediaImg, "", elem, false);
       }
       else {
-        this.linkViewRows.push([this.getValueText(elem), href, strings.linkX,
-                                "", ""]);
+        linkItems.push([this.getValueText(elem), href, strings.linkX, "", ""]);
       }
     }
     else if (elem instanceof content.HTMLScriptElement) {
-      this.linkViewRows.push([elem.type || elem.getAttribute("language") ||
-                              strings.notSet,
-                              elem.src || strings.linkScriptInline,
-                              strings.linkScript, "", "", ""]);
+      linkItems.push([elem.type || elem.getAttribute("language") ||
+                      strings.notSet, elem.src || strings.linkScriptInline,
+                      strings.linkScript, "", "", ""]);
+    }
+    if (imageItems.length || formItems.length || linkItems.length) {
+      sendAsyncMessage("PageInfo:mediaData",
+                       {imageItems, formItems, linkItems, isComplete: false});
     }
   },
 
