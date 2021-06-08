@@ -1163,6 +1163,8 @@ function BrowserOnCommand(event)
       reason = "malware";
     } else if (/e=unwantedBlocked/.test(docURI)) {
       reason = "unwanted";
+    } else if (/e=harmfulBlocked/.test(docURI)) {
+      reason = "harmful";
     }
 
     let docShell = ownerDoc.defaultView
