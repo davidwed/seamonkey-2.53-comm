@@ -489,8 +489,9 @@
             if (switchToNewTab)
             {
               let docTitle = tabInfo.title;
-              if (!/Mac/.test(navigator.platform))
+              if (AppConstants.platform != "macosx") {
                 docTitle += " - " + gBrandBundle.getString("brandFullName");
+              }
               document.title = docTitle;
 
               // Update the toolbar status - we don't need to do menus as they
@@ -636,8 +637,9 @@
               }
 
               let docTitle = tabInfo.title;
-              if (!/Mac/.test(navigator.platform))
+              if (AppConstants.platform != "macosx") {
                 docTitle += " - " + gBrandBundle.getString("brandFullName");
+              }
               document.title = docTitle;
 
               // Update the toolbar status - we don't need to do menus as they
@@ -713,8 +715,9 @@
               if (index == this.tabContainer.selectedIndex)
               {
                 let docTitle = tabInfo.title;
-                if (!/Mac/.test(navigator.platform))
+                if (AppConstants.platform != "macosx") {
                   docTitle += " - " + gBrandBundle.getString("brandFullName");
+                }
                 document.title = docTitle;
 
                 // Update the toolbar status - we don't need to do menus as they
