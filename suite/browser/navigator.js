@@ -351,10 +351,6 @@ function nsBrowserAccess() {
 nsBrowserAccess.prototype = {
 
   openURI: function (aURI, aOpener, aWhere, aFlags, aTriggeringPrincipal = null) {
-    if (!aURI) {
-      Components.utils.reportError("openURI should only be called with a valid URI");
-      throw Components.results.NS_ERROR_FAILURE;
-    }
 
     var isExternal = !!(aFlags & nsIBrowserDOMWindow.OPEN_EXTERNAL);
 
