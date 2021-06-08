@@ -8,10 +8,8 @@
 
 var EXPORTED_SYMBOLS = [ "Feeds" ];
 
-ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-XPCOMUtils.defineLazyModuleGetter(this, "BrowserUtils",
-                                  "resource://gre/modules/BrowserUtils.jsm");
+ChromeUtils.defineModuleGetter(this, "BrowserUtils",
+  "resource://gre/modules/BrowserUtils.jsm");
 
 var Feeds = {
 
