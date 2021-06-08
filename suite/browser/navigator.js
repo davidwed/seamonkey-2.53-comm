@@ -51,7 +51,7 @@ var gIgnoreClick = false;
 var gURIFixup = null;
 
 // Listeners for updating zoom value in status bar
-const ZoomListeners =
+var ZoomListeners =
 {
 
   // Identifies the setting in the content prefs database.
@@ -136,7 +136,7 @@ var gInitialPages = new Set([
 //cached elements
 var gBrowser = null;
 
-const gTabStripPrefListener =
+var gTabStripPrefListener =
 {
   domain: "browser.tabs.autoHide",
   observe: function(subject, topic, prefName)
@@ -153,7 +153,7 @@ const gTabStripPrefListener =
   }
 };
 
-const gHomepagePrefListener =
+var gHomepagePrefListener =
 {
   domain: "browser.startup.homepage",
   observe: function(subject, topic, prefName)
@@ -166,7 +166,7 @@ const gHomepagePrefListener =
   }
 };
 
-const gStatusBarPopupIconPrefListener =
+var gStatusBarPopupIconPrefListener =
 {
   domain: "privacy.popups.statusbar_icon_enabled",
   observe: function(subject, topic, prefName)
@@ -184,7 +184,7 @@ const gStatusBarPopupIconPrefListener =
 };
 
 // popup window permission change listener
-const gPopupPermListener = {
+var gPopupPermListener = {
 
   observe: function(subject, topic, data) {
     if (topic == "popup-perm-close") {
@@ -200,7 +200,7 @@ const gPopupPermListener = {
   }
 };
 
-const gFormSubmitObserver = {
+var gFormSubmitObserver = {
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIFormSubmitObserver,
                                          Ci.nsIObserver]),
 
