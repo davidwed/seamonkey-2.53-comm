@@ -28,23 +28,17 @@ var EXPORTED_SYMBOLS = [
 // Globals
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
-ChromeUtils.defineModuleGetter(this, "NetUtil",
-  "resource://gre/modules/NetUtil.jsm");
-ChromeUtils.defineModuleGetter(this, "PluralForm",
-  "resource://gre/modules/PluralForm.jsm");
-ChromeUtils.defineModuleGetter(this, "AppConstants",
-  "resource://gre/modules/AppConstants.jsm");
-ChromeUtils.defineModuleGetter(this, "DownloadHistory",
-  "resource://gre/modules/DownloadHistory.jsm");
-ChromeUtils.defineModuleGetter(this, "Downloads",
-  "resource://gre/modules/Downloads.jsm");
-ChromeUtils.defineModuleGetter(this, "DownloadUIHelper",
-  "resource://gre/modules/DownloadUIHelper.jsm");
-ChromeUtils.defineModuleGetter(this, "DownloadUtils",
-  "resource://gre/modules/DownloadUtils.jsm");
-ChromeUtils.defineModuleGetter(this, "OS",
-  "resource://gre/modules/osfile.jsm");
+XPCOMUtils.defineLazyModuleGetters(this, {
+  NetUtil: "resource://gre/modules/NetUtil.jsm",
+  PluralForm: "resource://gre/modules/PluralForm.jsm",
+  DownloadHistory: "resource://gre/modules/DownloadHistory.jsm",
+  Downloads: "resource://gre/modules/Downloads.jsm",
+  DownloadUIHelper: "resource://gre/modules/DownloadUIHelper.jsm",
+  DownloadUtils: "resource://gre/modules/DownloadUtils.jsm",
+  OS: "resource://gre/modules/osfile.jsm",
+});
 
 XPCOMUtils.defineLazyGetter(this, "DownloadsLogger", () => {
   let { ConsoleAPI } = ChromeUtils.import("resource://gre/modules/Console.jsm", {});
@@ -193,7 +187,7 @@ var DownloadsCommon = {
   init() {
     ChromeUtils.import("resource://gre/modules/Downloads.jsm");
     ChromeUtils.import("resource://gre/modules/DownloadIntegration.jsm");
-    DownloadIntegration.shouldPersistDownload = function() { return true; }
+    DownloadIntegration.shouldPersistDownload = function() { return true; };
     DownloadsData.initializeDataLink();
   },
 
