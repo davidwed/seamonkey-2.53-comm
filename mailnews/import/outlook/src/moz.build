@@ -19,7 +19,8 @@ SOURCES += [
 FINAL_LIBRARY = 'import'
 
 LOCAL_INCLUDES += [
-    '../../src'
+    '../../src',
+    "/comm/mailnews/mapi/include",
 ]
 
 # clang-cl rightly complains about switch on nsresult.
