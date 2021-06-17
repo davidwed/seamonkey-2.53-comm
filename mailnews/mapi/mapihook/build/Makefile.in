@@ -4,6 +4,8 @@
 
 GARBAGE	+= $(MIDL_GENERATED_FILES) done_gen ;
 
+MAPIINC = $(topsrcdir)/mailnews/mapi/include
+
 MIDL_GENERATED_FILES = \
 	dlldata.c \
 	msgMapi.h \
@@ -14,7 +16,7 @@ MIDL_GENERATED_FILES = \
 $(MIDL_GENERATED_FILES): done_gen ;
 
 done_gen: msgMapi.idl
-	$(MIDL) $(MIDL_FLAGS) -I $(srcdir) -Oicf $(srcdir)/msgMapi.idl
+	$(MIDL) $(MIDL_FLAGS) -I $(srcdir) -I $(MAPIINC) -Oicf $(srcdir)/msgMapi.idl
 	touch $@
 
 export:: done_gen
