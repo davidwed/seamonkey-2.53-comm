@@ -574,12 +574,12 @@ MimeHeaders_write_all_headers (MimeHeaders *hdrs, MimeDisplayOptions *opt, bool 
       for (colon = head; colon < end && *colon != ':'; colon++)
         ;
 
-        /* Back up over whitespace before the colon. */
-        ocolon = colon;
-        for (; colon > head && IS_SPACE(colon[-1]); colon--)
-          ;
+      /* Back up over whitespace before the colon. */
+      ocolon = colon;
+      for (; colon > head && IS_SPACE(colon[-1]); colon--)
+        ;
 
-        contents = ocolon + 1;
+      contents = ocolon + 1;
     }
 
     /* Skip over whitespace after colon. */

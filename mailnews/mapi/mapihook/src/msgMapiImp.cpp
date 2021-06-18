@@ -847,18 +847,17 @@ extern "C" void MSG_FreeMapiMessage (lpMapiMessage msg)
       if (&(msg->lpRecips[i]) != nullptr)
         msg_FreeMAPIRecipient(&(msg->lpRecips[i]));
 
-      CoTaskMemFree(msg->lpRecips);
+    CoTaskMemFree(msg->lpRecips);
 
-      for (i=0; i<msg->nFileCount; i++)
-        if (&(msg->lpFiles[i]) != nullptr)
-          msg_FreeMAPIFile(&(msg->lpFiles[i]));
+    for (i=0; i<msg->nFileCount; i++)
+      if (&(msg->lpFiles[i]) != nullptr)
+        msg_FreeMAPIFile(&(msg->lpFiles[i]));
 
-      CoTaskMemFree(msg->lpFiles);
+    CoTaskMemFree(msg->lpFiles);
 
-      CoTaskMemFree(msg);
+    CoTaskMemFree(msg);
   }
 }
-
 
 extern "C" bool MsgMarkMapiMessageRead (nsIMsgFolder *folder, nsMsgKey key, bool read)
 {
