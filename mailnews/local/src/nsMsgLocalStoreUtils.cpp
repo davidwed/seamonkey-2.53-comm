@@ -60,9 +60,9 @@ nsMsgLocalStoreUtils::nsShouldIgnoreFile(nsAString& name)
     return true;
 
   // The .mozmsgs dir is for spotlight support
-    return (StringEndsWith(name, NS_LITERAL_STRING(".mozmsgs")) ||
-            StringEndsWith(name, NS_LITERAL_STRING(".sbd")) ||
-            StringEndsWith(name, NS_LITERAL_STRING(SUMMARY_SUFFIX)));
+  return (StringEndsWith(name, NS_LITERAL_STRING(".mozmsgs")) ||
+          StringEndsWith(name, NS_LITERAL_STRING(".sbd")) ||
+          StringEndsWith(name, NS_LITERAL_STRING(SUMMARY_SUFFIX)));
 }
 
 /**

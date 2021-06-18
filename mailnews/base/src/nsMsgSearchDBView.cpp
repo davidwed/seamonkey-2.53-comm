@@ -701,8 +701,8 @@ nsMsgSearchDBView::OnNewSearch()
   if (mTree) 
     mTree->RowCountChanged(0, -oldSize);
 
-//    mSearchResults->Clear();
-    return NS_OK;
+  // mSearchResults->Clear();
+  return NS_OK;
 }
 
 NS_IMETHODIMP nsMsgSearchDBView::GetViewType(nsMsgViewTypeValue *aViewType)
