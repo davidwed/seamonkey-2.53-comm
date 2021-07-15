@@ -847,8 +847,10 @@ var gFolderTreeView = {
       let isMove = Cc["@mozilla.org/widget/dragservice;1"]
                       .getService(Ci.nsIDragService).getCurrentSession()
                       .dragAction == Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
-      if (!sourceFolder.canDeleteMessages)
+      let isNews = sourceFolder.flags & Ci.nsMsgFolderFlags.Newsgroup;
+      if (!sourceFolder.canDeleteMessages || isNews) {
         isMove = false;
+      }
 
       prefBranch.setCharPref("last_msg_movecopy_target_uri", targetFolder.URI);
       prefBranch.setBoolPref("last_msg_movecopy_was_move", isMove);
