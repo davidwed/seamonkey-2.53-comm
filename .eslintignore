@@ -25,7 +25,6 @@ im/**
 ldap/**
 mail/**
 mailnews/**
-suite/**
 
 # calendar/ exclusions
 
@@ -35,3 +34,12 @@ calendar/locales/en-US/lightning-l10n.js
 
 # third party library
 calendar/base/modules/ical.js
+
+# generated files
+mail/components/compose/texilla/TeXZilla.js
+suite/editor/components/texzilla/content/TeXZilla.js
+
+# getASTSource unsupported computed MemberExpression
+suite/extensions/irc/js/lib/command-manager.js
+suite/extensions/irc/xul/content/commands.js
+suite/extensions/irc/xul/content/output-window.js
