@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import sys
-import re
 
 # Change this number to add an amount to the minor, i.e with MINOR_ADD=2,
 # 24.2.0 becomes 2.6.4 instead of 2.6.2
@@ -15,6 +14,6 @@ def makeversion(x):
   parts[0] = major[:-1] + "." + major[-1]
   if len(parts) > 1 and parts[1].isdigit():
     parts[1] = str(int(parts[1]) + MINOR_ADD)
-  return re.sub(r'.0([ab][0-9]*|)$', r'\1', '.'.join(parts))
+  return '.'.join(parts)
 
 print(makeversion(sys.argv[1]))
