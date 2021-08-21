@@ -429,7 +429,6 @@
 @RESPATH@/components/dom_notification.xpt
 @RESPATH@/components/dom_offline.xpt
 @RESPATH@/components/dom_power.xpt
-@RESPATH@/components/dom_presentation.xpt
 @RESPATH@/components/dom_push.xpt
 @RESPATH@/components/dom_quota.xpt
 @RESPATH@/components/dom_range.xpt
@@ -685,9 +684,6 @@
 @RESPATH@/components/dom_webspeechsynth.xpt
 @RESPATH@/components/nsAsyncShutdown.manifest
 @RESPATH@/components/nsAsyncShutdown.js
-
-@RESPATH@/components/BuiltinProviders.manifest
-@RESPATH@/components/PresentationControlService.js
 
 ; Phishing Protection
 ; Modules
