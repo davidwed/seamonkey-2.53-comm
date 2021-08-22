@@ -330,6 +330,7 @@ var gMailNewsTabsType =
       // Load AccountCentral page here.
       ShowAccountCentral();
     }
+    SetUpToolbarButtons(gMsgFolderSelected.URI);
     UpdateMailToolbar("tab changed");
     delete aTabInfo.lock;
   },
