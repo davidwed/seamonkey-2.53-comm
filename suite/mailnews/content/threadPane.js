@@ -3,6 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var gLastMessageUriToLoad = null;
@@ -205,8 +206,14 @@ function ThreadPaneDoubleClick(event) {
 
 function ThreadPaneKeyPress(event)
 {
-  if (event.keyCode == KeyEvent.DOM_VK_RETURN)
-    ThreadPaneDoubleClick(event);
+  if (event.keyCode == KeyEvent.DOM_VK_RETURN) {
+    if ((AppConstants.platform == "macosx" ? event.metaKey : event.ctrlKey) &&
+        AllowOpenTabOnMiddleClick()) {
+      OpenMessageInNewTab(event);
+    } else {
+      ThreadPaneDoubleClick(event);
+    }
+  }
 }
 
 function MsgSortByThread()
