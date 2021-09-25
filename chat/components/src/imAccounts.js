@@ -5,6 +5,7 @@
 ChromeUtils.import("resource:///modules/imXPCOMUtils.jsm");
 ChromeUtils.import("resource:///modules/imServices.jsm");
 ChromeUtils.import("resource:///modules/jsProtoHelper.jsm");
+ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 
 var kPrefAutologinPending = "messenger.accounts.autoLoginPending";
 var kPrefMessengerAccounts = "messenger.accounts";
@@ -914,8 +915,9 @@ AccountsService.prototype = {
     prefs.deleteBranch(kPrefAutologinPending);
 
     // If the crash reporter isn't built, we can't know anything more.
-    if (!("nsICrashReporter" in Ci))
+    if (!AppConstants.MOZ_CRASHREPORTER) {
       return;
+    }
 
     try {
       // Try to get more info with breakpad
