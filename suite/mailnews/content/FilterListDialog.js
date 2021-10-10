@@ -11,8 +11,8 @@ var gDeleteButton;
 var gNewButton;
 var gReorderUpButton;
 var gReorderDownButton;
-var gRunFiltersFolderPickerLabel;
-var gRunFiltersFolderPicker;
+var gRunFiltersFolderPrefix;
+var gRunFiltersFolder;
 var gRunFiltersButton;
 var gFilterBundle;
 var gFilterListMsgWindow = null;
@@ -140,8 +140,8 @@ function onLoad()
     gNewButton = document.getElementById("newButton");
     gReorderUpButton = document.getElementById("reorderUpButton");
     gReorderDownButton = document.getElementById("reorderDownButton");
-    gRunFiltersFolderPickerLabel = document.getElementById("folderPickerPrefix");
-    gRunFiltersFolderPicker = document.getElementById("runFiltersFolder");
+    gRunFiltersFolderPrefix = document.getElementById("folderPickerPrefix");
+    gRunFiltersFolder = document.getElementById("runFiltersFolder");
     gRunFiltersButton = document.getElementById("runFiltersButton");
     gStatusBar = document.getElementById("statusbar-icon");
     gStatusText = document.getElementById("statusText");
@@ -234,13 +234,13 @@ function setFolder(msgFolder)
 
   var canFilterAfterTheFact = CanRunFiltersAfterTheFact(msgFolder.server);
   gRunFiltersButton.hidden = !canFilterAfterTheFact;
-  gRunFiltersFolderPicker.hidden = !canFilterAfterTheFact;
-  gRunFiltersFolderPickerLabel.hidden = !canFilterAfterTheFact;
+  gRunFiltersFolder.hidden = !canFilterAfterTheFact;
+  gRunFiltersFolderPrefix.hidden = !canFilterAfterTheFact;
 
   if (canFilterAfterTheFact) {
     // Get the first folder for this server. INBOX for
     // IMAP and POP3 accounts and 1st news group for news.
-    gRunFiltersFolderPicker.selectedIndex = 0;
+    gRunFiltersFolder.selectedIndex = 0;
     runMenu.selectFolder(getFirstFolder(msgFolder));
   }
 
@@ -417,11 +417,14 @@ function runSelectedFilters()
     return;
   }
 
-  var msgFolder = gRunFiltersFolderPicker._folder || gRunFiltersFolderPicker.selectedItem._folder;
-  var filterList = MailServices.filters.getTempFilterList(msgFolder);
-  var folders = Cc["@mozilla.org/array;1"]
-                  .createInstance(Ci.nsIMutableArray);
-  folders.appendElement(msgFolder);
+  let folder = gRunFiltersFolder._folder ||
+               gRunFiltersFolder.selectedItem._folder;
+  if (!folder)
+    return;
+
+  let filterList = MailServices.filters.getTempFilterList(folder);
+  let folders = Cc["@mozilla.org/array;1"].createInstance(Ci.nsIMutableArray);
+  folders.appendElement(folder);
 
   // make sure the tmp filter list uses the real filter list log stream
   filterList.logStream = currentFilterList().logStream;
@@ -470,8 +473,8 @@ function updateButtons()
 
     // we can run multiple filters on a folder
     // so only disable this UI if no filters are selected
-    gRunFiltersFolderPickerLabel.disabled = !numFiltersSelected;
-    gRunFiltersFolderPicker.disabled = !numFiltersSelected;
+    gRunFiltersFolderPrefix.disabled = !numFiltersSelected;
+    gRunFiltersFolder.disabled = !numFiltersSelected;
     gRunFiltersButton.disabled = !numFiltersSelected;
 
     // "up" enabled only if one filter selected, and it's not the first
@@ -610,8 +613,8 @@ function doHelpButton()
 
 function onTargetSelect(event)
 {
-  gRunFiltersFolderPicker._folder = event.target._folder;
-  gRunFiltersFolderPicker.menupopup.selectFolder(gRunFiltersFolderPicker._folder);
+  gRunFiltersFolder._folder = event.target._folder;
+  gRunFiltersFolder.menupopup.selectFolder(gRunFiltersFolder._folder);
 }
 
 /**
