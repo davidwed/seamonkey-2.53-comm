@@ -2007,7 +2007,7 @@ var gFolderTreeController = {
 
     window.openDialog("chrome://messenger/content/virtualFolderProperties.xul",
                       "", "chrome,modal,centerscreen",
-                      {folder: folder, searchTerms: aSearchTems,
+                      {folder: folder, searchTerms: aSearchTerms,
                        newFolderName: name});
   },
 
