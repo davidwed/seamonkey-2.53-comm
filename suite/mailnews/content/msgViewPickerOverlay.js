@@ -283,10 +283,10 @@ function AddVirtualFolderTerms(searchTermsArray)
   var virtualFolderSearchTerms = (gVirtualFolderTerms || gXFVirtualFolderTerms);
   if (virtualFolderSearchTerms)
   {
-    for (let i = 0; i < termsArray.length; i++)
+    for (let virtualFolderSearchTerm of fixIterator(virtualFolderSearchTerms,
+                                                    Ci.nsIMsgSearchTerm))
     {
-      let searchTerm = virtualFolderSearchTerms.queryElementAt(i, Ci.nsIMsgSearchTerm);
-      searchTermsArray.appendElement(searchTerm);
+      searchTermsArray.appendElement(virtualFolderSearchTerm);
     }
   }
 }
