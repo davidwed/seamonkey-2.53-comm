@@ -37,7 +37,7 @@ function onLoad(aEvent) {
 }
 
 function onAccept() {
-  let hostname = cleanUpHostName(gNameValue.value);
+  let hostname = cleanUpHostName(gNameValue.value.toLowerCase());
   if (!isLegalHostNameOrIP(hostname)) {
     let alertTitle = gNetworksBundle.getString("invalidServerName");
     let alertMsg = gNetworksBundle.getString("enterValidServerName");
