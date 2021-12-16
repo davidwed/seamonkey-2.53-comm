@@ -5,6 +5,10 @@
 package:
 	@$(MAKE) -C comm/suite/installer
 
+full-package:
+	@$(MAKE) -C comm/suite/installer
+	$(MAKE) -j1 -C comm/suite/locales $@
+
 package-compare:
 	@$(MAKE) -C comm/suite/installer package-compare
 
