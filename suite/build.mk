@@ -31,7 +31,7 @@ distribution:
 
 # make -j1 because dependencies in l10n build targets don't work
 # with parallel builds
-merge-% installers-% langpack-% chrome-% clobber-%:
+merge-% installers-% langpack-% chrome-% clobber-% createmar-%:
 	$(MAKE) -j1 -C comm/suite/locales $@
 
 # mochitests need to be run from the Mozilla build system
