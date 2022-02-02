@@ -1900,6 +1900,7 @@ mime_get_base_url(const char *url)
   if (s && !strncmp(s, "?type=application/x-message-display", sizeof("?type=application/x-message-display") - 1))
   {
     const char *nextTerm = strchr(s, '&');
+    // strlen(s) cannot be zero, because it matches the above text
     s = (nextTerm) ? nextTerm : s + strlen(s) - 1;
   }
   // we need to keep the ?number part of the url, or we won't know
