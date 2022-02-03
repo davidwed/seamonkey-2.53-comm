@@ -115,6 +115,11 @@ function do_check_transaction(real, expected) {
   if (real.them[real.them.length-1] == "QUIT")
     real.them.pop();
 
+  if (expected[0] == "AUTH") {
+    // We don't send inital AUTH command now.
+    expected = expected.slice(1);
+  }
+
   Assert.equal(real.them.join(","), expected.join(","));
   dump("Passed test " + test + "\n");
 }
