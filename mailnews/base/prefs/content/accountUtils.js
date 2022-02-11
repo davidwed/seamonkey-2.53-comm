@@ -7,6 +7,10 @@ ChromeUtils.import("resource://gre/modules/Services.jsm");
 ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
 
+#ifdef MOZ_SUITE
+  ChromeUtils.import("resource:///modules/ShellService.jsm");
+#endif
+
 var gAnyValidIdentity = false; //If there are no valid identities for any account
 // returns the first account with an invalid server or identity
 
@@ -47,22 +51,20 @@ function getInvalidAccounts(accounts)
 }
 
 function showMailIntegrationDialog() {
-  const nsIShellService = Ci.nsIShellService;
-
+#ifdef MOZ_SUITE
   try {
-    var shellService = Cc["@mozilla.org/suite/shell-service;1"]
-                         .getService(nsIShellService);
-    var appTypesCheck = shellService.shouldBeDefaultClientFor &
-                        (nsIShellService.MAIL | nsIShellService.NEWS);
+    var appTypesCheck = ShellService.shouldBeDefaultClientFor &
+                        (Ci.nsIShellService.MAIL | Ci.nsIShellService.NEWS);
 
-    // show the default client dialog only if we have at least one account,
+    // Show the default client dialog only if we have at least one account,
     // if we should check for the default client, and we want to check if we are
-    // the default for mail/news and are not the default client for mail/news
-    if (appTypesCheck && shellService.shouldCheckDefaultClient &&
-        !shellService.isDefaultClient(true, appTypesCheck))
+    // the default for mail/news and are not the default client for mail/news.
+    if (appTypesCheck && ShellService.shouldCheckDefaultClient &&
+        !ShellService.isDefaultClient(true, appTypesCheck))
         window.openDialog("chrome://communicator/content/defaultClientDialog.xul",
                         "DefaultClient", "modal,centerscreen,chrome,resizable=no");
   } catch (ex) {}
+#endif
 }
 
 /**
