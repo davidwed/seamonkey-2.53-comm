@@ -1888,8 +1888,10 @@ function SetDisplayMode(mode)
     gContentWindowDeck.selectedIndex = 0;
 
     // Restore menus and toolbars
-    gFormatToolbar.hidden = gFormatToolbarHidden;
-    gFormatToolbar.removeAttribute("hideinmenu");
+    if (previousMode == kDisplayModeSource) {
+      gFormatToolbar.hidden = gFormatToolbarHidden;
+      gFormatToolbar.removeAttribute("hideinmenu");
+    }
 
     gContentWindow.focus();
   }
