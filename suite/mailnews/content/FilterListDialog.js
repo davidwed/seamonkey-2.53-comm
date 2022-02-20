@@ -5,6 +5,7 @@
 
 ChromeUtils.import("resource://gre/modules/PluralForm.jsm");
 ChromeUtils.import("resource://gre/modules/Services.jsm");
+ChromeUtils.import("resource:///modules/iteratorUtils.jsm");
 ChromeUtils.import("resource:///modules/mailServices.js");
 
 var gEditButton;
@@ -447,7 +448,7 @@ function onDeleteFilter()
   for (let index = items.length - 1; index >= 0; --index) {
     let item = items[index];
     gCurrentFilterList.removeFilter(item._filter);
-    gFilterListbox.removeItemAt(gFilterListbox.getIndexOfItem(item));
+    item.remove();
   }
   updateCountBox();
 
@@ -866,12 +867,9 @@ function getServerThatCanHaveFilters()
     // if it cannot, check all accounts to find a server
     // that can have filters
     var allServers = MailServices.accounts.allServers;
-    var numServers = allServers.length;
-    for (var index = 0; index < numServers; index++)
+    for (let currentServer of fixIterator(allServers,
+                                          Ci.nsIMsgIncomingServer))
     {
-        var currentServer =
-          allServers.queryElementAt(index, Ci.nsIMsgIncomingServer);
-
         if (currentServer.canHaveFilters)
             return currentServer;
     }
