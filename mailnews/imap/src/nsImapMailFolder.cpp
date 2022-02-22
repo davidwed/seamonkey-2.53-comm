@@ -5467,9 +5467,12 @@ nsImapMailFolder::OnStopRunningUrl(nsIURI *aUrl, nsresult aExitCode)
           nsCOMPtr<nsIMsgCopyService> copyService = do_GetService(NS_MSGCOPYSERVICE_CONTRACTID, &rv);
           NS_ENSURE_SUCCESS(rv, rv);
           nsCOMPtr<nsIMsgFolder> srcFolder = do_QueryInterface(m_copyState->m_srcSupport);
-          if (srcFolder)
-          {
-            copyService->NotifyCompletion(m_copyState->m_srcSupport, this, aExitCode);
+          if (srcFolder) {
+            // Completion will start the next copy, so clear the one
+            // we've just finished.
+            nsCOMPtr<nsISupports> src = m_copyState->m_srcSupport;
+            m_copyState = nullptr;
+            copyService->NotifyCompletion(src, this, aExitCode);
           }
           m_copyState = nullptr;
         }
