@@ -600,6 +600,7 @@ var MessageWindowController =
       case "cmd_forwardInline":
       case "cmd_forwardAttachment":
       case "cmd_editAsNew":
+      case "cmd_editDraftMsg":
       case "cmd_getNextNMessages":
       case "cmd_find":
       case "cmd_findNext":
@@ -679,6 +680,7 @@ var MessageWindowController =
       case "cmd_forwardInline":
       case "cmd_forwardAttachment":
       case "cmd_editAsNew":
+      case "cmd_editDraftMsg":
       case "cmd_print":
       case "cmd_printpreview":
       case "button_print":
@@ -815,7 +817,10 @@ var MessageWindowController =
         MsgForwardAsAttachment(null);
         break;
       case "cmd_editAsNew":
-        MsgEditMessageAsNew();
+        MsgEditMessageAsNew(null);
+        break;
+      case "cmd_editDraftMsg":
+        MsgEditDraftMessage(null);
         break;
       case "cmd_createFilterFromPopup":
         CreateFilter(document.popupNode);
