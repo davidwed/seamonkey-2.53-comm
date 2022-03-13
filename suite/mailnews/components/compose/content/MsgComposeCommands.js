@@ -203,6 +203,8 @@ var stateListener = {
         this.NotifyComposeBodyReadyForwardInline();
         break;
 
+      case Ci.nsIMsgCompType.EditTemplate:
+        defaultSaveOperation = "template";
       case Ci.nsIMsgCompType.Draft:
       case Ci.nsIMsgCompType.Template:
       case Ci.nsIMsgCompType.Redirect:
