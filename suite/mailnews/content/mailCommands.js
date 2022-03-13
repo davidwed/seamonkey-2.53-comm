@@ -82,7 +82,8 @@ function GetIdentityForHeader(aMsgHdr, aType)
   let hintForIdentity = "";
   if (aType == Ci.nsIMsgCompType.ReplyToList)
     hintForIdentity = findDeliveredToIdentityEmail();
-  else if (aType == Ci.nsIMsgCompType.Template)
+  else if (aType == Ci.nsIMsgCompType.Template ||
+           aType == Ci.nsIMsgCompType.EditAsNew)
     hintForIdentity = aMsgHdr.author;
   else
     hintForIdentity = aMsgHdr.recipients + "," + aMsgHdr.ccList + "," +
