@@ -298,7 +298,6 @@ var PlacesCommandHook = {
     var itemId = PlacesUtils.getMostRecentBookmarkForURI(uri);
     let isNewBookmark = itemId == -1;
     if (isNewBookmark) {
-      // Bug 1148838 - Make this code work for full page plugins.
       var title;
       var description;
       var charset;
@@ -364,7 +363,6 @@ var PlacesCommandHook = {
                          await PlacesUtils.promiseItemGuid(aParentId) :
                          PlacesUtils.bookmarks.unfiledGuid;
       info = { url, parentGuid };
-      // Bug 1148838 - Make this code work for full page plugins.
       let description = null;
       let charset = null;
 
