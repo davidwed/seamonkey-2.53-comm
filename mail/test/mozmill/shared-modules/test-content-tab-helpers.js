@@ -66,7 +66,6 @@ function installInto(module) {
   module.NotificationWatcher = NotificationWatcher;
   module.get_notification_bar_for_tab = get_notification_bar_for_tab;
   module.get_test_plugin = get_test_plugin;
-  module.plugins_run_in_separate_processes = plugins_run_in_separate_processes;
   module.updateBlocklist = updateBlocklist;
   module.setAndUpdateBlocklist = setAndUpdateBlocklist;
   module.resetBlocklist = resetBlocklist;
@@ -434,35 +433,6 @@ function get_test_plugin() {
       return tags[i];
   }
   return null;
-}
-
-/* Returns true if we're currently set up to run plugins in separate
- * processes, false otherwise.
- */
-function plugins_run_in_separate_processes(aController) {
-  let supportsOOPP = false;
-
-  if (aController.mozmillModule.isMac) {
-    if (Services.appinfo.XPCOMABI.includes("x86-")) {
-      try {
-        supportsOOPP = Services.prefs.getBoolPref("dom.ipc.plugins.enabled.i386.test.plugin");
-      } catch(e) {
-        supportsOOPP = Services.prefs.getBoolPref("dom.ipc.plugins.enabled.i386");
-      }
-    }
-    else if (Services.appinfo.XPCOMABI.includes("x86_64-")) {
-      try {
-        supportsOOPP = Services.prefs.getBoolPref("dom.ipc.plugins.enabled.x86_64.test.plugin");
-      } catch(e) {
-        supportsOOPP = Services.prefs.getBoolPref("dom.ipc.plugins.enabled.x86_64");
-      }
-    }
-  }
-  else {
-    supportsOOPP = Services.prefs.getBoolPref("dom.ipc.plugins.enabled");
-  }
-
-  return supportsOOPP;
 }
 
 function updateBlocklist(aController, aCallback) {
