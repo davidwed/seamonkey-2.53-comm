@@ -129,6 +129,7 @@
 @BINPATH@/@DLL_PREFIX@mozavcodec@DLL_SUFFIX@
 #endif
 #ifdef MOZ_GTK
+@BINPATH@/@DLL_PREFIX@mozgtk@DLL_SUFFIX@
 #endif
 @RESPATH@/license.txt
 @RESPATH@/blocklist.xml
