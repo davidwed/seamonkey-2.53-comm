@@ -65,7 +65,6 @@ function installInto(module) {
   module.assert_content_tab_text_absent = assert_content_tab_text_absent;
   module.NotificationWatcher = NotificationWatcher;
   module.get_notification_bar_for_tab = get_notification_bar_for_tab;
-  module.get_test_plugin = get_test_plugin;
   module.updateBlocklist = updateBlocklist;
   module.setAndUpdateBlocklist = setAndUpdateBlocklist;
   module.resetBlocklist = resetBlocklist;
@@ -417,22 +416,6 @@ function get_notification_bar_for_tab(aTab) {
     return null;
 
   return notificationBoxEls;
-}
-
-/**
- * Returns the nsIPluginTag for the test plug-in, if it is available.
- * Returns null otherwise.
- */
-function get_test_plugin() {
-  let ph = Cc["@mozilla.org/plugin/host;1"].getService(Ci.nsIPluginHost);
-  var tags = ph.getPluginTags();
-
-  // Find the test plugin
-  for (var i = 0; i < tags.length; i++) {
-    if (tags[i].name == "Test Plug-in")
-      return tags[i];
-  }
-  return null;
 }
 
 function updateBlocklist(aController, aCallback) {
