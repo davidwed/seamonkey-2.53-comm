@@ -52,8 +52,10 @@ def seamonkey_version(build_env, app_path):
                                 'config', 'version.txt')
     version_file_display = os.path.join(build_env.topsrcdir, app_path[0],
                                         'config', 'version_display.txt')
+    version_file_package = os.path.join(build_env.topsrcdir, app_path[0],
+                                        'config', 'version_package.txt')
     rv = []
-    for f in [ version_file, version_file_display]:
+    for f in [ version_file, version_file_display, version_file_package]:
         if exists(f):
             f_value = open(f).read().strip()
         else:
@@ -61,18 +63,19 @@ def seamonkey_version(build_env, app_path):
         rv.append(f_value)
 
     return namespace(version=rv[0],
-                     version_display=rv[1])
+                     version_display=rv[1],
+                     version_package=rv[2])
 
 set_defconf('SEAMONKEY_VERSION', seamonkey_version.version)
 set_defconf('SEAMONKEY_VERSION_DISPLAY', seamonkey_version.version_display)
+set_defconf('MOZ_PKG_VERSION', seamonkey_version.version_package)
 
 set_define('MOZ_SEPARATE_MANIFEST_FOR_THEME_OVERRIDES', True)
 
 imply_option('MOZ_PLACES', True)
 imply_option('MOZ_SERVICES_SYNC', False)
 
-# Building extensions is enabled by default.
-# Bug 1231349 needs to be fixed for successful l10n builds.
+# Building extensions is disabled by default.
 
 # =========================================================
 # = ChatZilla extension
@@ -109,6 +112,8 @@ def debugqa(arg):
     return True
 
 set_config('MOZ_DEBUGQA', debugqa)
+
+include('../build/moz.configure/gecko_source.configure')
 
 include('../mailnews/moz.configure')
 include('../../toolkit/moz.configure')
