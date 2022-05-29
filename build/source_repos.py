@@ -77,7 +77,10 @@ def get_source_url(repo, rev):
     if "git" in repo:
         source_url = '%s/tree/%s' % (repo, rev)
     else:
-        source_url = '%s/rev/%s' % (repo, rev)
+        if "heptapod" in repo:
+            source_url = '%s/commits/%s' % (repo, rev)
+        else:
+            source_url = '%s/rev/%s' % (repo, rev)
 
     return source_url
 
@@ -152,6 +155,9 @@ def source_repo_header(output):
         else:
             output.write('#define MOZ_SOURCE_REPO {}\n'.format(gecko_repo))
             output.write('#define MOZ_SOURCE_URL {}\n'.format(gecko_source_url))
+        patch_queue = os.environ.get("MOZ_PATCH_QUEUE_URL", None)
+        if patch_queue:
+            output.write('#define MOZ_PATCH_QUEUE_URL {}\n'.format(patch_queue))
 
 
 def main(args):
