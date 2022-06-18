@@ -57,7 +57,15 @@ def read_sourcestamp(repository):
 
             if lines and lines[line2read].startswith('http'):
                 repo_line = lines[line2read].decode(system_encoding)
-                repo_url = repo_line.split('/rev/')
+                if "/tree/" in repo_line:
+                    repo_url = repo_line.split('/tree/')
+                elif "/commit/" in repo_line:
+                    repo_url = repo_line.split('/commit/')
+                elif "/commits/" in repo_line:
+                    repo_url = repo_line.split('/commits/')
+                else:
+                    repo_url = repo_line.split('/rev/')
+
                 return namespace(repo_url=repo_url[0], repo_rev=repo_url[1])
 
     return get_sourcestamp
