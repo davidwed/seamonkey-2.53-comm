@@ -623,7 +623,6 @@
 @RESPATH@/components/nsPlacesExpiration.js
 @RESPATH@/components/PageIconProtocolHandler.js
 @RESPATH@/components/PlacesCategoriesStarter.js
-@RESPATH@/components/ColorAnalyzer.js
 @RESPATH@/components/PageThumbsProtocol.js
 @RESPATH@/components/nsDefaultCLH.manifest
 @RESPATH@/components/nsDefaultCLH.js

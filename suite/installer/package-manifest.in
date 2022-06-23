@@ -354,7 +354,6 @@
 @RESPATH@/components/BrowserElementParent.manifest
 @RESPATH@/components/captivedetect.js
 @RESPATH@/components/CaptivePortalDetectComponents.manifest
-@RESPATH@/components/ColorAnalyzer.js
 @RESPATH@/components/ConsoleAPIStorage.js
 @RESPATH@/components/ConsoleAPI.manifest
 @RESPATH@/components/contentAreaDropListener.js
