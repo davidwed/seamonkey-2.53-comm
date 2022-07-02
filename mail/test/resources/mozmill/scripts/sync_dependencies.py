@@ -34,6 +34,8 @@
 #
 # ***** END LICENSE BLOCK *****
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import subprocess
 import urllib
@@ -56,8 +58,8 @@ os.chdir(root_path)
 
 for module in externalModules:
     # Retrieve latest EventUtils module and apply our patch
-    print "Downloading %s..." % (module["url"])
+    print("Downloading %s..." % (module["url"]))
     urllib.urlretrieve (module["url"], os.path.join(root_path, module["path"]))
 
-    print "Patching %s..." % (module["patch"])
+    print("Patching %s..." % (module["patch"]))
     subprocess.call(["git", "apply", module["patch"]])

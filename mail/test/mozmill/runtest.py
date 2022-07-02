@@ -7,6 +7,8 @@
 Runs the Bloat test harness
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys
 import os, os.path, platform, subprocess, signal
 import shutil
@@ -211,7 +213,7 @@ class ThunderTestProfile(mozprofile.ThunderbirdProfile):
         if os.path.exists(PROFILE_DIR):
             shutil.rmtree(PROFILE_DIR, onerror=rmtree_onerror)
         os.makedirs(PROFILE_DIR)
-        print 'Using profile dir:', PROFILE_DIR
+        print('Using profile dir:', PROFILE_DIR)
         if not os.path.exists(PROFILE_DIR):
             raise Exception('somehow failed to create profile dir!')
 
@@ -281,7 +283,7 @@ class ThunderTestMozmill(mozmill.MozMill):
         if self.use_vnc_server:
             try:
                 subprocess.check_call([self.VNC_SERVER_PATH, ':99'])
-            except subprocess.CalledProcessError, ex:
+            except subprocess.CalledProcessError as ex:
                 # Okay, so that display probably already exists.  We can either
                 # use it as-is or kill it.  I'm deciding we want to kill it
                 # since there might be other processes alive in there that
@@ -313,8 +315,8 @@ class ThunderTestMozmill(mozmill.MozMill):
                 if self.use_vnc_server and self.vnc_alive:
                     subprocess.check_call([self.VNC_SERVER_PATH,
                                            '-kill', ':99'])
-            except Exception, ex:
-                print '!!! Exception during killing VNC server:', ex
+            except Exception as ex:
+                print('!!! Exception during killing VNC server:', ex)
 
 
 def monkeypatched_15_run_tests(self, tests, sleeptime=0):
@@ -458,8 +460,8 @@ def prettifyFilename(path, tail_segs_desired=1):
     return '/'.join(parts[-tail_segs_desired:])
 
 def prettyPrintException(e):
-    print '  EXCEPTION:', e.get('message', 'no message!').encode('utf-8')
-    print '    at:', prettifyFilename(e.get('fileName', 'nonesuch')), 'line', e.get('lineNumber', 0)
+    print('  EXCEPTION:', e.get('message', 'no message!').encode('utf-8'))
+    print('    at:', prettifyFilename(e.get('fileName', 'nonesuch')), 'line', e.get('lineNumber', 0))
     if 'stack' in e:
         for line in e['stack'].splitlines():
             if not line:
@@ -480,9 +482,9 @@ def prettyPrintException(e):
                 path = pathAndLine
                 line = 0
             if funcname:
-                print '      ', funcname, prettifyFilename(path), line
+                print('      ', funcname, prettifyFilename(path), line)
             else:
-                print '           ', prettifyFilename(path), line
+                print('           ', prettifyFilename(path), line)
 
 
 # Tests that are useless and shouldn't be printed if successful
@@ -502,9 +504,9 @@ def prettyPrintResults():
             else:
                 kind = 'PASS'
             if result['name'] not in TEST_BLACKLIST:
-                print '%s-%s | %s' % (testOrSummary, kind, result['name'])
+                print('%s-%s | %s' % (testOrSummary, kind, result['name']))
         else:
-            print '%s-UNEXPECTED-FAIL | %s | %s' % (testOrSummary, prettifyFilename(result['filename']), result['name'])
+            print('%s-UNEXPECTED-FAIL | %s | %s' % (testOrSummary, prettifyFilename(result['filename']), result['name']))
         for failure in result['fails']:
             if 'exception' in failure:
                 prettyPrintException(failure['exception'])
@@ -512,20 +514,20 @@ def prettyPrintResults():
 @atexit.register
 def dumpRichResults():
     if USE_RICH_FAILURES:
-        print '##### MOZMILL-RICH-FAILURES-BEGIN #####'
+        print('##### MOZMILL-RICH-FAILURES-BEGIN #####')
         for result in TEST_RESULTS:
             if len(result['fails']) > 0:
                 for failure in result['fails']:
                     failure['fileName'] = prettifyFilename(result['filename'], 2)
                     failure['testName'] = result['name']
-                    print json.dumps(failure)
-        print '##### MOZMILL-RICH-FAILURES-END #####'
+                    print(json.dumps(failure))
+        print('##### MOZMILL-RICH-FAILURES-END #####')
 
 def checkCrashesAtExit():
     if mozcrash.check_for_crashes(dump_directory=os.path.join(PROFILE_DIR, 'minidumps'),
                                   symbols_path=SYMBOLS_PATH,
                                   test_name=TEST_NAME):
-        print >> sys.stderr, 'TinderboxPrint: ' + TEST_NAME + '<br/><em class="testfail">CRASH</em>'
+        print('TinderboxPrint: ' + TEST_NAME + '<br/><em class="testfail">CRASH</em>', file=sys.stderr)
         sys.exit(1)
 
 if __name__ == '__main__':

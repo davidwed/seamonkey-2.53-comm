@@ -36,6 +36,8 @@
 # 
 # ***** END LICENSE BLOCK *****
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import socket
 import os
 import copy

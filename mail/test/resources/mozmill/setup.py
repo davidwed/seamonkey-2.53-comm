@@ -35,6 +35,8 @@
 #
 # ***** END LICENSE BLOCK *****
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 from setuptools import setup, find_packages
 
 desc = """UI Automation tool for Mozilla applications."""
