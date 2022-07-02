@@ -14,6 +14,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys, os
 
 # If your extensions are in another directory, add it here. If the directory
@@ -172,8 +174,8 @@ htmlhelp_basename = 'mozmilldoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'mozmill.tex', ur'mozmill Documentation',
-   ur'Mikeal Rogers <mikeal.rogers@gmail.com>', 'manual'),
+  ('index', 'mozmill.tex', 'mozmill Documentation',
+   'Mikeal Rogers <mikeal.rogers@gmail.com>', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

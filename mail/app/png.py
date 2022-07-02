@@ -165,6 +165,8 @@ And now, my famous members
 # http://www.python.org/doc/2.2.3/whatsnew/node5.html
 from __future__ import generators
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 __version__ = "$URL: http://pypng.googlecode.com/svn/trunk/code/png.py $ $Rev: 228 $"
 
 from array import array
@@ -1860,8 +1862,8 @@ class Reader:
             while True:
                 try:
                     type, data = self.chunk()
-                except ValueError, e:
-                    raise ChunkError(e.args[0])
+                except ValueError as e:
+                    raise ChunkError(e)
                 if type == 'IEND':
                     # http://www.w3.org/TR/PNG/#11IEND
                     break
@@ -2331,7 +2333,7 @@ def topngbytes(name, rows, x, y, **k):
 
     import os
 
-    print name
+    print(name)
     f = BytesIO()
     w = Writer(x, y, **k)
     w.write(f, rows)
@@ -2495,7 +2497,7 @@ class Test(unittest.TestCase):
             candi = candidate.replace('n', 'i')
             if candi not in _pngsuite:
                 continue
-            print 'adam7 read', candidate
+            print('adam7 read', candidate)
             straight = Reader(bytes=_pngsuite[candidate])
             adam7 = Reader(bytes=_pngsuite[candi])
             # Just compare the pixels.  Ignore x,y (because they're
@@ -3709,7 +3711,7 @@ def _main(argv):
         names = list(_pngsuite)
         names.sort()
         for name in names:
-            print name
+            print(name)
         return
 
     # Run regression tests
@@ -3781,5 +3783,5 @@ def _main(argv):
 if __name__ == '__main__':
     try:
         _main(sys.argv)
-    except Error, e:
-        print >>sys.stderr, e
+    except Error as e:
+        print(e, file=sys.stderr)

@@ -4,6 +4,8 @@
 
 # We install an extension that provides a test folder tree mode.
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 
 def on_before_start(profile):

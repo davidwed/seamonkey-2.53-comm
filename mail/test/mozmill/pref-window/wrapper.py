@@ -4,6 +4,8 @@
 
 # For test-font-chooser.js we need a few default prefs -- this module does that.
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import shutil
 import sys

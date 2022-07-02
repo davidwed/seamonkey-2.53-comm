@@ -6,6 +6,8 @@
 # else it will spawn immediately and block before we have a chance to run
 # any Mozmill tests.
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import shutil
 import sys

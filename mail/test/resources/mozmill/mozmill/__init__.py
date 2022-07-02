@@ -37,6 +37,8 @@
 #
 # ***** END LICENSE BLOCK *****
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import copy
 import imp
 import os
@@ -178,7 +180,7 @@ class MozMill(object):
         meth = getattr(python_callbacks_module, method)
         try:
             meth(arg)
-        except Exception, e:
+        except Exception as e:
             self.endTest_listener({"name":method, "failed":1, 
                                    "python_exception_type":e.__class__.__name__,
                                    "python_exception_string":str(e),
@@ -284,7 +286,7 @@ class MozMill(object):
 
     def startTest_listener(self, test):
         self.current_test = test
-        print "TEST-START | %s | %s" % (test['filename'], test['name'])
+        print("TEST-START | %s | %s" % (test['filename'], test['name']))
 
     def endTest_listener(self, test):
         fname = os.path.split(test['filename'])[1]
@@ -293,13 +295,13 @@ class MozMill(object):
 
         self.alltests.append(test)
         if test.get('skipped', False):
-            print "WARNING | %s | (SKIP) %s" % (test['name'], test.get('skipped_reason', ''))
+            print("WARNING | %s | (SKIP) %s" % (test['name'], test.get('skipped_reason', '')))
             self.skipped.append(test)
         elif test['failed'] > 0:
-            print "TEST-UNEXPECTED-FAIL | %s | %s" % (test['filename'], test['name'])
+            print("TEST-UNEXPECTED-FAIL | %s | %s" % (test['filename'], test['name']))
             self.fails.append(test)
         else:
-            print "TEST-PASS | %s | %s" % (test['filename'], test['name'])
+            print("TEST-PASS | %s | %s" % (test['filename'], test['name']))
             self.passes.append(test)
 
     def endRunner_listener(self, obj):
@@ -314,9 +316,9 @@ class MozMill(object):
 
     def printStats(self):
         """print pass/failed/skipped statistics"""
-        print "INFO Passed: %d" % len(self.passes)
-        print "INFO Failed: %d" % len(self.fails)
-        print "INFO Skipped: %d" % len(self.skipped)
+        print("INFO Passed: %d" % len(self.passes))
+        print("INFO Failed: %d" % len(self.fails))
+        print("INFO Skipped: %d" % len(self.skipped))
         
     def report_disconnect(self):
         test = self.current_test
@@ -438,11 +440,11 @@ class MozMill(object):
             filename = report_url.split('file://', 1)[1]
             try:
                 f = file(filename, 'w')
-            except Exception, e:
-                print "Printing results to '%s' failed (%s)." % (filename, e)
+            except Exception as e:
+                print("Printing results to '%s' failed (%s)." % (filename, e))
                 return
         if f:
-            print >> f, json.dumps(results)
+            print(json.dumps(results), file=f)
             return
 
         # report to CouchDB
@@ -460,13 +462,13 @@ class MozMill(object):
             data = json.loads(response.read())
 
             # Print document location to the console and return
-            print "Report document created at '%s%s'" % (report_url, data['id'])
+            print("Report document created at '%s%s'" % (report_url, data['id']))
             return data
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             data = json.loads(e.read())
-            print "Sending results to '%s' failed (%s)." % (report_url, data['reason'])
-        except urllib2.URLError, e:
-            print "Sending results to '%s' failed (%s)." % (report_url, e.reason)
+            print("Sending results to '%s' failed (%s)." % (report_url, data['reason']))
+        except urllib2.URLError as e:
+            print("Sending results to '%s' failed (%s)." % (report_url, e.reason))
 
     def report(self, report_url):
         """print statistics and send the JSON report"""
@@ -516,7 +518,7 @@ class MozMill(object):
                 sleep(1)
                 x += 1
             else:
-                print "WARNING | endRunner was never called. There must have been a failure in the framework."
+                print("WARNING | endRunner was never called. There must have been a failure in the framework.")
                 self.runner.cleanup()
                 sys.exit(1)
 
@@ -588,13 +590,13 @@ class MozMillRestart(MozMill):
             pre_test = os.path.join(test_dir, 'testPre.js')
             post_test = os.path.join(test_dir, 'testPost.js') 
             if not os.path.exists(pre_test) or not os.path.exists(post_test):
-                print "Skipping "+test_dir+" does not contain both pre and post test."
+                print("Skipping "+test_dir+" does not contain both pre and post test.")
                 return
             
             tests = [pre_test, post_test]
         else:
             if not os.path.isfile(os.path.join(test_dir, 'test1.js')):
-                print "Skipping "+test_dir+" does not contain any known test file names"
+                print("Skipping "+test_dir+" does not contain any known test file names")
                 return
             tests = []
             counter = 1
@@ -630,7 +632,7 @@ class MozMillRestart(MozMill):
                 self.fire_python_callback(callback['method'], callback['arg'], self.python_callbacks_module)
             self.python_callbacks = []
         
-        self.python_callbacks_module = None    
+        self.python_callbacks_module = None
         
         # Reset the profile.
         profile = self.runner.profile
@@ -802,7 +804,7 @@ class CLI(jsbridge.CLI):
                 disconnected = True
                 if not self.mozmill.userShutdownEnabled:
                     self.mozmill.report_disconnect()               
-                    print 'TEST-UNEXPECTED-FAIL | Disconnect Error: Application unexpectedly closed'
+                    print('TEST-UNEXPECTED-FAIL | Disconnect Error: Application unexpectedly closed')
                 runner.cleanup()
             except:
                 runner.cleanup()
