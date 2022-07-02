@@ -35,6 +35,8 @@
 #
 # ***** END LICENSE BLOCK *****
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import asyncore
 import socket
 import select
@@ -190,13 +192,13 @@ class Bridge(Telnet):
 
             Bridge.timeout_ctr += interval
             if Bridge.timeout_ctr > self.timeout:
-                print 'Timeout: %s' % exec_string
+                print('Timeout: %s' % exec_string)
                 raise JSBridgeDisconnectError("Connection timed out")
             
             sleep(interval)
             try:
                 self.send('')
-            except socket.error, e:
+            except socket.error as e:
                 raise JSBridgeDisconnectError("JSBridge Socket Disconnected: %s" % e)
 
         Bridge.timeout_ctr = 0. # reset the counter
@@ -245,7 +247,7 @@ class Bridge(Telnet):
             # Try to get a json object from the data stream    
             try:
                 obj, index = decoder.raw_decode(self.sbuffer)
-            except Exception, e:
+            except Exception as e:
                 self.parsing = False
             # If we got an object fire the callback infra    
             if self.parsing:

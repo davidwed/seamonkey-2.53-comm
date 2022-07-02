@@ -8,6 +8,8 @@
 install mozmill and its dependencies
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import sys
 from subprocess import call
@@ -50,7 +52,7 @@ def main(args=None):
   usage = "Usage: %prog destination path/to/mozbase"
 
   # Print the python version
-  print 'Python: %s' % sys.version
+  print('Python: %s' % sys.version)
 
   # The data is kept in the same directory as the script
   source=os.path.abspath(os.path.dirname(__file__))
@@ -60,14 +62,14 @@ def main(args=None):
     destination = os.path.abspath(args[0])
     mozbase = os.path.abspath(args[1])
   else:
-    print "Usage: %s destination path/to/mozbase" % sys.argv[0]
+    print("Usage: %s destination path/to/mozbase" % sys.argv[0])
     sys.exit(1)
 
   os.chdir(source)
 
   # check for existence of necessary files
   if not os.path.exists('virtualenv'):
-    print "File not found: virtualenv"
+    print("File not found: virtualenv")
     sys.exit(1)
 
   # packages to install in dependency order
@@ -84,7 +86,7 @@ def main(args=None):
                      "--no-download",
                      destination], env=env)
   if returncode:
-    print 'Failure to install virtualenv'
+    print('Failure to install virtualenv')
     sys.exit(returncode)
   pip = entry_point_path(destination, 'pip')
 
@@ -95,13 +97,13 @@ def main(args=None):
   returncode = call([pip, 'install'] +
     [os.path.join(mozbase, package) for package in mozbase_packages], env=env)
   if returncode:
-    print 'Failure to install packages'
+    print('Failure to install packages')
     sys.exit(returncode)
 
   # Install mozmill
   returncode = call([pip, 'install'] + [os.path.abspath(package) for package in packages], env=env)
   if returncode:
-    print 'Failure to install packages'
+    print('Failure to install packages')
     sys.exit(returncode)
 
 if __name__ == '__main__':

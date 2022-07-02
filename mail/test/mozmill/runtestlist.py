@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import optparse
 import sys
 import os
@@ -107,7 +109,7 @@ for directory in tests:
         args.append("--testing-modules-dir")
         args.append(os.path.abspath(options.testingmodules))
 
-    print args
+    print(args)
     outputPipe = subprocess.PIPE
 
     proc = subprocess.Popen(args, cwd=SCRIPT_DIRECTORY, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)

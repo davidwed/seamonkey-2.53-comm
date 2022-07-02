@@ -15,6 +15,8 @@ Otherwise manual corrections will get dropped when pushing the update.
 
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import argparse, ftplib, json, os, os.path, re, shutil, subprocess, sys, tarfile, tempfile
 from collections import OrderedDict
 
