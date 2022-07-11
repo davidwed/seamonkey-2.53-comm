@@ -54,8 +54,6 @@ const kVcardFields =
           // Other > Notes
          ["Notes", "Notes"],
           // Chat
-         ["Gtalk", "_GoogleTalk"],
-         ["AIM", "_AimScreenName"],
          ["Yahoo", "_Yahoo"],
          ["Skype", "_Skype"],
          ["QQ", "_QQ"],
@@ -122,10 +120,6 @@ function OnLoadNewCard()
       if (gEditCard.card.displayName)
         gEditCard.generateDisplayName = false;
     }
-    if ("aimScreenName" in window.arguments[0])
-      gEditCard.card.setProperty("_AimScreenName",
-                                 window.arguments[0].aimScreenName);
-
     if ("okCallback" in window.arguments[0])
       gOkCallback = window.arguments[0].okCallback;
 
@@ -601,6 +595,16 @@ function CheckAndSetCardValues(cardproperty, doc, check)
   cardproperty.setProperty("PhotoType", photoType);
   purgeOldPhotos(true);
 
+  // Remove obsolete chat names.
+  try {
+    cardproperty.setProperty("_GoogleTalk", "");
+  }
+  catch (ex) {}
+  try {
+    cardproperty.setProperty("_AimScreenName", "");
+  }
+  catch (ex) {}
+
   return true;
 }
 
@@ -895,7 +899,7 @@ function modifyDatepicker(aDatepicker) {
 }
 
 var chatNameFieldIds =
-  ["Gtalk", "AIM", "Yahoo", "Skype", "QQ", "MSN", "ICQ", "XMPP", "IRC"];
+  ["Yahoo", "Skype", "QQ", "MSN", "ICQ", "XMPP", "IRC"];
 
 /**
  * Show the 'Chat' tab and focus the first field that has a value, or
