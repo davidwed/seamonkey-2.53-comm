@@ -495,7 +495,14 @@ function saveSearchTerms(searchTerms, termOwner)
     var matchAll = gSearchBooleanRadiogroup.value == 'matchAll';
     var i;
     for (i = 0; i < gSearchRemovedTerms.length; i++)
-        searchTerms.removeElementAt(searchTerms.indexOf(0, gSearchRemovedTerms[i]));
+        try {
+            searchTerms.removeElementAt(
+                searchTerms.indexOf(0, gSearchRemovedTerms[i]));
+        } catch (ex) {
+              Cu.reportError("** Error handling removed element " +
+                             i + ": " + ex + "\n");
+        }
+    gSearchRemovedTerms=[];
 
     for (i = 0; i < gSearchTerms.length; i++) {
         try {
@@ -516,7 +523,7 @@ function saveSearchTerms(searchTerms, termOwner)
             }
             searchTerms.replaceElementAt(searchTerm, i);
         } catch (ex) {
-            dump("** Error saving element " + i + ": " + ex + "\n");
+            Cu.reportError("** Error saving element " + i + ": " + ex + "\n");
         }
     }
 }
