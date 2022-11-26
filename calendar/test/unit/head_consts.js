@@ -20,9 +20,6 @@ updateAppInfo();
 
 (function() {
     let bindir = Services.dirsvc.get("CurProcD", Ci.nsIFile);
-    if (!AppConstants.NIGHTLY_BUILD) {
-        bindir.append("distribution");
-    }
     bindir.append("extensions");
 
     let xpiFile = bindir.clone();
