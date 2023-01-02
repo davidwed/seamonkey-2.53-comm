@@ -8,10 +8,6 @@
   -moz-font-smoothing-background-color: -moz-mac-source-list;
 }
 
-#placesList > treechildren::-moz-tree-row {
-  background-color: transparent;
-}
-
 #placesList > treechildren::-moz-tree-row(selected) {
   -moz-appearance: -moz-mac-source-list-selection;
   -moz-font-smoothing-background-color: -moz-mac-source-list-selection;
@@ -22,69 +18,28 @@
   -moz-font-smoothing-background-color: -moz-mac-active-source-list-selection;
 }
 
+#placesList > treechildren::-moz-tree-twisty(selected),
 #placesList > treechildren::-moz-tree-cell-text(selected) {
   color: #FFFFFF;
+  fill-opacity: 1;
 }
 
 #placesList > treechildren::-moz-tree-twisty {
-  -moz-appearance: none;
   width: 16px;
   padding-bottom: 1px;
-  padding-inline-end: 4px;
-  list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed");
-}
-
-#placesList > treechildren::-moz-tree-twisty(closed, selected) {
-  list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed-inverted");
-}
-
-#placesList > treechildren::-moz-tree-twisty(open) {
-  list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-expanded");
-}
-
-#placesList > treechildren::-moz-tree-twisty(open, selected) {
-  list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-expanded-inverted");
-}
-
-#placesList > treechildren:-moz-locale-dir(rtl)::-moz-tree-twisty(closed) {
-  list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed-rtl");
-}
-
-#placesList > treechildren:-moz-locale-dir(rtl)::-moz-tree-twisty(closed, selected) {
-  list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed-inverted-rtl");
 }
 
 @media (-moz-mac-yosemite-theme) {
+  #placesList > treechildren::-moz-tree-twisty(selected),
   #placesList > treechildren::-moz-tree-cell-text(selected) {
     color: -moz-dialogtext;
+    fill-opacity: 0.6;
   }
 
+  #placesList > treechildren::-moz-tree-twisty(selected, focus),
   #placesList > treechildren::-moz-tree-cell-text(selected, focus) {
     color: #FFFFFF;
-  }
-
-  #placesList > treechildren::-moz-tree-twisty(closed, selected) {
-    list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed");
-  }
-
-  #placesList > treechildren::-moz-tree-twisty(closed, selected, focus) {
-    list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed-inverted");
-  }
-
-  #placesList > treechildren::-moz-tree-twisty(open, selected) {
-    list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-expanded");
-  }
-
-  #placesList > treechildren::-moz-tree-twisty(open, selected, focus) {
-    list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-expanded-inverted");
-  }
-
-  #placesList > treechildren:-moz-locale-dir(rtl)::-moz-tree-twisty(closed, selected) {
-    list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed-rtl");
-  }
-
-  #placesList > treechildren:-moz-locale-dir(rtl)::-moz-tree-twisty(closed, selected, focus) {
-    list-style-image: url("chrome://global/skin/tree/arrow-disclosure.svg#arrow-disclosure-collapsed-inverted-rtl")
+    fill-opacity: 1;
   }
 }
 
@@ -94,7 +49,6 @@
 
 #placeContent > treechildren::-moz-tree-row {
   border-top: none !important;
-  padding-top: 1px;
 }
 
 #placeContent > treechildren::-moz-tree-cell,
