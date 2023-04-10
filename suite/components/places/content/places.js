@@ -1307,7 +1307,7 @@ var ContentTree = {
 
   openSelectedNode: function CT_openSelectedNode(aEvent) {
     let view = this.view;
-    PlacesUIUtils.openNodeWithEvent(view.selectedNode, aEvent);
+    PlacesUIUtils.openNodeWithEvent(view.selectedNode, aEvent, true);
   },
 
   onClick: function CT_onClick(aEvent) {
