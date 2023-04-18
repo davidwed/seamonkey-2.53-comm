@@ -5,8 +5,6 @@
 comm.jar:
 % content editor %content/editor/
 % overlay chrome://communicator/content/tasksOverlay.xul chrome://editor/content/editorTasksOverlay.xul
-% overlay chrome://messenger/content/mailWindowOverlay.xul chrome://editor/content/editorMailOverlay.xul
-% overlay chrome://navigator/content/navigatorOverlay.xul chrome://editor/content/editorNavigatorOverlay.xul
     content/editor/ComposerCommands.js              (content/ComposerCommands.js)
     content/editor/composerOverlay.xul              (content/composerOverlay.xul)
     content/editor/editingOverlay.js                (content/editingOverlay.js)
@@ -18,8 +16,6 @@ comm.jar:
     content/editor/EditorContent.css                (content/EditorContent.css)
     content/editor/EditorContextMenu.js             (content/EditorContextMenu.js)
     content/editor/EditorContextMenuOverlay.xul     (content/EditorContextMenuOverlay.xul)
-    content/editor/editorMailOverlay.xul            (content/editorMailOverlay.xul)
-    content/editor/editorNavigatorOverlay.xul       (content/editorNavigatorOverlay.xul)
     content/editor/editorOverlay.xul                (content/editorOverlay.xul)
     content/editor/editorTasksOverlay.xul           (content/editorTasksOverlay.xul)
     content/editor/editorUtilities.js               (content/editorUtilities.js)
