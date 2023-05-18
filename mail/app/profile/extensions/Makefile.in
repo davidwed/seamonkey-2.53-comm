@@ -24,7 +24,7 @@ DEFINES += \
 
 define _INSTALL_EXTENSION
 $(NSINSTALL) -D $(dir) && \
-  $(PYTHON) -m mozbuild.action.preprocessor $(DEFINES) $(ACDEFINES) $(srcdir)/$(dir)/install.rdf.in -o $(dir)/install.rdf && \
+  $(PYTHON3) -m mozbuild.action.preprocessor $(DEFINES) $(ACDEFINES) $(srcdir)/$(dir)/install.rdf.in -o $(dir)/install.rdf && \
   cd $(dir) && \
   $(ZIP) -r9XD $(DISTROEXT)/$(dir).xpi install.rdf && \
   cd $(abspath $(srcdir)/$(dir)) && \

@@ -13,12 +13,12 @@ THUNDERBIRD_VERSION := $(shell cat $(commtopsrcdir)/mail/config/version.txt)
 SEAMONKEY_VERSION := $(shell cat $(commtopsrcdir)/suite/config/version.txt)
 
 ifdef MOZ_SUITE
-LIGHTNING_VERSION := $(shell $(PYTHON) $(commtopsrcdir)/calendar/lightning/build/makeversion.py $(THUNDERBIRD_VERSION))
+LIGHTNING_VERSION := $(shell $(PYTHON3) $(commtopsrcdir)/calendar/lightning/build/makeversion.py $(THUNDERBIRD_VERSION))
 else
-LIGHTNING_VERSION := $(shell $(PYTHON) $(commtopsrcdir)/calendar/lightning/build/makeversion.py $(word 1,$(MOZ_PKG_VERSION) $(THUNDERBIRD_VERSION)))
+LIGHTNING_VERSION := $(shell $(PYTHON3) $(commtopsrcdir)/calendar/lightning/build/makeversion.py $(word 1,$(MOZ_PKG_VERSION) $(THUNDERBIRD_VERSION)))
 endif
 
-GDATA_VERSION := $(shell $(PYTHON) $(commtopsrcdir)/calendar/providers/gdata/makeversion.py $(LIGHTNING_VERSION))
+GDATA_VERSION := $(shell $(PYTHON3) $(commtopsrcdir)/calendar/providers/gdata/makeversion.py $(LIGHTNING_VERSION))
 
 
 DEFINES += -DSEAMONKEY_VERSION=$(SEAMONKEY_VERSION) \
@@ -29,4 +29,4 @@ DEFINES += -DSEAMONKEY_VERSION=$(SEAMONKEY_VERSION) \
 include $(commtopsrcdir)/calendar/lightning/lightning-packager.mk
 
 stage-package:
-	$(PYTHON) -u $(MOZILLA_DIR)/build/upload.py $(final_parent)/$(XPI_PKGNAME).xpi
+	$(PYTHON3) -u $(MOZILLA_DIR)/build/upload.py $(final_parent)/$(XPI_PKGNAME).xpi

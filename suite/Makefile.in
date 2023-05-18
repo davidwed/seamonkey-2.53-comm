@@ -17,6 +17,6 @@ endif
 # platform.ini are the same, which isn't a problem for Firefox, but
 # it's not right for anything else. So we correct platform.ini here.
 libs:: $(DIST)/bin/platform.ini
-	$(PYTHON) $(commtopsrcdir)/build/source_repos.py gen_platformini \
+	$(PYTHON3) $(commtopsrcdir)/build/source_repos.py gen_platformini \
 		$(DIST)/bin/platform.ini
 

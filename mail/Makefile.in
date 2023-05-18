@@ -8,9 +8,9 @@ include $(moztopsrcdir)/config/config.mk
 ifdef ENABLE_TESTS
 
 check-sync-dirs::
-	@$(PYTHON) $(commtopsrcdir)/mail/check-sync-dirs.py \
+	@$(PYTHON3) $(commtopsrcdir)/mail/check-sync-dirs.py \
 	   $(topsrcdir)/build $(MOZILLA_SRCDIR)/build
-	@$(PYTHON) $(commtopsrcdir)/mail/check-sync-dirs.py \
+	@$(PYTHON3) $(commtopsrcdir)/mail/check-sync-dirs.py \
 	   $(srcdir)/config/tooltool-manifests $(MOZILLA_SRCDIR)/browser/config/tooltool-manifests
 
 check:: check-sync-dirs
@@ -33,6 +33,6 @@ endif
 # platform.ini are the same, which isn't a problem for Firefox, but
 # it's not right for anything else. So we correct platform.ini here.
 libs:: $(DIST)/bin/platform.ini
-	$(PYTHON) $(commtopsrcdir)/build/source_repos.py gen_platformini \
+	$(PYTHON3) $(commtopsrcdir)/build/source_repos.py gen_platformini \
 		$(DIST)/bin/platform.ini
 
