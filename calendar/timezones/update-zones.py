@@ -17,7 +17,19 @@ Otherwise manual corrections will get dropped when pushing the update.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-import argparse, ftplib, json, os, os.path, re, shutil, subprocess, sys, tarfile, tempfile
+import argparse
+import ftplib
+import io
+import json
+import os
+import os.path
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+
 from collections import OrderedDict
 
 
@@ -35,7 +47,7 @@ class TimezoneUpdater(object):
                          " ftp.iana.org to %s\n" % tzdata_download_path)
         ftp = ftplib.FTP("ftp.iana.org")
         ftp.login()
-        ftp.retrbinary("RETR /tz/tzdata-latest.tar.gz", open(tzdata_download_path, "wb").write)
+        ftp.retrbinary("RETR /tz/tzdata-latest.tar.gz", io.open(tzdata_download_path, "wb").write)
         ftp.quit()
 
         self.tzdata_path = tempfile.mkdtemp(prefix="zones")
@@ -46,7 +58,7 @@ class TimezoneUpdater(object):
     def get_tzdata_version(self):
         """Extract version number of tzdata files."""
         version = None
-        with open(os.path.join(self.tzdata_path, "version"), "r") as versionfile:
+        with io.open(os.path.join(self.tzdata_path, "version"), "r", encoding='utf-8') as versionfile:
             for line in versionfile:
                 match = re.match(r"\w+", line)
                 if match is not None:
@@ -76,7 +88,7 @@ class TimezoneUpdater(object):
     def read_backward(self):
         """Read the 'backward' file, which contains timezone identifier links"""
         links = {}
-        with open(os.path.join(self.tzdata_path, "backward"), "r") as backward:
+        with io.open(os.path.join(self.tzdata_path, "backward"), "r", encoding='utf-8') as backward:
             for line in backward:
                 parts = line.strip().split()
                 if len(parts) == 3 and parts[0] == "Link":
@@ -87,7 +99,7 @@ class TimezoneUpdater(object):
     def read_zones_tab(self):
         """Read zones.tab for latitude and longitude data."""
         lat_long_data = {}
-        with open(os.path.join(self.zoneinfo_path, "zones.tab"), "r") as tab:
+        with io.open(os.path.join(self.zoneinfo_path, "zones.tab"), "r", encoding='utf-8') as tab:
             for line in tab:
                 if len(line) < 19:
                     sys.stderr.write("Line in zones.tab not long enough: %s\n" % line.strip())
@@ -103,10 +115,10 @@ class TimezoneUpdater(object):
 
         We keep only the lines we want, and we use the pure version of RRULE if
         the versions differ. See Asia/Jerusalem for an example."""
-        with open(os.path.join(self.zoneinfo_path, filename), "r") as zone:
+        with io.open(os.path.join(self.zoneinfo_path, filename), "r", encoding='utf-8') as zone:
             zoneinfo = zone.readlines()
 
-        with open(os.path.join(self.zoneinfo_pure_path, filename), "r") as zone:
+        with io.open(os.path.join(self.zoneinfo_pure_path, filename), "r", encoding='utf-8') as zone:
             zoneinfo_pure = zone.readlines()
 
         ics_data = []
@@ -171,7 +183,7 @@ class TimezoneUpdater(object):
         outlines = []
         zoneprops = {}
 
-        with open(tzprops_file) as fp:
+        with io.open(tzprops_file, encoding='utf-8') as fp:
             for line in fp.readlines():
                 match = TZ_LINE.match(line.rstrip("\n"))
                 if match:
@@ -183,7 +195,7 @@ class TimezoneUpdater(object):
                 outlines.append(propname + "=" + zone.replace("_", " "))
 
         if len(outlines):
-            with open(tzprops_file, 'a') as fp:
+            with io.open(tzprops_file, 'a', encoding='utf-8', newline='\n') as fp:
                 fp.write("\n#added with %s\n" % version)
                 fp.write("\n".join(outlines) + "\n")
 
@@ -195,7 +207,7 @@ class TimezoneUpdater(object):
         data["aliases"] = OrderedDict(sorted(aliases.items()))
         data["zones"] = OrderedDict(sorted(zones.items()))
 
-        with open(filename, "w") as jsonfile:
+        with io.open(filename, "w", encoding='utf-8', newline='\n') as jsonfile:
             json.dump(data, jsonfile, indent=2, separators=(",", ": "))
             jsonfile.write("\n")
 
@@ -206,7 +218,7 @@ class TimezoneUpdater(object):
         if need_download_tzdata:
             self.download_tzdata()
 
-        with open(zones_json_file, "r") as jsonfile:
+        with io.open(zones_json_file, "r", encoding='utf-8') as jsonfile:
             zonesjson = json.load(jsonfile)
 
         version = self.get_tzdata_version()
@@ -260,13 +272,13 @@ def create_test_data(zones_file):
     previous_version = "no previous version"
     current_version = "no current version"
     if (os.path.isfile(zones_file) and os.access(zones_file, os.R_OK)):
-        with open(zones_file, "r") as rzf:
+        with io.open(zones_file, "r", encoding='utf-8') as rzf:
             current_data = json.load(rzf)
             current_version = current_data["version"]
             current_zones = current_data["zones"]
             current_aliases = current_data["aliases"]
     if (os.path.isfile(previous_file) and os.access(previous_file, os.R_OK)):
-        with open(previous_file, "r") as rpf:
+        with io.open(previous_file, "r", encoding='utf-8') as rpf:
             previous_data = json.load(rpf)
             previous_version = previous_data["version"]
 
@@ -285,7 +297,7 @@ def create_test_data(zones_file):
         test_data["zones"] = sorted(test_zones)
 
         """Writing test data"""
-        with open(previous_file, "w") as wpf:
+        with io.open(previous_file, "w", encoding='utf-8', newline='\n') as wpf:
             json.dump(test_data, wpf, indent=2, separators=(",", ": "))
             wpf.write("\n")
 

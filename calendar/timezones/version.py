@@ -5,10 +5,12 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-import json, os.path
+import io
+import json
+import os.path
 
 json_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "zones.json")
 
-with open(json_file, "r") as fp:
+with io.open(json_file, "r", encoding='utf-8') as fp:
     data = json.load(fp)
     print(data["version"])
